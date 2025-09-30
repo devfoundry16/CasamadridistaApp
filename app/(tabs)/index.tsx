@@ -1,98 +1,342 @@
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { Clock, ChevronRight } from 'lucide-react-native';
+import { useApp } from '@/contexts/AppContext';
+import Colors from '@/constants/colors';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const router = useRouter();
+  const { featuredArticles, latestArticles } = useApp();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <LinearGradient
+        colors={[Colors.secondary, Colors.royalBlue]}
+        style={styles.header}
+      >
+        <Text style={styles.headerTitle}>بيت المدريديستا</Text>
+        <Text style={styles.headerSubtitle}>Casa Madridista</Text>
+        <Text style={styles.headerTagline}>Your Home for Real Madrid News</Text>
+      </LinearGradient>
+
+      <View style={styles.content}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Featured Stories</Text>
+          <View style={styles.accentLine} />
+        </View>
+
+        {featuredArticles[0] && (
+          <TouchableOpacity
+            style={styles.featuredCard}
+            onPress={() => router.push(`/article/${featuredArticles[0].id}` as any)}
+            activeOpacity={0.9}
+          >
+            <Image
+              source={{ uri: featuredArticles[0].image }}
+              style={styles.featuredImage}
+              contentFit="cover"
+            />
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.9)']}
+              style={styles.featuredGradient}
+            >
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryText}>
+                  {featuredArticles[0].category.replace('-', ' ').toUpperCase()}
+                </Text>
+              </View>
+              <Text style={styles.featuredTitle} numberOfLines={2}>
+                {featuredArticles[0].title}
+              </Text>
+              <View style={styles.featuredMeta}>
+                <Clock size={14} color={Colors.accent} />
+                <Text style={styles.featuredMetaText}>{featuredArticles[0].readTime}</Text>
+                <Text style={styles.featuredMetaText}>•</Text>
+                <Text style={styles.featuredMetaText}>{featuredArticles[0].date}</Text>
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
+
+        <View style={styles.featuredGrid}>
+          {featuredArticles.slice(1, 3).map((article: any) => (
+            <TouchableOpacity
+              key={article.id}
+              style={styles.featuredSmallCard}
+              onPress={() => router.push(`/article/${article.id}` as any)}
+              activeOpacity={0.9}
+            >
+              <Image
+                source={{ uri: article.image }}
+                style={styles.featuredSmallImage}
+                contentFit="cover"
+              />
+              <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.85)']}
+                style={styles.featuredSmallGradient}
+              >
+                <Text style={styles.featuredSmallTitle} numberOfLines={2}>
+                  {article.title}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Latest News</Text>
+          <TouchableOpacity
+            style={styles.seeAllButton}
+            onPress={() => router.push('/news' as any)}
+          >
+            <Text style={styles.seeAllText}>See All</Text>
+            <ChevronRight size={16} color={Colors.accent} />
+          </TouchableOpacity>
+        </View>
+
+        {latestArticles.map((article: any) => (
+          <TouchableOpacity
+            key={article.id}
+            style={styles.newsCard}
+            onPress={() => router.push(`/article/${article.id}` as any)}
+            activeOpacity={0.8}
+          >
+            <Image
+              source={{ uri: article.image }}
+              style={styles.newsImage}
+              contentFit="cover"
+            />
+            <View style={styles.newsContent}>
+              <View style={styles.newsCategory}>
+                <Text style={styles.newsCategoryText}>
+                  {article.category.replace('-', ' ').toUpperCase()}
+                </Text>
+              </View>
+              <Text style={styles.newsTitle} numberOfLines={2}>
+                {article.title}
+              </Text>
+              <Text style={styles.newsExcerpt} numberOfLines={2}>
+                {article.excerpt}
+              </Text>
+              <View style={styles.newsMeta}>
+                <Clock size={12} color={Colors.textLight} />
+                <Text style={styles.newsMetaText}>{article.readTime}</Text>
+                <Text style={styles.newsMetaText}>•</Text>
+                <Text style={styles.newsMetaText}>{article.date}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: Colors.lightGray,
+  },
+  header: {
+    paddingTop: 40,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700' as const,
+    color: Colors.accent,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 20,
+    fontWeight: '600' as const,
+    color: Colors.textWhite,
+    marginBottom: 4,
+  },
+  headerTagline: {
+    fontSize: 14,
+    color: Colors.textWhite,
+    opacity: 0.8,
+  },
+  content: {
+    padding: 16,
+  },
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    marginTop: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '700' as const,
+    color: Colors.text,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
+  accentLine: {
+    height: 3,
+    width: 40,
+    backgroundColor: Colors.accent,
+    borderRadius: 2,
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  seeAllText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: Colors.accent,
+  },
+  featuredCard: {
+    height: 300,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 16,
+    backgroundColor: Colors.secondary,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  featuredImage: {
+    width: '100%',
+    height: '100%',
+  },
+  featuredGradient: {
+    position: 'absolute',
     bottom: 0,
     left: 0,
+    right: 0,
+    padding: 20,
+    justifyContent: 'flex-end',
+  },
+  categoryBadge: {
+    backgroundColor: Colors.accent,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+  },
+  categoryText: {
+    fontSize: 10,
+    fontWeight: '700' as const,
+    color: Colors.secondary,
+    letterSpacing: 1,
+  },
+  featuredTitle: {
+    fontSize: 24,
+    fontWeight: '700' as const,
+    color: Colors.textWhite,
+    marginBottom: 8,
+    lineHeight: 30,
+  },
+  featuredMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  featuredMetaText: {
+    fontSize: 12,
+    color: Colors.accent,
+  },
+  featuredGrid: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  featuredSmallCard: {
+    flex: 1,
+    height: 180,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: Colors.secondary,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
+  featuredSmallImage: {
+    width: '100%',
+    height: '100%',
+  },
+  featuredSmallGradient: {
     position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+    justifyContent: 'flex-end',
+  },
+  featuredSmallTitle: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: Colors.textWhite,
+    lineHeight: 18,
+  },
+  newsCard: {
+    flexDirection: 'row',
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    marginBottom: 12,
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  newsImage: {
+    width: 120,
+    height: 120,
+  },
+  newsContent: {
+    flex: 1,
+    padding: 12,
+    justifyContent: 'space-between',
+  },
+  newsCategory: {
+    backgroundColor: Colors.lightGray,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
+  newsCategoryText: {
+    fontSize: 9,
+    fontWeight: '600' as const,
+    color: Colors.royalBlue,
+    letterSpacing: 0.5,
+  },
+  newsTitle: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: Colors.text,
+    lineHeight: 18,
+    marginBottom: 4,
+  },
+  newsExcerpt: {
+    fontSize: 12,
+    color: Colors.textLight,
+    lineHeight: 16,
+    marginBottom: 6,
+  },
+  newsMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  newsMetaText: {
+    fontSize: 10,
+    color: Colors.textLight,
   },
 });

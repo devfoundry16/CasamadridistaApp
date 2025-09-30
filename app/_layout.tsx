@@ -1,24 +1,51 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import * as SplashScreen from 'expo-splash-screen';
+import React, { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AppProvider } from '@/contexts/AppContext';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+SplashScreen.preventAutoHideAsync();
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+const queryClient = new QueryClient();
+
+function RootLayoutNav() {
+  return (
+    <Stack screenOptions={{ headerBackTitle: 'Back' }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="create-formation" options={{ headerShown: true, headerTitle: 'Create Formation', headerStyle: { backgroundColor: '#001F3F' }, headerTintColor: '#FFFFFF', headerTitleStyle: { fontWeight: '700' as const } }} />
+      <Stack.Screen name="team" options={{ headerShown: true, headerTitle: 'Team', headerStyle: { backgroundColor: '#001F3F' }, headerTintColor: '#FFFFFF', headerTitleStyle: { fontWeight: '700' as const } }} />
+      <Stack.Screen name="store" options={{ headerShown: true, headerTitle: 'Store', headerStyle: { backgroundColor: '#001F3F' }, headerTintColor: '#FFFFFF', headerTitleStyle: { fontWeight: '700' as const } }} />
+      <Stack.Screen
+        name="article/[id]"
+        options={{
+          headerShown: true,
+          headerTitle: 'Article',
+          headerStyle: {
+            backgroundColor: '#001F3F',
+          },
+          headerTintColor: '#FFFFFF',
+          headerTitleStyle: {
+            fontWeight: '700' as const,
+          },
+        }}
+      />
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <AppProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <RootLayoutNav />
+        </GestureHandlerRootView>
+      </AppProvider>
+    </QueryClientProvider>
   );
 }
