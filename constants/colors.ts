@@ -18,7 +18,7 @@ const Colors = {
   success: '#4CAF50',
   error: '#F44336',
 };
-const storeColors = {
+const altColors = {
   text: "#1A1A1A" as const,
   textSecondary: "#6B7280" as const,
   background: "#FFFFFF" as const,
@@ -35,5 +35,5 @@ const storeColors = {
   error: "#EF4444" as const,
   warning: "#F59E0B" as const,
 }
-export { storeColors };
+export { altColors };
 export default Colors;

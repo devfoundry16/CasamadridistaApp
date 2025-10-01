@@ -1,9 +1,12 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Trophy, Users, Globe, Heart } from 'lucide-react-native';
+import { Trophy, Users, Globe, Heart, FileText, Shield } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import Colors from '@/constants/colors';
 
 export default function AboutScreen() {
+  const router = useRouter();
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <LinearGradient
@@ -127,6 +130,35 @@ export default function AboutScreen() {
               <Text style={styles.statLabel}>Total Trophies</Text>
             </View>
           </View>
+        </View>
+
+        <View style={styles.legalSection}>
+          <Text style={styles.sectionTitle}>Legal</Text>
+          <TouchableOpacity 
+            style={styles.legalCard}
+            onPress={() => router.replace('/terms-of-service')}
+          >
+            <View style={styles.legalIcon}>
+              <FileText size={24} color={Colors.accent} />
+            </View>
+            <View style={styles.legalContent}>
+              <Text style={styles.legalTitle}>Terms of Service</Text>
+              <Text style={styles.legalDescription}>Read our terms and conditions</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.legalCard}
+            onPress={() => router.push('/privacy-policy')}
+          >
+            <View style={styles.legalIcon}>
+              <Shield size={24} color={Colors.accent} />
+            </View>
+            <View style={styles.legalContent}>
+              <Text style={styles.legalTitle}>Privacy Policy</Text>
+              <Text style={styles.legalDescription}>Learn how we protect your data</Text>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
@@ -281,5 +313,46 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textLight,
     textAlign: 'center',
+  },
+  legalSection: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  legalCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.lightGray,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 12,
+  },
+  legalIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  legalContent: {
+    flex: 1,
+  },
+  legalTitle: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  legalDescription: {
+    fontSize: 13,
+    color: Colors.textLight,
   },
 });

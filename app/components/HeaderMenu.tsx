@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Users, Layout, Store } from 'lucide-react-native';
+import { Info, Mail, Crown } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import Colors from '@/constants/colors';
 
@@ -10,32 +10,32 @@ function HeaderMenu() {
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        onPress={() => router.push('/team' as any)}
+        onPress={() => router.push('/about' as any)}
         style={styles.button}
         activeOpacity={0.7}
-        accessibilityLabel="Open team"
-        accessibilityHint="Open Real Madrid team roster"
+        accessibilityLabel="About"
+        accessibilityHint="About Us"
       >
-        <Users size={20} color={Colors.accent} />
+        <Info size={20} color={Colors.accent} />
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => router.push('/create-formation' as any)}
+        onPress={() => router.push('/memberships' as any)}
         style={styles.button}
         activeOpacity={0.7}
-        accessibilityLabel="Create formation"
-        accessibilityHint="Open formation creator"
+        accessibilityLabel="Memberships"
+        accessibilityHint="Memberships"
       >
-        <Layout size={20} color={Colors.accent} />
+        <Crown size={20} color={Colors.accent} />
       </TouchableOpacity>
       <TouchableOpacity
-        onPress={() => router.push('/store' as any)}
+        onPress={() => router.push('/contact' as any)}
         style={styles.button}
         activeOpacity={0.7}
-        accessibilityLabel="Store"
-        accessibilityHint="Open Store"
+        accessibilityLabel="Contact"
+        accessibilityHint="Contact Us"
       >
-        <Store size={20} color={Colors.accent} />
+        <Mail size={20} color={Colors.accent} />
       </TouchableOpacity>
     </View>
   );

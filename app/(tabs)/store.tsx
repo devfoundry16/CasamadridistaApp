@@ -2,8 +2,7 @@ import React from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ShoppingCart } from 'lucide-react-native';
-import { useApp } from '@/contexts/AppContext';
-import {storeColors} from '@/constants/colors';
+import {altColors} from '@/constants/colors';
 
 interface Product {
   id: number;
@@ -24,7 +23,7 @@ const PRODUCTS: Product[] = [
 
 export default function StoreScreen() {
   const insets = useSafeAreaInsets();
-  const colors = storeColors;
+  const colors = altColors;
 
   const renderProduct = ({ item }: { item: Product }) => (
     <Pressable

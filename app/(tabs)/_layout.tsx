@@ -3,9 +3,9 @@ import {
   Home,
   Newspaper,
   Image as ImageIcon,
-  Info,
-  Mail,
-  Crown,
+  User,
+  Layout,
+  Store,
 } from "lucide-react-native";
 import React from "react";
 import Colors from "@/constants/colors";
@@ -56,27 +56,27 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="about"
+        name="create-formation"
         options={{
-          title: "About",
-          headerTitle: "About Us",
-          tabBarIcon: ({ color, size }) => <Info size={size} color={color} />,
+          title: "Formation",
+          headerTitle: "Formation Builder",
+          tabBarIcon: ({ color, size }) => <Layout size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="contact"
+        name="team"
         options={{
-          title: "Contact",
-          headerTitle: "Contact Us",
-          tabBarIcon: ({ color, size }) => <Mail size={size} color={color} />,
+          title: "Team",
+          headerTitle: "Ream Madrid Team",
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="memberships"
+        name="store"
         options={{
-          title: "Memberships",
-          headerTitle: "Memberships",
-          tabBarIcon: ({ color, size }) => <Crown size={size} color={color} />,
+          title: "Store",
+          headerTitle: "Store",
+          tabBarIcon: ({ color, size }) => <Store size={size} color={color} />,
         }}
       />
     </Tabs>
