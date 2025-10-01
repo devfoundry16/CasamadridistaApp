@@ -47,7 +47,7 @@ export default function StoreScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border, paddingTop: insets.top + 12 }]}>
+      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border, paddingTop: 12 }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Official Store</Text>
         <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
           Authentic Real Madrid merchandise
@@ -78,9 +78,11 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700' as const,
     marginBottom: 4,
+    textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 14,
+    textAlign: 'center',
   },
   productsList: {
     padding: 16,

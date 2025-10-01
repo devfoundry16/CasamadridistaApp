@@ -3,9 +3,9 @@ import {
   Home,
   Newspaper,
   Image as ImageIcon,
-  User,
+  Users as Team,
   Layout,
-  Store,
+  ShoppingCart as Store
 } from "lucide-react-native";
 import React from "react";
 import Colors from "@/constants/colors";
@@ -15,7 +15,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.accent,
+        tabBarActiveTintColor: Colors.darkGold,
         tabBarInactiveTintColor: Colors.darkGray,
         headerShown: true,
         headerStyle: {
@@ -23,7 +23,8 @@ export default function TabLayout() {
         },
         headerTintColor: Colors.textWhite,
         headerTitleStyle: {
-          fontWeight: "700" as const,
+          fontSize: 18,
+          fontWeight: "600" as const,
         },
         tabBarStyle: {
           backgroundColor: Colors.primary,
@@ -68,7 +69,7 @@ export default function TabLayout() {
         options={{
           title: "Team",
           headerTitle: "Ream Madrid Team",
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Team size={size} color={color} />,
         }}
       />
       <Tabs.Screen

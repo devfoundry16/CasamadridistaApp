@@ -10,13 +10,6 @@ export default function ContactScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <LinearGradient
-        colors={[Colors.secondary, Colors.royalBlue]}
-        style={styles.header}
-      >
-        <Text style={styles.headerTitle}>Get in Touch</Text>
-        <Text style={styles.headerSubtitle}>Connect with Casa Madridista</Text>
-      </LinearGradient>
 
       <View style={styles.content}>
         <View style={styles.section}>

@@ -16,7 +16,7 @@ function HeaderMenu() {
         accessibilityLabel="About"
         accessibilityHint="About Us"
       >
-        <Info size={20} color={Colors.accent} />
+        <Info size={20} color={Colors.primary} />
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -26,7 +26,7 @@ function HeaderMenu() {
         accessibilityLabel="Memberships"
         accessibilityHint="Memberships"
       >
-        <Crown size={20} color={Colors.accent} />
+        <Crown size={20} color={Colors.primary} />
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => router.push('/contact' as any)}
@@ -35,7 +35,7 @@ function HeaderMenu() {
         accessibilityLabel="Contact"
         accessibilityHint="Contact Us"
       >
-        <Mail size={20} color={Colors.accent} />
+        <Mail size={20} color={Colors.primary} />
       </TouchableOpacity>
     </View>
   );

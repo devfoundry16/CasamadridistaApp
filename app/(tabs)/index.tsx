@@ -1,10 +1,16 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import { Clock, ChevronRight } from 'lucide-react-native';
-import { useApp } from '@/contexts/AppContext';
-import Colors from '@/constants/colors';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { Clock, ChevronRight } from "lucide-react-native";
+import { useApp } from "@/contexts/AppContext";
+import Colors from "@/constants/colors";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -12,14 +18,22 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <LinearGradient
-        colors={[Colors.secondary, Colors.royalBlue]}
+      <View
         style={styles.header}
       >
-        <Text style={styles.headerTitle}>بيت المدريديستا</Text>
-        <Text style={styles.headerSubtitle}>Casa Madridista</Text>
-        <Text style={styles.headerTagline}>Your Home for Real Madrid News</Text>
-      </LinearGradient>
+        <Image
+          source={{
+            uri: "https://casamadridista.com/wp-content/uploads/2025/09/435345345.webp",
+          }}
+          style={styles.headerImage}
+          contentFit="cover"
+        />
+        <View style={styles.headerSection}>
+          <Text style={styles.headerTitle}>بيت المدريديستا</Text>
+          <Text style={styles.headerSubtitle}>Casa Madridista</Text>
+          <Text style={styles.headerTagline}>Your Home for Real Madrid News</Text>
+        </View>
+      </View>
 
       <View style={styles.content}>
         <View style={styles.sectionHeader}>
@@ -30,7 +44,9 @@ export default function HomeScreen() {
         {featuredArticles[0] && (
           <TouchableOpacity
             style={styles.featuredCard}
-            onPress={() => router.push(`/article/${featuredArticles[0].id}` as any)}
+            onPress={() =>
+              router.push(`/article/${featuredArticles[0].id}` as any)
+            }
             activeOpacity={0.9}
           >
             <Image
@@ -39,12 +55,12 @@ export default function HomeScreen() {
               contentFit="cover"
             />
             <LinearGradient
-              colors={['transparent', 'rgba(0,0,0,0.9)']}
+              colors={["transparent", "rgba(0,0,0,0.9)"]}
               style={styles.featuredGradient}
             >
               <View style={styles.categoryBadge}>
                 <Text style={styles.categoryText}>
-                  {featuredArticles[0].category.replace('-', ' ').toUpperCase()}
+                  {featuredArticles[0].category.replace("-", " ").toUpperCase()}
                 </Text>
               </View>
               <Text style={styles.featuredTitle} numberOfLines={2}>
@@ -52,9 +68,13 @@ export default function HomeScreen() {
               </Text>
               <View style={styles.featuredMeta}>
                 <Clock size={14} color={Colors.accent} />
-                <Text style={styles.featuredMetaText}>{featuredArticles[0].readTime}</Text>
+                <Text style={styles.featuredMetaText}>
+                  {featuredArticles[0].readTime}
+                </Text>
                 <Text style={styles.featuredMetaText}>•</Text>
-                <Text style={styles.featuredMetaText}>{featuredArticles[0].date}</Text>
+                <Text style={styles.featuredMetaText}>
+                  {featuredArticles[0].date}
+                </Text>
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -74,7 +94,7 @@ export default function HomeScreen() {
                 contentFit="cover"
               />
               <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.85)']}
+                colors={["transparent", "rgba(0,0,0,0.85)"]}
                 style={styles.featuredSmallGradient}
               >
                 <Text style={styles.featuredSmallTitle} numberOfLines={2}>
@@ -89,7 +109,7 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Latest News</Text>
           <TouchableOpacity
             style={styles.seeAllButton}
-            onPress={() => router.push('/news' as any)}
+            onPress={() => router.push("/news" as any)}
           >
             <Text style={styles.seeAllText}>See All</Text>
             <ChevronRight size={16} color={Colors.accent} />
@@ -111,7 +131,7 @@ export default function HomeScreen() {
             <View style={styles.newsContent}>
               <View style={styles.newsCategory}>
                 <Text style={styles.newsCategoryText}>
-                  {article.category.replace('-', ' ').toUpperCase()}
+                  {article.category.replace("-", " ").toUpperCase()}
                 </Text>
               </View>
               <Text style={styles.newsTitle} numberOfLines={2}>
@@ -137,23 +157,34 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: Colors.darkGray,
   },
   header: {
-    paddingTop: 40,
     paddingBottom: 30,
-    paddingHorizontal: 20,
+    alignItems: "center",
+  },
+  headerSection: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
     alignItems: 'center',
+    paddingBlockEnd: 300,
+    paddingBlockStart: 300,
+  },
+  headerImage: {
+    width: "100%",
+    height: 778,
+    marginBottom: 12,
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.accent,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 20,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.textWhite,
     marginBottom: 4,
   },
@@ -166,16 +197,16 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 16,
     marginTop: 8,
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: '700' as const,
-    color: Colors.text,
+    fontWeight: "700" as const,
+    color: Colors.textWhite,
   },
   accentLine: {
     height: 3,
@@ -184,63 +215,63 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   seeAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   seeAllText: {
     fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.accent,
+    fontWeight: "600" as const,
+    color: Colors.textWhite,
   },
   featuredCard: {
     height: 300,
     borderRadius: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 16,
     backgroundColor: Colors.secondary,
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
   },
   featuredImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   featuredGradient: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     padding: 20,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   categoryBadge: {
     backgroundColor: Colors.accent,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginBottom: 12,
   },
   categoryText: {
     fontSize: 10,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.secondary,
     letterSpacing: 1,
   },
   featuredTitle: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.textWhite,
     marginBottom: 8,
     lineHeight: 30,
   },
   featuredMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   featuredMetaText: {
@@ -248,7 +279,7 @@ const styles = StyleSheet.create({
     color: Colors.accent,
   },
   featuredGrid: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 24,
   },
@@ -256,40 +287,40 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 180,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     backgroundColor: Colors.secondary,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
   },
   featuredSmallImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   featuredSmallGradient: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     padding: 12,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   featuredSmallTitle: {
     fontSize: 14,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.textWhite,
     lineHeight: 18,
   },
   newsCard: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: Colors.primary,
     borderRadius: 12,
     marginBottom: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -301,25 +332,25 @@ const styles = StyleSheet.create({
   newsContent: {
     flex: 1,
     padding: 12,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   newsCategory: {
     backgroundColor: Colors.lightGray,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginBottom: 6,
   },
   newsCategoryText: {
     fontSize: 9,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.royalBlue,
     letterSpacing: 0.5,
   },
   newsTitle: {
     fontSize: 14,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.text,
     lineHeight: 18,
     marginBottom: 4,
@@ -331,8 +362,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   newsMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   newsMetaText: {

@@ -159,6 +159,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700' as const,
     marginBottom: 12,
+    textAlign: 'center',
   },
   formationSelector: {
     flexDirection: 'row',
@@ -169,6 +170,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   formationButtonText: {
     fontSize: 16,

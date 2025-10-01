@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AppProvider } from "@/contexts/AppContext";
+import Colors from "@/constants/colors";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -13,48 +14,32 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="about"
         options={{
-          headerShown: true,
-          headerTitle: "About",
-          headerStyle: { backgroundColor: "#001F3F" },
-          headerTintColor: "#FFFFFF",
-          headerTitleStyle: { fontWeight: "700" as const },
+          ...headerOptions,
+          title: "About",
         }}
       />
       <Stack.Screen
         name="contact"
         options={{
-          headerShown: true,
-          headerTitle: "Contact",
-          headerStyle: { backgroundColor: "#001F3F" },
-          headerTintColor: "#FFFFFF",
-          headerTitleStyle: { fontWeight: "700" as const },
+          ...headerOptions,
+          title: "Contact",
         }}
       />
       <Stack.Screen
         name="memberships"
         options={{
-          headerShown: true,
-          headerTitle: "Memberships",
-          headerStyle: { backgroundColor: "#001F3F" },
-          headerTintColor: "#FFFFFF",
-          headerTitleStyle: { fontWeight: "700" as const },
+          ...headerOptions,
+          title: "Memberships",
         }}
-      /> */}
+      />
       <Stack.Screen
         name="article/[id]"
         options={{
-          headerShown: true,
-          headerTitle: "Article",
-          headerStyle: {
-            backgroundColor: "#001F3F",
-          },
-          headerTintColor: "#FFFFFF",
-          headerTitleStyle: {
-            fontWeight: "700" as const,
-          },
+          ...headerOptions,
+          title: "Article",
         }}
       />
     </Stack>
@@ -75,4 +60,12 @@ export default function RootLayout() {
       </AppProvider>
     </QueryClientProvider>
   );
+}
+
+const headerOptions = {
+  headerShown: true,
+  headerBackButtonDisplayMode: "minimal" as const,
+  headerTintColor: Colors.textWhite,
+  headerStyle: { backgroundColor: Colors.darkGold},
+  headerTitleStyle: { fontWeight: "700" as const },
 }
