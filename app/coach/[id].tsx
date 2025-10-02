@@ -1,27 +1,21 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import { MapPin, Calendar, Hash, Award } from "lucide-react-native";
 import Colors from "@/constants/colors";
 import { useApp } from "@/contexts/AppContext";
 
-export default function PlayerDetailScreen() {
-  const { players } = useApp();
+export default function CoachDetailScreen() {
+  const { coach: player} = useApp();
   const { id } = useLocalSearchParams();
-  const player = players.find((p) => p.id.toString() === id);
 
   if (!player) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Player not found</Text>
+        <Text style={styles.errorText}>Coach not found</Text>
       </View>
     );
   }
-
-  const positionLabel =
-    player.position.charAt(0).toUpperCase() + player.position.slice(1);
-
   return (
     <>
       <Stack.Screen
@@ -39,7 +33,6 @@ export default function PlayerDetailScreen() {
             contentFit="cover"
           />
           <Text style={styles.playerName}>{player.name}</Text>
-          <Text style={styles.playerPosition}>{positionLabel}</Text>
         </View>
 
         <View style={styles.content}>
@@ -49,16 +42,6 @@ export default function PlayerDetailScreen() {
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Full Name</Text>
                 <Text style={styles.infoValue}>{player.name}</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Position</Text>
-                <Text style={styles.infoValue}>{positionLabel}</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Number</Text>
-                <Text style={styles.infoValue}>{player.number}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
