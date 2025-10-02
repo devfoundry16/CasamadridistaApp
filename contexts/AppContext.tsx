@@ -1,11 +1,12 @@
 import createContextHook from "@nkzw/create-context-hook";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { articles } from "@/mocks/articles";
-
+import { Player } from '@/app/services/api';
 type Theme = "light" | "dark";
 
 export const [AppProvider, useApp] = createContextHook(() => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [players, setPlayers] = useState<Array<Player>>([]);
 
   const filteredArticles = useMemo(() => {
     if (selectedCategory === "all") return articles;
@@ -20,6 +21,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     return articles.slice(0, 6);
   }, []);
 
+
   return useMemo(
     () => ({
       articles,
@@ -28,6 +30,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
       filteredArticles,
       featuredArticles,
       latestArticles,
+      players,
+      setPlayers,
     }),
     [
       articles,
@@ -36,6 +40,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       filteredArticles,
       featuredArticles,
       latestArticles,
+      players,
     ]
   );
 });

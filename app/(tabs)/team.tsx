@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
 import {
-  FlatList,
-  Pressable,
+  TouchableOpacity,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MapPin, Calendar, Building2 } from "lucide-react-native";
 import { Player, TeamInfo, SportsService } from "../services/api";
 import { altColors as colors } from "@/constants/colors";
 import { latestMatches } from "@/mocks/team";
+import { useApp } from "@/contexts/AppContext";
 
 export default function TeamScreen() {
-  const insets = useSafeAreaInsets();
-  const [players, setPlayers] = useState<Array<Player>>([]);
+  const router = useRouter();
+  const {players, setPlayers} = useApp();
   const [teamInfo, setTeamInfo] = useState<TeamInfo>();
 
   const goalkeepers = players.filter((p) => p.position === "Goalkeeper");
@@ -82,14 +83,6 @@ export default function TeamScreen() {
           2024-2025 Season
         </Text>
       </View>
-      {/* <FlatList
-        data={REAL_MADRID_SQUAD}
-        renderItem={renderPlayer}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        contentContainerStyle={styles.playersList}
-        columnWrapperStyle={styles.columnWrapper}
-      /> */}
       <View style={styles.content}>
         <View style={styles.infoCard}>
           <View style={styles.infoColumn}>
@@ -126,7 +119,7 @@ export default function TeamScreen() {
           </View>
           {goalkeepers.map((player) => (
             <View>
-              <PlayerCard key={player.number} player={player} />
+              <PlayerCard key={player.id} player={player} onPress={() => router.push(`/player/${player.id}` as any)} />
               <View style={styles.accentLine} />
             </View>
           ))}
@@ -138,7 +131,7 @@ export default function TeamScreen() {
           </View>
           {defenders.map((player) => (
             <View>
-              <PlayerCard key={player.number} player={player} />
+              <PlayerCard key={player.id} player={player} onPress={() => router.push(`/player/${player.id}` as any)} />
               <View style={styles.accentLine} />
             </View>
           ))}
@@ -150,7 +143,7 @@ export default function TeamScreen() {
           </View>
           {midfielders.map((player) => (
             <View>
-              <PlayerCard key={player.number} player={player} />
+              <PlayerCard key={player.id} player={player} onPress={() => router.push(`/player/${player.id}` as any)} />
               <View style={styles.accentLine} />
             </View>
           ))}
@@ -162,7 +155,7 @@ export default function TeamScreen() {
           </View>
           {forwards.map((player) => (
             <View>
-              <PlayerCard key={player.number} player={player} />
+              <PlayerCard key={player.id} player={player} onPress={() => router.push(`/player/${player.id}` as any)} />
               <View style={styles.accentLine} />
             </View>
           ))}
@@ -214,9 +207,9 @@ export default function TeamScreen() {
     </ScrollView>
   );
 }
-function PlayerCard({ player }: { player: Player }) {
+function PlayerCard({ player, onPress} : { player: Player; onPress: () => void }) {
   return (
-    <View style={styles.playerCard}>
+    <TouchableOpacity style={styles.playerCard} onPress={onPress}>
       <View style={styles.playerNumber}>
         <Text style={styles.playerNumberText}>{player.number}</Text>
       </View>
@@ -237,7 +230,7 @@ function PlayerCard({ player }: { player: Player }) {
           <Text style={styles.playerMetaText}>{player.age} years</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 const styles = StyleSheet.create({
