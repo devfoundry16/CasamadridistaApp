@@ -1,4 +1,4 @@
-const realMadridGold = "#FFD700" as const;
+const realMadridGold = "#BC9045" as const;
 const realMadridWhite = "#FFFFFF" as const;
 const realMadridNavy = "#001F3F" as const;
 const realMadridPurple = "#8B5CF6" as const;
@@ -22,20 +22,23 @@ const Colors = {
 };
 const altColors = {
   text: "#1A1A1A" as const,
+  textWhite: "#FFFFFF" as const,
   textSecondary: "#6B7280" as const,
-  background: "#FFFFFF" as const,
+  background: "#333333" as const,
   backgroundSecondary: "#F9FAFB" as const,
   tint: realMadridGold,
   tabIconDefault: "#9CA3AF" as const,
   tabIconSelected: realMadridGold,
   border: "#E5E7EB" as const,
-  card: "#FFFFFF" as const,
+  card: "#555" as const,
   primary: realMadridGold,
   secondary: realMadridNavy,
   accent: realMadridPurple,
   success: "#10B981" as const,
   error: "#EF4444" as const,
   warning: "#F59E0B" as const,
+  royalBlue: '#0033A0',
+  lightGray: '#F5F5F5',
 }
 export { altColors };
 export default Colors;

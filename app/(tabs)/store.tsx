@@ -13,8 +13,8 @@ interface Product {
 }
 
 const PRODUCTS: Product[] = [
-  { id: 1, name: 'Home Jersey 24/25', price: '$89.99', imageUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400', category: 'Jerseys' },
-  { id: 2, name: 'Away Jersey 24/25', price: '$89.99', imageUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400', category: 'Jerseys' },
+  { id: 1, name: 'Home Jersey 24/25', price: '$89.99', imageUrl: 'https://casamadridista.com/wp-content/uploads/2025/08/box.png', category: 'Jerseys' },
+  { id: 2, name: 'Away Jersey 24/25', price: '$89.99', imageUrl: 'https://casamadridista.com/wp-content/uploads/2025/08/DAEA05EB-59E7-4316-91D0-926B6F344449.png', category: 'Jerseys' },
   { id: 3, name: 'Training Kit', price: '$59.99', imageUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400', category: 'Training' },
   { id: 4, name: 'Scarf', price: '$24.99', imageUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400', category: 'Accessories' },
   { id: 5, name: 'Cap', price: '$19.99', imageUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400', category: 'Accessories' },
@@ -27,18 +27,18 @@ export default function StoreScreen() {
 
   const renderProduct = ({ item }: { item: Product }) => (
     <Pressable
-      style={[styles.productCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+      style={[styles.productCard, { backgroundColor: colors.card, borderWidth: 0}]}
     >
       <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
       <View style={styles.productInfo}>
-        <Text style={[styles.productCategory, { color: colors.textSecondary }]}>{item.category}</Text>
-        <Text style={[styles.productName, { color: colors.text }]} numberOfLines={2}>
+        <Text style={[styles.productCategory, { color: colors.textWhite }]}>{item.category}</Text>
+        <Text style={[styles.productName, { color: colors.textWhite }]} numberOfLines={2}>
           {item.name}
         </Text>
         <View style={styles.productFooter}>
-          <Text style={[styles.productPrice, { color: colors.primary }]}>{item.price}</Text>
+          <Text style={[styles.productPrice, { color: colors.textWhite }]}>{item.price}</Text>
           <Pressable style={[styles.addToCartButton, { backgroundColor: colors.primary }]}>
-            <ShoppingCart size={18} color={colors.secondary} />
+            <ShoppingCart size={18} color={colors.textWhite} />
           </Pressable>
         </View>
       </View>
@@ -47,12 +47,6 @@ export default function StoreScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border, paddingTop: 12 }]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Official Store</Text>
-        <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-          Authentic Real Madrid merchandise
-        </Text>
-      </View>
       <FlatList
         data={PRODUCTS}
         renderItem={renderProduct}

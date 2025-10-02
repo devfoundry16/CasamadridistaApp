@@ -1,72 +1,257 @@
-import React from 'react';
-import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useApp } from '@/contexts/AppContext';
-import {altColors} from '@/constants/colors';
-
-interface Player {
-  id: number;
-  name: string;
-  position: string;
-  number: number;
-  imageUrl: string;
-  nationality: string;
-}
-
-const REAL_MADRID_SQUAD: Player[] = [
-  { id: 1, name: 'Thibaut Courtois', position: 'Goalkeeper', number: 1, imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400', nationality: 'Belgium' },
-  { id: 2, name: 'Dani Carvajal', position: 'Defender', number: 2, imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400', nationality: 'Spain' },
-  { id: 3, name: 'Éder Militão', position: 'Defender', number: 3, imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400', nationality: 'Brazil' },
-  { id: 4, name: 'David Alaba', position: 'Defender', number: 4, imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400', nationality: 'Austria' },
-  { id: 5, name: 'Jude Bellingham', position: 'Midfielder', number: 5, imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400', nationality: 'England' },
-  { id: 6, name: 'Federico Valverde', position: 'Midfielder', number: 8, imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400', nationality: 'Uruguay' },
-  { id: 7, name: 'Luka Modrić', position: 'Midfielder', number: 10, imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400', nationality: 'Croatia' },
-  { id: 8, name: 'Vinícius Jr.', position: 'Forward', number: 7, imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400', nationality: 'Brazil' },
-  { id: 9, name: 'Kylian Mbappé', position: 'Forward', number: 9, imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400', nationality: 'France' },
-  { id: 10, name: 'Rodrygo', position: 'Forward', number: 11, imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400', nationality: 'Brazil' },
-];
+import React, { useEffect, useState } from "react";
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { Image } from "expo-image";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { MapPin, Calendar, Building2 } from "lucide-react-native";
+import { Player, TeamInfo, SportsService } from "../services/api";
+import { altColors as colors } from "@/constants/colors";
+import { latestMatches } from "@/mocks/team";
 
 export default function TeamScreen() {
   const insets = useSafeAreaInsets();
-  const colors = altColors;
+  const [players, setPlayers] = useState<Array<Player>>([]);
+  const [teamInfo, setTeamInfo] = useState<TeamInfo>();
 
-  const renderPlayer = ({ item }: { item: Player }) => (
-    <Pressable
-      style={[styles.playerCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-    >
-      <Image source={{ uri: item.imageUrl }} style={styles.playerImage} />
-      <View style={styles.playerNumber}>
-        <Text style={[styles.playerNumberText, { color: colors.primary }]}>{item.number}</Text>
-      </View>
-      <View style={styles.playerInfo}>
-        <Text style={[styles.playerName, { color: colors.text }]}>{item.name}</Text>
-        <Text style={[styles.playerPosition, { color: colors.textSecondary }]}>{item.position}</Text>
-        <Text style={[styles.playerNationality, { color: colors.textSecondary }]}>{item.nationality}</Text>
-      </View>
-    </Pressable>
-  );
+  const goalkeepers = players.filter((p) => p.position === "Goalkeeper");
+  const defenders = players.filter((p) => p.position === "Defender");
+  const midfielders = players.filter((p) => p.position === "Midfielder");
+  const forwards = players.filter((p) => p.position === "Attacker");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const tf = await SportsService.fetchTeamInfo("Real Madrid");
+      let squads = await SportsService.fetchSquad(tf.id);
+      setTeamInfo(tf);
+      let newPlayers: Array<Player> = [];
+      for (const player of squads) {
+        const playerData: Player = await SportsService.fetchProfile(player.id);
+        const flag = await SportsService.fetchCountryFlag(
+          playerData.birth.country
+        );
+        newPlayers.push({
+          ...playerData,
+          number: player.number,
+          birth: {
+            date: playerData.birth.date,
+            place: playerData.birth.place,
+            country: playerData.birth.country,
+            flag: flag,
+          },
+        });
+      }
+      setPlayers(newPlayers);
+    };
+
+    fetchData();
+    console.log("***");
+  }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border, paddingTop: 12}]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Real Madrid Squad</Text>
-        <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>2024-2025 Season</Text>
+    <ScrollView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      showsVerticalScrollIndicator={false}
+    >
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: colors.border,
+            paddingTop: 12,
+          },
+        ]}
+      >
+        <Image
+          source={{
+            uri: teamInfo?.logo,
+          }}
+          contentFit="cover"
+          style={styles.headerImage}
+        />
+        <Text style={[styles.headerTitle, { color: colors.textWhite }]}>
+          {teamInfo?.name} Squad
+        </Text>
+        <Text style={[styles.headerSubtitle, { color: colors.textWhite }]}>
+          2024-2025 Season
+        </Text>
       </View>
-      <FlatList
+      {/* <FlatList
         data={REAL_MADRID_SQUAD}
         renderItem={renderPlayer}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         contentContainerStyle={styles.playersList}
         columnWrapperStyle={styles.columnWrapper}
+      /> */}
+      <View style={styles.content}>
+        <View style={styles.infoCard}>
+          <View style={styles.infoColumn}>
+            <View style={styles.infoItem}>
+              <MapPin size={20} color={colors.textWhite} />
+              <Text style={styles.infoLabel}>Country</Text>
+              <Image
+                source={{ uri: teamInfo?.flag }}
+                contentFit="cover"
+                style={styles.playerCountryImage}
+              />
+            </View>
+            <View style={styles.infoItem}>
+              <Calendar size={20} color={colors.textWhite} />
+              <Text style={styles.infoLabel}>Founded</Text>
+              <Text style={styles.infoValue}>{teamInfo?.founded}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Building2 size={20} color={colors.textWhite} />
+              <Text style={styles.infoLabel}>Stadium</Text>
+              <Text style={styles.infoValue}>{teamInfo?.stadium}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Squad</Text>
+          <View style={styles.accentLine} />
+        </View>
+
+        <View style={styles.positionSection}>
+          <View style={styles.positionTitleContainer}>
+            <Text style={styles.positionTitle}>GOALKEEPERS</Text>
+          </View>
+          {goalkeepers.map((player) => (
+            <View>
+              <PlayerCard key={player.number} player={player} />
+              <View style={styles.accentLine} />
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.positionSection}>
+          <View style={styles.positionTitleContainer}>
+            <Text style={styles.positionTitle}>DEFENDERS</Text>
+          </View>
+          {defenders.map((player) => (
+            <View>
+              <PlayerCard key={player.number} player={player} />
+              <View style={styles.accentLine} />
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.positionSection}>
+          <View style={styles.positionTitleContainer}>
+            <Text style={styles.positionTitle}>MIDFIELDERS</Text>
+          </View>
+          {midfielders.map((player) => (
+            <View>
+              <PlayerCard key={player.number} player={player} />
+              <View style={styles.accentLine} />
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.positionSection}>
+          <View style={styles.positionTitleContainer}>
+            <Text style={styles.positionTitle}>FORWARDS</Text>
+          </View>
+          {forwards.map((player) => (
+            <View>
+              <PlayerCard key={player.number} player={player} />
+              <View style={styles.accentLine} />
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Latest Matches</Text>
+          <View style={styles.accentLine} />
+        </View>
+
+        {latestMatches.map((match, index) => (
+          <View key={index} style={styles.matchCard}>
+            <View style={styles.matchHeader}>
+              <Text style={styles.matchCompetition}>{match.competition}</Text>
+              <Text style={styles.matchDateTime}>
+                {match.date} • {match.time}
+              </Text>
+            </View>
+            <View style={styles.matchContent}>
+              <View style={styles.teamContainer}>
+                <Image
+                  source={{ uri: match.homeTeam.logo }}
+                  style={styles.teamLogo}
+                  contentFit="contain"
+                />
+                <Text style={styles.teamName} numberOfLines={1}>
+                  {match.homeTeam.name}
+                </Text>
+              </View>
+              <View style={styles.scoreContainer}>
+                <Text style={styles.score}>{match.homeTeam.score}</Text>
+                <Text style={styles.scoreSeparator}>-</Text>
+                <Text style={styles.score}>{match.awayTeam.score}</Text>
+              </View>
+              <View style={styles.teamContainer}>
+                <Image
+                  source={{ uri: match.awayTeam.logo }}
+                  style={styles.teamLogo}
+                  contentFit="contain"
+                />
+                <Text style={styles.teamName} numberOfLines={1}>
+                  {match.awayTeam.name}
+                </Text>
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
+  );
+}
+function PlayerCard({ player }: { player: Player }) {
+  return (
+    <View style={styles.playerCard}>
+      <View style={styles.playerNumber}>
+        <Text style={styles.playerNumberText}>{player.number}</Text>
+      </View>
+      <Image
+        source={{ uri: player.photo }}
+        style={styles.playerPhoto}
+        contentFit="cover"
       />
+      <View style={styles.playerInfo}>
+        <Text style={styles.playerName}>{player.name}</Text>
+        <View style={styles.playerMeta}>
+          <Image
+            source={{ uri: player.birth.flag }}
+            contentFit="cover"
+            style={styles.playerCountryImage}
+          />
+          <Text style={styles.playerMetaText}>Age: </Text>
+          <Text style={styles.playerMetaText}>{player.age} years</Text>
+        </View>
+      </View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
+    padding: 16,
+  },
+  headerImage: {
+    width: 120,
+    height: 120,
+    margin: "auto",
+    marginBottom: 12,
   },
   header: {
     paddingHorizontal: 16,
@@ -75,60 +260,201 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     marginBottom: 4,
-    textAlign: 'center',
+    textAlign: "center",
   },
   headerSubtitle: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
   playersList: {
     padding: 16,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     marginBottom: 16,
   },
-  playerCard: {
-    width: '48%',
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
+
+  infoCard: {
+    marginBottom: 24,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
-  playerImage: {
-    width: '100%',
-    height: 180,
-    backgroundColor: '#E5E7EB',
+  infoColumn: {
+    flexDirection: "column",
+    justifyContent: "space-around",
+  },
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 6,
+    gap: 8,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: colors.lightGray,
+    fontWeight: "500" as const,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: colors.textWhite,
+    fontWeight: "700" as const,
+  },
+  sectionHeader: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "700" as const,
+    color: colors.textWhite,
+  },
+  accentLine: {
+    height: 1.5,
+    width: "100%",
+    backgroundColor: colors.lightGray,
+    borderRadius: 2,
+  },
+  positionSection: {
+    marginBottom: 24,
+  },
+  positionTitleContainer: {
+    textAlignVertical: "center",
+    backgroundColor: colors.primary,
+    paddingLeft: 16,
+  },
+  positionTitle: {
+    fontSize: 18,
+    fontWeight: "600" as const,
+    color: colors.textWhite,
+    paddingVertical: 6,
+  },
+  playerCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 12,
+    padding: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   playerNumber: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    width: 40,
+    height: 40,
     borderRadius: 20,
-    width: 36,
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
   playerNumberText: {
-    fontSize: 18,
-    fontWeight: '700' as const,
+    fontSize: 25,
+    fontWeight: "700" as const,
+    color: colors.textWhite,
+  },
+  playerPhoto: {
+    width: 60,
+    height: 60,
+    marginRight: 12,
+    backgroundColor: colors.lightGray,
+  },
+  playerCountryImage: {
+    width: 30,
+    height: 30,
+    marginRight: 6,
+    backgroundColor: colors.lightGray,
   },
   playerInfo: {
-    padding: 12,
+    flex: 1,
+    justifyContent: "center",
   },
   playerName: {
     fontSize: 16,
-    fontWeight: '700' as const,
+    fontWeight: "600" as const,
+    color: colors.textWhite,
     marginBottom: 4,
   },
-  playerPosition: {
-    fontSize: 12,
-    marginBottom: 2,
+  playerMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
-  playerNationality: {
+  playerMetaText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: colors.textWhite,
+  },
+  matchCard: {
+    borderColor: colors.lightGray,
+    borderWidth: 1,
+    padding: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  matchHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  matchCompetition: {
+    fontSize: 12,
+    fontWeight: "700" as const,
+    color: colors.textWhite,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  matchDateTime: {
     fontSize: 11,
+    color: colors.textWhite,
+  },
+  matchContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  teamContainer: {
+    flex: 1,
+    alignItems: "center",
+    gap: 8,
+  },
+  teamLogo: {
+    width: 40,
+    height: 40,
+  },
+  teamName: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: colors.textWhite,
+    textAlign: "center",
+  },
+  scoreContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 20,
+  },
+  score: {
+    fontSize: 28,
+    fontWeight: "700" as const,
+    color: colors.textWhite,
+  },
+  scoreSeparator: {
+    fontSize: 20,
+    fontWeight: "600" as const,
+    color: colors.textWhite,
   },
 });

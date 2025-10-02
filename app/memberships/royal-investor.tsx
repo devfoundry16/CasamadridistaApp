@@ -15,6 +15,7 @@ import {
   Users,
   Award,
   ChevronDown,
+  Check,
 } from "lucide-react-native";
 import { Image } from "expo-image";
 
@@ -109,30 +110,58 @@ export default function RoyalInvestorScreen() {
         </View>
       </View>
       <View style={styles.content}>
-        <View style={styles.benefitsSection}>
-          <Text style={styles.sectionTitle}>Investor Benefits</Text>
-          {benefits.map((benefit, index) => {
-            const Icon = benefit.icon;
-            return (
-              <View key={index} style={styles.benefitCard}>
-                <View style={styles.iconContainer}>
-                  <Icon size={24} color={Colors.accent} />
-                </View>
-                <View style={styles.benefitContent}>
-                  <Text style={styles.benefitTitle}>{benefit.title}</Text>
-                  <Text style={styles.benefitDescription}>
-                    {benefit.description}
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
+        <View style={styles.section}>
+          <Text style={{ ...styles.sectionTitle, fontSize: 32 }}>
+            Rare Opportunity!
+          </Text>
+          <Text style={styles.sectionText}>
+            The rarest opportunity to join the heart of the association and its
+            senior management through an exceptional contribution.
+          </Text>
+          <Text style={styles.sectionText}>
+            We offer this unique membership to visionary individuals who believe
+            in the future of CasaMadridista as a global Real Madrid community
+            and wish to support its mission from a truly influential leadership
+            position.
+          </Text>
+          <Image
+            source={{
+              uri: "https://casamadridista.com/wp-content/uploads/2025/09/34534535.webp",
+            }}
+            style={{
+              width: "100%",
+              height: 208,
+              borderRadius: 12,
+              marginTop: 12,
+              marginBottom: 12,
+            }}
+            contentFit="cover"
+          />
         </View>
+
+        {Benefits.map((benefit, index) => (
+          <View key={index} style={styles.section}>
+            <Text style={styles.sectionTitle}>{benefit.title}</Text>
+            {benefit.description ? (
+              <Text style={styles.sectionText}>{benefit.description}</Text>
+            ) : null}
+            {benefit.items.map((item, idx) => (
+              <View key={idx} style={styles.valueItem}>
+                <Check size={20} strokeWidth={4} color={Colors.darkGold} />
+                <Text key={idx} style={styles.valueText}>
+                  <Text style={styles.valueText}>{item}</Text>
+                </Text>
+              </View>
+            ))}
+          </View>
+        ))}
 
         <View style={styles.formSection}>
           <Text style={styles.formTitle}>Join Application Form</Text>
           <Text style={styles.formDescription}>
-            Fill out the form below to apply for the Royal Investor Program
+            To join the Royal Investor Membership, please fill out the form
+            Below. All applications are subject to official review, and you will
+            be contacted as soon as possible.
           </Text>
 
           <View style={styles.inputGroup}>
@@ -252,17 +281,74 @@ export default function RoyalInvestorScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      <View style={styles.headerContent}>
+        <Image
+          source={{
+            uri: "https://casamadridista.com/wp-content/uploads/2025/09/343747.webp",
+          }}
+          style={styles.footerImage}
+          contentFit="cover"
+        />
+        <View style={styles.heroSection}>
+          <Text style={styles.footerTitle}>
+            Become one of the association's champions!
+          </Text>
+          <Text style={styles.subtitle}>
+            Your support makes a difference. Contribute to the growth of the
+            official Real Madrid association, and your name and photo will shine
+            on the honor board in front of thousands of Madridistas!
+          </Text>
+          <TouchableOpacity style={{...styles.submitButton, paddingHorizontal: 24, marginTop: 16}}>
+            <Text style={styles.submitButtonText}>Apply Now</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </ScrollView>
   );
 }
 
+const Benefits: {
+  title: string;
+  description: string;
+  items: string[];
+}[] = [
+  {
+    title: "Benefits of the Royal Investor Membership",
+    description: "",
+    items: [
+      "Join the association’s senior management for 12 months",
+      "Private meeting with current or former Real Madrid players (subject to availability and coordination)",
+      "Exclusive visit to Real Madrid facilities (Valdebebas), including a VIP tour supervised by an official",
+      "Attend meetings with official club representatives (subject to feasibility and official schedules)",
+      "Official recognition on the website as a “Royal Investor” with a profile and photo",
+      "Closed attendance at official meetings and participation in major strategic decisions",
+      "Full access to all VIP membership privileges",
+      "Luxurious royal souvenir + a personalized certificate of appreciation signed by the association",
+      "Special media coverage for the investor across all our platforms",
+    ],
+  },
+  {
+    title: "Who is eligible?",
+    description:
+      "Entrepreneurs, public figures, investors, and Real Madrid fans seeking a real role in developing the largest Arabic-speaking Real Madrid community.",
+    items: [
+      "Only 3 individuals are selected annually for membership",
+      "Each application is reviewed individually",
+      "Submitting an application does not guarantee approval. The association reserves the right to reject any application for any reason",
+      "Applications are subject to strict criteria",
+      "Applications are accepted from any country or nationality",
+      "The application form at the bottom of the page must be completed to submit your request",
+    ],
+  },
+];
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: Colors.darkGray,
   },
   content: {
-    padding: 20,
+    padding: 35,
   },
   headerContent: {
     flexDirection: "column" as const,
@@ -271,8 +357,21 @@ const styles = StyleSheet.create({
   },
   heroImage: {
     width: "100%",
-    height: 235,
-    marginBottom: 12,
+    height: 300,
+    marginBottom: 0,
+  },
+  footerImage: {
+    width: "100%",
+    height: 650,
+    marginBottom: 0,
+  },
+  footerTitle: {
+    fontSize: 28,
+    fontWeight: "700" as const,
+    color: Colors.textWhite,
+    marginTop: 16,
+    marginBottom: 16,
+    textAlign: "center" as const,
   },
   heroSection: {
     position: "absolute" as const,
@@ -284,12 +383,12 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: Colors.secondary,
     marginTop: 16,
-    marginBottom: 8,
+    marginBottom: 16,
     textAlign: "center" as const,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.textLight,
+    color: Colors.textWhite,
     textAlign: "center" as const,
     paddingHorizontal: 20,
   },
@@ -320,11 +419,41 @@ const styles = StyleSheet.create({
   benefitsSection: {
     marginBottom: 32,
   },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "700" as const,
-    color: Colors.secondary,
+  section: {
     marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  sectionTitle: {
+    fontSize: 30,
+    fontWeight: "700" as const,
+    color: Colors.darkGold,
+    marginBottom: 12,
+  },
+  sectionText: {
+    fontSize: 15,
+    color: Colors.textWhite,
+    lineHeight: 24,
+    marginBottom: 12,
+  },
+  valueItem: {
+    flexDirection: "row",
+    alignItems: "center" as const,
+    marginBottom: 12,
+    gap: 12,
+  },
+  valueText: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.textWhite,
+    lineHeight: 22,
+  },
+  valueBold: {
+    fontWeight: "700" as const,
+    color: Colors.textWhite,
   },
   benefitCard: {
     backgroundColor: Colors.primary,
@@ -356,16 +485,10 @@ const styles = StyleSheet.create({
   },
   benefitDescription: {
     fontSize: 14,
-    color: Colors.textLight,
+    color: Colors.textWhite,
     lineHeight: 20,
   },
-  formSection: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
+  formSection: {},
   formTitle: {
     fontSize: 22,
     fontWeight: "700" as const,
@@ -374,7 +497,8 @@ const styles = StyleSheet.create({
   },
   formDescription: {
     fontSize: 14,
-    color: Colors.textLight,
+    color: Colors.textWhite,
+    fontStyle: "italic" as const,
     marginBottom: 24,
   },
   inputGroup: {
@@ -433,7 +557,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   submitButton: {
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.darkGold,
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center" as const,
@@ -442,6 +566,6 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: Colors.secondary,
+    color: Colors.textWhite,
   },
 });
