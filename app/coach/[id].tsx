@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { WebView } from 'react-native-webview';
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Image } from "expo-image";
 import { MapPin, Calendar, Hash, Award } from "lucide-react-native";
@@ -255,5 +256,19 @@ const styles = StyleSheet.create({
     color: Colors.textWhite,
     textAlign: "center",
     marginTop: 40,
+  },
+  widgetContainer: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    overflow: 'hidden',
+    height: 400,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  webview: {
+    backgroundColor: 'transparent',
   },
 });

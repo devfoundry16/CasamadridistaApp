@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { WebView } from "react-native-webview";
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import { MapPin, Calendar, Hash, Award } from "lucide-react-native";
 import Colors from "@/constants/colors";
 import { useApp } from "@/contexts/AppContext";
@@ -18,6 +18,43 @@ export default function PlayerDetailScreen() {
       </View>
     );
   }
+
+  const statsHtml = `
+                    <!DOCTYPE html>
+                    <html>
+                      <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                          body {
+                            margin: 0;
+                            padding: 0;
+                            background-color: transparent;
+                          }
+                          api-sports-widget {
+                            background-color: none;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <api-sports-widget
+                          data-type="config"
+                          data-key="2efab6a210831868664529f16d897809"
+                          data-sport="football"
+                          data-theme="grey"
+                        ></api-sports-widget>
+
+                        <api-sports-widget 
+                          data-type="player" 
+                          data-player-id="${player.id}"
+                          data-player-statistics="true"
+                          data-player-injuries="true"
+                          data-player-trophies="true"
+                          data-season="AFL"
+                        ></api-sports-widget>  
+                        <script type="module" src="https://widgets.api-sports.io/3.1.0/widgets.js"></script>
+                      </body>
+                    </html>
+                  `;
 
   const positionLabel =
     player.position.charAt(0).toUpperCase() + player.position.slice(1);
@@ -77,7 +114,13 @@ export default function PlayerDetailScreen() {
               <View style={styles.divider} />
               <View style={{ ...styles.infoRow }}>
                 <Text style={styles.infoLabel}>Place of Birth</Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}} >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
                   <Text style={styles.infoValue}>{player.birth.place} </Text>
                   <Image
                     source={{ uri: player.flag }}
@@ -101,6 +144,22 @@ export default function PlayerDetailScreen() {
                 <Text style={styles.infoLabel}>Height</Text>
                 <Text style={styles.infoValue}>{player.height}</Text>
               </View>
+            </View>
+          </View>
+
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}>Player Stats</Text>
+            <View style={styles.widgetContainer}>
+              <WebView
+                source={{
+                  html: statsHtml,
+                }}
+                style={styles.webview}
+                javaScriptEnabled={true}
+                domStorageEnabled={true}
+                startInLoadingState={true}
+                scalesPageToFit={true}
+              />
             </View>
           </View>
 
@@ -272,5 +331,19 @@ const styles = StyleSheet.create({
     color: Colors.textWhite,
     textAlign: "center",
     marginTop: 40,
+  },
+  widgetContainer: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    overflow: "hidden",
+    height: 400,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  webview: {
+    backgroundColor: "transparent",
   },
 });

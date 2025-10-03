@@ -13,14 +13,15 @@ export interface Match {
   homeTeam: {
     name: string;
     logo: string;
-    score: number;
+    score?: number;
   };
   awayTeam: {
     name: string;
     logo: string;
-    score: number;
+    score?: number;
   };
   competition: string;
+  stadium?: string;
 }
 
 export const teamInfo = {
@@ -173,6 +174,80 @@ export const players: Player[] = [
     nationality: 'Spain',
     age: 24,
     position: 'forward',
+  },
+];
+
+export const nextMatch: Match = {
+  date: '2025-10-10',
+  time: '21:00',
+  homeTeam: {
+    name: 'Real Madrid',
+    logo: 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg',
+  },
+  awayTeam: {
+    name: 'Barcelona',
+    logo: 'https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg',
+  },
+  competition: 'La Liga',
+  stadium: 'Santiago Bernabéu',
+};
+
+export const upcomingMatches: Match[] = [
+  {
+    date: '2025-10-10',
+    time: '21:00',
+    homeTeam: {
+      name: 'Real Madrid',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg',
+    },
+    awayTeam: {
+      name: 'Barcelona',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg',
+    },
+    competition: 'La Liga',
+    stadium: 'Santiago Bernabéu',
+  },
+  {
+    date: '2025-10-15',
+    time: '20:00',
+    homeTeam: {
+      name: 'Atlético Madrid',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/f/f4/Atletico_Madrid_2017_logo.svg',
+    },
+    awayTeam: {
+      name: 'Real Madrid',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg',
+    },
+    competition: 'La Liga',
+    stadium: 'Wanda Metropolitano',
+  },
+  {
+    date: '2025-10-20',
+    time: '21:00',
+    homeTeam: {
+      name: 'Real Madrid',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg',
+    },
+    awayTeam: {
+      name: 'Bayern Munich',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/1/1b/FC_Bayern_M%C3%BCnchen_logo_%282017%29.svg',
+    },
+    competition: 'Champions League',
+    stadium: 'Santiago Bernabéu',
+  },
+  {
+    date: '2025-10-25',
+    time: '18:30',
+    homeTeam: {
+      name: 'Sevilla',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/3/3b/Sevilla_FC_logo.svg',
+    },
+    awayTeam: {
+      name: 'Real Madrid',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg',
+    },
+    competition: 'La Liga',
+    stadium: 'Ramón Sánchez Pizjuán',
   },
 ];
 

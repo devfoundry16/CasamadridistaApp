@@ -4,23 +4,124 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
+import { WebView } from "react-native-webview";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { Clock, ChevronRight } from "lucide-react-native";
+import { Clock, ChevronRight, MapPinned, Calendar } from "lucide-react-native";
 import { useApp } from "@/contexts/AppContext";
 import Colors from "@/constants/colors";
+import { useEffect, useState } from "react";
+
+import { nextMatch, upcomingMatches } from "@/mocks/team";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { featuredArticles, latestArticles } = useApp();
+  const [timeLeft, setTimeLeft] = useState<string>("");
+  const statsHtml = ` 
+                    <!DOCTYPE html>
+                    <html>
+                      <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                          body {
+                            margin: 0;
+                            padding: 0;
+                            background-color: transparent;
+                          }
+                          api-sports-widget {
+                            background-color: none;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <api-sports-widget
+                          data-type="config"
+                          data-key="2efab6a210831868664529f16d897809"
+                          data-sport="football"
+                          data-theme="grey"
+                          data-show-logos="true"
+                        ></api-sports-widget>
 
+                       <api-sports-widget 
+                          data-type="standings" 
+                          data-league="140" 
+                          data-season="2025"
+                        ></api-sports-widget>
+
+                        <script type="module" src="https://widgets.api-sports.io/3.1.0/widgets.js"></script>
+                      </body>
+                    </html>
+                  `;
+
+  const standingHTML = ` 
+                    <!DOCTYPE html>
+                    <html>
+                      <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                          body {
+                            margin: 0;
+                            padding: 0;
+                            background-color: transparent;
+                          }
+                          api-sports-widget {
+                            background-color: none;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <api-sports-widget
+                          data-type="config"
+                          data-key="2efab6a210831868664529f16d897809"
+                          data-sport="football"
+                          data-theme="grey"
+                          data-show-logos="true"
+                        ></api-sports-widget>
+
+                       <api-sports-widget 
+                          data-type="league" 
+                          data-league="140"
+                          data-refresh="20"
+                        ></api-sports-widget>
+
+                        <script type="module" src="https://widgets.api-sports.io/3.1.0/widgets.js"></script>
+                      </body>
+                    </html>
+                  `;
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const matchDateTime = new Date(`${nextMatch.date}T${nextMatch.time}:00`);
+      const now = new Date();
+      const difference = matchDateTime.getTime() - now.getTime();
+
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor(
+          (difference % (1000 * 60 * 60)) / (1000 * 60)
+        );
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+      } else {
+        setTimeLeft("Match Started");
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View
-        style={styles.header}
-      >
+      <View style={styles.header}>
         <Image
           source={{
             uri: "https://casamadridista.com/wp-content/uploads/2025/09/435345345.webp",
@@ -29,9 +130,177 @@ export default function HomeScreen() {
           contentFit="cover"
         />
         <View style={styles.headerSection}>
-          <Text style={styles.headerTitle}>بيت المدريديستا</Text>
-          <Text style={styles.headerSubtitle}>Casa Madridista</Text>
-          <Text style={styles.headerTagline}>Your Home for Real Madrid News</Text>
+          <Text style={styles.headerTitle}>REAL MADRID OFFICIAL FAN CLUB</Text>
+          <Text style={styles.headerTagline}>
+            Join the largest gathering of Madridistas in the world
+          </Text>
+          <Pressable
+            style={[
+              styles.loginButton,
+              {
+                backgroundColor: Colors.darkGold,
+              },
+            ]}
+          >
+            <Text style={[styles.loginButtonText, { color: Colors.textWhite }]}>
+              Become a Member
+            </Text>
+          </Pressable>
+
+          <View style={styles.content}>
+            <View style={styles.nextMatchSection}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Next Match</Text>
+              </View>
+
+              <View
+                style={styles.matchCard}
+              >
+                <View style={styles.nextMatchHeader}>
+                  <Text style={styles.nextMatchCompetition}>
+                    {nextMatch.competition}
+                  </Text>
+                  <View style={styles.countdownContainer}>
+                    <Clock size={16} color={Colors.primary} />
+                    <Text style={styles.countdownText}>{timeLeft}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.nextMatchTeams}>
+                  <View style={styles.nextMatchTeam}>
+                    <Image
+                      source={{ uri: nextMatch.homeTeam.logo }}
+                      style={styles.nextMatchLogo}
+                      contentFit="contain"
+                    />
+                    <Text style={styles.nextMatchTeamName}>
+                      {nextMatch.homeTeam.name}
+                    </Text>
+                  </View>
+
+                  <View style={styles.vsContainer}>
+                    <Text style={styles.vsText}>VS</Text>
+                  </View>
+
+                  <View style={styles.nextMatchTeam}>
+                    <Image
+                      source={{ uri: nextMatch.awayTeam.logo }}
+                      style={styles.nextMatchLogo}
+                      contentFit="contain"
+                    />
+                    <Text style={styles.nextMatchTeamName}>
+                      {nextMatch.awayTeam.name}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.nextMatchDetails}>
+                  <View style={styles.nextMatchDetailItem}>
+                    <Calendar size={16} color={Colors.textWhite} />
+                    <Text style={styles.nextMatchDetailText}>
+                      {new Date(nextMatch.date).toLocaleDateString("en-US", {
+                        weekday: "short",
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </Text>
+                  </View>
+                  <View style={styles.nextMatchDetailItem}>
+                    <Clock size={16} color={Colors.textWhite} />
+                    <Text style={styles.nextMatchDetailText}>
+                      {nextMatch.time}
+                    </Text>
+                  </View>
+                  {nextMatch.stadium && (
+                    <View style={styles.nextMatchDetailItem}>
+                      <MapPinned size={16} color={Colors.textWhite} />
+                      <Text style={styles.nextMatchDetailText}>
+                        {nextMatch.stadium}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {upcomingMatches.map((match, index) => (
+          <View key={`upcoming-${index}`} style={styles.matchCard}>
+            <View style={styles.matchHeader}>
+              <Text style={styles.matchCompetition}>{match.competition}</Text>
+              <Text style={styles.matchDateTime}>
+                {new Date(match.date).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                • {match.time}
+              </Text>
+            </View>
+            <View style={styles.matchContent}>
+              <View style={styles.teamContainer}>
+                <Image
+                  source={{ uri: match.homeTeam.logo }}
+                  style={styles.teamLogo}
+                  contentFit="contain"
+                />
+                <Text style={styles.teamName} numberOfLines={1}>
+                  {match.homeTeam.name}
+                </Text>
+              </View>
+              <View style={styles.scoreContainer}>
+                <Text style={styles.vsTextSmall}>VS</Text>
+              </View>
+              <View style={styles.teamContainer}>
+                <Image
+                  source={{ uri: match.awayTeam.logo }}
+                  style={styles.teamLogo}
+                  contentFit="contain"
+                />
+                <Text style={styles.teamName} numberOfLines={1}>
+                  {match.awayTeam.name}
+                </Text>
+              </View>
+            </View>
+            {match.stadium && (
+              <View style={styles.matchStadium}>
+                <MapPinned size={12} color={Colors.textWhite} />
+                <Text style={styles.matchStadiumText}>{match.stadium}</Text>
+              </View>
+            )}
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.infoSection}>
+        <Text style={styles.sectionTitle}></Text>
+        <View style={styles.widgetContainer}>
+          <WebView
+            source={{
+              html: statsHtml,
+            }}
+            style={styles.webview}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            startInLoadingState={true}
+            scalesPageToFit={true}
+          />
+        </View>
+      </View>
+      <View>
+        <Text style={styles.sectionTitle}></Text>
+        <View style={styles.widgetContainer}>
+          <WebView
+            source={{
+              html: standingHTML,
+            }}
+            style={styles.webview}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            startInLoadingState={true}
+            scalesPageToFit={true}
+          />
         </View>
       </View>
 
@@ -40,115 +309,6 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Featured Stories</Text>
           <View style={styles.accentLine} />
         </View>
-
-        {featuredArticles[0] && (
-          <TouchableOpacity
-            style={styles.featuredCard}
-            onPress={() =>
-              router.push(`/article/${featuredArticles[0].id}` as any)
-            }
-            activeOpacity={0.9}
-          >
-            <Image
-              source={{ uri: featuredArticles[0].image }}
-              style={styles.featuredImage}
-              contentFit="cover"
-            />
-            <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.9)"]}
-              style={styles.featuredGradient}
-            >
-              <View style={styles.categoryBadge}>
-                <Text style={styles.categoryText}>
-                  {featuredArticles[0].category.replace("-", " ").toUpperCase()}
-                </Text>
-              </View>
-              <Text style={styles.featuredTitle} numberOfLines={2}>
-                {featuredArticles[0].title}
-              </Text>
-              <View style={styles.featuredMeta}>
-                <Clock size={14} color={Colors.accent} />
-                <Text style={styles.featuredMetaText}>
-                  {featuredArticles[0].readTime}
-                </Text>
-                <Text style={styles.featuredMetaText}>•</Text>
-                <Text style={styles.featuredMetaText}>
-                  {featuredArticles[0].date}
-                </Text>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
-
-        <View style={styles.featuredGrid}>
-          {featuredArticles.slice(1, 3).map((article: any) => (
-            <TouchableOpacity
-              key={article.id}
-              style={styles.featuredSmallCard}
-              onPress={() => router.push(`/article/${article.id}` as any)}
-              activeOpacity={0.9}
-            >
-              <Image
-                source={{ uri: article.image }}
-                style={styles.featuredSmallImage}
-                contentFit="cover"
-              />
-              <LinearGradient
-                colors={["transparent", "rgba(0,0,0,0.85)"]}
-                style={styles.featuredSmallGradient}
-              >
-                <Text style={styles.featuredSmallTitle} numberOfLines={2}>
-                  {article.title}
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Latest News</Text>
-          <TouchableOpacity
-            style={styles.seeAllButton}
-            onPress={() => router.push("/news" as any)}
-          >
-            <Text style={styles.seeAllText}>See All</Text>
-            <ChevronRight size={16} color={Colors.accent} />
-          </TouchableOpacity>
-        </View>
-
-        {latestArticles.map((article: any) => (
-          <TouchableOpacity
-            key={article.id}
-            style={styles.newsCard}
-            onPress={() => router.push(`/article/${article.id}` as any)}
-            activeOpacity={0.8}
-          >
-            <Image
-              source={{ uri: article.image }}
-              style={styles.newsImage}
-              contentFit="cover"
-            />
-            <View style={styles.newsContent}>
-              <View style={styles.newsCategory}>
-                <Text style={styles.newsCategoryText}>
-                  {article.category.replace("-", " ").toUpperCase()}
-                </Text>
-              </View>
-              <Text style={styles.newsTitle} numberOfLines={2}>
-                {article.title}
-              </Text>
-              <Text style={styles.newsExcerpt} numberOfLines={2}>
-                {article.excerpt}
-              </Text>
-              <View style={styles.newsMeta}>
-                <Clock size={12} color={Colors.textLight} />
-                <Text style={styles.newsMetaText}>{article.readTime}</Text>
-                <Text style={styles.newsMetaText}>•</Text>
-                <Text style={styles.newsMetaText}>{article.date}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
       </View>
     </ScrollView>
   );
@@ -164,12 +324,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerSection: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
-    alignItems: 'center',
+    alignItems: "center",
     paddingBlockEnd: 300,
-    paddingBlockStart: 300,
+    paddingBlockStart: "10%",
   },
   headerImage: {
     width: "100%",
@@ -177,10 +337,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    color: Colors.accent,
-    marginBottom: 4,
+    fontSize: 30,
+    fontWeight: "900" as const,
+    color: Colors.textWhite,
+    marginBottom: 14,
+    textAlign: "center",
+    fontStyle: "italic",
   },
   headerSubtitle: {
     fontSize: 20,
@@ -189,9 +351,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   headerTagline: {
-    fontSize: 14,
+    fontSize: 18,
     color: Colors.textWhite,
     opacity: 0.8,
+    fontStyle: "italic",
+  },
+  infoSection: {
+    marginBottom: 24,
   },
   content: {
     padding: 16,
@@ -369,5 +535,201 @@ const styles = StyleSheet.create({
   newsMetaText: {
     fontSize: 10,
     color: Colors.textLight,
+  },
+  loginButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 24,
+  },
+  loginButtonText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+  },
+  widgetContainer: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    overflow: "hidden",
+    height: 500,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    marginBottom: 12,
+  },
+  webview: {
+    backgroundColor: "transparent",
+  },
+  matchCard: {
+    borderColor: Colors.lightGray,
+    borderWidth: 1,
+    padding: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  matchHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  matchCompetition: {
+    fontSize: 12,
+    fontWeight: "700" as const,
+    color: Colors.textWhite,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  matchDateTime: {
+    fontSize: 11,
+    color: Colors.textWhite,
+  },
+  matchContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  teamContainer: {
+    flex: 1,
+    alignItems: "center",
+    gap: 8,
+  },
+  teamLogo: {
+    width: 40,
+    height: 40,
+  },
+  teamName: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.textWhite,
+    textAlign: "center",
+  },
+  scoreContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 20,
+  },
+  score: {
+    fontSize: 28,
+    fontWeight: "700" as const,
+    color: Colors.textWhite,
+  },
+  scoreSeparator: {
+    fontSize: 20,
+    fontWeight: "600" as const,
+    color: Colors.textWhite,
+  },
+  nextMatchSection: {
+    marginBottom: 24,
+  },
+  nextMatchCard: {
+    borderRadius: 20,
+    padding: 20,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+  },
+  nextMatchHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  nextMatchCompetition: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: Colors.textWhite,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  countdownContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  countdownText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: Colors.textWhite,
+  },
+  nextMatchTeams: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  nextMatchTeam: {
+    flex: 1,
+    alignItems: "center",
+    gap: 12,
+  },
+  nextMatchLogo: {
+    width: 70,
+    height: 70,
+  },
+  nextMatchTeamName: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: Colors.textWhite,
+    textAlign: "center",
+  },
+  vsContainer: {
+    paddingHorizontal: 16,
+  },
+  vsText: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.textWhite,
+    letterSpacing: 2,
+  },
+  nextMatchDetails: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.2)",
+  },
+  nextMatchDetailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  nextMatchDetailText: {
+    fontSize: 12,
+    color: Colors.textWhite,
+    fontWeight: "600" as const,
+  },
+  vsTextSmall: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.textWhite,
+  },
+  matchStadium: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  matchStadiumText: {
+    fontSize: 11,
+    color: Colors.textWhite,
   },
 });

@@ -1,4 +1,4 @@
-import fetchWithAuth from './fetchWithAuth';
+import fetchWithAuth from "./fetchWithAuth";
 
 export interface Player {
   id: number;
@@ -47,13 +47,13 @@ export interface TeamInfo {
 }
 
 class ApiService {
-  private API_KEY = '2efab6a210831868664529f16d897809';
+  private API_KEY = "2efab6a210831868664529f16d897809";
 
   async fetchTeamInfo(name: string): Promise<TeamInfo> {
     const param: Record<string, string> = {
       name: name,
     };
-    const res = await fetchWithAuth('teams/', this.API_KEY, param);
+    const res = await fetchWithAuth("teams/", this.API_KEY, param);
     const flag = await this.fetchCountryFlag(res.response[0].team.country);
     return {
       ...res.response[0].team,
@@ -65,14 +65,14 @@ class ApiService {
     const param: Record<string, number | undefined> = {
       team: id,
     };
-    const res = await fetchWithAuth('players/squads', this.API_KEY, param);
+    const res = await fetchWithAuth("players/squads", this.API_KEY, param);
     return res.response[0].players.slice();
   }
   async fetchProfile(id: number) {
     const param: Record<string, number> = {
       player: id,
     };
-    const res = await fetchWithAuth('players/profiles/', this.API_KEY, param);
+    const res = await fetchWithAuth("players/profiles/", this.API_KEY, param);
     return res.response[0].player;
   }
   async fetchCoachProfile(id: number) {
@@ -80,17 +80,40 @@ class ApiService {
     const param: Record<string, number> = {
       team: id,
     };
-    const res = await fetchWithAuth('coachs/', this.API_KEY, param);
+    const res = await fetchWithAuth("coachs/", this.API_KEY, param);
     return res.response[0];
   }
   async fetchCountryFlag(country: string) {
     const param: Record<string, string> = {
       name:
-        country.toLowerCase() == 'türkiye' ? 'turkey' : country.toLowerCase(),
+        country.toLowerCase() == "türkiye" ? "turkey" : country.toLowerCase(),
     };
-    const res = await fetchWithAuth('countries/', this.API_KEY, param);
+    const res = await fetchWithAuth("countries/", this.API_KEY, param);
     return res.response[0]?.flag;
   }
+  async fetchNextMatch(teamId: number): Promise<any> {
+    const param: Record<string, any> = {
+      team: teamId,
+      next: 1,
+      timezone: "Europe/Madrid", // Optional, for local time
+    };
+    const res = await fetchWithAuth("fixtures", this.API_KEY, param);
+    return res.response[0]; // Returns the next match object
+  }
+
+  async fetchUpcomingMatches(
+    teamId: number,
+    count: number = 5
+  ): Promise<any[]> {
+    const param: Record<string, any> = {
+      team: teamId,
+      next: count,
+      timezone: "Europe/Madrid",
+    };
+    const res = await fetchWithAuth("fixtures", this.API_KEY, param);
+    return res.response; // Array of match objects
+  }
+  
 }
 
 export const ProfileApiService = new ApiService();

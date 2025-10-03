@@ -5,7 +5,8 @@ import {
   Image as ImageIcon,
   Users as Team,
   Layout,
-  ShoppingCart as Store
+  ShoppingCart as Store,
+  UserRound as Profile
 } from "lucide-react-native";
 import React from "react";
 import Colors from "@/constants/colors";
@@ -78,6 +79,14 @@ export default function TabLayout() {
           title: "Store",
           headerTitle: "Store",
           tabBarIcon: ({ color, size }) => <Store size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          headerTitle: "Profile",
+          tabBarIcon: ({ color, size }) => <Profile size={size} color={color} />,
         }}
       />
     </Tabs>
