@@ -10,7 +10,7 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MapPin, Calendar, Building2 } from "lucide-react-native";
-import { Player, TeamInfo, Coach } from "@/services/profileApi";
+import { Player, TeamInfo, Coach } from "@/interfaces/profile";
 import { altColors as colors } from "@/constants/colors";
 import { latestMatches } from "@/mocks/team";
 import { useApp } from "@/contexts/AppContext";
@@ -25,8 +25,8 @@ export default function TeamScreen() {
   const forwards = players.filter((p) => p.position === "Attacker");
 
   useEffect(() => {
-    fetchProfileData();
-    console.log("***");
+    fetchProfileData('Real Madrid');
+    console.log("fetch Profile Data");
   }, []);
 
   return (

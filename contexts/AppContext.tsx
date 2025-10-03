@@ -2,12 +2,10 @@ import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { articles } from "@/mocks/articles";
-import {
-  Player,
-  Coach,
-  TeamInfo,
-  ProfileApiService,
-} from "@/services/profileApi";
+import { Player, Coach, TeamInfo } from "@/interfaces/profile";
+import { NextMatch } from "@/interfaces/match";
+import ProfileApiService from "@/services/profileApi";
+import MatchApiService from "@/services/matchApi";
 type Theme = "light" | "dark";
 
 export const [AppProvider, useApp] = createContextHook(() => {
@@ -15,6 +13,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [players, setPlayers] = useState<Array<Player>>([]);
   const [coach, setCoach] = useState<Coach>();
   const [teamInfo, setTeamInfo] = useState<TeamInfo>();
+  const [nextMatch, setNextMatch] = useState<NextMatch>();
 
   const loadAppData = useCallback(async () => {
     try {
@@ -63,57 +62,68 @@ export const [AppProvider, useApp] = createContextHook(() => {
     return articles.slice(0, 6);
   }, []);
 
-  const fetchProfileData = useCallback(async () => {
-    //fetch Players
-    const teamInfo = await ProfileApiService.fetchTeamInfo("Real Madrid");
-    let squads = await ProfileApiService.fetchSquad(teamInfo.id);
-    setTeamInfo(teamInfo);
-    let newPlayers: Array<Player> = [];
-    for (const player of squads) {
-      const playerData: Player = await ProfileApiService.fetchProfile(
-        player.id
-      );
+  const fetchProfileData = useCallback(
+    async (name: string) => {
+      //fetch Players
+      const teamInfo = await ProfileApiService.fetchTeamInfo(541);
+      let squads = await ProfileApiService.fetchSquad(teamInfo.id);
+      setTeamInfo(teamInfo);
+      let newPlayers: Array<Player> = [];
+      for (const player of squads) {
+        const playerData: Player = await ProfileApiService.fetchProfile(
+          player.id
+        );
+        const birthFlag = await ProfileApiService.fetchCountryFlag(
+          playerData.birth.country
+        );
+        const countryFlag = await ProfileApiService.fetchCountryFlag(
+          playerData.nationality
+        );
+        newPlayers.push({
+          ...playerData,
+          number: player.number,
+          birth: {
+            date: playerData.birth.date,
+            place: playerData.birth.place,
+            country: playerData.birth.country,
+            flag: birthFlag,
+          },
+          flag: countryFlag,
+        });
+      }
+      setPlayers(newPlayers);
+      let ch = await ProfileApiService.fetchCoachProfile(teamInfo.id);
       const birthFlag = await ProfileApiService.fetchCountryFlag(
-        playerData.birth.country
+        ch.birth.country
       );
       const countryFlag = await ProfileApiService.fetchCountryFlag(
-        playerData.nationality
+        ch.nationality
       );
-      newPlayers.push({
-        ...playerData,
-        number: player.number,
+      let newCoach = {
+        ...ch,
         birth: {
-          date: playerData.birth.date,
-          place: playerData.birth.place,
-          country: playerData.birth.country,
+          date: ch.birth.date,
+          place: ch.birth.place,
+          country: ch.birth.country,
           flag: birthFlag,
         },
         flag: countryFlag,
-      });
-    }
-    setPlayers(newPlayers);
-    let ch = await ProfileApiService.fetchCoachProfile(teamInfo.id);
-    const birthFlag = await ProfileApiService.fetchCountryFlag(
-      ch.birth.country
-    );
-    const countryFlag = await ProfileApiService.fetchCountryFlag(
-      ch.nationality
-    );
-    let newCoach = {
-      ...ch,
-      birth: {
-        date: ch.birth.date,
-        place: ch.birth.place,
-        country: ch.birth.country,
-        flag: birthFlag,
-      },
-      flag: countryFlag,
-    }
-    setCoach(newCoach);
-    await AsyncStorage.setItem('players', JSON.stringify(newPlayers));
-    await AsyncStorage.setItem('coach', JSON.stringify(newCoach));
-    await AsyncStorage.setItem('team', JSON.stringify(teamInfo));
-  }, [players, coach, teamInfo]);
+      };
+      setCoach(newCoach);
+      await AsyncStorage.setItem("players", JSON.stringify(newPlayers));
+      await AsyncStorage.setItem("coach", JSON.stringify(newCoach));
+      await AsyncStorage.setItem("team", JSON.stringify(teamInfo));
+    },
+    [players, coach, teamInfo]
+  );
+
+  const fetchNextMatchData = useCallback(
+    async (id: number) => {
+      const data: any = await MatchApiService.fetchNextMatch(id);
+      setNextMatch(data);
+    },
+    [nextMatch]
+  );
 
   return useMemo(
     () => ({
@@ -126,7 +136,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
       players,
       coach,
       teamInfo,
-      fetchProfileData
+      nextMatch,
+      fetchProfileData,
+      fetchNextMatchData,
     }),
     [
       articles,
@@ -138,7 +150,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
       players,
       coach,
       teamInfo,
-      fetchProfileData
+      nextMatch,
+      fetchProfileData,
+      fetchNextMatchData,
     ]
   );
 });

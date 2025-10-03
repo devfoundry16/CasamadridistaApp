@@ -1,57 +1,11 @@
 import fetchWithAuth from "./fetchWithAuth";
-
-export interface Player {
-  id: number;
-  name: string;
-  firstname: string;
-  lastname: string;
-  age: number;
-  birth: {
-    date: string;
-    place: string;
-    country: string;
-    flag: string;
-  };
-  nationality: string;
-  flag?: string;
-  height: string;
-  weight: string;
-  number: number;
-  position: string;
-  photo: string;
-}
-
-export interface Coach extends Player {
-  career: [
-    {
-      team: {
-        id: number;
-        name: string;
-        logo: string;
-      };
-      start: string;
-      end: string;
-    }
-  ];
-}
-
-export interface TeamInfo {
-  id: number;
-  name: string;
-  code: string;
-  country: string;
-  flag: string;
-  stadium: string;
-  founded: number;
-  logo: string;
-}
-
+import { TeamInfo } from "@/interfaces/profile";
 class ApiService {
   private API_KEY = "2efab6a210831868664529f16d897809";
 
-  async fetchTeamInfo(name: string): Promise<TeamInfo> {
-    const param: Record<string, string> = {
-      name: name,
+  async fetchTeamInfo(id: number): Promise<TeamInfo> {
+    const param: Record<string, number> = {
+      id: id,
     };
     const res = await fetchWithAuth("teams/", this.API_KEY, param);
     const flag = await this.fetchCountryFlag(res.response[0].team.country);
@@ -91,29 +45,6 @@ class ApiService {
     const res = await fetchWithAuth("countries/", this.API_KEY, param);
     return res.response[0]?.flag;
   }
-  async fetchNextMatch(teamId: number): Promise<any> {
-    const param: Record<string, any> = {
-      team: teamId,
-      next: 1,
-      timezone: "Europe/Madrid", // Optional, for local time
-    };
-    const res = await fetchWithAuth("fixtures", this.API_KEY, param);
-    return res.response[0]; // Returns the next match object
-  }
-
-  async fetchUpcomingMatches(
-    teamId: number,
-    count: number = 5
-  ): Promise<any[]> {
-    const param: Record<string, any> = {
-      team: teamId,
-      next: count,
-      timezone: "Europe/Madrid",
-    };
-    const res = await fetchWithAuth("fixtures", this.API_KEY, param);
-    return res.response; // Array of match objects
-  }
-  
 }
-
-export const ProfileApiService = new ApiService();
+const ProfileApiService = new ApiService();
+export default ProfileApiService;

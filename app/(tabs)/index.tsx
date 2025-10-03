@@ -8,19 +8,18 @@ import {
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Clock, ChevronRight, MapPinned, Calendar } from "lucide-react-native";
 import { useApp } from "@/contexts/AppContext";
 import Colors from "@/constants/colors";
 import { useEffect, useState } from "react";
-
-import { nextMatch, upcomingMatches } from "@/mocks/team";
+import { upcomingMatches } from "@/mocks/team";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { featuredArticles, latestArticles } = useApp();
+  const { nextMatch, fetchNextMatchData } = useApp();
   const [timeLeft, setTimeLeft] = useState<string>("");
+
   const statsHtml = ` 
                     <!DOCTYPE html>
                     <html>
@@ -93,12 +92,19 @@ export default function HomeScreen() {
                     </html>
                   `;
   useEffect(() => {
-    const calculateTimeLeft = () => {
-      const matchDateTime = new Date(`${nextMatch.date}T${nextMatch.time}:00`);
+    const fetchData = async() => {
+      await fetchNextMatchData(541);
+      console.log('Data Successfully Loaded');
+    }
+    fetchData();
+  }, [])                
+  useEffect(() => {
+    const calculateTimeLeft = async () => {
+      const matchDateString: any = nextMatch?.fixture.date;
+      const matchDateTime = new Date(matchDateString);
       const now = new Date();
       const difference = matchDateTime.getTime() - now.getTime();
-
-      if (difference > 0) {
+        if (difference > 0) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
           (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
@@ -113,12 +119,10 @@ export default function HomeScreen() {
         setTimeLeft("Match Started");
       }
     };
-
     calculateTimeLeft();
     const timer = setInterval(calculateTimeLeft, 1000);
-
     return () => clearInterval(timer);
-  }, []);
+  }, [nextMatch]);
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
@@ -157,9 +161,14 @@ export default function HomeScreen() {
                 style={styles.matchCard}
               >
                 <View style={styles.nextMatchHeader}>
-                  <Text style={styles.nextMatchCompetition}>
-                    {nextMatch.competition}
-                  </Text>
+                  <View style={{flexDirection: 'column'}}>
+                    <Text style={styles.nextMatchCompetition}>
+                      {nextMatch?.league.name}
+                    </Text>
+                    <Text style={styles.nextMatchCompetition}>
+                      {nextMatch?.league.round}
+                    </Text>
+                  </View>
                   <View style={styles.countdownContainer}>
                     <Clock size={16} color={Colors.primary} />
                     <Text style={styles.countdownText}>{timeLeft}</Text>
@@ -167,56 +176,53 @@ export default function HomeScreen() {
                 </View>
 
                 <View style={styles.nextMatchTeams}>
-                  <View style={styles.nextMatchTeam}>
+                  <TouchableOpacity style={styles.nextMatchTeam} onPress={() => router.push('/team')}>
                     <Image
-                      source={{ uri: nextMatch.homeTeam.logo }}
+                      source={{ uri: nextMatch?.teams.home.logo }}
                       style={styles.nextMatchLogo}
                       contentFit="contain"
                     />
                     <Text style={styles.nextMatchTeamName}>
-                      {nextMatch.homeTeam.name}
+                      {nextMatch?.teams.home.name}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
 
                   <View style={styles.vsContainer}>
+                    <Text style={styles.vsText}>{nextMatch?.goals.home}</Text>
                     <Text style={styles.vsText}>VS</Text>
+                    <Text style={styles.vsText}>{nextMatch?.goals.away}</Text>
                   </View>
 
-                  <View style={styles.nextMatchTeam}>
+                  <TouchableOpacity style={styles.nextMatchTeam}>
                     <Image
-                      source={{ uri: nextMatch.awayTeam.logo }}
+                      source={{ uri: nextMatch?.teams.away.logo }}
                       style={styles.nextMatchLogo}
                       contentFit="contain"
                     />
                     <Text style={styles.nextMatchTeamName}>
-                      {nextMatch.awayTeam.name}
+                      {nextMatch?.teams.away.name}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 </View>
 
                 <View style={styles.nextMatchDetails}>
                   <View style={styles.nextMatchDetailItem}>
                     <Calendar size={16} color={Colors.textWhite} />
-                    <Text style={styles.nextMatchDetailText}>
-                      {new Date(nextMatch.date).toLocaleDateString("en-US", {
-                        weekday: "short",
+                    <Text style={{...styles.nextMatchDetailText, marginRight: 10}}>
+                      {new Date(nextMatch?.fixture.date as any).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </Text>
                   </View>
-                  <View style={styles.nextMatchDetailItem}>
-                    <Clock size={16} color={Colors.textWhite} />
-                    <Text style={styles.nextMatchDetailText}>
-                      {nextMatch.time}
-                    </Text>
-                  </View>
-                  {nextMatch.stadium && (
+                  {nextMatch?.fixture.venue.name && (
                     <View style={styles.nextMatchDetailItem}>
                       <MapPinned size={16} color={Colors.textWhite} />
                       <Text style={styles.nextMatchDetailText}>
-                        {nextMatch.stadium}
+                        {nextMatch?.fixture.venue.name}
                       </Text>
                     </View>
                   )}
@@ -648,6 +654,7 @@ const styles = StyleSheet.create({
   },
   nextMatchCompetition: {
     fontSize: 14,
+    marginRight: 10,
     fontWeight: "700" as const,
     color: Colors.textWhite,
     textTransform: "uppercase",
@@ -696,6 +703,7 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: Colors.textWhite,
     letterSpacing: 2,
+
   },
   nextMatchDetails: {
     flexDirection: "row",
