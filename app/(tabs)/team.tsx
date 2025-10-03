@@ -10,15 +10,14 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MapPin, Calendar, Building2 } from "lucide-react-native";
-import { Player, TeamInfo, Coach, ProfileApiService } from "@/services/profileApi";
+import { Player, TeamInfo, Coach } from "@/services/profileApi";
 import { altColors as colors } from "@/constants/colors";
 import { latestMatches } from "@/mocks/team";
 import { useApp } from "@/contexts/AppContext";
 
 export default function TeamScreen() {
   const router = useRouter();
-  const { players, setPlayers, coach, setCoach } = useApp();
-  const [teamInfo, setTeamInfo] = useState<TeamInfo>();
+  const { players, coach, teamInfo, fetchProfileData } = useApp();
 
   const goalkeepers = players.filter((p) => p.position === "Goalkeeper");
   const defenders = players.filter((p) => p.position === "Defender");
@@ -26,57 +25,7 @@ export default function TeamScreen() {
   const forwards = players.filter((p) => p.position === "Attacker");
 
   useEffect(() => {
-    const fetchData = async () => {
-      //fetch Players
-      const tf = await ProfileApiService.fetchTeamInfo("Real Madrid");
-      let squads = await ProfileApiService.fetchSquad(tf.id);
-      setTeamInfo(tf);
-      let newPlayers: Array<Player> = [];
-      // for (const player of squads) {
-      //   const playerData: Player = await ProfileApiService.fetchProfile(
-      //     player.id
-      //   );
-      //   const birthFlag = await ProfileApiService.fetchCountryFlag(
-      //     playerData.birth.country
-      //   );
-      //   const countryFlag = await ProfileApiService.fetchCountryFlag(
-      //     playerData.nationality
-      //   );
-      //   newPlayers.push({
-      //     ...playerData,
-      //     number: player.number,
-      //     birth: {
-      //       date: playerData.birth.date,
-      //       place: playerData.birth.place,
-      //       country: playerData.birth.country,
-      //       flag: birthFlag,
-      //     },
-      //     flag: countryFlag,
-      //   });
-      // }
-      // setPlayers(newPlayers);
-      //fetch Coach
-      let ch = await ProfileApiService.fetchCoachProfile(tf.id);
-      const birthFlag = await ProfileApiService.fetchCountryFlag(
-        ch.birth.country
-      );
-      const countryFlag = await ProfileApiService.fetchCountryFlag(
-        ch.nationality
-      );
-      setCoach({
-        ...ch,
-        birth: {
-          date: ch.birth.date,
-          place: ch.birth.place,
-          country: ch.birth.country,
-          flag: birthFlag,
-        },
-        flag: countryFlag,
-      });
-
-    };
-
-    fetchData();
+    fetchProfileData();
     console.log("***");
   }, []);
 
@@ -139,7 +88,7 @@ export default function TeamScreen() {
           <View style={styles.accentLine} />
         </View>
 
-        {/* <View style={styles.positionSection}>
+        <View style={styles.positionSection}>
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>GOALKEEPERS</Text>
           </View>
@@ -197,7 +146,7 @@ export default function TeamScreen() {
               <View style={styles.accentLine} />
             </View>
           ))}
-        </View> */}
+        </View>
         <View style={styles.positionSection}>
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>COACH</Text>
