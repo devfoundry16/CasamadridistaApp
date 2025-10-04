@@ -6,8 +6,8 @@ export interface NextMatch {
     date: Date;
     timestamp: number;
     periods: {
-      first: Date;
-      second: Date;
+      first: Number;
+      second: Number;
     };
     venue: {
       id: number;
@@ -67,4 +67,6 @@ export interface NextMatch {
       away: number;
     };
   };
+}
+export interface LastMatch extends NextMatch {
 }

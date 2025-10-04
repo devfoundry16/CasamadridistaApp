@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { articles } from "@/mocks/articles";
 import { Player, Coach, TeamInfo } from "@/interfaces/profile";
-import { NextMatch } from "@/interfaces/match";
+import { NextMatch, LastMatch } from "@/interfaces/match";
 import ProfileApiService from "@/services/profileApi";
 import MatchApiService from "@/services/matchApi";
 type Theme = "light" | "dark";
@@ -14,6 +14,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [coach, setCoach] = useState<Coach>();
   const [teamInfo, setTeamInfo] = useState<TeamInfo>();
   const [nextMatch, setNextMatch] = useState<NextMatch>();
+  const [lastMatches, setLastMatches] = useState<Array<LastMatch>>([]);
 
   const loadAppData = useCallback(async () => {
     try {
@@ -124,7 +125,13 @@ export const [AppProvider, useApp] = createContextHook(() => {
     },
     [nextMatch]
   );
-
+  const fetchLastMatchesData = useCallback(
+    async (id: number) => {
+      const data: any = await MatchApiService.fetchLastMatches(id);
+      setLastMatches(data);
+    },
+    [lastMatches]
+  );
   return useMemo(
     () => ({
       articles,
@@ -137,8 +144,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
       coach,
       teamInfo,
       nextMatch,
+      lastMatches,
       fetchProfileData,
       fetchNextMatchData,
+      fetchLastMatchesData,
     }),
     [
       articles,
@@ -151,8 +160,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
       coach,
       teamInfo,
       nextMatch,
+      lastMatches,
       fetchProfileData,
       fetchNextMatchData,
+      fetchLastMatchesData,
     ]
   );
 });

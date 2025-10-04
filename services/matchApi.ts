@@ -22,6 +22,17 @@ class ApiService {
     const res = await fetchWithAuth("fixtures", this.API_KEY, param);
     return res.response; // Array of match objects
   }
+  async fetchLastMatches(
+    teamId: number,
+    count: number = 5
+  ) {
+    const param: Record<string, any> = {
+      team: teamId,
+      last: count,
+    };
+    const res = await fetchWithAuth("fixtures", this.API_KEY, param);
+    return res.response; // Array of match objects
+  }
 }
 const MatchApiService = new ApiService();
 export default MatchApiService;

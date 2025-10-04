@@ -368,8 +368,8 @@ const styles = StyleSheet.create({
   playerCountryImage: {
     width: 50,
     height: 30,
+    backgroundColor: 'transparent',
     marginRight: 6,
-    backgroundColor: colors.lightGray,
   },
   playerInfo: {
     flex: 1,

@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 30,
     marginLeft: 10,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: 'transparent',
   },
   content: {
     padding: 16,
@@ -242,10 +242,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   statLabel: {
     fontSize: 12,
@@ -272,10 +268,6 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 0,
     elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   infoRow: {
     flexDirection: "row",
@@ -303,10 +295,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   clubLogo: {
     width: 60,

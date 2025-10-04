@@ -17,7 +17,8 @@ import { upcomingMatches } from "@/mocks/team";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { nextMatch, fetchNextMatchData } = useApp();
+  const { nextMatch, fetchNextMatchData, lastMatches, fetchLastMatchesData } =
+    useApp();
   const [timeLeft, setTimeLeft] = useState<string>("");
 
   const statsHtml = ` 
@@ -92,19 +93,20 @@ export default function HomeScreen() {
                     </html>
                   `;
   useEffect(() => {
-    const fetchData = async() => {
+    const fetchData = async () => {
       await fetchNextMatchData(541);
-      console.log('Data Successfully Loaded');
-    }
+      await fetchLastMatchesData(541);
+      console.log("Data Successfully Loaded");
+    };
     fetchData();
-  }, [])                
+  }, []);
   useEffect(() => {
     const calculateTimeLeft = async () => {
       const matchDateString: any = nextMatch?.fixture.date;
       const matchDateTime = new Date(matchDateString);
       const now = new Date();
       const difference = matchDateTime.getTime() - now.getTime();
-        if (difference > 0) {
+      if (difference > 0) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
           (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
@@ -157,11 +159,9 @@ export default function HomeScreen() {
                 <Text style={styles.sectionTitle}>Next Match</Text>
               </View>
 
-              <View
-                style={styles.matchCard}
-              >
+              <View style={styles.matchCard}>
                 <View style={styles.nextMatchHeader}>
-                  <View style={{flexDirection: 'column'}}>
+                  <View style={{ flexDirection: "column" }}>
                     <Text style={styles.nextMatchCompetition}>
                       {nextMatch?.league.name}
                     </Text>
@@ -176,7 +176,10 @@ export default function HomeScreen() {
                 </View>
 
                 <View style={styles.nextMatchTeams}>
-                  <TouchableOpacity style={styles.nextMatchTeam} onPress={() => router.push('/team')}>
+                  <TouchableOpacity
+                    style={styles.nextMatchTeam}
+                    onPress={() => router.push("/team")}
+                  >
                     <Image
                       source={{ uri: nextMatch?.teams.home.logo }}
                       style={styles.nextMatchLogo}
@@ -185,6 +188,20 @@ export default function HomeScreen() {
                     <Text style={styles.nextMatchTeamName}>
                       {nextMatch?.teams.home.name}
                     </Text>
+                    <View style={styles.formContainer}>
+                      {lastMatches.map((result, index) => (
+                        <View
+                          key={index}
+                          style={[
+                            styles.formBadge,
+                            result.teams.home.winner && styles.formWin,
+                            result.teams.home.winner ===
+                              result.teams.away.winner && styles.formDraw,
+                            !result.teams.home.winner && styles.formLoss,
+                          ]}
+                        ></View>
+                      ))}
+                    </View>
                   </TouchableOpacity>
 
                   <View style={styles.vsContainer}>
@@ -208,8 +225,12 @@ export default function HomeScreen() {
                 <View style={styles.nextMatchDetails}>
                   <View style={styles.nextMatchDetailItem}>
                     <Calendar size={16} color={Colors.textWhite} />
-                    <Text style={{...styles.nextMatchDetailText, marginRight: 10}}>
-                      {new Date(nextMatch?.fixture.date as any).toLocaleDateString("en-US", {
+                    <Text
+                      style={{ ...styles.nextMatchDetailText, marginRight: 10 }}
+                    >
+                      {new Date(
+                        nextMatch?.fixture.date as any
+                      ).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
@@ -361,6 +382,7 @@ const styles = StyleSheet.create({
     color: Colors.textWhite,
     opacity: 0.8,
     fontStyle: "italic",
+    textAlign: "center",
   },
   infoSection: {
     marginBottom: 24,
@@ -703,7 +725,6 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: Colors.textWhite,
     letterSpacing: 2,
-
   },
   nextMatchDetails: {
     flexDirection: "row",
@@ -738,6 +759,32 @@ const styles = StyleSheet.create({
   },
   matchStadiumText: {
     fontSize: 11,
+    color: Colors.textWhite,
+  },
+  formContainer: {
+    flexDirection: "row",
+    gap: 4,
+    marginTop: 6,
+  },
+  formBadge: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  formWin: {
+    backgroundColor: "#10b981",
+  },
+  formDraw: {
+    backgroundColor: "#f59e0b",
+  },
+  formLoss: {
+    backgroundColor: "#ef4444",
+  },
+  formText: {
+    fontSize: 10,
+    fontWeight: "700" as const,
     color: Colors.textWhite,
   },
 });
