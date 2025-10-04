@@ -17,6 +17,13 @@ export interface Player {
   photo: string;
 }
 
+export interface PlayerWithTeam {
+  team: {
+    id: number;
+  };
+  player: Player;
+}
+
 export interface Coach extends Player {
   career: [
     {
@@ -29,6 +36,12 @@ export interface Coach extends Player {
       end: string;
     }
   ];
+}
+export interface CoachWithTeam {
+  team: {
+    id: number;
+  };
+  player: Coach;
 }
 
 export interface TeamInfo {

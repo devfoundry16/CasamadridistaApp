@@ -9,7 +9,7 @@ import {
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { MapPin, Calendar, Building2 } from "lucide-react-native";
-import { Player, TeamInfo, Coach, CountryMap } from "@/interfaces/profile";
+import { Player, TeamInfo, Coach, CountryMap, PlayerWithTeam, CoachWithTeam } from "@/interfaces/profile";
 import countries from "@/constants/countries.json";
 import { altColors as colors } from "@/constants/colors";
 import { latestMatches } from "@/mocks/team";
@@ -19,15 +19,19 @@ const map: CountryMap = countries;
 
 export default function TeamScreen() {
   const router = useRouter();
-  const { players, coach, teamInfo, fetchProfileData } = useApp();
+  const { playersList, coachList, teamInfoList, fetchProfileData } = useApp();
 
-  const goalkeepers = players.filter((p) => p.position === "Goalkeeper");
-  const defenders = players.filter((p) => p.position === "Defender");
-  const midfielders = players.filter((p) => p.position === "Midfielder");
-  const forwards = players.filter((p) => p.position === "Attacker");
+  const players = playersList.find((p) => p.team.id === 541) ?? {player:[], team:{}};
+  const coachWithTeam = coachList.find((c) => c.team.id === 541) ?? {player: {}, team: {}};
+  const teamInfo = teamInfoList.find((t) => t.team.id === 541);
+
+  const goalkeepers = players.player.filter((p) => p.position === "Goalkeeper");
+  const defenders = players.player.filter((p) => p.position === "Defender");
+  const midfielders = players.player.filter((p) => p.position === "Midfielder");
+  const forwards = players.player.filter((p) => p.position === "Attacker");
 
   useEffect(() => {
-    fetchProfileData("Real Madrid");
+    // fetchProfileData(541); // Default Real Madrid team ID
     console.log("fetch Profile Data");
   }, []);
 
@@ -92,11 +96,11 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>GOALKEEPERS</Text>
           </View>
-          {goalkeepers.map((player) => (
-            <View key={player.id}>
+          {goalkeepers.map((pwTeam) => (
+            <View key={pwTeam.id}>
               <PlayerCard
-                player={player}
-                onPress={() => router.push(`/player/${player.id}` as any)}
+                player={pwTeam}
+                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -107,11 +111,11 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>DEFENDERS</Text>
           </View>
-          {defenders.map((player) => (
-            <View key={player.id}>
+          {defenders.map((pwTeam) => (
+            <View key={pwTeam.id}>
               <PlayerCard
-                player={player}
-                onPress={() => router.push(`/player/${player.id}` as any)}
+                player={pwTeam}
+                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -122,11 +126,11 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>MIDFIELDERS</Text>
           </View>
-          {midfielders.map((player) => (
-            <View key={player.id}>
+          {midfielders.map((pwTeam) => (
+            <View key={pwTeam.id}>
               <PlayerCard
-                player={player}
-                onPress={() => router.push(`/player/${player.id}` as any)}
+                player={pwTeam}
+                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -137,11 +141,11 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>FORWARDS</Text>
           </View>
-          {forwards.map((player) => (
-            <View key={player.id}>
+          {forwards.map((pwTeam) => (
+            <View key={pwTeam.id}>
               <PlayerCard
-                player={player}
-                onPress={() => router.push(`/player/${player.id}` as any)}
+                player={pwTeam}
+                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -151,11 +155,11 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>COACH</Text>
           </View>
-          {coach && (
+          {coachWithTeam && (
             <View>
               <PlayerCard
-                player={coach}
-                onPress={() => router.push(`/coach/${coach.id}` as any)}
+                player={coachWithTeam.player}
+                onPress={() => router.push(`/coach/${coachWithTeam.player.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -212,7 +216,7 @@ function PlayerCard({
   player,
   onPress,
 }: {
-  player: Player | Coach;
+  player: PlayerWithTeam | CoachWithTeam;
   onPress: () => void;
 }) {
   return (
@@ -232,7 +236,7 @@ function PlayerCard({
             <CountryFlag isoCode={map[player.nationality]} size={25} />
           ) : null}
           <Text style={styles.playerMetaText}>Age: </Text>
-          <Text style={styles.playerMetaText}>{player.age} years</Text>
+          <Text style={styles.playerMetaText}>{player.player?.age} years</Text>
         </View>
       </View>
     </TouchableOpacity>

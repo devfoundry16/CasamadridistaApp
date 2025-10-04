@@ -31,14 +31,13 @@ class ApiService {
       team: id,
     };
     const res = await fetchWithAuth("players/squads", this.API_KEY, param);
-    return res.response[0].players.slice();
+    return res.response[0];
   }
   async fetchProfile(id: number) {
     const param: Record<string, number> = {
       player: id,
     };
     const res = await fetchWithAuth("players/profiles/", this.API_KEY, param);
-    console.log('player:', id)
     if (res.response[0] == undefined) console.log('error player: ', id, res)
     return res.response[0].player;
   }

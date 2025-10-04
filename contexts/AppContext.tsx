@@ -2,7 +2,12 @@ import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { articles } from "@/mocks/articles";
-import { Player, Coach, TeamInfo } from "@/interfaces/profile";
+import {
+  Coach,
+  TeamInfo,
+  PlayerWithTeam,
+  CoachWithTeam,
+} from "@/interfaces/profile";
 import { NextMatch, LastMatch } from "@/interfaces/match";
 import ProfileApiService from "@/services/profileApi";
 import MatchApiService from "@/services/matchApi";
@@ -11,33 +16,37 @@ type Theme = "light" | "dark";
 
 export const [AppProvider, useApp] = createContextHook(() => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [players, setPlayers] = useState<Array<Player>>([]);
-  const [coach, setCoach] = useState<Coach>();
-  const [teamInfo, setTeamInfo] = useState<TeamInfo>();
+  const [playersList, setPlayersList] = useState<PlayerWithTeam[]>([]);
+  const [coachList, setCoachList] = useState<CoachWithTeam[]>([]);
+  const [teamInfoList, setTeamInfoList] = useState<TeamInfo[]>([]);
   const [nextMatch, setNextMatch] = useState<NextMatch>();
   const [lastMatches, setLastMatches] = useState<Array<LastMatch>>([]);
 
   const loadAppData = useCallback(async () => {
     try {
+      //AsyncStorage.clear(); // for testing only, remove in production
       const playersString = await AsyncStorage.getItem("players");
-      let savedPlayers: Array<Player>;
+      let savedPlayersList: PlayerWithTeam[];
       if (playersString) {
-        savedPlayers = JSON.parse(playersString);
-        setPlayers(savedPlayers);
+        savedPlayersList = JSON.parse(playersString);
+        console.log("loaded players:", savedPlayersList.length);
+        setPlayersList(savedPlayersList);
       }
 
-      const coachString = await AsyncStorage.getItem("coach");
-      let coach: Coach;
+      const coachString = await AsyncStorage.getItem("coaches");
+      let coachList: CoachWithTeam[];
       if (coachString) {
-        coach = JSON.parse(coachString);
-        setCoach(coach);
+        coachList = JSON.parse(coachString);
+        console.log("loaded coaches:", coachList.length);
+        setCoachList(coachList);
       }
 
-      const teamString = await AsyncStorage.getItem("team");
-      let team: TeamInfo;
+      const teamString = await AsyncStorage.getItem("teams");
+      let teamList: TeamInfo[];
       if (teamString) {
-        team = JSON.parse(teamString);
-        setTeamInfo(team);
+        teamList = JSON.parse(teamString);
+        console.log("loaded teams:", teamList.length);
+        setTeamInfoList(teamList);
       }
 
       console.log("[App] Data loaded");
@@ -63,48 +72,66 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const latestArticles = useMemo(() => {
     return articles.slice(0, 6);
   }, []);
-
   const fetchProfileData = useCallback(
-    async (name: string) => {
-      //fetch Players
-      const teamInfo = await ProfileApiService.fetchTeamInfo(541);
+    async (id: number) => {
+      const index = teamInfoList.findIndex((p) => p.team.id === id); // index = -1 not found
+
+      //teamInfo
+      const teamInfo = await ProfileApiService.fetchTeamInfo(id);
       let squads = await ProfileApiService.fetchSquad(teamInfo.team.id);
-      setTeamInfo(teamInfo);
-      let newPlayers: Array<Player> = [];
-      let playerDataPromises = Array();
+
+      const newTeamInfoList = index == -1 ? [...teamInfoList, teamInfo] : [...teamInfoList.slice(0, index), teamInfo, ...teamInfoList.slice(index + 1)];
+
+      //coachList
+      const coach = await ProfileApiService.fetchCoachProfile(teamInfo.team.id);
+      const newCoachList = index == -1 ? [
+        ...coachList,
+        { team: { id }, player: coach },
+      ] : [
+        ...coachList.slice(0, index),
+        { team: { id }, player: coach },
+        ...coachList.slice(index + 1),
+      ];
+
+      setTeamInfoList(newTeamInfoList);
+      setCoachList(newCoachList);
+      AsyncStorage.setItem("teams", JSON.stringify(newTeamInfoList));
+      AsyncStorage.setItem("coaches", JSON.stringify(newCoachList));
+
+      //playersList
       Bluebird.Promise.map(
-        squads,
-        (player: { id: number; }) => ProfileApiService.fetchProfile(player.id),
+        squads.players,
+        (player: { id: number }) => ProfileApiService.fetchProfile(player.id),
         { concurrency: 5 }
       ).then((data: any) => {
-        setPlayers(data)
+        let newPlayersList;
+        if (index == -1) {
+          newPlayersList = [
+            ...playersList,
+            {
+              player: data,
+              team: {
+                id,
+              },
+            },
+          ];
+        } else {
+          newPlayersList = [
+            ...playersList.slice(0, index),
+            {
+              player: data,
+              team: {
+                id,
+              },
+            },
+            ...playersList.slice(index + 1),
+          ];
+        }
+        setPlayersList(newPlayersList);
+        AsyncStorage.setItem("players", JSON.stringify(newPlayersList));
       });
-      // const birthFlag = await ProfileApiService.fetchCountryFlag(
-      //   playerData.birth.nationality
-      // );
-      // const countryFlag = await ProfileApiService.fetchCountryFlag(
-      //   playerData.nationality
-      // );
-      // newPlayers.push({
-      //   ...playerData,
-      //   number: player.number,
-      //   birth: {
-      //     date: playerData.birth.date,
-      //     place: playerData.birth.place,
-      //     country: playerData.birth.country,
-      //     flag: birthFlag,
-      //   },
-      //   flag: countryFlag,
-      // });
-      // setPlayers(newPlayers);
-      let ch = await ProfileApiService.fetchCoachProfile(teamInfo.team.id);
-      setCoach(ch);
-      
-      // await AsyncStorage.setItem("players", JSON.stringify(newPlayers));
-      // await AsyncStorage.setItem("coach", JSON.stringify(newCoach));
-      // await AsyncStorage.setItem("team", JSON.stringify(teamInfo));
     },
-    [players, coach, teamInfo]
+    [playersList, coachList, teamInfoList]
   );
 
   const fetchNextMatchData = useCallback(
@@ -129,9 +156,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
       filteredArticles,
       featuredArticles,
       latestArticles,
-      players,
-      coach,
-      teamInfo,
+      playersList,
+      coachList,
+      teamInfoList,
       nextMatch,
       lastMatches,
       fetchProfileData,
@@ -145,9 +172,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
       filteredArticles,
       featuredArticles,
       latestArticles,
-      players,
-      coach,
-      teamInfo,
+      playersList,
+      coachList,
+      teamInfoList,
       nextMatch,
       lastMatches,
       fetchProfileData,

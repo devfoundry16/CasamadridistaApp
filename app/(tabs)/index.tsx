@@ -94,9 +94,9 @@ export default function HomeScreen() {
                   `;
   useEffect(() => {
     const fetchData = async () => {
-      await fetchNextMatchData(541);
-      await fetchLastMatchesData(541);
-      console.log("Data Successfully Loaded");
+      // await fetchNextMatchData(541);
+      // await fetchLastMatchesData(541);
+      // console.log("Data Successfully Loaded");
     };
     fetchData();
   }, []);
@@ -314,7 +314,7 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      <View style={styles.infoSection}>
+      {/* <View style={styles.infoSection}>
         <Text style={styles.sectionTitle}></Text>
         <View style={styles.widgetContainer}>
           <WebView
@@ -343,7 +343,7 @@ export default function HomeScreen() {
             scalesPageToFit={true}
           />
         </View>
-      </View>
+      </View> */}
 
       <View style={styles.content}>
         <View style={styles.sectionHeader}>

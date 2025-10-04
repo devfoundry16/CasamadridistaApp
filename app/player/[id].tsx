@@ -2,26 +2,34 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { WebView } from "react-native-webview";
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Image } from "expo-image";
-import { MapPin, Calendar, Hash, Award } from "lucide-react-native";
 import Colors from "@/constants/colors";
-import { useApp } from "@/contexts/AppContext";
+import ProfileApiService from "@/services/profileApi";
+
 import CountryFlag from "react-native-country-flag";
 import countries from "@/constants/countries.json";
 import { CountryMap } from "@/interfaces/profile";
+import { useEffect } from "react";
 
 const map: CountryMap = countries;
 export default function PlayerDetailScreen() {
-  const { players } = useApp();
   const { id } = useLocalSearchParams();
-  const player = players.find((p) => p.id.toString() === id);
 
-  if (!player) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Player not found</Text>
-      </View>
-    );
-  }
+  let player: any = {
+    id: 0,
+    name: "",
+    firstname: "",
+    lastname: "",
+    age: 0,
+    birth: { date: "", place: "", country: "" }
+  };
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      player = await ProfileApiService.fetchProfile(Number(id));
+      console.log("Fetch player data");
+    };
+    fetchData();
+  }, []);
 
   const statsHtml = `
                     <!DOCTYPE html>
@@ -150,7 +158,7 @@ export default function PlayerDetailScreen() {
             </View>
           </View>
 
-          <View style={styles.infoSection}>
+          {/* <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Player Stats</Text>
             <View style={styles.widgetContainer}>
               <WebView
@@ -164,7 +172,7 @@ export default function PlayerDetailScreen() {
                 scalesPageToFit={true}
               />
             </View>
-          </View>
+          </View> */}
 
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Club</Text>
