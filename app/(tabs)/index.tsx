@@ -219,6 +219,20 @@ export default function HomeScreen() {
                     <Text style={styles.nextMatchTeamName}>
                       {nextMatch?.teams.away.name}
                     </Text>
+                    <View style={styles.formContainer}>
+                      {lastMatches.map((result, index) => (
+                        <View
+                          key={index}
+                          style={[
+                            styles.formBadge,
+                            result.teams.home.winner && styles.formWin,
+                            result.teams.home.winner ===
+                              result.teams.away.winner && styles.formDraw,
+                            !result.teams.home.winner && styles.formLoss,
+                          ]}
+                        ></View>
+                      ))}
+                    </View>
                   </TouchableOpacity>
                 </View>
 

@@ -3,6 +3,18 @@ import { TeamInfo } from "@/interfaces/profile";
 class ApiService {
   private API_KEY = "2efab6a210831868664529f16d897809";
 
+  async fetchTeamsInLeague(
+    leagueId: number,
+    season: number
+  ): Promise<TeamInfo[]> {
+    const param: Record<string, number> = {
+      league: leagueId,
+      season: season,
+    };
+    const res = await fetchWithAuth("teams", this.API_KEY, param);
+    return res.response;
+  }
+
   async fetchTeamInfo(id: number): Promise<TeamInfo> {
     const param: Record<string, number> = {
       id: id,
@@ -10,8 +22,7 @@ class ApiService {
     const res = await fetchWithAuth("teams/", this.API_KEY, param);
     const flag = await this.fetchCountryFlag(res.response[0].team.country);
     return {
-      ...res.response[0].team,
-      stadium: res.response[0].venue.name,
+      ...res.response[0],
       flag,
     };
   }
@@ -27,6 +38,8 @@ class ApiService {
       player: id,
     };
     const res = await fetchWithAuth("players/profiles/", this.API_KEY, param);
+    console.log('player:', id)
+    if (res.response[0] == undefined) console.log('error player: ', id, res)
     return res.response[0].player;
   }
   async fetchCoachProfile(id: number) {

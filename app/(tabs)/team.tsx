@@ -8,12 +8,14 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MapPin, Calendar, Building2 } from "lucide-react-native";
-import { Player, TeamInfo, Coach } from "@/interfaces/profile";
+import { Player, TeamInfo, Coach, CountryMap } from "@/interfaces/profile";
+import countries from "@/constants/countries.json";
 import { altColors as colors } from "@/constants/colors";
 import { latestMatches } from "@/mocks/team";
 import { useApp } from "@/contexts/AppContext";
+import CountryFlag from "react-native-country-flag";
+const map: CountryMap = countries;
 
 export default function TeamScreen() {
   const router = useRouter();
@@ -25,7 +27,7 @@ export default function TeamScreen() {
   const forwards = players.filter((p) => p.position === "Attacker");
 
   useEffect(() => {
-    fetchProfileData('Real Madrid');
+    fetchProfileData("Real Madrid");
     console.log("fetch Profile Data");
   }, []);
 
@@ -46,13 +48,13 @@ export default function TeamScreen() {
       >
         <Image
           source={{
-            uri: teamInfo?.logo,
+            uri: teamInfo?.team?.logo,
           }}
           contentFit="cover"
           style={styles.headerImage}
         />
         <Text style={[styles.headerTitle, { color: colors.textWhite }]}>
-          {teamInfo?.name} Squad
+          {teamInfo?.team?.name} Squad
         </Text>
         <Text style={[styles.headerSubtitle, { color: colors.textWhite }]}>
           2024-2025 Season
@@ -64,21 +66,19 @@ export default function TeamScreen() {
             <View style={styles.infoItem}>
               <MapPin size={20} color={colors.textWhite} />
               <Text style={styles.infoLabel}>Country</Text>
-              <Image
-                source={{ uri: teamInfo?.flag }}
-                contentFit="cover"
-                style={styles.playerCountryImage}
-              />
+              {teamInfo?.team?.country && map[teamInfo.team.country] ? (
+                <CountryFlag isoCode={map[teamInfo.team.country]} size={25} />
+              ) : null}
             </View>
             <View style={styles.infoItem}>
               <Calendar size={20} color={colors.textWhite} />
               <Text style={styles.infoLabel}>Founded</Text>
-              <Text style={styles.infoValue}>{teamInfo?.founded}</Text>
+              <Text style={styles.infoValue}>{teamInfo?.team?.founded}</Text>
             </View>
             <View style={styles.infoItem}>
               <Building2 size={20} color={colors.textWhite} />
               <Text style={styles.infoLabel}>Stadium</Text>
-              <Text style={styles.infoValue}>{teamInfo?.stadium}</Text>
+              <Text style={styles.infoValue}>{teamInfo?.venue?.name}</Text>
             </View>
           </View>
         </View>
@@ -151,15 +151,15 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>COACH</Text>
           </View>
-            {coach && (
-              <View>
-                <PlayerCard
-                  player={coach}
-                  onPress={() => router.push(`/coach/${coach.id}` as any)}
-                />
-                <View style={styles.accentLine} />
-              </View>
-            )}
+          {coach && (
+            <View>
+              <PlayerCard
+                player={coach}
+                onPress={() => router.push(`/coach/${coach.id}` as any)}
+              />
+              <View style={styles.accentLine} />
+            </View>
+          )}
         </View>
 
         <View style={styles.sectionHeader}>
@@ -228,11 +228,9 @@ function PlayerCard({
       <View style={styles.playerInfo}>
         <Text style={styles.playerName}>{player.name}</Text>
         <View style={styles.playerMeta}>
-          <Image
-            source={{ uri: player.birth.flag }}
-            contentFit="cover"
-            style={styles.playerCountryImage}
-          />
+          {player.nationality && map[player.nationality] ? (
+            <CountryFlag isoCode={map[player.nationality]} size={25} />
+          ) : null}
           <Text style={styles.playerMetaText}>Age: </Text>
           <Text style={styles.playerMetaText}>{player.age} years</Text>
         </View>
@@ -368,7 +366,7 @@ const styles = StyleSheet.create({
   playerCountryImage: {
     width: 50,
     height: 30,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     marginRight: 6,
   },
   playerInfo: {
@@ -464,47 +462,47 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
   },
   nextMatchHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
   nextMatchCompetition: {
     fontSize: 14,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: colors.accent,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1,
   },
   countdownContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
   countdownText: {
     fontSize: 13,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: colors.accent,
   },
   nextMatchTeams: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   nextMatchTeam: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 12,
   },
   nextMatchLogo: {
@@ -513,44 +511,44 @@ const styles = StyleSheet.create({
   },
   nextMatchTeamName: {
     fontSize: 15,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: colors.textWhite,
-    textAlign: 'center',
+    textAlign: "center",
   },
   vsContainer: {
     paddingHorizontal: 16,
   },
   vsText: {
     fontSize: 20,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: colors.accent,
     letterSpacing: 2,
   },
   nextMatchDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    borderTopColor: "rgba(255, 255, 255, 0.2)",
   },
   nextMatchDetailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   nextMatchDetailText: {
     fontSize: 12,
     color: colors.textWhite,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
   },
   vsTextSmall: {
     fontSize: 16,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: colors.textWhite,
   },
   matchStadium: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
     marginTop: 8,
     paddingTop: 8,

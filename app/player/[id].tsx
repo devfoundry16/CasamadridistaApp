@@ -5,7 +5,11 @@ import { Image } from "expo-image";
 import { MapPin, Calendar, Hash, Award } from "lucide-react-native";
 import Colors from "@/constants/colors";
 import { useApp } from "@/contexts/AppContext";
+import CountryFlag from "react-native-country-flag";
+import countries from "@/constants/countries.json";
+import { CountryMap } from "@/interfaces/profile";
 
+const map: CountryMap = countries;
 export default function PlayerDetailScreen() {
   const { players } = useApp();
   const { id } = useLocalSearchParams();
@@ -105,11 +109,9 @@ export default function PlayerDetailScreen() {
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Nationality</Text>
-                <Image
-                  source={{ uri: player.birth.flag }}
-                  contentFit="cover"
-                  style={styles.playerCountryImage}
-                />
+                {player.nationality && map[player.nationality] ? (
+                  <CountryFlag isoCode={map[player.nationality]} size={25} />
+                ) : null}
               </View>
               <View style={styles.divider} />
               <View style={{ ...styles.infoRow }}>
@@ -122,11 +124,12 @@ export default function PlayerDetailScreen() {
                   }}
                 >
                   <Text style={styles.infoValue}>{player.birth.place} </Text>
-                  <Image
-                    source={{ uri: player.flag }}
-                    contentFit="cover"
-                    style={styles.playerCountryImage}
-                  />
+                  {player.birth.country && map[player.birth.country] ? (
+                    <CountryFlag
+                      isoCode={map[player.birth.country]}
+                      size={25}
+                    />
+                  ) : null}
                 </View>
               </View>
               <View style={styles.divider} />
@@ -223,7 +226,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 30,
     marginLeft: 10,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   content: {
     padding: 16,

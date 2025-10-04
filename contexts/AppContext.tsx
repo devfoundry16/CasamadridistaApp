@@ -6,6 +6,7 @@ import { Player, Coach, TeamInfo } from "@/interfaces/profile";
 import { NextMatch, LastMatch } from "@/interfaces/match";
 import ProfileApiService from "@/services/profileApi";
 import MatchApiService from "@/services/matchApi";
+import * as Bluebird from "bluebird";
 type Theme = "light" | "dark";
 
 export const [AppProvider, useApp] = createContextHook(() => {
@@ -67,53 +68,41 @@ export const [AppProvider, useApp] = createContextHook(() => {
     async (name: string) => {
       //fetch Players
       const teamInfo = await ProfileApiService.fetchTeamInfo(541);
-      let squads = await ProfileApiService.fetchSquad(teamInfo.id);
+      let squads = await ProfileApiService.fetchSquad(teamInfo.team.id);
       setTeamInfo(teamInfo);
       let newPlayers: Array<Player> = [];
-      for (const player of squads) {
-        const playerData: Player = await ProfileApiService.fetchProfile(
-          player.id
-        );
-        const birthFlag = await ProfileApiService.fetchCountryFlag(
-          playerData.birth.country
-        );
-        const countryFlag = await ProfileApiService.fetchCountryFlag(
-          playerData.nationality
-        );
-        newPlayers.push({
-          ...playerData,
-          number: player.number,
-          birth: {
-            date: playerData.birth.date,
-            place: playerData.birth.place,
-            country: playerData.birth.country,
-            flag: birthFlag,
-          },
-          flag: countryFlag,
-        });
-      }
-      setPlayers(newPlayers);
-      let ch = await ProfileApiService.fetchCoachProfile(teamInfo.id);
-      const birthFlag = await ProfileApiService.fetchCountryFlag(
-        ch.birth.country
-      );
-      const countryFlag = await ProfileApiService.fetchCountryFlag(
-        ch.nationality
-      );
-      let newCoach = {
-        ...ch,
-        birth: {
-          date: ch.birth.date,
-          place: ch.birth.place,
-          country: ch.birth.country,
-          flag: birthFlag,
-        },
-        flag: countryFlag,
-      };
-      setCoach(newCoach);
-      await AsyncStorage.setItem("players", JSON.stringify(newPlayers));
-      await AsyncStorage.setItem("coach", JSON.stringify(newCoach));
-      await AsyncStorage.setItem("team", JSON.stringify(teamInfo));
+      let playerDataPromises = Array();
+      Bluebird.Promise.map(
+        squads,
+        (player: { id: number; }) => ProfileApiService.fetchProfile(player.id),
+        { concurrency: 5 }
+      ).then((data: any) => {
+        setPlayers(data)
+      });
+      // const birthFlag = await ProfileApiService.fetchCountryFlag(
+      //   playerData.birth.nationality
+      // );
+      // const countryFlag = await ProfileApiService.fetchCountryFlag(
+      //   playerData.nationality
+      // );
+      // newPlayers.push({
+      //   ...playerData,
+      //   number: player.number,
+      //   birth: {
+      //     date: playerData.birth.date,
+      //     place: playerData.birth.place,
+      //     country: playerData.birth.country,
+      //     flag: birthFlag,
+      //   },
+      //   flag: countryFlag,
+      // });
+      // setPlayers(newPlayers);
+      let ch = await ProfileApiService.fetchCoachProfile(teamInfo.team.id);
+      setCoach(ch);
+      
+      // await AsyncStorage.setItem("players", JSON.stringify(newPlayers));
+      // await AsyncStorage.setItem("coach", JSON.stringify(newCoach));
+      // await AsyncStorage.setItem("team", JSON.stringify(teamInfo));
     },
     [players, coach, teamInfo]
   );
