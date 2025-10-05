@@ -1,27 +1,38 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { WebView } from 'react-native-webview';
+import { WebView } from "react-native-webview";
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Image } from "expo-image";
-import { MapPin, Calendar, Hash, Award } from "lucide-react-native";
 import Colors from "@/constants/colors";
+import ProfileApiService from "@/services/profileApi";
+
+import CountryFlag from "react-native-country-flag";
+import countries from "@/constants/countries.json";
+import { CountryMap, Player, PlayerWithTeam } from "@/interfaces/profile";
+import { useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
 
-export default function CoachDetailScreen() {
-  const { coach: player} = useApp();
+const map: CountryMap = countries;
+export default function PlayerDetailScreen() {
   const { id } = useLocalSearchParams();
+  const { coachList } = useApp();
 
-  if (!player) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Coach not found</Text>
-      </View>
-    );
-  }
+  const coachId = Number(id);
+
+  const coachWithTeam = coachList.find((p) => p.player.id === coachId);
+  const coach = coachWithTeam?.player;
+  useEffect(() => {
+    const fetchData = async () => {
+      // player = await ProfileApiService.fetchProfile(Number(id));
+      console.log("coachId:", coachId);
+    };
+    fetchData();
+  }, []);
+
   return (
     <>
       <Stack.Screen
         options={{
-          title: player.name,
+          title: coach?.name,
           headerStyle: { backgroundColor: Colors.secondary },
           headerTintColor: Colors.primary,
         }}
@@ -29,11 +40,12 @@ export default function CoachDetailScreen() {
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Image
-            source={{ uri: player.photo }}
+            source={{ uri: coach?.photo }}
             style={styles.playerPhoto}
             contentFit="cover"
           />
-          <Text style={styles.playerName}>{player.name}</Text>
+          <Text style={styles.playerName}>{coach?.name}</Text>
+          <Text style={styles.playerPosition}>{coach?.position}</Text>
         </View>
 
         <View style={styles.content}>
@@ -42,48 +54,53 @@ export default function CoachDetailScreen() {
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Full Name</Text>
-                <Text style={styles.infoValue}>{player.name}</Text>
+                <Text style={styles.infoValue}>{coach?.name}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Age</Text>
-                <Text style={styles.infoValue}>{player.age}</Text>
+                <Text style={styles.infoValue}>{coach?.age}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Nationality</Text>
-                <Image
-                  source={{ uri: player.birth.flag }}
-                  contentFit="cover"
-                  style={styles.playerCountryImage}
-                />
+                {coach?.nationality && map[coach?.nationality] ? (
+                  <CountryFlag isoCode={map[coach?.nationality]} size={25} />
+                ) : null}
               </View>
               <View style={styles.divider} />
               <View style={{ ...styles.infoRow }}>
                 <Text style={styles.infoLabel}>Place of Birth</Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}} >
-                  <Text style={styles.infoValue}>{player.birth.place} </Text>
-                  <Image
-                    source={{ uri: player.flag }}
-                    contentFit="cover"
-                    style={styles.playerCountryImage}
-                  />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={styles.infoValue}>{coach?.birth.place} </Text>
+                  {coach?.birth.country && map[coach?.birth.country] ? (
+                    <CountryFlag
+                      isoCode={map[coach?.birth.country]}
+                      size={25}
+                    />
+                  ) : null}
                 </View>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Date Of Birth</Text>
-                <Text style={styles.infoValue}>{player.birth.date}</Text>
+                <Text style={styles.infoValue}>{coach?.birth.date}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Weight</Text>
-                <Text style={styles.infoValue}>{player.weight}</Text>
+                <Text style={styles.infoValue}>{coach?.weight}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Height</Text>
-                <Text style={styles.infoValue}>{player.height}</Text>
+                <Text style={styles.infoValue}>{coach?.height}</Text>
               </View>
             </View>
           </View>
@@ -148,7 +165,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 30,
     marginLeft: 10,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: "transparent",
   },
   content: {
     padding: 16,
@@ -167,10 +184,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   statLabel: {
     fontSize: 12,
@@ -197,10 +210,6 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 0,
     elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   infoRow: {
     flexDirection: "row",
@@ -228,10 +237,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   clubLogo: {
     width: 60,
@@ -260,15 +265,15 @@ const styles = StyleSheet.create({
   widgetContainer: {
     backgroundColor: Colors.primary,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     height: 400,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   webview: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
 });

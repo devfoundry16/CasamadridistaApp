@@ -7,30 +7,31 @@ import ProfileApiService from "@/services/profileApi";
 
 import CountryFlag from "react-native-country-flag";
 import countries from "@/constants/countries.json";
-import { CountryMap } from "@/interfaces/profile";
+import { CountryMap, Player, PlayerWithTeam } from "@/interfaces/profile";
 import { useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
 
 const map: CountryMap = countries;
 export default function PlayerDetailScreen() {
-  const { id } = useLocalSearchParams();
-  const { playersList, coachList, teamInfoList, fetchProfileData } = useApp();
+  const { team, id } = useLocalSearchParams();
+  const { playersList } = useApp();
 
-  const players = playersList.find((p) => p.team.id === Number(id)) ?? {player:[], team:{}};
-
-  let player: any = players? players.player: {
-    id: 0,
-    name: "",
-    firstname: "",
-    lastname: "",
-    age: 0,
-    birth: { date: "", place: "", country: "" }
-  };
+  const teamId = Number(team);
+  const playerId = Number(id);
   
+  const players =  playersList.find((p) => p.team.id == teamId);
+  const player = players ? players.player?.find((p) => p.id == playerId) : undefined;
+
   useEffect(() => {
     const fetchData = async () => {
-      player = await ProfileApiService.fetchProfile(Number(id));
-      console.log("Fetch player data");
+      // player = await ProfileApiService.fetchProfile(Number(id));
+      const teamIDs = playersList.map((players) => players.team.id);
+
+      console.log("team id:", teamId, typeof teamId);
+      console.log("player id:", playerId, typeof playerId);
+
+      console.log("loaded players on player/[id].tsx:", teamIDs);
+      console.log("fetch player data on player/[id].tsx");
     };
     fetchData();
   }, []);
@@ -61,7 +62,7 @@ export default function PlayerDetailScreen() {
 
                         <api-sports-widget 
                           data-type="player" 
-                          data-player-id="${player.id}"
+                          data-player-id="${player?.id}"
                           data-player-statistics="true"
                           data-player-injuries="true"
                           data-player-trophies="true"
@@ -72,14 +73,11 @@ export default function PlayerDetailScreen() {
                     </html>
                   `;
 
-  const positionLabel =
-    player.position.charAt(0).toUpperCase() + player.position.slice(1);
-
   return (
     <>
       <Stack.Screen
         options={{
-          title: player.name,
+          title: player?.name,
           headerStyle: { backgroundColor: Colors.secondary },
           headerTintColor: Colors.primary,
         }}
@@ -87,12 +85,12 @@ export default function PlayerDetailScreen() {
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Image
-            source={{ uri: player.photo }}
+            source={{ uri: player?.photo }}
             style={styles.playerPhoto}
             contentFit="cover"
           />
-          <Text style={styles.playerName}>{player.name}</Text>
-          <Text style={styles.playerPosition}>{positionLabel}</Text>
+          <Text style={styles.playerName}>{player?.name}</Text>
+          <Text style={styles.playerPosition}>{player?.position}</Text>
         </View>
 
         <View style={styles.content}>
@@ -101,28 +99,28 @@ export default function PlayerDetailScreen() {
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Full Name</Text>
-                <Text style={styles.infoValue}>{player.name}</Text>
+                <Text style={styles.infoValue}>{player?.name}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Position</Text>
-                <Text style={styles.infoValue}>{positionLabel}</Text>
+                <Text style={styles.infoValue}>{player?.position}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Number</Text>
-                <Text style={styles.infoValue}>{player.number}</Text>
+                <Text style={styles.infoValue}>{player?.number}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Age</Text>
-                <Text style={styles.infoValue}>{player.age}</Text>
+                <Text style={styles.infoValue}>{player?.age}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Nationality</Text>
-                {player.nationality && map[player.nationality] ? (
-                  <CountryFlag isoCode={map[player.nationality]} size={25} />
+                {player?.nationality && map[player?.nationality] ? (
+                  <CountryFlag isoCode={map[player?.nationality]} size={25} />
                 ) : null}
               </View>
               <View style={styles.divider} />
@@ -135,10 +133,10 @@ export default function PlayerDetailScreen() {
                     alignItems: "center",
                   }}
                 >
-                  <Text style={styles.infoValue}>{player.birth.place} </Text>
-                  {player.birth.country && map[player.birth.country] ? (
+                  <Text style={styles.infoValue}>{player?.birth.place} </Text>
+                  {player?.birth.country && map[player?.birth.country] ? (
                     <CountryFlag
-                      isoCode={map[player.birth.country]}
+                      isoCode={map[player?.birth.country]}
                       size={25}
                     />
                   ) : null}
@@ -147,22 +145,22 @@ export default function PlayerDetailScreen() {
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Date Of Birth</Text>
-                <Text style={styles.infoValue}>{player.birth.date}</Text>
+                <Text style={styles.infoValue}>{player?.birth.date}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Weight</Text>
-                <Text style={styles.infoValue}>{player.weight}</Text>
+                <Text style={styles.infoValue}>{player?.weight}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Height</Text>
-                <Text style={styles.infoValue}>{player.height}</Text>
+                <Text style={styles.infoValue}>{player?.height}</Text>
               </View>
             </View>
           </View>
 
-          {/* <View style={styles.infoSection}>
+          <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Player Stats</Text>
             <View style={styles.widgetContainer}>
               <WebView
@@ -176,7 +174,7 @@ export default function PlayerDetailScreen() {
                 scalesPageToFit={true}
               />
             </View>
-          </View> */}
+          </View>
 
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>Club</Text>

@@ -21,7 +21,7 @@ export interface PlayerWithTeam {
   team: {
     id: number;
   };
-  player: Player;
+  player: Player[];
 }
 
 export interface Coach extends Player {

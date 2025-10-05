@@ -20,10 +20,19 @@ const map: CountryMap = countries;
 export default function TeamScreen() {
   const router = useRouter();
   const { playersList, coachList, teamInfoList, fetchProfileData } = useApp();
+  const id = 541;
 
-  const players = playersList.find((p) => p.team.id === 541) ?? {player:[], team:{}};
-  const coachWithTeam = coachList.find((c) => c.team.id === 541) ?? {player: {}, team: {}};
-  const teamInfo = teamInfoList.find((t) => t.team.id === 541);
+  const players = playersList.find((p) => p.team.id === id) ?? {
+    player: [],
+    team: {},
+  };
+  const coachWithTeam: CoachWithTeam = coachList.find(
+    (c) => c.team.id === Number(id)
+  ) ?? { player: {} as Coach, team: { id: 0 } };
+
+  const coach: Player = coachWithTeam.player;
+
+  const teamInfo = teamInfoList.find((t) => t.team.id === id);
 
   const goalkeepers = players.player.filter((p) => p.position === "Goalkeeper");
   const defenders = players.player.filter((p) => p.position === "Defender");
@@ -31,8 +40,10 @@ export default function TeamScreen() {
   const forwards = players.player.filter((p) => p.position === "Attacker");
 
   useEffect(() => {
-    // fetchProfileData(541); // Default Real Madrid team ID
-    console.log("fetch Profile Data");
+    // fetchProfileData(Number(id)); // Default Real Madrid team ID
+    const teamIDs = playersList.map((players) => players.team.id);
+    console.log("loaded players on team[id].tsx:", teamIDs);
+    console.log("fetch profile data on team[id].tsx");
   }, []);
 
   return (
@@ -96,11 +107,11 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>GOALKEEPERS</Text>
           </View>
-          {goalkeepers.map((pwTeam) => (
-            <View key={pwTeam.id}>
+          {goalkeepers.map((player: Player) => (
+            <View key={player.id}>
               <PlayerCard
-                player={pwTeam}
-                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
+                player={player}
+                onPress={() => router.push(`/player/${player.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -111,11 +122,11 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>DEFENDERS</Text>
           </View>
-          {defenders.map((pwTeam) => (
-            <View key={pwTeam.id}>
+          {defenders.map((player: Player) => (
+            <View key={player.id}>
               <PlayerCard
-                player={pwTeam}
-                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
+                player={player}
+                onPress={() => router.push(`/player/${player.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -126,11 +137,11 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>MIDFIELDERS</Text>
           </View>
-          {midfielders.map((pwTeam) => (
-            <View key={pwTeam.id}>
+          {midfielders.map((player: Player) => (
+            <View key={player.id}>
               <PlayerCard
-                player={pwTeam}
-                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
+                player={player}
+                onPress={() => router.push(`/player/${player.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -141,11 +152,11 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>FORWARDS</Text>
           </View>
-          {forwards.map((pwTeam) => (
-            <View key={pwTeam.id}>
+          {forwards.map((player: Player) => (
+            <View key={player.id}>
               <PlayerCard
-                player={pwTeam}
-                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
+                player={player}
+                onPress={() => router.push(`/player/${player.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -155,11 +166,11 @@ export default function TeamScreen() {
           <View style={styles.positionTitleContainer}>
             <Text style={styles.positionTitle}>COACH</Text>
           </View>
-          {coachWithTeam && (
+          {coach && (
             <View>
               <PlayerCard
-                player={coachWithTeam.player}
-                onPress={() => router.push(`/coach/${coachWithTeam.player.id}` as any)}
+                player={coach}
+                onPress={() => router.push(`/coach/${coach.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -216,7 +227,7 @@ function PlayerCard({
   player,
   onPress,
 }: {
-  player: PlayerWithTeam | CoachWithTeam;
+  player: Player | Coach;
   onPress: () => void;
 }) {
   return (
@@ -236,7 +247,7 @@ function PlayerCard({
             <CountryFlag isoCode={map[player.nationality]} size={25} />
           ) : null}
           <Text style={styles.playerMetaText}>Age: </Text>
-          <Text style={styles.playerMetaText}>{player.player?.age} years</Text>
+          <Text style={styles.playerMetaText}>{player.age} years</Text>
         </View>
       </View>
     </TouchableOpacity>

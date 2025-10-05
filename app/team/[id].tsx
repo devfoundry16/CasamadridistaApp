@@ -7,25 +7,44 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useRouter, Stack } from "expo-router";
 import { MapPin, Calendar, Building2 } from "lucide-react-native";
-import { Player, TeamInfo, Coach, CountryMap, PlayerWithTeam, CoachWithTeam } from "@/interfaces/profile";
+import {
+  Player,
+  TeamInfo,
+  Coach,
+  CountryMap,
+  PlayerWithTeam,
+  CoachWithTeam,
+} from "@/interfaces/profile";
 import countries from "@/constants/countries.json";
 import { altColors as colors } from "@/constants/colors";
+import Colors from "@/constants/colors";
+
 import { latestMatches } from "@/mocks/team";
 import { useApp } from "@/contexts/AppContext";
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from "expo-router";
 import CountryFlag from "react-native-country-flag";
 const map: CountryMap = countries;
 
 export default function TeamDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const teamId = Number(id);
+
   const { playersList, coachList, teamInfoList, fetchProfileData } = useApp();
 
-  const players = playersList.find((p) => p.team.id === Number(id)) ?? {player:[], team:{}};
-  const coachWithTeam = coachList.find((c) => c.team.id === Number(id)) ?? {player: {}, team: {}};
-  const teamInfo = teamInfoList.find((t) => t.team.id === Number(id));
+  const players = playersList.find((p) => p.team.id === teamId) ?? {
+    player: [],
+    team: {},
+  };
+  const coachWithTeam: CoachWithTeam = coachList.find(
+    (c) => c.team.id === teamId
+  ) ?? { player: {} as Coach, team: { id: 0 } };
+
+  const coach: Player = coachWithTeam.player;
+
+  const teamInfo = teamInfoList.find((t) => t.team.id === teamId);
 
   const goalkeepers = players.player.filter((p) => p.position === "Goalkeeper");
   const defenders = players.player.filter((p) => p.position === "Defender");
@@ -33,192 +52,211 @@ export default function TeamDetailScreen() {
   const forwards = players.player.filter((p) => p.position === "Attacker");
 
   useEffect(() => {
-    fetchProfileData(Number(id)); // Default Real Madrid team ID
-    console.log("fetch Profile Data");
+    //fetchProfileData(teamId); // Default Real Madrid team ID
+    const teamIDs = playersList.map((players) => players.team.id);
+    console.log("loaded players on team[id].tsx:", teamIDs);
+    console.log("fetch profile data on team[id].tsx");
   }, []);
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      showsVerticalScrollIndicator={false}
-    >
-      <View
-        style={[
-          styles.header,
-          {
-            backgroundColor: colors.background,
-            borderBottomColor: colors.border,
-            paddingTop: 12,
-          },
-        ]}
+    <>
+      <Stack.Screen
+        options={{
+          title: teamInfo?.team?.name,
+          headerStyle: { backgroundColor: Colors.secondary },
+          headerTintColor: Colors.primary,
+        }}
+      />
+      <ScrollView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        showsVerticalScrollIndicator={false}
       >
-        <Image
-          source={{
-            uri: teamInfo?.team?.logo,
-          }}
-          contentFit="cover"
-          style={styles.headerImage}
-        />
-        <Text style={[styles.headerTitle, { color: colors.textWhite }]}>
-          {teamInfo?.team?.name} Squad
-        </Text>
-        <Text style={[styles.headerSubtitle, { color: colors.textWhite }]}>
-          2024-2025 Season
-        </Text>
-      </View>
-      <View style={styles.content}>
-        <View style={styles.infoCard}>
-          <View style={styles.infoColumn}>
-            <View style={styles.infoItem}>
-              <MapPin size={20} color={colors.textWhite} />
-              <Text style={styles.infoLabel}>Country</Text>
-              {teamInfo?.team?.country && map[teamInfo.team.country] ? (
-                <CountryFlag isoCode={map[teamInfo.team.country]} size={25} />
-              ) : null}
-            </View>
-            <View style={styles.infoItem}>
-              <Calendar size={20} color={colors.textWhite} />
-              <Text style={styles.infoLabel}>Founded</Text>
-              <Text style={styles.infoValue}>{teamInfo?.team?.founded}</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Building2 size={20} color={colors.textWhite} />
-              <Text style={styles.infoLabel}>Stadium</Text>
-              <Text style={styles.infoValue}>{teamInfo?.venue?.name}</Text>
+        <View
+          style={[
+            styles.header,
+            {
+              backgroundColor: colors.background,
+              borderBottomColor: colors.border,
+              paddingTop: 12,
+            },
+          ]}
+        >
+          <Image
+            source={{
+              uri: teamInfo?.team?.logo,
+            }}
+            contentFit="cover"
+            style={styles.headerImage}
+          />
+          <Text style={[styles.headerTitle, { color: colors.textWhite }]}>
+            {teamInfo?.team?.name} Squad
+          </Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textWhite }]}>
+            2024-2025 Season
+          </Text>
+        </View>
+        <View style={styles.content}>
+          <View style={styles.infoCard}>
+            <View style={styles.infoColumn}>
+              <View style={styles.infoItem}>
+                <MapPin size={20} color={colors.textWhite} />
+                <Text style={styles.infoLabel}>Country</Text>
+                {teamInfo?.team?.country && map[teamInfo.team.country] ? (
+                  <CountryFlag isoCode={map[teamInfo.team.country]} size={25} />
+                ) : null}
+              </View>
+              <View style={styles.infoItem}>
+                <Calendar size={20} color={colors.textWhite} />
+                <Text style={styles.infoLabel}>Founded</Text>
+                <Text style={styles.infoValue}>{teamInfo?.team?.founded}</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Building2 size={20} color={colors.textWhite} />
+                <Text style={styles.infoLabel}>Stadium</Text>
+                <Text style={styles.infoValue}>{teamInfo?.venue?.name}</Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Squad</Text>
-          <View style={styles.accentLine} />
-        </View>
-
-        <View style={styles.positionSection}>
-          <View style={styles.positionTitleContainer}>
-            <Text style={styles.positionTitle}>GOALKEEPERS</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Squad</Text>
+            <View style={styles.accentLine} />
           </View>
-          {goalkeepers.map((pwTeam) => (
-            <View key={pwTeam.id}>
-              <PlayerCard
-                player={pwTeam}
-                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
-              />
-              <View style={styles.accentLine} />
-            </View>
-          ))}
-        </View>
 
-        <View style={styles.positionSection}>
-          <View style={styles.positionTitleContainer}>
-            <Text style={styles.positionTitle}>DEFENDERS</Text>
-          </View>
-          {defenders.map((pwTeam) => (
-            <View key={pwTeam.id}>
-              <PlayerCard
-                player={pwTeam}
-                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
-              />
-              <View style={styles.accentLine} />
+          <View style={styles.positionSection}>
+            <View style={styles.positionTitleContainer}>
+              <Text style={styles.positionTitle}>GOALKEEPERS</Text>
             </View>
-          ))}
-        </View>
-
-        <View style={styles.positionSection}>
-          <View style={styles.positionTitleContainer}>
-            <Text style={styles.positionTitle}>MIDFIELDERS</Text>
-          </View>
-          {midfielders.map((pwTeam) => (
-            <View key={pwTeam.id}>
-              <PlayerCard
-                player={pwTeam}
-                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
-              />
-              <View style={styles.accentLine} />
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.positionSection}>
-          <View style={styles.positionTitleContainer}>
-            <Text style={styles.positionTitle}>FORWARDS</Text>
-          </View>
-          {forwards.map((pwTeam) => (
-            <View key={pwTeam.id}>
-              <PlayerCard
-                player={pwTeam}
-                onPress={() => router.push(`/player/${pwTeam.id}` as any)}
-              />
-              <View style={styles.accentLine} />
-            </View>
-          ))}
-        </View>
-        <View style={styles.positionSection}>
-          <View style={styles.positionTitleContainer}>
-            <Text style={styles.positionTitle}>COACH</Text>
-          </View>
-          {coachWithTeam && (
-            <View>
-              <PlayerCard
-                player={coachWithTeam.player}
-                onPress={() => router.push(`/coach/${coachWithTeam.player.id}` as any)}
-              />
-              <View style={styles.accentLine} />
-            </View>
-          )}
-        </View>
-
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Latest Matches</Text>
-          <View style={styles.accentLine} />
-        </View>
-
-        {latestMatches.map((match, index) => (
-          <View key={index} style={styles.matchCard}>
-            <View style={styles.matchHeader}>
-              <Text style={styles.matchCompetition}>{match.competition}</Text>
-              <Text style={styles.matchDateTime}>
-                {match.date} • {match.time}
-              </Text>
-            </View>
-            <View style={styles.matchContent}>
-              <View style={styles.teamContainer}>
-                <Image
-                  source={{ uri: match.homeTeam.logo }}
-                  style={styles.teamLogo}
-                  contentFit="contain"
+            {goalkeepers.map((player: Player) => (
+              <View key={player.id}>
+                <PlayerCard
+                  player={player}
+                  onPress={() =>
+                    router.push(`/player/${teamId}/${player.id}` as any)
+                  }
                 />
-                <Text style={styles.teamName} numberOfLines={1}>
-                  {match.homeTeam.name}
+                <View style={styles.accentLine} />
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.positionSection}>
+            <View style={styles.positionTitleContainer}>
+              <Text style={styles.positionTitle}>DEFENDERS</Text>
+            </View>
+            {defenders.map((player: Player) => (
+              <View key={player.id}>
+                <PlayerCard
+                  player={player}
+                  onPress={() =>
+                    router.push(`/player/${teamId}/${player.id}` as any)
+                  }
+                />
+                <View style={styles.accentLine} />
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.positionSection}>
+            <View style={styles.positionTitleContainer}>
+              <Text style={styles.positionTitle}>MIDFIELDERS</Text>
+            </View>
+            {midfielders.map((player: Player) => (
+              <View key={player.id}>
+                <PlayerCard
+                  player={player}
+                  onPress={() =>
+                    router.push(`/player/${teamId}/${player.id}` as any)
+                  }
+                />
+                <View style={styles.accentLine} />
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.positionSection}>
+            <View style={styles.positionTitleContainer}>
+              <Text style={styles.positionTitle}>FORWARDS</Text>
+            </View>
+            {forwards.map((player: Player) => (
+              <View key={player.id}>
+                <PlayerCard
+                  player={player}
+                  onPress={() =>
+                    router.push(`/player/${teamId}/${player.id}` as any)
+                  }
+                />
+                <View style={styles.accentLine} />
+              </View>
+            ))}
+          </View>
+          <View style={styles.positionSection}>
+            <View style={styles.positionTitleContainer}>
+              <Text style={styles.positionTitle}>COACH</Text>
+            </View>
+            {coach && (
+              <View>
+                <PlayerCard
+                  player={coach}
+                  onPress={() => router.push(`/coach/${coach.id}` as any)}
+                />
+                <View style={styles.accentLine} />
+              </View>
+            )}
+          </View>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Latest Matches</Text>
+            <View style={styles.accentLine} />
+          </View>
+
+          {latestMatches.map((match, index) => (
+            <View key={index} style={styles.matchCard}>
+              <View style={styles.matchHeader}>
+                <Text style={styles.matchCompetition}>{match.competition}</Text>
+                <Text style={styles.matchDateTime}>
+                  {match.date} • {match.time}
                 </Text>
               </View>
-              <View style={styles.scoreContainer}>
-                <Text style={styles.score}>{match.homeTeam.score}</Text>
-                <Text style={styles.scoreSeparator}>-</Text>
-                <Text style={styles.score}>{match.awayTeam.score}</Text>
-              </View>
-              <View style={styles.teamContainer}>
-                <Image
-                  source={{ uri: match.awayTeam.logo }}
-                  style={styles.teamLogo}
-                  contentFit="contain"
-                />
-                <Text style={styles.teamName} numberOfLines={1}>
-                  {match.awayTeam.name}
-                </Text>
+              <View style={styles.matchContent}>
+                <View style={styles.teamContainer}>
+                  <Image
+                    source={{ uri: match.homeTeam.logo }}
+                    style={styles.teamLogo}
+                    contentFit="contain"
+                  />
+                  <Text style={styles.teamName} numberOfLines={1}>
+                    {match.homeTeam.name}
+                  </Text>
+                </View>
+                <View style={styles.scoreContainer}>
+                  <Text style={styles.score}>{match.homeTeam.score}</Text>
+                  <Text style={styles.scoreSeparator}>-</Text>
+                  <Text style={styles.score}>{match.awayTeam.score}</Text>
+                </View>
+                <View style={styles.teamContainer}>
+                  <Image
+                    source={{ uri: match.awayTeam.logo }}
+                    style={styles.teamLogo}
+                    contentFit="contain"
+                  />
+                  <Text style={styles.teamName} numberOfLines={1}>
+                    {match.awayTeam.name}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+          ))}
+        </View>
+      </ScrollView>
+    </>
   );
 }
 function PlayerCard({
   player,
   onPress,
 }: {
-  player: PlayerWithTeam | CoachWithTeam;
+  player: Player | Coach;
   onPress: () => void;
 }) {
   return (
@@ -238,7 +276,7 @@ function PlayerCard({
             <CountryFlag isoCode={map[player.nationality]} size={25} />
           ) : null}
           <Text style={styles.playerMetaText}>Age: </Text>
-          <Text style={styles.playerMetaText}>{player.player?.age} years</Text>
+          <Text style={styles.playerMetaText}>{player.age} years</Text>
         </View>
       </View>
     </TouchableOpacity>

@@ -29,7 +29,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
       let savedPlayersList: PlayerWithTeam[];
       if (playersString) {
         savedPlayersList = JSON.parse(playersString);
-        console.log("loaded players:", savedPlayersList.length);
+        const teamIDs = savedPlayersList.map(players => players.team.id)
+        console.log("loaded players:", teamIDs);
         setPlayersList(savedPlayersList);
       }
 
