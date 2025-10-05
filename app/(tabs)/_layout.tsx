@@ -6,11 +6,12 @@ import {
   Users as Team,
   Layout,
   ShoppingCart as Store,
-  UserRound as Profile
+  UserRound as Profile,
+  UserCircle
 } from "lucide-react-native";
 import React from "react";
 import Colors from "@/constants/colors";
-import HeaderMenu from '../components/HeaderMenu';
+import HeaderMenu from '@/components/HeaderMenu';
 
 export default function TabLayout() {
   return (
@@ -82,11 +83,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="account"
         options={{
-          title: "Profile",
-          headerTitle: "Profile",
-          tabBarIcon: ({ color, size }) => <Profile size={size} color={color} />,
+          title: "Account",
+          headerTitle: "My Account",
+          tabBarIcon: ({ color, size }) => <UserCircle size={size} color={color} />,
         }}
       />
     </Tabs>

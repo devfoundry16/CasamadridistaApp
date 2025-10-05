@@ -49,6 +49,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         setTeamInfoList(teamList);
       }
 
+      //fetchProfileData(541);
       console.log("[App] Data loaded");
     } catch (error) {
       console.error("[App] Failed to load data:", error);

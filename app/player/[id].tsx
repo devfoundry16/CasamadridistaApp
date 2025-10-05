@@ -9,12 +9,16 @@ import CountryFlag from "react-native-country-flag";
 import countries from "@/constants/countries.json";
 import { CountryMap } from "@/interfaces/profile";
 import { useEffect } from "react";
+import { useApp } from "@/contexts/AppContext";
 
 const map: CountryMap = countries;
 export default function PlayerDetailScreen() {
   const { id } = useLocalSearchParams();
+  const { playersList, coachList, teamInfoList, fetchProfileData } = useApp();
 
-  let player: any = {
+  const players = playersList.find((p) => p.team.id === Number(id)) ?? {player:[], team:{}};
+
+  let player: any = players? players.player: {
     id: 0,
     name: "",
     firstname: "",

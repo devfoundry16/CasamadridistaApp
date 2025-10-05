@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Info, Mail, Crown } from 'lucide-react-native';
 import { useRouter } from 'expo-router';

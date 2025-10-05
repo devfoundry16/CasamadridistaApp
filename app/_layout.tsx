@@ -43,6 +43,13 @@ function RootLayoutNav() {
           title: "Article",
         }}
       />
+      <Stack.Screen
+        name="team/[id]"
+        options={{
+          ...headerOptions,
+          title: "Team Info",
+        }}
+      />
     </Stack>
   );
 }
