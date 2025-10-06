@@ -53,7 +53,6 @@ export default function TeamDetailScreen() {
 
   useEffect(() => {
     if ( players.player.length === 0) {
-      console.log("fetch profile data on team[id].tsx");
       fetchProfileData(teamId); // Default Real Madrid team ID
     }
     const teamIDs = playersList.map((players) => players.team.id);

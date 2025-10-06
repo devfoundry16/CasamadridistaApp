@@ -1,4 +1,4 @@
-import { LastMatch, NextMatch } from "./match";
+import { Match } from "./match";
 
 export interface Player {
   id: number;
@@ -65,7 +65,7 @@ export interface TeamInfo {
     surface: string; //"grass";
     image: string; //"https://media.api-sports.io/football/venues/19939.png";
   };
-  nextMatches: NextMatch[];
-  lastMatches: LastMatch[];
+  nextMatches: Match[];
+  lastMatches: Match[];
 }
 export type CountryMap = { [countryName: string]: string };

@@ -24,10 +24,11 @@ import {
 import { useApp } from "@/contexts/AppContext";
 import Colors from "@/constants/colors";
 import { useEffect, useState, useRef } from "react";
-import { upcomingMatches } from "@/mocks/team";
+import { teamInfo, upcomingMatches } from "@/mocks/team";
 import { quotes, strengthStats, squadPlayers } from "@/mocks/advertisement";
 import Carousel from "react-native-reanimated-carousel";
 import CustomWebView from "@/components/CustomWebView";
+import UpcomingMatchesCarousel from "@/components/UpcomingMatchCard";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = 280;
@@ -39,27 +40,73 @@ export default function HomeScreen() {
 
   const RealMadridId = 541;
 
-  const nextMatch = teamInfoList
-    .find((p) => p.team.id == RealMadridId)
-    ?.nextMatches?.at(0);
+  const nextMatches = teamInfoList.find(
+    (p) => p.team.id == RealMadridId
+  )?.nextMatches;
+
+  const lastMatches = teamInfoList.find(
+    (p) => p.team.id == RealMadridId
+  )?.lastMatches;
+
+  const matches = [...(nextMatches ?? []), ...(lastMatches ?? [])];
+
+  const nextMatch = nextMatches?.at(0);
 
   const quoteCarouselRef = useRef<any>(null);
   const playerCarouseRef = useRef<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
 
+  const [strengthSectionY, setStrengthSectionY] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+
+  const mainScrollY = useRef(0);
+
   const [timeLeft, setTimeLeft] = useState<string>("");
   const getIcon = (iconName: string) => {
-    const iconProps = { size: 48, color: Colors.accent };
+    const iconProps = { width: 156, height: 156 };
     switch (iconName) {
       case "users":
-        return <Users {...iconProps} />;
+        return (
+          <Image
+            source={{
+              uri: "https://casamadridista.com/wp-content/uploads/2025/09/4324324234.webp",
+            }}
+            contentFit="cover"
+            style={iconProps}
+          />
+        );
       case "gift":
-        return <Gift {...iconProps} />;
+        return (
+          <Image
+            source={{
+              uri: "https://casamadridista.com/wp-content/uploads/2025/09/323423424.webp",
+            }}
+            contentFit="cover"
+            style={iconProps}
+          />
+        );
       case "calendar":
-        return <Calendar {...iconProps} />;
+        return (
+          <Image
+            source={{
+              uri: "https://casamadridista.com/wp-content/uploads/2025/09/34y467346.webp",
+            }}
+            contentFit="cover"
+            style={iconProps}
+          />
+        );
       case "heart":
-        return <Heart {...iconProps} />;
+        return (
+          <Image
+            source={{
+              uri: "https://casamadridista.com/wp-content/uploads/2025/09/324245324231.webp",
+            }}
+            contentFit="cover"
+            style={iconProps}
+          />
+        );
       default:
         return <Users {...iconProps} />;
     }
@@ -85,6 +132,36 @@ export default function HomeScreen() {
   const handlePrevQuote = () => {
     if (quoteCarouselRef.current) {
       quoteCarouselRef.current.prev();
+    }
+  };
+
+  const formatTime = (
+    days: number,
+    hours: number,
+    minutes: number,
+    seconds: number
+  ) => {
+    const pad = (num: number) => String(num).padStart(2, "0");
+    return `${pad(days)}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+  };
+
+  const handleStrengthSectionLayout = (event: any) => {
+    const { y } = event.nativeEvent.layout;
+    setStrengthSectionY(y);
+  };
+
+  const handleScroll = (event: any) => {
+    const scrollY = event.nativeEvent.contentOffset.y;
+    mainScrollY.current = scrollY;
+
+    if (!hasAnimated && strengthSectionY > 0) {
+      const viewportHeight = Dimensions.get("window").height;
+      const triggerPoint = strengthSectionY - viewportHeight * 0.7;
+
+      if (scrollY >= triggerPoint) {
+        setShouldAnimate(true);
+        setHasAnimated(true);
+      }
     }
   };
 
@@ -154,12 +231,7 @@ export default function HomeScreen() {
                     </html>
                   `;
   useEffect(() => {
-    const fetchData = async () => {
-      // console.log('nextMatch', nextMatch);
-      // await fetchLastMatchesData(nextMatch?.teams.home.id);
-      // console.log('last matches:', lastMatches);
-      // console.log("Data Successfully Loaded");
-    };
+    const fetchData = async () => {};
     fetchData();
   }, []);
   useEffect(() => {
@@ -178,7 +250,7 @@ export default function HomeScreen() {
         );
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-        setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+        setTimeLeft(formatTime(days, hours, minutes, seconds));
       } else {
         setTimeLeft("Match Started");
       }
@@ -188,7 +260,12 @@ export default function HomeScreen() {
     return () => clearInterval(timer);
   }, [nextMatch]);
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
+    >
       <View style={styles.header}>
         <Image
           source={{
@@ -219,7 +296,7 @@ export default function HomeScreen() {
           <View style={styles.content}>
             <View style={styles.nextMatchSection}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Next Match</Text>
+                <Text style={styles.sectionTitle}>Upcoming</Text>
               </View>
 
               <View style={styles.matchCard}>
@@ -261,13 +338,16 @@ export default function HomeScreen() {
                             styles.formBadge,
                             (nextMatch?.teams.home.id == result.teams.home.id
                               ? result.goals.home > result.goals.away
-                              : result.goals.home < result.goals.away) && styles.formWin,
+                              : result.goals.home < result.goals.away) &&
+                              styles.formWin,
                             (nextMatch?.teams.home.id == result.teams.home.id
                               ? result.goals.home == result.goals.away
-                              : result.goals.home == result.goals.away) && styles.formDraw,
+                              : result.goals.home == result.goals.away) &&
+                              styles.formDraw,
                             (nextMatch?.teams.home.id == result.teams.home.id
                               ? result.goals.home < result.goals.away
-                              : result.goals.home > result.goals.away ) && styles.formLoss,
+                              : result.goals.home > result.goals.away) &&
+                              styles.formLoss,
                           ]}
                         ></View>
                       ))}
@@ -302,13 +382,16 @@ export default function HomeScreen() {
                             styles.formBadge,
                             (nextMatch?.teams.away.id == result.teams.home.id
                               ? result.goals.home > result.goals.away
-                              : result.goals.home < result.goals.away) && styles.formWin,
+                              : result.goals.home < result.goals.away) &&
+                              styles.formWin,
                             (nextMatch?.teams.away.id == result.teams.home.id
                               ? result.goals.home == result.goals.away
-                              : result.goals.home == result.goals.away) && styles.formDraw,
+                              : result.goals.home == result.goals.away) &&
+                              styles.formDraw,
                             (nextMatch?.teams.away.id == result.teams.home.id
                               ? result.goals.home < result.goals.away
-                              : result.goals.home > result.goals.away ) && styles.formLoss,
+                              : result.goals.home > result.goals.away) &&
+                              styles.formLoss,
                           ]}
                         ></View>
                       ))}
@@ -346,57 +429,16 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-
-        {upcomingMatches.map((match, index) => (
-          <View key={`upcoming-${index}`} style={styles.matchCard}>
-            <View style={styles.matchHeader}>
-              <Text style={styles.matchCompetition}>{match.competition}</Text>
-              <Text style={styles.matchDateTime}>
-                {new Date(match.date).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })}{" "}
-                • {match.time}
-              </Text>
-            </View>
-            <View style={styles.matchContent}>
-              <View style={styles.teamContainer}>
-                <Image
-                  source={{ uri: match.homeTeam.logo }}
-                  style={styles.teamLogo}
-                  contentFit="contain"
-                />
-                <Text style={styles.teamName} numberOfLines={1}>
-                  {match.homeTeam.name}
-                </Text>
-              </View>
-              <View style={styles.scoreContainer}>
-                <Text style={styles.vsTextSmall}>VS</Text>
-              </View>
-              <View style={styles.teamContainer}>
-                <Image
-                  source={{ uri: match.awayTeam.logo }}
-                  style={styles.teamLogo}
-                  contentFit="contain"
-                />
-                <Text style={styles.teamName} numberOfLines={1}>
-                  {match.awayTeam.name}
-                </Text>
-              </View>
-            </View>
-            {match.stadium && (
-              <View style={styles.matchStadium}>
-                <MapPinned size={12} color={Colors.textWhite} />
-                <Text style={styles.matchStadiumText}>{match.stadium}</Text>
-              </View>
-            )}
-          </View>
-        ))}
+        <Text>{matches?.length && <UpcomingMatchesCarousel data={matches} />}
+        </Text>
       </View>
       <CustomWebView title="La Liga Standings" statsHtml={statsHtml} />
       <CustomWebView title="Players stats" statsHtml={standingHTML} />
 
-      <View style={styles.adStrengthSection}>
+      <View
+        style={styles.adStrengthSection}
+        onLayout={handleStrengthSectionLayout}
+      >
         <View style={styles.adSectionHeader}>
           <View style={styles.adHeaderLine} />
           <Text style={styles.adSectionTitle}>Our Strength</Text>
@@ -406,7 +448,7 @@ export default function HomeScreen() {
 
         <View style={styles.adStatsContainer}>
           {strengthStats.map((stat, index) => (
-            <AnimatedStat key={index} stat={stat} icon={getIcon(stat.icon)} />
+            <AnimatedStat key={index} stat={stat} icon={getIcon(stat.icon)} shouldAnimate={shouldAnimate}/>
           ))}
         </View>
       </View>
@@ -556,7 +598,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkGray,
   },
   header: {
-    paddingBottom: 30,
     alignItems: "center",
   },
   headerSection: {
@@ -570,7 +611,6 @@ const styles = StyleSheet.create({
   headerImage: {
     width: "100%",
     height: 778,
-    marginBottom: 12,
   },
   headerTitle: {
     fontSize: 30,
@@ -597,6 +637,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   content: {
+    width: "90%",
     padding: 16,
   },
   sectionHeader: {
@@ -607,9 +648,10 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "700" as const,
     color: Colors.textWhite,
+    textAlign: "center",
   },
   accentLine: {
     height: 3,
@@ -787,7 +829,8 @@ const styles = StyleSheet.create({
   matchCard: {
     borderColor: Colors.lightGray,
     borderWidth: 1,
-    padding: 16,
+    padding: 8,
+    paddingHorizontal: 16,
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -998,10 +1041,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   adHeaderLine: {
-    width: 40,
+    width: 70,
     height: 2,
     backgroundColor: Colors.accent,
-    marginHorizontal: 10,
+    marginHorizontal: 40,
   },
   adSectionTitle: {
     fontSize: 24,
@@ -1010,7 +1053,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   adSectionSubtitle: {
-    fontSize: 14,
+    fontSize: 16,
     color: Colors.accent,
     textAlign: "center",
     marginBottom: 30,
@@ -1030,13 +1073,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   adStatValue: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "700" as const,
     color: Colors.textWhite,
     marginBottom: 6,
   },
   adStatLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: Colors.accent,
     textAlign: "center",
   },
@@ -1084,36 +1127,12 @@ const styles = StyleSheet.create({
   },
   adSquadSection: {
     paddingVertical: 40,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#2a2a2a",
     marginHorizontal: -16,
   },
   adSquadHeader: {
     paddingHorizontal: 20,
     marginBottom: 20,
-  },
-  adNavigationButtons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 12,
-    marginTop: 15,
-  },
-  adNavButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#2a2a2a",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: Colors.accent,
-  },
-  adNavButtonDisabled: {
-    borderColor: Colors.darkGray,
-    opacity: 0.5,
-  },
-  adSquadScrollContent: {
-    paddingHorizontal: (width - CARD_WIDTH) / 2,
-    gap: CARD_SPACING,
   },
   adPlayerCard: {
     width: CARD_WIDTH,
@@ -1152,7 +1171,7 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
   },
   adPlayerActionImage: {
-    width: 370,
+    width: "100%",
     height: 322,
   },
   adQuoteContainer: {
@@ -1230,27 +1249,30 @@ interface AnimatedStatProps {
     color: string;
   };
   icon: React.ReactElement;
+  shouldAnimate: boolean;
 }
 
-function AnimatedStat({ stat, icon }: AnimatedStatProps) {
+function AnimatedStat({ stat, icon, shouldAnimate }: AnimatedStatProps) {
   const [displayValue, setDisplayValue] = useState(0);
   const animatedValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.timing(animatedValue, {
-      toValue: stat.value,
-      duration: 2000,
-      useNativeDriver: false,
-    }).start();
+    if (shouldAnimate) {
+      Animated.timing(animatedValue, {
+        toValue: stat.value,
+        duration: 2000,
+        useNativeDriver: false,
+      }).start();
 
-    const listener = animatedValue.addListener(({ value }) => {
-      setDisplayValue(Math.round(value));
-    });
+      const listener = animatedValue.addListener(({ value }) => {
+        setDisplayValue(Math.floor(value));
+      });
 
-    return () => {
-      animatedValue.removeListener(listener);
-    };
-  }, [stat.value, animatedValue]);
+      return () => {
+        animatedValue.removeListener(listener);
+      };
+    }
+  }, [shouldAnimate, stat.value, animatedValue]);
 
   return (
     <View style={styles.adStatCard}>

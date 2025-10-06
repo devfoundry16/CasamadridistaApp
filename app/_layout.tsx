@@ -37,6 +37,13 @@ function RootLayoutNav() {
         }}
       />
       <Stack.Screen
+        name="campaigns"
+        options={{
+          ...headerOptions,
+          title: "Campaigns",
+        }}
+      />
+      <Stack.Screen
         name="team/[id]"
         options={{
           ...headerOptions,

@@ -24,7 +24,7 @@ const altColors = {
   text: "#1A1A1A" as const,
   textWhite: "#FFFFFF" as const,
   textSecondary: "#6B7280" as const,
-  background: "#333333" as const,
+  background: "#515151" as const,
   backgroundSecondary: "#F9FAFB" as const,
   tint: realMadridGold,
   tabIconDefault: "#9CA3AF" as const,

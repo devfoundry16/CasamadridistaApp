@@ -17,7 +17,7 @@ export default function PlayerDetailScreen() {
 
   const teamId = Number(team);
   const playerId = Number(id);
-  
+
   const players =  playersList.find((p) => p.team.id == teamId);
   const player = players ? players.player?.find((p) => p.id == playerId) : undefined;
 
@@ -25,9 +25,6 @@ export default function PlayerDetailScreen() {
     const fetchData = async () => {
       // player = await ProfileApiService.fetchProfile(Number(id));
       const teamIDs = playersList.map((players) => players.team.id);
-
-      console.log("team id:", teamId, typeof teamId);
-      console.log("player id:", playerId, typeof playerId);
 
       console.log("loaded players on player/[id].tsx:", teamIDs);
       console.log("fetch player data on player/[id].tsx");

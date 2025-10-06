@@ -1,4 +1,4 @@
-export interface NextMatch {
+export interface Match {
   fixture: {
     id: number;
     referee: number;
@@ -67,6 +67,4 @@ export interface NextMatch {
       away: number;
     };
   };
-}
-export interface LastMatch extends NextMatch {
 }

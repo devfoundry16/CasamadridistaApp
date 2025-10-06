@@ -1,10 +1,20 @@
 import { View, Text, StyleSheet } from "react-native";
 import WebView from "react-native-webview";
 import Colors from "@/constants/colors";
-const CustomWebView = ({title, statsHtml}: {title: string, statsHtml: string}) => {
+const CustomWebView = ({
+  title,
+  statsHtml,
+}: {
+  title: string;
+  statsHtml: string;
+}) => {
   return (
     <View style={styles.infoSection}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.adSectionHeader}>
+      <View style={styles.adHeaderLine} />
+      <Text style={styles.adSectionTitle}>{title}</Text>
+      <View style={styles.adHeaderLine} />
+      </View>
       <View style={styles.widgetContainer}>
         <WebView
           source={{
@@ -23,14 +33,26 @@ const CustomWebView = ({title, statsHtml}: {title: string, statsHtml: string}) =
 export default CustomWebView;
 const styles = StyleSheet.create({
   infoSection: {
-    marginBottom: 24,
+    backgroundColor: "#2a2a2a",
+    paddingVertical: 16,
   },
-  sectionTitle: {
-    fontSize: 20,
+  adSectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  adHeaderLine: {
+    width: 70,
+    height: 2,
+    backgroundColor: Colors.accent,
+    marginHorizontal: 30,
+  },
+  adSectionTitle: {
+    fontSize: 24,
     fontWeight: "700" as const,
-    color: Colors.darkGold,
-    marginBottom: 12,
-    paddingLeft: 4,
+    color: Colors.textWhite,
+    textAlign: "center",
   },
   widgetContainer: {
     backgroundColor: Colors.darkGray,
@@ -44,6 +66,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   webview: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
 });

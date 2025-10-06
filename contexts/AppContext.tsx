@@ -7,7 +7,7 @@ import {
   PlayerWithTeam,
   CoachWithTeam,
 } from "@/interfaces/profile";
-import { NextMatch, LastMatch } from "@/interfaces/match";
+import { Match } from "@/interfaces/match";
 import ProfileApiService from "@/services/profileApi";
 import MatchApiService from "@/services/matchApi";
 import * as Bluebird from "bluebird";
@@ -19,8 +19,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [playersList, setPlayersList] = useState<PlayerWithTeam[]>([]);
   const [coachList, setCoachList] = useState<CoachWithTeam[]>([]);
   const [teamInfoList, setTeamInfoList] = useState<TeamInfo[]>([]);
-  const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<LastMatch[]>([]);
-  const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<LastMatch[]>([]);
+  const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
+  const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
 
   const loadAppData = useCallback(async () => {
     try {
@@ -57,7 +57,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const loadInitialData = async () => {
     try {
-      fetchProfileData(RealMadridId);
+      //fetchProfileData(RealMadridId);
       fetchNextMatchData(RealMadridId).then((result) => {
         MatchApiService.fetchLastMatches(result.teams.home.id).then(data => {
           setHomeTeamLastMatches(data);

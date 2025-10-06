@@ -111,7 +111,7 @@ export default function TeamScreen() {
             <View key={player.id}>
               <PlayerCard
                 player={player}
-                onPress={() => router.push(`/player/${player.id}` as any)}
+                onPress={() => router.push(`/player/${teamInfo?.team.id}/${player.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -126,7 +126,7 @@ export default function TeamScreen() {
             <View key={player.id}>
               <PlayerCard
                 player={player}
-                onPress={() => router.push(`/player/${player.id}` as any)}
+                onPress={() => router.push(`/player/${teamInfo?.team.id}/${player.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -141,7 +141,7 @@ export default function TeamScreen() {
             <View key={player.id}>
               <PlayerCard
                 player={player}
-                onPress={() => router.push(`/player/${player.id}` as any)}
+                onPress={() => router.push(`/player/${teamInfo?.team.id}/${player.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
@@ -156,7 +156,7 @@ export default function TeamScreen() {
             <View key={player.id}>
               <PlayerCard
                 player={player}
-                onPress={() => router.push(`/player/${player.id}` as any)}
+                onPress={() => router.push(`/player/${teamInfo?.team.id}/${player.id}` as any)}
               />
               <View style={styles.accentLine} />
             </View>
