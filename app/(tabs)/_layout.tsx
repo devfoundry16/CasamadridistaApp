@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import {
   Home,
-  Newspaper,
+  Gamepad2,
   Image as ImageIcon,
   Users as Team,
   Layout,
@@ -49,12 +49,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="news"
+        name="penalty"
         options={{
-          title: "News",
-          headerTitle: "Latest News",
+          title: "Penalty",
+          headerTitle: "Penalty Game",
           tabBarIcon: ({ color, size }) => (
-            <Newspaper size={size} color={color} />
+            <Gamepad2 size={size} color={color} />
           ),
         }}
       />

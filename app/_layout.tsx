@@ -37,13 +37,6 @@ function RootLayoutNav() {
         }}
       />
       <Stack.Screen
-        name="article/[id]"
-        options={{
-          ...headerOptions,
-          title: "Article",
-        }}
-      />
-      <Stack.Screen
         name="team/[id]"
         options={{
           ...headerOptions,

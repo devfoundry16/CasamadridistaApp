@@ -9,7 +9,6 @@ import {
   Animated,
   Dimensions,
 } from "react-native";
-import { WebView } from "react-native-webview";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import {
@@ -28,6 +27,7 @@ import { useEffect, useState, useRef } from "react";
 import { upcomingMatches } from "@/mocks/team";
 import { quotes, strengthStats, squadPlayers } from "@/mocks/advertisement";
 import Carousel from "react-native-reanimated-carousel";
+import CustomWebView from "@/components/CustomWebView";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = 280;
@@ -381,37 +381,9 @@ export default function HomeScreen() {
           </View>
         ))}
       </View>
+      <CustomWebView title="La Liga Standings" statsHtml={statsHtml} />
+      <CustomWebView title="Players stats" statsHtml={standingHTML} />
 
-      {/* <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}></Text>
-        <View style={styles.widgetContainer}>
-          <WebView
-            source={{
-              html: statsHtml,
-            }}
-            style={styles.webview}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            startInLoadingState={true}
-            scalesPageToFit={true}
-          />
-        </View>
-      </View>
-      <View>
-        <Text style={styles.sectionTitle}></Text>
-        <View style={styles.widgetContainer}>
-          <WebView
-            source={{
-              html: standingHTML,
-            }}
-            style={styles.webview}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            startInLoadingState={true}
-            scalesPageToFit={true}
-          />
-        </View>
-      </View> */}
       <View style={styles.adStrengthSection}>
         <View style={styles.adSectionHeader}>
           <View style={styles.adHeaderLine} />
@@ -800,21 +772,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600" as const,
   },
-  widgetContainer: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    overflow: "hidden",
-    height: 500,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    marginBottom: 12,
-  },
-  webview: {
-    backgroundColor: "transparent",
-  },
   matchCard: {
     borderColor: Colors.lightGray,
     borderWidth: 1,
@@ -1196,7 +1153,7 @@ const styles = StyleSheet.create({
   adHeadPhoto: {
     width: 200,
     height: 200,
-    borderRadius: "50%",
+    borderRadius: 100,
     marginBottom: 12,
     borderWidth: 3,
     borderColor: Colors.accent,

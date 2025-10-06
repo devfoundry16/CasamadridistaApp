@@ -18,66 +18,7 @@ export default function NewsScreen() {
         style={styles.categoriesContainer}
         contentContainerStyle={styles.categoriesContent}
       >
-        {categories.map((category) => (
-          <TouchableOpacity
-            key={category.id}
-            style={[
-              styles.categoryChip,
-              selectedCategory === category.id && styles.categoryChipActive,
-            ]}
-            onPress={() => setSelectedCategory(category.id)}
-            activeOpacity={0.7}
-          >
-            <Text
-              style={[
-                styles.categoryChipText,
-                selectedCategory === category.id && styles.categoryChipTextActive,
-              ]}
-            >
-              {category.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <ScrollView
-        style={styles.articlesContainer}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.articlesContent}
-      >
-        {filteredArticles.map((article: any) => (
-          <TouchableOpacity
-            key={article.id}
-            style={styles.articleCard}
-            onPress={() => router.push(`/article/${article.id}` as any)}
-            activeOpacity={0.8}
-          >
-            <Image
-              source={{ uri: article.image }}
-              style={styles.articleImage}
-              contentFit="cover"
-            />
-            <View style={styles.articleContent}>
-              <View style={styles.articleCategory}>
-                <Text style={styles.articleCategoryText}>
-                  {article.category.replace('-', ' ').toUpperCase()}
-                </Text>
-              </View>
-              <Text style={styles.articleTitle} numberOfLines={2}>
-                {article.title}
-              </Text>
-              <Text style={styles.articleExcerpt} numberOfLines={3}>
-                {article.excerpt}
-              </Text>
-              <View style={styles.articleMeta}>
-                <Clock size={12} color={Colors.textLight} />
-                <Text style={styles.articleMetaText}>{article.readTime}</Text>
-                <Text style={styles.articleMetaText}>•</Text>
-                <Text style={styles.articleMetaText}>{article.date}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
+        
       </ScrollView>
     </View>
   );

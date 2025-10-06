@@ -1,15 +1,14 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { WebView } from "react-native-webview";
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Image } from "expo-image";
 import Colors from "@/constants/colors";
 import ProfileApiService from "@/services/profileApi";
-
 import CountryFlag from "react-native-country-flag";
 import countries from "@/constants/countries.json";
-import { CountryMap, Player, PlayerWithTeam } from "@/interfaces/profile";
+import { CountryMap} from "@/interfaces/profile";
 import { useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
+import CustomWebView from "@/components/CustomWebView";
 
 const map: CountryMap = countries;
 export default function PlayerDetailScreen() {
@@ -160,38 +159,9 @@ export default function PlayerDetailScreen() {
             </View>
           </View>
 
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Player Stats</Text>
-            <View style={styles.widgetContainer}>
-              <WebView
-                source={{
-                  html: statsHtml,
-                }}
-                style={styles.webview}
-                javaScriptEnabled={true}
-                domStorageEnabled={true}
-                startInLoadingState={true}
-                scalesPageToFit={true}
-              />
-            </View>
-          </View>
+          <CustomWebView statsHtml={statsHtml} title="Player Stats"/>
+          
 
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Club</Text>
-            <View style={styles.clubCard}>
-              <Image
-                source={{
-                  uri: "https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg",
-                }}
-                style={styles.clubLogo}
-                contentFit="contain"
-              />
-              <View style={styles.clubInfo}>
-                <Text style={styles.clubName}>Real Madrid CF</Text>
-                <Text style={styles.clubSubtitle}>Los Blancos</Text>
-              </View>
-            </View>
-          </View>
         </View>
       </ScrollView>
     </>
@@ -332,19 +302,5 @@ const styles = StyleSheet.create({
     color: Colors.textWhite,
     textAlign: "center",
     marginTop: 40,
-  },
-  widgetContainer: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    overflow: "hidden",
-    height: 400,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  webview: {
-    backgroundColor: "transparent",
   },
 });
