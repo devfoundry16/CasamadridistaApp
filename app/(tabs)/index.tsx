@@ -35,8 +35,14 @@ const CARD_SPACING = 20;
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { nextMatch, fetchNextMatchData, lastMatches, fetchLastMatchesData } =
-    useApp();
+  const { teamInfoList, homeTeamLastMatches, awayTeamLastMatches } = useApp();
+
+  const RealMadridId = 541;
+
+  const nextMatch = teamInfoList
+    .find((p) => p.team.id == RealMadridId)
+    ?.nextMatches?.at(0);
+
   const quoteCarouselRef = useRef<any>(null);
   const playerCarouseRef = useRef<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -93,9 +99,6 @@ export default function HomeScreen() {
                             padding: 0;
                             background-color: transparent;
                           }
-                          api-sports-widget {
-                            background-color: none;
-                          }
                         </style>
                       </head>
                       <body>
@@ -129,9 +132,6 @@ export default function HomeScreen() {
                             padding: 0;
                             background-color: transparent;
                           }
-                          api-sports-widget {
-                            background-color: none;
-                          }
                         </style>
                       </head>
                       <body>
@@ -155,8 +155,9 @@ export default function HomeScreen() {
                   `;
   useEffect(() => {
     const fetchData = async () => {
-      await fetchNextMatchData(541);
-      // await fetchLastMatchesData(541);
+      // console.log('nextMatch', nextMatch);
+      // await fetchLastMatchesData(nextMatch?.teams.home.id);
+      // console.log('last matches:', lastMatches);
       // console.log("Data Successfully Loaded");
     };
     fetchData();
@@ -208,6 +209,7 @@ export default function HomeScreen() {
                 backgroundColor: Colors.darkGold,
               },
             ]}
+            onPress={() => router.push("/memberships/royal-investor")}
           >
             <Text style={[styles.loginButtonText, { color: Colors.textWhite }]}>
               Become a Member
@@ -252,15 +254,20 @@ export default function HomeScreen() {
                       {nextMatch?.teams.home.name}
                     </Text>
                     <View style={styles.formContainer}>
-                      {lastMatches.map((result, index) => (
+                      {homeTeamLastMatches?.map((result, index) => (
                         <View
                           key={index}
                           style={[
                             styles.formBadge,
-                            result.teams.home.winner && styles.formWin,
-                            result.teams.home.winner ===
-                              result.teams.away.winner && styles.formDraw,
-                            !result.teams.home.winner && styles.formLoss,
+                            (nextMatch?.teams.home.id == result.teams.home.id
+                              ? result.goals.home > result.goals.away
+                              : result.goals.home < result.goals.away) && styles.formWin,
+                            (nextMatch?.teams.home.id == result.teams.home.id
+                              ? result.goals.home == result.goals.away
+                              : result.goals.home == result.goals.away) && styles.formDraw,
+                            (nextMatch?.teams.home.id == result.teams.home.id
+                              ? result.goals.home < result.goals.away
+                              : result.goals.home > result.goals.away ) && styles.formLoss,
                           ]}
                         ></View>
                       ))}
@@ -288,15 +295,20 @@ export default function HomeScreen() {
                       {nextMatch?.teams.away.name}
                     </Text>
                     <View style={styles.formContainer}>
-                      {lastMatches.map((result, index) => (
+                      {awayTeamLastMatches?.map((result, index) => (
                         <View
                           key={index}
                           style={[
                             styles.formBadge,
-                            result.teams.home.winner && styles.formWin,
-                            result.teams.home.winner ===
-                              result.teams.away.winner && styles.formDraw,
-                            !result.teams.home.winner && styles.formLoss,
+                            (nextMatch?.teams.away.id == result.teams.home.id
+                              ? result.goals.home > result.goals.away
+                              : result.goals.home < result.goals.away) && styles.formWin,
+                            (nextMatch?.teams.away.id == result.teams.home.id
+                              ? result.goals.home == result.goals.away
+                              : result.goals.home == result.goals.away) && styles.formDraw,
+                            (nextMatch?.teams.away.id == result.teams.home.id
+                              ? result.goals.home < result.goals.away
+                              : result.goals.home > result.goals.away ) && styles.formLoss,
                           ]}
                         ></View>
                       ))}

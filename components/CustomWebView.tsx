@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
   },
   widgetContainer: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.darkGray,
     borderRadius: 12,
     overflow: "hidden",
     height: 400,
@@ -44,6 +44,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   webview: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
   },
 });

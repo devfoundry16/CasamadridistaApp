@@ -52,10 +52,12 @@ export default function TeamDetailScreen() {
   const forwards = players.player.filter((p) => p.position === "Attacker");
 
   useEffect(() => {
-    //fetchProfileData(teamId); // Default Real Madrid team ID
+    if ( players.player.length === 0) {
+      console.log("fetch profile data on team[id].tsx");
+      fetchProfileData(teamId); // Default Real Madrid team ID
+    }
     const teamIDs = playersList.map((players) => players.team.id);
     console.log("loaded players on team[id].tsx:", teamIDs);
-    console.log("fetch profile data on team[id].tsx");
   }, []);
 
   return (
