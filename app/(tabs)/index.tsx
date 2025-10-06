@@ -11,28 +11,24 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import {
-  Clock,
-  ChevronRight,
-  Users,
-  Gift,
-  Calendar,
-  Heart,
-  ChevronLeft,
-  MapPinned,
-} from "lucide-react-native";
+import { ChevronRight, Users, ChevronLeft } from "lucide-react-native";
 import { useApp } from "@/contexts/AppContext";
 import Colors from "@/constants/colors";
 import { useEffect, useState, useRef } from "react";
-import { teamInfo, upcomingMatches } from "@/mocks/team";
 import { quotes, strengthStats, squadPlayers } from "@/mocks/advertisement";
 import Carousel from "react-native-reanimated-carousel";
 import CustomWebView from "@/components/CustomWebView";
 import UpcomingMatchesCarousel from "@/components/UpcomingMatchCard";
+import UpcomingForm from "@/components/UpcomingForm";
 
 const { width } = Dimensions.get("window");
+type TimeLeft = {
+  days: string;
+  hours: string;
+  minutes: string;
+  seconds: string;
+};
 const CARD_WIDTH = 280;
-const CARD_SPACING = 20;
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -63,7 +59,12 @@ export default function HomeScreen() {
 
   const mainScrollY = useRef(0);
 
-  const [timeLeft, setTimeLeft] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
+    days: "0",
+    hours: "0",
+    minutes: "0",
+    seconds: "0",
+  });
   const getIcon = (iconName: string) => {
     const iconProps = { width: 156, height: 156 };
     switch (iconName) {
@@ -142,7 +143,12 @@ export default function HomeScreen() {
     seconds: number
   ) => {
     const pad = (num: number) => String(num).padStart(2, "0");
-    return `${pad(days)}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+    return {
+      days: pad(days),
+      hours: pad(hours),
+      minutes: pad(minutes),
+      seconds: pad(seconds),
+    };
   };
 
   const handleStrengthSectionLayout = (event: any) => {
@@ -252,7 +258,7 @@ export default function HomeScreen() {
 
         setTimeLeft(formatTime(days, hours, minutes, seconds));
       } else {
-        setTimeLeft("Match Started");
+        setTimeLeft({ days: "0", hours: "0", minutes: "0", seconds: "0" });
       }
     };
     calculateTimeLeft();
@@ -297,139 +303,21 @@ export default function HomeScreen() {
             <View style={styles.nextMatchSection}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Upcoming</Text>
+                {nextMatch && (
+                  <UpcomingForm
+                    nextMatch={nextMatch}
+                    homeTeamLastMatches={homeTeamLastMatches}
+                    awayTeamLastMatches={awayTeamLastMatches}
+                    timeLeft={timeLeft}
+                  />
+                )}
               </View>
-
-              <View style={styles.matchCard}>
-                <View style={styles.nextMatchHeader}>
-                  <View style={{ flexDirection: "column" }}>
-                    <Text style={styles.nextMatchCompetition}>
-                      {nextMatch?.league.name}
-                    </Text>
-                    <Text style={styles.nextMatchCompetition}>
-                      {nextMatch?.league.round}
-                    </Text>
-                  </View>
-                  <View style={styles.countdownContainer}>
-                    <Clock size={16} color={Colors.primary} />
-                    <Text style={styles.countdownText}>{timeLeft}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.nextMatchTeams}>
-                  <TouchableOpacity
-                    style={styles.nextMatchTeam}
-                    onPress={() =>
-                      router.push(`/team/${nextMatch?.teams.home.id}`)
-                    }
-                  >
-                    <Image
-                      source={{ uri: nextMatch?.teams.home.logo }}
-                      style={styles.nextMatchLogo}
-                      contentFit="contain"
-                    />
-                    <Text style={styles.nextMatchTeamName}>
-                      {nextMatch?.teams.home.name}
-                    </Text>
-                    <View style={styles.formContainer}>
-                      {homeTeamLastMatches?.map((result, index) => (
-                        <View
-                          key={index}
-                          style={[
-                            styles.formBadge,
-                            (nextMatch?.teams.home.id == result.teams.home.id
-                              ? result.goals.home > result.goals.away
-                              : result.goals.home < result.goals.away) &&
-                              styles.formWin,
-                            (nextMatch?.teams.home.id == result.teams.home.id
-                              ? result.goals.home == result.goals.away
-                              : result.goals.home == result.goals.away) &&
-                              styles.formDraw,
-                            (nextMatch?.teams.home.id == result.teams.home.id
-                              ? result.goals.home < result.goals.away
-                              : result.goals.home > result.goals.away) &&
-                              styles.formLoss,
-                          ]}
-                        ></View>
-                      ))}
-                    </View>
-                  </TouchableOpacity>
-
-                  <View style={styles.vsContainer}>
-                    <Text style={styles.vsText}>{nextMatch?.goals.home}</Text>
-                    <Text style={styles.vsText}>VS</Text>
-                    <Text style={styles.vsText}>{nextMatch?.goals.away}</Text>
-                  </View>
-
-                  <TouchableOpacity
-                    style={styles.nextMatchTeam}
-                    onPress={() =>
-                      router.push(`/team/${nextMatch?.teams.away.id}`)
-                    }
-                  >
-                    <Image
-                      source={{ uri: nextMatch?.teams.away.logo }}
-                      style={styles.nextMatchLogo}
-                      contentFit="contain"
-                    />
-                    <Text style={styles.nextMatchTeamName}>
-                      {nextMatch?.teams.away.name}
-                    </Text>
-                    <View style={styles.formContainer}>
-                      {awayTeamLastMatches?.map((result, index) => (
-                        <View
-                          key={index}
-                          style={[
-                            styles.formBadge,
-                            (nextMatch?.teams.away.id == result.teams.home.id
-                              ? result.goals.home > result.goals.away
-                              : result.goals.home < result.goals.away) &&
-                              styles.formWin,
-                            (nextMatch?.teams.away.id == result.teams.home.id
-                              ? result.goals.home == result.goals.away
-                              : result.goals.home == result.goals.away) &&
-                              styles.formDraw,
-                            (nextMatch?.teams.away.id == result.teams.home.id
-                              ? result.goals.home < result.goals.away
-                              : result.goals.home > result.goals.away) &&
-                              styles.formLoss,
-                          ]}
-                        ></View>
-                      ))}
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.nextMatchDetails}>
-                  <View style={styles.nextMatchDetailItem}>
-                    <Calendar size={16} color={Colors.textWhite} />
-                    <Text
-                      style={{ ...styles.nextMatchDetailText, marginRight: 10 }}
-                    >
-                      {new Date(
-                        nextMatch?.fixture.date as any
-                      ).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </Text>
-                  </View>
-                  {nextMatch?.fixture.venue.name && (
-                    <View style={styles.nextMatchDetailItem}>
-                      <MapPinned size={16} color={Colors.textWhite} />
-                      <Text style={styles.nextMatchDetailText}>
-                        {nextMatch?.fixture.venue.name}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-              </View>
+                
             </View>
           </View>
         </View>
-        <Text>{matches?.length && <UpcomingMatchesCarousel data={matches} />}
+        <Text>
+          {matches?.length && <UpcomingMatchesCarousel data={matches} />}
         </Text>
       </View>
       <CustomWebView title="La Liga Standings" statsHtml={statsHtml} />
@@ -448,7 +336,12 @@ export default function HomeScreen() {
 
         <View style={styles.adStatsContainer}>
           {strengthStats.map((stat, index) => (
-            <AnimatedStat key={index} stat={stat} icon={getIcon(stat.icon)} shouldAnimate={shouldAnimate}/>
+            <AnimatedStat
+              key={index}
+              stat={stat}
+              icon={getIcon(stat.icon)}
+              shouldAnimate={shouldAnimate}
+            />
           ))}
         </View>
       </View>
@@ -641,17 +534,17 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   sectionHeader: {
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     marginBottom: 16,
-    marginTop: 8,
+    marginTop: 20,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
     color: Colors.textWhite,
-    textAlign: "center",
+    marginBottom: 15,
   },
   accentLine: {
     height: 3,
@@ -942,7 +835,7 @@ const styles = StyleSheet.create({
   nextMatchTeam: {
     flex: 1,
     alignItems: "center",
-    gap: 12,
+    gap: 6,
   },
   nextMatchLogo: {
     width: 70,
@@ -1001,28 +894,6 @@ const styles = StyleSheet.create({
   formContainer: {
     flexDirection: "row",
     gap: 4,
-    marginTop: 6,
-  },
-  formBadge: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  formWin: {
-    backgroundColor: "#10b981",
-  },
-  formDraw: {
-    backgroundColor: "#f59e0b",
-  },
-  formLoss: {
-    backgroundColor: "#ef4444",
-  },
-  formText: {
-    fontSize: 10,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
   },
   adPlayerImage: {
     width: "100%",

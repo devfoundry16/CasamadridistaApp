@@ -58,7 +58,7 @@ export default function UpcomingMatchesCarousel({
 
   const renderCard = (item: any) => (
     <View style={styles.card}>
-      <Text style={styles.league}>{item.league.name}</Text>
+      <Text style={styles.league}>{item.league.name} {item.league.season}-{item.league.season+1}</Text>
       <Text style={styles.week}>{item.league.round}</Text>
 
       <View style={styles.matchRow}>
@@ -146,7 +146,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
   },
   adHeaderLine: {
     width: 70,
@@ -211,12 +210,12 @@ const styles = StyleSheet.create({
   },
   teamName: {
     color: Colors.textWhite,
-    fontSize: 15,
+    fontSize: 14,
     marginTop: 2,
   },
   score: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: "bold",
   },
   date: {
@@ -226,6 +225,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 8,
-    fontSize: 11,
+    fontSize: 13,
   },
 });
