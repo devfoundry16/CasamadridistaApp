@@ -1,15 +1,13 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { WebView } from "react-native-webview";
-import { useLocalSearchParams, Stack } from "expo-router";
-import { Image } from "expo-image";
 import Colors from "@/constants/colors";
-import ProfileApiService from "@/services/profileApi";
+import { Image } from "expo-image";
+import { Stack, useLocalSearchParams } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-import CountryFlag from "react-native-country-flag";
 import countries from "@/constants/countries.json";
-import { CountryMap, Player, PlayerWithTeam } from "@/interfaces/profile";
-import { useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
+import { CountryMap } from "@/types/profile";
+import { useEffect } from "react";
+import CountryFlag from "react-native-country-flag";
 
 const map: CountryMap = countries;
 export default function PlayerDetailScreen() {

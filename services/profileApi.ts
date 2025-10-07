@@ -1,5 +1,5 @@
+import { TeamInfo } from "@/types/profile";
 import fetchWithAuth from "./fetchWithAuth";
-import { TeamInfo } from "@/interfaces/profile";
 class ApiService {
   private API_KEY = "2efab6a210831868664529f16d897809";
 

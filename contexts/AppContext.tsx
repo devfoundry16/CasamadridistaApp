@@ -1,16 +1,15 @@
+import MatchApiService from "@/services/matchApi";
+import ProfileApiService from "@/services/profileApi";
+import { Match } from "@/types/match";
+import {
+    CoachWithTeam,
+    PlayerWithTeam,
+    TeamInfo
+} from "@/types/profile";
 import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Coach,
-  TeamInfo,
-  PlayerWithTeam,
-  CoachWithTeam,
-} from "@/interfaces/profile";
-import { Match } from "@/interfaces/match";
-import ProfileApiService from "@/services/profileApi";
-import MatchApiService from "@/services/matchApi";
 import * as Bluebird from "bluebird";
+import { useCallback, useEffect, useMemo, useState } from "react";
 type Theme = "light" | "dark";
 const RealMadridId = 541;
 export const [AppProvider, useApp] = createContextHook(() => {

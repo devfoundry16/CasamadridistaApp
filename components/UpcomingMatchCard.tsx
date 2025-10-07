@@ -1,5 +1,5 @@
 import Colors from "@/constants/colors";
-import { Match } from "@/interfaces/match";
+import { Match } from "@/types/match";
 import { useRouter } from "expo-router";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useRef } from "react";

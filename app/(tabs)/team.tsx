@@ -2,7 +2,7 @@ import CustomWebView from "@/components/CustomWebView";
 import Colors, { altColors as colors } from "@/constants/colors";
 import countries from "@/constants/countries.json";
 import { useApp } from "@/contexts/AppContext";
-import { Coach, CoachWithTeam, CountryMap, Player } from "@/interfaces/profile";
+import { Coach, CoachWithTeam, CountryMap, Player } from "@/types/profile";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { Building2, Calendar, MapPin } from "lucide-react-native";

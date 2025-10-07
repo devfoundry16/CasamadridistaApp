@@ -1,8 +1,10 @@
 import Colors from "@/constants/colors";
-import { Match } from "@/interfaces/match";
+import { Match } from "@/types/match";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import CircularProgress from "react-native-circular-progress-indicator";
+
 import TeamForm from "./TeamForm";
 interface UpcomingProps {
   nextMatch: Match;
@@ -23,6 +25,7 @@ export default function UpcomingForm({
   timeLeft,
 }: UpcomingProps) {
   const router = useRouter();
+  const maxValues = [365, 24, 60, 60];
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -81,11 +84,26 @@ export default function UpcomingForm({
       {/* Countdown */}
       <View style={styles.timerRow}>
         {Object.entries(timeLeft).map(([label, value], i) => (
-          <View key={i} style={styles.timerCircle}>
-            <View style={styles.timerInner}>
+          <View key={i}>
+            {/* <View style={styles.timerInner}>
               <Text style={styles.timerValue}>{value}</Text>
               <Text style={styles.timerLabel}>{label}</Text>
-            </View>
+            </View> */}
+            <CircularProgress
+              radius={30}
+              value={Number(value)}
+              maxValue={maxValues[i]}
+              progressValueStyle={{color: Colors.textWhite, fontSize: 20}}
+              title={label}
+              titleColor={Colors.textWhite}
+              titleStyle={{ fontSize: 10 }}
+              activeStrokeColor="#28a745"
+              inActiveStrokeColor="#e6e6e6"
+              inActiveStrokeWidth={3}
+              activeStrokeWidth={3}
+              inActiveStrokeOpacity={0.2}
+              duration={1000}
+            />
           </View>
         ))}
       </View>
@@ -158,14 +176,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: Colors.textWhite,
   },
-  formWin: { backgroundColor: "#16a34a" },
+  formWin: { backgroundColor: "#28a745" },
   formDraw: { backgroundColor: "#facc15" },
   formLoss: { backgroundColor: "#dc2626" },
   timerRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 16,
+    gap: 1,
     marginBottom: 10,
   },
   timerCircle: {

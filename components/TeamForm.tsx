@@ -1,8 +1,8 @@
 // components/TeamForm.tsx
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { Match } from "@/interfaces/match";
 import Colors from "@/constants/colors";
+import { Match } from "@/types/match";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     color: Colors.textWhite,
     textAlign: 'center',
   },
-  win: { backgroundColor: "#10b981" },
+  win: { backgroundColor: "#28a745" },
   draw: { backgroundColor: "#f59e0b" },
   loss: { backgroundColor: "#ef4444" },
 });
