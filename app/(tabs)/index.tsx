@@ -315,13 +315,11 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-        <View>
-          {matches?.length && <UpcomingMatchesCarousel data={matches} />}
-        </View>
+        <UpcomingMatchesCarousel data={matches} />
       </View>
 
-      <CustomWebView title="La Liga Standings" statsHtml={statsHtml} />
-      <CustomWebView title="Players stats" statsHtml={standingHTML} />
+      <CustomWebView size={700} title="La Liga Standings" statsHtml={statsHtml} />
+      <CustomWebView size={600} title="Team stats" statsHtml={standingHTML} />
 
       <View
         style={styles.adStrengthSection}

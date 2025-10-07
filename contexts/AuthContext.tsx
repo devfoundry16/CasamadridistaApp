@@ -1,6 +1,6 @@
 import createContextHook from '@nkzw/create-context-hook';
-import { useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export interface User {
   id: string;
@@ -87,10 +87,10 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       email,
       phone: '+1234567890',
       age: '30',
-      nationality: 'Spain',
-      placeOfResidence: 'Madrid',
+      nationality: 'Lebanon',
+      placeOfResidence: 'Berlin',
       annualIncome: '$50,000 - $100,000',
-      photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
+      photo: 'https://casamadridista.com/wp-content/uploads/2025/08/IMG_3689.jpg',
     };
 
     await AsyncStorage.setItem('user', JSON.stringify(mockUser));

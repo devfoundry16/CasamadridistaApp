@@ -1,11 +1,11 @@
+import Colors from "@/constants/colors";
+import { AppProvider } from "@/contexts/AppContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { AppProvider } from "@/contexts/AppContext";
-import { AuthProvider } from "@/contexts/AuthContext";
-import Colors from "@/constants/colors";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -48,6 +48,13 @@ function RootLayoutNav() {
         options={{
           ...headerOptions,
           title: "Team Info",
+        }}
+      />
+      <Stack.Screen
+        name="match/[id]"
+        options={{
+          ...headerOptions,
+          title: "Match Info",
         }}
       />
     </Stack>

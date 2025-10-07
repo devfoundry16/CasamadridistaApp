@@ -1,10 +1,12 @@
-import { View, Text, StyleSheet } from "react-native";
-import WebView from "react-native-webview";
 import Colors from "@/constants/colors";
+import { StyleSheet, Text, View } from "react-native";
+import WebView from "react-native-webview";
 const CustomWebView = ({
+  size = 300,
   title,
   statsHtml,
 }: {
+  size: number;
   title: string;
   statsHtml: string;
 }) => {
@@ -15,7 +17,7 @@ const CustomWebView = ({
       <Text style={styles.adSectionTitle}>{title}</Text>
       <View style={styles.adHeaderLine} />
       </View>
-      <View style={styles.widgetContainer}>
+      <View style={[styles.widgetContainer, {height: size}]}>
         <WebView
           source={{
             html: statsHtml,
@@ -58,7 +60,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkGray,
     borderRadius: 12,
     overflow: "hidden",
-    height: 400,
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -66,6 +67,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   webview: {
-    backgroundColor: "transparent",
+    backgroundColor: Colors.deepDarkGray,
   },
 });

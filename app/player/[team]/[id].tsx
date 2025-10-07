@@ -1,14 +1,13 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { useLocalSearchParams, Stack } from "expo-router";
-import { Image } from "expo-image";
-import Colors from "@/constants/colors";
-import ProfileApiService from "@/services/profileApi";
-import CountryFlag from "react-native-country-flag";
-import countries from "@/constants/countries.json";
-import { CountryMap} from "@/interfaces/profile";
-import { useEffect } from "react";
-import { useApp } from "@/contexts/AppContext";
 import CustomWebView from "@/components/CustomWebView";
+import Colors from "@/constants/colors";
+import countries from "@/constants/countries.json";
+import { useApp } from "@/contexts/AppContext";
+import { CountryMap } from "@/interfaces/profile";
+import { Image } from "expo-image";
+import { Stack, useLocalSearchParams } from "expo-router";
+import { useEffect } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import CountryFlag from "react-native-country-flag";
 
 const map: CountryMap = countries;
 export default function PlayerDetailScreen() {
@@ -44,7 +43,7 @@ export default function PlayerDetailScreen() {
                             background-color: transparent;
                           }
                           api-sports-widget {
-                            background-color: none;
+                            background-color: transparent;
                           }
                         </style>
                       </head>
@@ -54,6 +53,7 @@ export default function PlayerDetailScreen() {
                           data-key="2efab6a210831868664529f16d897809"
                           data-sport="football"
                           data-theme="grey"
+                          data-show-logos="true"
                         ></api-sports-widget>
 
                         <api-sports-widget 
@@ -156,7 +156,7 @@ export default function PlayerDetailScreen() {
             </View>
           </View>
 
-          <CustomWebView statsHtml={statsHtml} title="Player Stats"/>
+          <CustomWebView size={600} statsHtml={statsHtml} title="Player Stats"/>
           
 
         </View>
@@ -168,7 +168,7 @@ export default function PlayerDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.darkGray,
+    backgroundColor: Colors.deepDarkGray,
   },
   header: {
     paddingTop: 40,

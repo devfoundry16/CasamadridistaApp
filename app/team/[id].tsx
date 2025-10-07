@@ -1,11 +1,6 @@
 import Colors, { altColors as colors } from "@/constants/colors";
 import countries from "@/constants/countries.json";
-import {
-  Coach,
-  CoachWithTeam,
-  CountryMap,
-  Player
-} from "@/interfaces/profile";
+import { Coach, CoachWithTeam, CountryMap, Player } from "@/interfaces/profile";
 import { Image } from "expo-image";
 import { Stack, useRouter } from "expo-router";
 import { Building2, Calendar, MapPin } from "lucide-react-native";
@@ -18,8 +13,8 @@ import {
   View,
 } from "react-native";
 
+import CustomWebView from "@/components/CustomWebView";
 import { useApp } from "@/contexts/AppContext";
-import { latestMatches } from "@/mocks/team";
 import { useLocalSearchParams } from "expo-router";
 import CountryFlag from "react-native-country-flag";
 const map: CountryMap = countries;
@@ -49,12 +44,50 @@ export default function TeamDetailScreen() {
   const forwards = players.player.filter((p) => p.position === "Attacker");
 
   useEffect(() => {
-    if ( players.player.length === 0) {
+    if (players.player.length === 0) {
+      console.log('loaded players from apis');
       fetchProfileData(teamId); // Default Real Madrid team ID
     }
     const teamIDs = playersList.map((players) => players.team.id);
-    console.log("loaded players on team[id].tsx:", teamIDs);
+    console.log("loaded players from context on team[id].tsx:", teamIDs);
   }, []);
+
+  const statsHtml = `
+                    <!DOCTYPE html>
+                    <html>
+                      <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                          body {
+                            margin: 0;
+                            padding: 0;
+                            background-color: transparent;
+                          }
+                          api-sports-widget {
+                            background-color: none;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <api-sports-widget
+                          data-type="config"
+                          data-key="2efab6a210831868664529f16d897809"
+                          data-sport="football"
+                          data-theme="grey"
+                          data-show-logos="true"
+                        ></api-sports-widget>
+
+                        <api-sports-widget 
+                          data-type="team" 
+                          data-team-id=${teamId}
+                          data-team-squad="true"
+                          data-team-statistics="true"
+                          data-team-venue="true"
+                        ></api-sports-widget>
+                        <script type="module" src="https://widgets.api-sports.io/3.1.0/widgets.js"></script>
+                      </body>
+                    </html>
+                  `;
 
   return (
     <>
@@ -203,12 +236,13 @@ export default function TeamDetailScreen() {
             )}
           </View>
 
-          <View style={styles.sectionHeader}>
+          {/* <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Latest Matches</Text>
             <View style={styles.accentLine} />
-          </View>
+          </View> */}
+          <CustomWebView size={600} statsHtml={statsHtml} title="Team Stats" />
 
-          {latestMatches.map((match, index) => (
+          {/* {latestMatches.map((match, index) => (
             <View key={index} style={styles.matchCard}>
               <View style={styles.matchHeader}>
                 <Text style={styles.matchCompetition}>{match.competition}</Text>
@@ -244,7 +278,8 @@ export default function TeamDetailScreen() {
                 </View>
               </View>
             </View>
-          ))}
+          ))} */}
+
         </View>
       </ScrollView>
     </>
