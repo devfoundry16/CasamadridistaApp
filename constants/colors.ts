@@ -4,10 +4,10 @@ const realMadridNavy = "#001F3F" as const;
 const realMadridPurple = "#8B5CF6" as const;
 const Colors = {
   primary: '#FFFFFF',
-  secondary: '#BC9045',
-  accent: '#BC9045',
+  secondary: realMadridGold,
+  accent: realMadridGold,
   royalBlue: '#0033A0',
-  darkGold: '#BC9045',
+  darkGold: realMadridGold,
   lightGray: '#F5F5F5',
   mediumGray: '#E0E0E0',
   darkGray: '#515151',

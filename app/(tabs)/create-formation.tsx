@@ -1,9 +1,9 @@
 import React, { useRef } from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import { View, StyleSheet, Platform, Dimensions } from "react-native";
 import { Stack } from "expo-router";
-import { WebView } from "react-native-webview";
 import Colors from "@/constants/colors";
-
+import { WebView } from 'react-native-webview';
+const { width, height } = Dimensions.get('window');
 export default function CreateFormationScreen() {
   const htmlSource = Platform.select({
     default: { uri: "http://localhost:5000" },
@@ -42,9 +42,14 @@ export default function CreateFormationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: Colors.text,
+    margin: 0,
+    padding: 0,
   },
   webview: {
     flex: 1,
+    backgroundColor: 'transparent',
+    margin: 0,
+    padding: 0,
   },
 });

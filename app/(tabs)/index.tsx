@@ -1,25 +1,24 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Pressable,
-  Animated,
-  Dimensions,
-} from "react-native";
+import CustomWebView from "@/components/CustomWebView";
+import UpcomingForm from "@/components/UpcomingForm";
+import UpcomingMatchesCarousel from "@/components/UpcomingMatchCard";
+import Colors from "@/constants/colors";
+import { useApp } from "@/contexts/AppContext";
+import { quotes, squadPlayers, strengthStats } from "@/mocks/advertisement";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { ChevronRight, Users, ChevronLeft } from "lucide-react-native";
-import { useApp } from "@/contexts/AppContext";
-import Colors from "@/constants/colors";
-import { useEffect, useState, useRef } from "react";
-import { quotes, strengthStats, squadPlayers } from "@/mocks/advertisement";
+import { ChevronLeft, ChevronRight, Users } from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Carousel from "react-native-reanimated-carousel";
-import CustomWebView from "@/components/CustomWebView";
-import UpcomingMatchesCarousel from "@/components/UpcomingMatchCard";
-import UpcomingForm from "@/components/UpcomingForm";
 
 const { width } = Dimensions.get("window");
 type TimeLeft = {
@@ -316,10 +315,11 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-        <Text>
+        <View>
           {matches?.length && <UpcomingMatchesCarousel data={matches} />}
-        </Text>
+        </View>
       </View>
+
       <CustomWebView title="La Liga Standings" statsHtml={statsHtml} />
       <CustomWebView title="Players stats" statsHtml={standingHTML} />
 

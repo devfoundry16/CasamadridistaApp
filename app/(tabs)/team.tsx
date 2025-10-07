@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
+import Colors, { altColors as colors } from "@/constants/colors";
+import countries from "@/constants/countries.json";
+import { useApp } from "@/contexts/AppContext";
+import { Coach, CoachWithTeam, CountryMap, Player } from "@/interfaces/profile";
+import { latestMatches } from "@/mocks/team";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { Building2, Calendar, MapPin } from "lucide-react-native";
+import React, { useEffect } from "react";
 import {
-  TouchableOpacity,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
-import { Image } from "expo-image";
-import { useRouter } from "expo-router";
-import { MapPin, Calendar, Building2 } from "lucide-react-native";
-import { Player, TeamInfo, Coach, CountryMap, PlayerWithTeam, CoachWithTeam } from "@/interfaces/profile";
-import countries from "@/constants/countries.json";
-import { altColors as colors } from "@/constants/colors";
-import { latestMatches } from "@/mocks/team";
-import { useApp } from "@/contexts/AppContext";
 import CountryFlag from "react-native-country-flag";
 const map: CountryMap = countries;
 
@@ -48,7 +48,7 @@ export default function TeamScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.container, { backgroundColor: Colors.darkGray }]}
       showsVerticalScrollIndicator={false}
     >
       <View

@@ -1,16 +1,16 @@
+import Colors from "@/constants/colors";
+import { Match } from "@/interfaces/match";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useRef } from "react";
 import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
   Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Match } from "@/interfaces/match";
 import Carousel from "react-native-reanimated-carousel";
-import Colors from "@/constants/colors";
 const { width } = Dimensions.get("window");
 
 const matches = [

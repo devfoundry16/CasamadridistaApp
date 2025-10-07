@@ -1,9 +1,9 @@
-import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import TeamForm from "./TeamForm";
 import Colors from "@/constants/colors";
 import { Match } from "@/interfaces/match";
 import { useRouter } from "expo-router";
+import React from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import TeamForm from "./TeamForm";
 interface UpcomingProps {
   nextMatch: Match;
   homeTeamLastMatches: Match[];
@@ -22,7 +22,7 @@ export default function UpcomingForm({
   awayTeamLastMatches,
   timeLeft,
 }: UpcomingProps) {
-    const router = useRouter();
+  const router = useRouter();
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -44,36 +44,37 @@ export default function UpcomingForm({
       {/* Teams */}
       <View style={styles.teamsContainer}>
         {/* Home Team */}
-        <TouchableOpacity style={styles.teamBox} onPress={() => router.push(`/team/${nextMatch.teams.home.id}`)}>
+        <TouchableOpacity
+          style={styles.teamBox}
+          onPress={() => router.push(`/team/${nextMatch.teams.home.id}`)}
+        >
           <Image
             source={{ uri: nextMatch?.teams.home.logo }}
             style={styles.logo}
           />
           <Text style={styles.teamName}>{nextMatch?.teams.home.name}</Text>
 
-          <View style={styles.formRow}>
-            <TeamForm
-              matches={homeTeamLastMatches ?? []}
-              nextMatchTeamId={nextMatch?.teams.home.id}
-              isHome
-            />
-          </View>
+          <TeamForm
+            matches={homeTeamLastMatches ?? []}
+            nextMatchTeamId={nextMatch?.teams.home.id}
+            isHome
+          />
         </TouchableOpacity>
 
         {/* Away Team */}
-        <TouchableOpacity style={styles.teamBox} onPress={() => router.push(`/team/${nextMatch.teams.away.id}`)}>
+        <TouchableOpacity
+          style={styles.teamBox}
+          onPress={() => router.push(`/team/${nextMatch.teams.away.id}`)}
+        >
           <Image
             source={{ uri: nextMatch?.teams.away.logo }}
             style={styles.logo}
           />
           <Text style={styles.teamName}>{nextMatch?.teams.away.name}</Text>
-
-          <View style={styles.formRow}>
-            <TeamForm
-              matches={awayTeamLastMatches ?? []}
-              nextMatchTeamId={nextMatch?.teams.away.id}
-            />
-          </View>
+          <TeamForm
+            matches={awayTeamLastMatches ?? []}
+            nextMatchTeamId={nextMatch?.teams.away.id}
+          />
         </TouchableOpacity>
       </View>
 
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   timerInner: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderRadius: 25,
     width: 50,
     height: 50,
