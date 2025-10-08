@@ -15,6 +15,14 @@ class ApiService {
     return res.response;
   }
 
+  async fetchLeagueById(leagueId: number) {
+    const param: Record<string, number> = {
+      id: leagueId,
+    };
+    const res = await fetchWithAuth("leagues", this.API_KEY, param);
+    return res.response[0];
+  }
+
   async fetchTeamInfo(id: number): Promise<TeamInfo> {
     const param: Record<string, number> = {
       id: id,
@@ -56,6 +64,13 @@ class ApiService {
     };
     const res = await fetchWithAuth("countries/", this.API_KEY, param);
     return res.response[0]?.flag;
+  }
+  async fetchVenueById(id: number) {
+    const param: Record<string, number> = {
+      id: id,
+    };
+    const res = await fetchWithAuth("venues/", this.API_KEY, param);
+    return res.response[0];
   }
 }
 const ProfileApiService = new ApiService();

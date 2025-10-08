@@ -104,14 +104,14 @@ export default function TeamScreen() {
           source={{
             uri: teamInfo?.team?.logo,
           }}
-          contentFit="cover"
+          contentFit="contain"
           style={styles.headerImage}
         />
         <Text style={[styles.headerTitle, { color: colors.textWhite }]}>
           {teamInfo?.team?.name} Squad
         </Text>
         <Text style={[styles.headerSubtitle, { color: colors.textWhite }]}>
-          2024-2025 Season
+          2025-2026 Season
         </Text>
       </View>
       <View style={styles.content}>
@@ -129,11 +129,15 @@ export default function TeamScreen() {
               <Text style={styles.infoLabel}>Founded</Text>
               <Text style={styles.infoValue}>{teamInfo?.team?.founded}</Text>
             </View>
-            <View style={styles.infoItem}>
+            <TouchableOpacity style={styles.infoItem} onPress={() => {
+              if (teamInfo?.venue?.id) {
+                router.push(`/venue/${teamInfo.venue.id}`);
+              }
+            }}>
               <Building2 size={20} color={colors.textWhite} />
               <Text style={styles.infoLabel}>Stadium</Text>
               <Text style={styles.infoValue}>{teamInfo?.venue?.name}</Text>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
 

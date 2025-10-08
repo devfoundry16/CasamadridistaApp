@@ -21,12 +21,6 @@ import {
 import Carousel from "react-native-reanimated-carousel";
 
 const { width } = Dimensions.get("window");
-type TimeLeft = {
-  days: string;
-  hours: string;
-  minutes: string;
-  seconds: string;
-};
 const CARD_WIDTH = 280;
 
 export default function HomeScreen() {
@@ -58,12 +52,7 @@ export default function HomeScreen() {
 
   const mainScrollY = useRef(0);
 
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
-    days: "0",
-    hours: "0",
-    minutes: "0",
-    seconds: "0",
-  });
+ 
   const getIcon = (iconName: string) => {
     const iconProps = { width: 156, height: 156 };
     switch (iconName) {
@@ -133,21 +122,6 @@ export default function HomeScreen() {
     if (quoteCarouselRef.current) {
       quoteCarouselRef.current.prev();
     }
-  };
-
-  const formatTime = (
-    days: number,
-    hours: number,
-    minutes: number,
-    seconds: number
-  ) => {
-    const pad = (num: number) => String(num).padStart(2, "0");
-    return {
-      days: pad(days),
-      hours: pad(hours),
-      minutes: pad(minutes),
-      seconds: pad(seconds),
-    };
   };
 
   const handleStrengthSectionLayout = (event: any) => {
@@ -239,31 +213,7 @@ export default function HomeScreen() {
     const fetchData = async () => {};
     fetchData();
   }, []);
-  useEffect(() => {
-    const calculateTimeLeft = async () => {
-      const matchDateString: any = nextMatch?.fixture.date;
-      const matchDateTime = new Date(matchDateString);
-      const now = new Date();
-      const difference = matchDateTime.getTime() - now.getTime();
-      if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        );
-        const minutes = Math.floor(
-          (difference % (1000 * 60 * 60)) / (1000 * 60)
-        );
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-        setTimeLeft(formatTime(days, hours, minutes, seconds));
-      } else {
-        setTimeLeft({ days: "0", hours: "0", minutes: "0", seconds: "0" });
-      }
-    };
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(timer);
-  }, [nextMatch]);
+  
   return (
     <ScrollView
       style={styles.container}
@@ -307,7 +257,6 @@ export default function HomeScreen() {
                     nextMatch={nextMatch}
                     homeTeamLastMatches={homeTeamLastMatches}
                     awayTeamLastMatches={awayTeamLastMatches}
-                    timeLeft={timeLeft}
                   />
                 )}
               </View>

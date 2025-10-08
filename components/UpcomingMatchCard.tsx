@@ -20,9 +20,11 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
 
   const renderCard = (item: any) => (
     <View style={styles.card}>
-      <Text style={styles.league}>
-        {item.league.name} {item.league.season}-{item.league.season + 1}
-      </Text>
+      <TouchableOpacity onPress={() => router.push(`/league/${item.league.id}/${item.league.season}`)}>
+        <Text style={styles.league}>
+          {item.league.name} {item.league.season}-{item.league.season + 1}
+        </Text>
+      </TouchableOpacity>
       <Text style={styles.week}>{item.league.round}</Text>
 
       <TouchableOpacity style={styles.matchRow} onPress={() => router.push(`/match/${item.fixture.id}`)}>

@@ -47,14 +47,28 @@ function RootLayoutNav() {
         name="team/[id]"
         options={{
           ...headerOptions,
-          title: "Team Info",
+          title: "Team Details",
         }}
       />
       <Stack.Screen
         name="match/[id]"
         options={{
           ...headerOptions,
-          title: "Match Info",
+          title: "Match Details",
+        }}
+      />
+      <Stack.Screen
+        name="league/[id]/[season]"
+        options={{
+          ...headerOptions,
+          title: "League Details",
+        }}
+      />
+      <Stack.Screen
+        name="venue/[id]"
+        options={{
+          ...headerOptions,
+          title: "Venue Details",
         }}
       />
     </Stack>

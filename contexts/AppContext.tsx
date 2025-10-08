@@ -2,9 +2,9 @@ import MatchApiService from "@/services/matchApi";
 import ProfileApiService from "@/services/profileApi";
 import { Match } from "@/types/match";
 import {
-    CoachWithTeam,
-    PlayerWithTeam,
-    TeamInfo
+  CoachWithTeam,
+  PlayerWithTeam,
+  TeamInfo
 } from "@/types/profile";
 import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -146,7 +146,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     },
     [playersList, coachList, teamInfoList]
   );
-
 
   return useMemo(
     () => ({

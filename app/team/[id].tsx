@@ -45,7 +45,7 @@ export default function TeamDetailScreen() {
 
   useEffect(() => {
     if (players.player.length === 0) {
-      console.log('loaded players from apis');
+      console.log("loaded players from apis");
       fetchProfileData(teamId); // Default Real Madrid team ID
     }
     const teamIDs = playersList.map((players) => players.team.id);
@@ -116,7 +116,7 @@ export default function TeamDetailScreen() {
             source={{
               uri: teamInfo?.team?.logo,
             }}
-            contentFit="cover"
+            contentFit="contain"
             style={styles.headerImage}
           />
           <Text style={[styles.headerTitle, { color: colors.textWhite }]}>
@@ -141,11 +141,18 @@ export default function TeamDetailScreen() {
                 <Text style={styles.infoLabel}>Founded</Text>
                 <Text style={styles.infoValue}>{teamInfo?.team?.founded}</Text>
               </View>
-              <View style={styles.infoItem}>
+              <TouchableOpacity
+                style={styles.infoItem}
+                onPress={() => {
+                  if (teamInfo?.venue?.id) {
+                    router.push(`/venue/${teamInfo.venue.id}`);
+                  }
+                }}
+              >
                 <Building2 size={20} color={colors.textWhite} />
                 <Text style={styles.infoLabel}>Stadium</Text>
                 <Text style={styles.infoValue}>{teamInfo?.venue?.name}</Text>
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -279,7 +286,6 @@ export default function TeamDetailScreen() {
               </View>
             </View>
           ))} */}
-
         </View>
       </ScrollView>
     </>

@@ -1,31 +1,74 @@
 import Colors from "@/constants/colors";
 import { Match } from "@/types/match";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import CircularProgress from "react-native-circular-progress-indicator";
+import { Circle } from "react-native-progress";
 
 import TeamForm from "./TeamForm";
 interface UpcomingProps {
   nextMatch: Match;
   homeTeamLastMatches: Match[];
   awayTeamLastMatches: Match[];
-  timeLeft: {
-    days: string;
-    hours: string;
-    minutes: string;
-    seconds: string;
-  };
 }
-
+type TimeLeft = {
+  days: string;
+  hours: string;
+  minutes: string;
+  seconds: string;
+};
 export default function UpcomingForm({
   nextMatch,
   homeTeamLastMatches,
   awayTeamLastMatches,
-  timeLeft,
 }: UpcomingProps) {
   const router = useRouter();
   const maxValues = [365, 24, 60, 60];
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
+    days: "0",
+    hours: "0",
+    minutes: "0",
+    seconds: "0",
+  });
+  const formatTime = (
+    days: number,
+    hours: number,
+    minutes: number,
+    seconds: number
+  ) => {
+    const pad = (num: number) => String(num).padStart(2, "0");
+    return {
+      days: pad(days),
+      hours: pad(hours),
+      minutes: pad(minutes),
+      seconds: pad(seconds),
+    };
+  };
+  useEffect(() => {
+    const calculateTimeLeft = async () => {
+      const matchDateString: any = nextMatch?.fixture.date;
+      const matchDateTime = new Date(matchDateString);
+      const now = new Date();
+      const difference = matchDateTime.getTime() - now.getTime();
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor(
+          (difference % (1000 * 60 * 60)) / (1000 * 60)
+        );
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        setTimeLeft(formatTime(days, hours, minutes, seconds));
+      } else {
+        setTimeLeft({ days: "0", hours: "0", minutes: "0", seconds: "0" });
+      }
+    };
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(timer);
+  }, [nextMatch]);
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -89,20 +132,11 @@ export default function UpcomingForm({
               <Text style={styles.timerValue}>{value}</Text>
               <Text style={styles.timerLabel}>{label}</Text>
             </View> */}
-            <CircularProgress
-              radius={30}
-              value={Number(value)}
-              maxValue={maxValues[i]}
-              progressValueStyle={{color: Colors.textWhite, fontSize: 20}}
-              title={label}
-              titleColor={Colors.textWhite}
-              titleStyle={{ fontSize: 10 }}
-              activeStrokeColor="#28a745"
-              inActiveStrokeColor="#e6e6e6"
-              inActiveStrokeWidth={3}
-              activeStrokeWidth={3}
-              inActiveStrokeOpacity={0.2}
-              duration={1000}
+            <TimeCircle
+              label={label.toUpperCase()}
+              value={value}
+              max={maxValues[i]}
+              color="#4CAF50"
             />
           </View>
         ))}
@@ -118,6 +152,36 @@ export default function UpcomingForm({
     </View>
   );
 }
+
+const TimeCircle = ({
+  label,
+  value,
+  max,
+  color,
+}: {
+  label: string;
+  value: string;
+  max: number;
+  color: string;
+}) => {
+  const progress = max > 0 ? Number(value) / max : 0;
+  return (
+    <View style={styles.circleContainer}>
+      <Text style={styles.label}>{label}</Text>
+      <Circle
+        progress={progress}
+        size={60}
+        thickness={4}
+        color={color}
+        unfilledColor="#E0E0E0"
+        borderWidth={0}
+        showsText={true}
+        formatText={() => value}
+        textStyle={styles.valueText}
+      />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -179,13 +243,7 @@ const styles = StyleSheet.create({
   formWin: { backgroundColor: "#28a745" },
   formDraw: { backgroundColor: "#facc15" },
   formLoss: { backgroundColor: "#dc2626" },
-  timerRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 1,
-    marginBottom: 10,
-  },
+
   timerCircle: {
     borderColor: "#16a34a",
     borderWidth: 2,
@@ -219,5 +277,25 @@ const styles = StyleSheet.create({
   predictionHighlight: {
     color: Colors.textWhite,
     fontWeight: "600",
+  },
+  timerRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    gap: 2,
+  },
+  circleContainer: {
+    alignItems: "center",
+  },
+  valueText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: Colors.textWhite,
+  },
+  label: {
+    marginBottom: 2,
+    fontSize: 12,
+    color: Colors.textWhite,
+    fontWeight: "500",
   },
 });

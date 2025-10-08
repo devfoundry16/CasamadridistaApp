@@ -17,7 +17,7 @@ const CustomWebView = ({
       <Text style={styles.adSectionTitle}>{title}</Text>
       <View style={styles.adHeaderLine} />
       </View>
-      <View style={[styles.widgetContainer, {height: size}]}>
+      <View style={[styles.widgetContainer, {height: size, width: '100%'}]}>
         <WebView
           source={{
             html: statsHtml,
