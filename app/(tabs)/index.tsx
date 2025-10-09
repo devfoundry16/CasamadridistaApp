@@ -1,10 +1,10 @@
 import CustomWebView from "@/components/CustomWebView";
-import QuoteSection from "@/components/QuoteSection";
-import SquadSection from "@/components/SquadSection";
-import StrengthSection from "@/components/StrengthSection";
+import QuoteSection from "@/components/Home/QuoteSection";
+import SquadSection from "@/components/Home/SquadSection";
+import StrengthSection from "@/components/Home/StrengthSection";
+import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
+import VisionSection from "@/components/Home/VisionSection";
 import UpcomingForm from "@/components/UpcomingForm";
-import UpcomingMatchesCarousel from "@/components/UpcomingMatchCard";
-import VisionSection from "@/components/VisionSection";
 import Colors from "@/constants/colors";
 import { useApp } from "@/contexts/AppContext";
 

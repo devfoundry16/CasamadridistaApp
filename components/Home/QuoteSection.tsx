@@ -4,11 +4,11 @@ import { Image } from "expo-image";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useRef, useState } from "react";
 import {
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 const { width } = Dimensions.get("window");
