@@ -22,9 +22,6 @@ import {
   View
 } from "react-native";
 
-const { width } = Dimensions.get("window");
-const CARD_WIDTH = 280;
-
 export default function HomeScreen() {
   const router = useRouter();
   const { teamInfoList } = useApp();
@@ -103,6 +100,7 @@ export default function HomeScreen() {
 
   const loadInitialData = async () => {
     try {
+      console.log(nextMatch)
       //fetchProfileData(RealMadridId);
       MatchApiService.fetchNextMatch(RealMadridId).then((result) => {
         MatchApiService.fetchLastMatches(result.teams.home.id).then((data) => {

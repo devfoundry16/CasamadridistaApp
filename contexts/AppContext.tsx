@@ -44,6 +44,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         console.log("loaded teams:", teamList.length);
         setTeamInfoList(teamList);
       }
+      // fetchProfileData(RealMadridId);
       console.log("[App] Data loaded");
     } catch (error) {
       console.error("[App] Failed to load data:", error);

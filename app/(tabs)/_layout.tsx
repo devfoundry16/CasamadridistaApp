@@ -1,17 +1,15 @@
+import HeaderMenu from '@/components/HeaderMenu';
+import Colors from "@/constants/colors";
 import { Tabs } from "expo-router";
 import {
-  Home,
   Gamepad2,
-  Image as ImageIcon,
-  Users as Team,
+  Home,
   Layout,
   ShoppingCart as Store,
-  UserRound as Profile,
+  Users as Team,
   UserCircle
 } from "lucide-react-native";
 import React from "react";
-import Colors from "@/constants/colors";
-import HeaderMenu from '@/components/HeaderMenu';
 
 export default function TabLayout() {
   return (
