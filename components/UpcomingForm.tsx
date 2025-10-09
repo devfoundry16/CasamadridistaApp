@@ -76,16 +76,18 @@ export default function UpcomingForm({
         {nextMatch?.league.name} {nextMatch?.league.season}-
         {nextMatch?.league.season + 1} | {nextMatch?.league.round}
       </Text>
-      <Text style={styles.venueText}>
-        {nextMatch?.fixture.venue.name} |{" "}
-        {new Date(nextMatch?.fixture.date).toLocaleDateString("en-US", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
+      <TouchableOpacity onPress={() => router.push(`/venue/${nextMatch?.fixture.venue.id}`)}>
+        <Text style={styles.venueText}>
+          {nextMatch?.fixture.venue.name} | {" "}
+          {new Date(nextMatch?.fixture.date).toLocaleDateString("en-US", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
       </Text>
+      </TouchableOpacity>
 
       {/* Teams */}
       <View style={styles.teamsContainer}>

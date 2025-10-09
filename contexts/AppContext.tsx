@@ -1,6 +1,5 @@
 import MatchApiService from "@/services/matchApi";
 import ProfileApiService from "@/services/profileApi";
-import { Match } from "@/types/match";
 import {
   CoachWithTeam,
   PlayerWithTeam,
@@ -14,12 +13,9 @@ type Theme = "light" | "dark";
 const RealMadridId = 541;
 export const [AppProvider, useApp] = createContextHook(() => {
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [playersList, setPlayersList] = useState<PlayerWithTeam[]>([]);
   const [coachList, setCoachList] = useState<CoachWithTeam[]>([]);
   const [teamInfoList, setTeamInfoList] = useState<TeamInfo[]>([]);
-  const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
-  const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
 
   const loadAppData = useCallback(async () => {
     try {
@@ -54,25 +50,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, []);
 
-  const loadInitialData = async () => {
-    try {
-      //fetchProfileData(RealMadridId);
-      fetchNextMatchData(RealMadridId).then((result) => {
-        MatchApiService.fetchLastMatches(result.teams.home.id).then(data => {
-          setHomeTeamLastMatches(data);
-        })
-        MatchApiService.fetchLastMatches(result.teams.away.id).then(data => {
-          setAwayTeamLastMatches(data);
-        });
-      });
-    } catch (error) {
-      console.error("[App] Failed to load initial data:", error);
-    }
-  };
-
   useEffect(() => {
     loadAppData();
-    loadInitialData();
     // return () => subscription.remove();
   }, [loadAppData]);
 
@@ -153,16 +132,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
       coachList,
       teamInfoList,
       fetchProfileData,
-      homeTeamLastMatches,
-      awayTeamLastMatches,
     }),
     [
       playersList,
       coachList,
       teamInfoList,
       fetchProfileData,
-      homeTeamLastMatches,
-      awayTeamLastMatches,
     ]
   );
 });
