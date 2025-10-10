@@ -1,7 +1,11 @@
-import { MaterialTopTabNavigationEventMap, MaterialTopTabNavigationOptions, createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { withLayoutContext } from 'expo-router';
-import { ParamListBase, TabNavigationState } from '@react-navigation/native';
-import Colors from '@/constants/colors';
+import Colors from "@/constants/colors";
+import {
+  MaterialTopTabNavigationEventMap,
+  MaterialTopTabNavigationOptions,
+  createMaterialTopTabNavigator,
+} from "@react-navigation/material-top-tabs";
+import { ParamListBase, TabNavigationState } from "@react-navigation/native";
+import { Stack, withLayoutContext } from "expo-router";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -14,36 +18,51 @@ export const MaterialTopTabs = withLayoutContext<
 
 export default function MembershipsLayout() {
   return (
-    <MaterialTopTabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.deepDarkGray,
-        tabBarLabelStyle: {
-          fontSize: 14,
-          fontWeight: '600' as const,
-          textTransform: 'none' as const,
-        },
-        tabBarStyle: {
-          backgroundColor: Colors.secondary,
-        },
-        tabBarIndicatorStyle: {
-          backgroundColor: Colors.primary,
-          height: 3,
-        },
-      }}
-    >
-      <MaterialTopTabs.Screen
-        name="packages"
+    <>
+      <Stack.Screen
         options={{
-          title: 'Packages',
+          headerShown: true,
+          headerTitle: "Memberships",
+          headerStyle: {
+            backgroundColor: Colors.secondary,
+          },
+          headerTintColor: Colors.textWhite,
+          headerTitleStyle: {
+            fontWeight: "700" as const,
+          },
         }}
       />
-      <MaterialTopTabs.Screen
-        name="royal-investor"
-        options={{
-          title: 'Royal Investor',
+      <MaterialTopTabs
+        screenOptions={{
+          tabBarActiveTintColor: Colors.primary,
+          tabBarInactiveTintColor: Colors.deepDarkGray,
+          tabBarLabelStyle: {
+            fontSize: 14,
+            fontWeight: "600" as const,
+            textTransform: "none" as const,
+          },
+          tabBarStyle: {
+            backgroundColor: Colors.secondary,
+          },
+          tabBarIndicatorStyle: {
+            backgroundColor: Colors.primary,
+            height: 3,
+          },
         }}
-      />
-    </MaterialTopTabs>
+      >
+        <MaterialTopTabs.Screen
+          name="packages"
+          options={{
+            title: "Packages",
+          }}
+        />
+        <MaterialTopTabs.Screen
+          name="royal-investor"
+          options={{
+            title: "Royal Investor",
+          }}
+        />
+      </MaterialTopTabs>
+    </>
   );
 }

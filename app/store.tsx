@@ -1,8 +1,9 @@
+import Colors, { altColors } from '@/constants/colors';
+import { Stack } from 'expo-router';
+import { ShoppingCart } from 'lucide-react-native';
 import React from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ShoppingCart } from 'lucide-react-native';
-import {altColors} from '@/constants/colors';
 
 interface Product {
   id: number;
@@ -47,6 +48,19 @@ export default function StoreScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: "About",
+          headerStyle: {
+            backgroundColor: Colors.secondary,
+          },
+          headerTintColor: Colors.textWhite,
+          headerTitleStyle: {
+            fontWeight: "700" as const,
+          },
+        }}
+      />
       <FlatList
         data={PRODUCTS}
         renderItem={renderProduct}

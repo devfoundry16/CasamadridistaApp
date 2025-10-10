@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { Stack } from "expo-router";
-import { Image } from "expo-image";
 import Colors from "@/constants/colors";
+import { Image } from "expo-image";
+import { Stack } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function PrivacyPolicyScreen() {
   return (
@@ -154,7 +154,7 @@ const headerOptions = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.darkGray,
+    backgroundColor: Colors.deepDarkGray,
   },
   headerContent: {
     flexDirection: "column" as const,
@@ -167,11 +167,11 @@ const styles = StyleSheet.create({
   },
   headerImage: {
     width: "100%",
-    height: 235,
+    height: 250,
     marginBottom: 12,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 36,
     fontWeight: "700" as const,
     color: Colors.textWhite,
     marginBottom: 4,

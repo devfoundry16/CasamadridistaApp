@@ -5,7 +5,7 @@ import {
   Gamepad2,
   Home,
   Layout,
-  ShoppingCart as Store,
+  Store,
   Users as Team,
   UserCircle
 } from "lucide-react-native";
@@ -73,11 +73,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="store"
+        name="store-coming-soon"
         options={{
           title: "Store",
           headerTitle: "Store",
           tabBarIcon: ({ color, size }) => <Store size={size} color={color} />,
+          
         }}
       />
       <Tabs.Screen

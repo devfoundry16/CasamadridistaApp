@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
-import { useRouter, Stack } from 'expo-router';
-import { useApp } from '@/contexts/AppContext';
-import {altColors as colors} from '@/constants/colors';
+import Colors, { altColors as colors } from '@/constants/colors';
 import { wordpressService, Campaign as WPCampaign, Donor as WPDonor } from '@/services/wordpress';
+import { Stack, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function CampaignsScreen() {
   const router = useRouter();
@@ -98,7 +97,19 @@ export default function CampaignsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ title: 'Campaigns' }} />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: "Donate & Support",
+          headerStyle: {
+            backgroundColor: Colors.secondary,
+          },
+          headerTintColor: Colors.textWhite,
+          headerTitleStyle: {
+            fontWeight: "700" as const,
+          },
+        }}
+      />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}

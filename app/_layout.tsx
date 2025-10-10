@@ -15,62 +15,6 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="about"
-        options={{
-          ...headerOptions,
-          title: "About",
-        }}
-      />
-      <Stack.Screen
-        name="contact"
-        options={{
-          ...headerOptions,
-          title: "Contact",
-        }}
-      />
-      <Stack.Screen
-        name="memberships"
-        options={{
-          ...headerOptions,
-          title: "Memberships",
-        }}
-      />
-      <Stack.Screen
-        name="campaigns"
-        options={{
-          ...headerOptions,
-          title: "Campaigns",
-        }}
-      />
-      <Stack.Screen
-        name="team/[id]"
-        options={{
-          ...headerOptions,
-          title: "Team Details",
-        }}
-      />
-      <Stack.Screen
-        name="match/[id]"
-        options={{
-          ...headerOptions,
-          title: "Match Details",
-        }}
-      />
-      <Stack.Screen
-        name="league/[id]/[season]"
-        options={{
-          ...headerOptions,
-          title: "League Details",
-        }}
-      />
-      <Stack.Screen
-        name="venue/[id]"
-        options={{
-          ...headerOptions,
-          title: "Venue Details",
-        }}
-      />
     </Stack>
   );
 }
