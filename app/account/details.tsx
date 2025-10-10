@@ -1,45 +1,51 @@
-import React, { useState } from 'react';
+import Colors from "@/constants/colors";
+import { useAuth } from "@/contexts/AuthContext";
+import { Stack } from "expo-router";
+import { Save } from "lucide-react-native";
+import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
+  Alert,
   ScrollView,
+  StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-} from 'react-native';
-import { Stack } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
-import Colors from '@/constants/colors';
-import { Save } from 'lucide-react-native';
+  View,
+} from "react-native";
 
 export default function AccountDetailsScreen() {
   const { user, updateUser } = useAuth();
   const [formData, setFormData] = useState({
-    fullName: user?.fullName || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    age: user?.age || '',
-    nationality: user?.nationality || '',
-    placeOfResidence: user?.placeOfResidence || '',
-    annualIncome: user?.annualIncome || '',
+    first_name: user?.first_name || "",
+    last_name: user?.first_name || "",
+    email: user?.email || "",
+    name: user?.name || "",
+    age: user?.age || "",
+    nationality: user?.nationality || "",
+    placeOfResidence: user?.placeOfResidence || "",
+    annualIncome: user?.annualIncome || "",
   });
 
   const handleSave = () => {
-    if (!formData.fullName || !formData.email || !formData.phone) {
-      Alert.alert('Error', 'Please fill in all required fields');
+    if (
+      !formData.first_name ||
+      !formData.last_name ||
+      !formData.email ||
+      !formData.name
+    ) {
+      Alert.alert("Error", "Please fill in all required fields");
       return;
     }
 
     updateUser(formData);
-    Alert.alert('Success', 'Account details updated successfully');
+    Alert.alert("Success", "Account details updated successfully");
   };
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: 'Account Details',
+          title: "Account Details",
           headerStyle: { backgroundColor: Colors.secondary },
           headerTintColor: Colors.textWhite,
         }}
@@ -47,16 +53,41 @@ export default function AccountDetailsScreen() {
       <ScrollView style={styles.container}>
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Full Name *</Text>
+            <Text style={styles.label}>First Name *</Text>
             <TextInput
               style={styles.input}
-              value={formData.fullName}
-              onChangeText={(text) => setFormData({ ...formData, fullName: text })}
-              placeholder="Enter your full name"
+              value={formData.first_name}
+              onChangeText={(text) =>
+                setFormData({ ...formData, first_name: text })
+              }
+              placeholder="Enter your first name"
               placeholderTextColor={Colors.darkGray}
             />
           </View>
-
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Last Name *</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.last_name}
+              onChangeText={(text) =>
+                setFormData({ ...formData, last_name: text })
+              }
+              placeholder="Enter your last name"
+              placeholderTextColor={Colors.darkGray}
+            />
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Display Name *</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.name}
+              onChangeText={(text) =>
+                setFormData({ ...formData, name: text })
+              }
+              placeholder="Enter your display name"
+              placeholderTextColor={Colors.darkGray}
+            />
+          </View>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Email Address *</Text>
             <TextInput
@@ -69,19 +100,6 @@ export default function AccountDetailsScreen() {
               autoCapitalize="none"
             />
           </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Phone Number *</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.phone}
-              onChangeText={(text) => setFormData({ ...formData, phone: text })}
-              placeholder="Enter your phone number"
-              placeholderTextColor={Colors.darkGray}
-              keyboardType="phone-pad"
-            />
-          </View>
-
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Age</Text>
             <TextInput
@@ -99,7 +117,9 @@ export default function AccountDetailsScreen() {
             <TextInput
               style={styles.input}
               value={formData.nationality}
-              onChangeText={(text) => setFormData({ ...formData, nationality: text })}
+              onChangeText={(text) =>
+                setFormData({ ...formData, nationality: text })
+              }
               placeholder="Enter your nationality"
               placeholderTextColor={Colors.darkGray}
             />
@@ -110,7 +130,9 @@ export default function AccountDetailsScreen() {
             <TextInput
               style={styles.input}
               value={formData.placeOfResidence}
-              onChangeText={(text) => setFormData({ ...formData, placeOfResidence: text })}
+              onChangeText={(text) =>
+                setFormData({ ...formData, placeOfResidence: text })
+              }
               placeholder="Enter your place of residence"
               placeholderTextColor={Colors.darkGray}
             />
@@ -121,7 +143,9 @@ export default function AccountDetailsScreen() {
             <TextInput
               style={styles.input}
               value={formData.annualIncome}
-              onChangeText={(text) => setFormData({ ...formData, annualIncome: text })}
+              onChangeText={(text) =>
+                setFormData({ ...formData, annualIncome: text })
+              }
               placeholder="Select annual income"
               placeholderTextColor={Colors.darkGray}
             />
@@ -140,7 +164,7 @@ export default function AccountDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: "#2A2A2A",
   },
   form: {
     padding: 24,
@@ -150,23 +174,23 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.textWhite,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#3A3A3A',
+    backgroundColor: "#3A3A3A",
     borderWidth: 1,
-    borderColor: '#4A4A4A',
+    borderColor: "#4A4A4A",
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
     color: Colors.textWhite,
   },
   saveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: Colors.accent,
     padding: 16,
     borderRadius: 25,
@@ -175,7 +199,7 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: 16,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.textWhite,
   },
 });

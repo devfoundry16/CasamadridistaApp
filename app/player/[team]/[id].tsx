@@ -2,7 +2,7 @@ import CustomWebView from "@/components/CustomWebView";
 import Colors from "@/constants/colors";
 import countries from "@/constants/countries.json";
 import { useApp } from "@/contexts/AppContext";
-import { CountryMap } from "@/types/profile";
+import { CountryMap } from "@/types/soccer/profile";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";

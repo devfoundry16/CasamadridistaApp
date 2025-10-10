@@ -276,7 +276,7 @@ export default function AboutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.darkGray,
+    backgroundColor: Colors.deepDarkGray,
   },
   headerContent: {
     flexDirection: "column" as const,

@@ -9,7 +9,7 @@ import Colors from "@/constants/colors";
 import { useApp } from "@/contexts/AppContext";
 
 import MatchApiService from "@/services/matchApi";
-import { Match } from "@/types/match";
+import { Match } from "@/types/soccer/match";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";

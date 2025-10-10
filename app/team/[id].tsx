@@ -1,6 +1,6 @@
 import Colors, { altColors as colors } from "@/constants/colors";
 import countries from "@/constants/countries.json";
-import { Coach, CoachWithTeam, CountryMap, Player } from "@/types/profile";
+import { Coach, CoachWithTeam, CountryMap, Player } from "@/types/soccer/profile";
 import { Image } from "expo-image";
 import { Stack, useRouter } from "expo-router";
 import { Building2, Calendar, MapPin } from "lucide-react-native";

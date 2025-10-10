@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const DEFAULT_BASE_URL = 'https://casamadridista.com';
+const DEFAULT_BASE_URL = 'https://casamadridista.com/wp-json';
 const API_BASE_URL_KEY = 'wordpress_api_base_url';
 
 export interface WordPressPost {

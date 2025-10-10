@@ -1,4 +1,4 @@
-import { TeamInfo } from "@/types/profile";
+import { TeamInfo } from "@/types/soccer/profile";
 import fetchWithAuth from "./fetchWithAuth";
 class ApiService {
   private API_KEY = "2efab6a210831868664529f16d897809";

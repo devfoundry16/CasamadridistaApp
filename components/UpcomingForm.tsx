@@ -1,5 +1,5 @@
 import Colors from "@/constants/colors";
-import { Match } from "@/types/match";
+import { Match } from "@/types/soccer/match";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";

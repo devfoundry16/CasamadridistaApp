@@ -1,5 +1,5 @@
 import { PenaltyGameProvider, usePenaltyGame } from '@/contexts/PenaltyGameContext';
-import type { GoalZone } from '@/types/penalty-game';
+import type { GoalZone } from '@/types/soccer/penalty-game';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, router } from 'expo-router';
 import { Bot, Target, Trophy, Users } from 'lucide-react-native';

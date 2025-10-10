@@ -1,53 +1,8 @@
+import UserApiService from '@/services/authApi';
+import { Address, Order, PaymentMethod, User } from '@/types/user/profile';
 import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-
-export interface User {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  age: string;
-  nationality: string;
-  placeOfResidence: string;
-  annualIncome: string;
-  photo?: string;
-  subscription?: {
-    type: string;
-    plan: string;
-    startDate: string;
-    endDate: string;
-  };
-}
-
-export interface Address {
-  id: string;
-  type: 'shipping' | 'billing';
-  fullName: string;
-  address: string;
-  city: string;
-  country: string;
-  postalCode: string;
-  phone: string;
-}
-
-export interface PaymentMethod {
-  id: string;
-  type: 'card' | 'paypal';
-  cardNumber?: string;
-  cardHolder?: string;
-  expiryDate?: string;
-  email?: string;
-}
-
-export interface Order {
-  id: string;
-  date: string;
-  items: string[];
-  total: number;
-  status: 'pending' | 'completed' | 'cancelled';
-}
-
 export const [AuthProvider, useAuth] = createContextHook(() => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,14 +38,18 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const login = useCallback(async (email: string, password: string) => {
     const mockUser: User = {
       id: '1',
-      fullName: 'Ali Fayad',
-      email,
-      phone: '+1234567890',
+      username: 'alifayad03',
+      first_name: 'Ali',
+      last_name: 'Fayad',
+      name: 'Ali Fayad',
+      email: 'alifayad03@gmail.com',
+      password: 'password123',
       age: '30',
       nationality: 'Lebanon',
       placeOfResidence: 'Berlin',
       annualIncome: '$50,000 - $100,000',
       photo: 'https://casamadridista.com/wp-content/uploads/2025/08/IMG_3689.jpg',
+      role: ["subscriber"],
     };
 
     await AsyncStorage.setItem('user', JSON.stringify(mockUser));
@@ -98,11 +57,9 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   }, []);
 
   const register = useCallback(async (userData: Omit<User, 'id'>) => {
-    const newUser: User = {
-      ...userData,
-      id: Date.now().toString(),
-    };
-
+    const response = await UserApiService.register(userData);
+    const newUser: User = response;
+    console.log('Registered user:', newUser)
     await AsyncStorage.setItem('user', JSON.stringify(newUser));
     setUser(newUser);
   }, []);
@@ -118,7 +75,8 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const updateUser = useCallback(async (updates: Partial<User>) => {
     if (!user) return;
-    const updatedUser = { ...user, ...updates };
+    const response = await UserApiService.update(updates);
+    const updatedUser: User = response;
     await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
   }, [user]);

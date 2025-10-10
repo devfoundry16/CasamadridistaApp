@@ -1,22 +1,10 @@
+import { AuthResponse, User } from '@/types/user/profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const DEFAULT_BASE_URL = 'https://casamadridista.com';
+const DEFAULT_BASE_URL = 'https://casamadridista.com/wp-json';
 const API_BASE_URL_KEY = 'api_base_url_key';
-
-export interface User {
-  id: number;
-  username: string;
-  name: string;
-  email: string;
-  avatar_urls: Record<string, string>;
-}
-
-export interface AuthResponse {
-  token: string;
-  user_email: string;
-  user_nicename: string;
-  user_display_name: string;
-}
-class AuthApiService {
+const AUTH_USERNAME = 'iworqs'; // Replace with actual username
+const AUTH_PASSWORD = 'P8u4 vcXa 7FrR mWXP eVla jstg';
+class ApiService {
   private baseUrl: string = DEFAULT_BASE_URL;
 
   async initialize() {
@@ -38,7 +26,8 @@ class AuthApiService {
   }
 
   private async fetchWithAuth(endpoint: string, options: RequestInit = {}) {
-    const token = await AsyncStorage.getItem('jwt_token');
+    // const token = await AsyncStorage.getItem('jwt_token');
+    const token = btoa(`${AUTH_USERNAME}:${AUTH_PASSWORD}`);
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -48,10 +37,10 @@ class AuthApiService {
     }
 
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers['Authorization'] = `Basic ${token}`;
     }
 
-    const url = `${this.baseUrl}/wp-json${endpoint}`;
+    const url = `${this.baseUrl}${endpoint}`;
     console.log('[WordPress] Fetching:', url);
 
     const response = await fetch(url, {
@@ -69,7 +58,7 @@ class AuthApiService {
   }
 
   async login(username: string, password: string): Promise<AuthResponse> {
-    const response = await fetch(`${this.baseUrl}/wp-json/profile/login`, {
+    const response = await fetch(`${this.baseUrl}/profile/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -89,10 +78,16 @@ class AuthApiService {
     return data;
   }
 
-  async register(username: string, email: string, password: string): Promise<any> {
-    return this.fetchWithAuth('/wp/v2/users/register', {
+  async register( userData: Omit<User, 'id'> ): Promise<any> {
+    return this.fetchWithAuth('/wp/v2/users', {
       method: 'POST',
-      body: JSON.stringify({ username, email, password }),
+      body: JSON.stringify(userData),
+    });
+  }
+  async update( userData: Partial<User> ): Promise<any> {
+    return this.fetchWithAuth(`/wp/v2/users/${userData.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(userData),
     });
   }
 
@@ -101,7 +96,7 @@ class AuthApiService {
       const token = await AsyncStorage.getItem('jwt_token');
       if (!token) return false;
 
-      const response = await fetch(`${this.baseUrl}/wp-json/jwt-auth/v1/token/validate`, {
+      const response = await fetch(`${this.baseUrl}/jwt-auth/v1/token/validate`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -133,4 +128,5 @@ class AuthApiService {
   }
 }
 
-export const UserService = new AuthApiService();
+const UserApiService = new ApiService();
+export default UserApiService;

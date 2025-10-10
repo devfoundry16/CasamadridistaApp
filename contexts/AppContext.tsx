@@ -4,7 +4,7 @@ import {
   CoachWithTeam,
   PlayerWithTeam,
   TeamInfo
-} from "@/types/profile";
+} from "@/types/soccer/profile";
 import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Bluebird from "bluebird";

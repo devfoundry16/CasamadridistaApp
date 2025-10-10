@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import countries from "@/constants/countries.json";
 import { useApp } from "@/contexts/AppContext";
-import { CountryMap } from "@/types/profile";
+import { CountryMap } from "@/types/soccer/profile";
 import { useEffect } from "react";
 import CountryFlag from "react-native-country-flag";
 

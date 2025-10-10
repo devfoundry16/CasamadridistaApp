@@ -1,4 +1,4 @@
-import type { GameMode, GameState, GoalZone, Player, WebSocketMessage } from '@/types/penalty-game';
+import type { GameMode, GameState, GoalZone, Player, WebSocketMessage } from '@/types/soccer/penalty-game';
 import createContextHook from '@nkzw/create-context-hook';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
