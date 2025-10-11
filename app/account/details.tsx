@@ -17,27 +17,22 @@ export default function AccountDetailsScreen() {
   const { user, updateUser } = useAuth();
   const [formData, setFormData] = useState({
     first_name: user?.first_name || "",
-    last_name: user?.first_name || "",
+    last_name: user?.last_name || "",
     email: user?.email || "",
     name: user?.name || "",
-    age: user?.age || "",
-    nationality: user?.nationality || "",
-    placeOfResidence: user?.placeOfResidence || "",
-    annualIncome: user?.annualIncome || "",
   });
 
   const handleSave = () => {
     if (
       !formData.first_name ||
       !formData.last_name ||
-      !formData.email ||
       !formData.name
     ) {
       Alert.alert("Error", "Please fill in all required fields");
       return;
     }
-
-    updateUser(formData);
+    console.log(formData);
+    updateUser({id: user?.id, ...formData});
     Alert.alert("Success", "Account details updated successfully");
   };
 
@@ -89,7 +84,7 @@ export default function AccountDetailsScreen() {
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address *</Text>
+            <Text style={styles.label}>Email Address</Text>
             <TextInput
               style={styles.input}
               value={formData.email}
@@ -98,56 +93,6 @@ export default function AccountDetailsScreen() {
               placeholderTextColor={Colors.darkGray}
               keyboardType="email-address"
               autoCapitalize="none"
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Age</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.age}
-              onChangeText={(text) => setFormData({ ...formData, age: text })}
-              placeholder="Enter your age"
-              placeholderTextColor={Colors.darkGray}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nationality</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.nationality}
-              onChangeText={(text) =>
-                setFormData({ ...formData, nationality: text })
-              }
-              placeholder="Enter your nationality"
-              placeholderTextColor={Colors.darkGray}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Place of Residence</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.placeOfResidence}
-              onChangeText={(text) =>
-                setFormData({ ...formData, placeOfResidence: text })
-              }
-              placeholder="Enter your place of residence"
-              placeholderTextColor={Colors.darkGray}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Annual Income</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.annualIncome}
-              onChangeText={(text) =>
-                setFormData({ ...formData, annualIncome: text })
-              }
-              placeholder="Select annual income"
-              placeholderTextColor={Colors.darkGray}
             />
           </View>
 

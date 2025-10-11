@@ -91,6 +91,8 @@ class ApiService {
     });
   }
 
+  
+
   async validateToken(): Promise<boolean> {
     try {
       const token = await AsyncStorage.getItem('jwt_token');

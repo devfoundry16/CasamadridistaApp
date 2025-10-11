@@ -37,12 +37,12 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const login = useCallback(async (email: string, password: string) => {
     const mockUser: User = {
-      id: '1',
+      id: 13,
       username: 'alifayad03',
       first_name: 'Ali',
       last_name: 'Fayad',
       name: 'Ali Fayad',
-      email: 'alifayad03@gmail.com',
+      email: 'alifayad@gmail.com',
       password: 'password123',
       age: '30',
       nationality: 'Lebanon',
@@ -77,6 +77,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     if (!user) return;
     const response = await UserApiService.update(updates);
     const updatedUser: User = response;
+    console.log('Updated user:', updatedUser);
     await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
   }, [user]);
