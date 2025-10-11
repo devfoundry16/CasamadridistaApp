@@ -1,6 +1,6 @@
 import CustomWebView from "@/components/CustomWebView";
 import Colors from "@/constants/colors";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
 const MatchDetailScreen = () => {
@@ -41,9 +41,25 @@ const MatchDetailScreen = () => {
                     </html>
                   `;
   return (
-    <View style={styles.container}>
+    <>
+    <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: "Match Details",
+          headerStyle: {
+            backgroundColor: Colors.secondary,
+          },
+          headerTintColor: Colors.textWhite,
+          headerTitleStyle: {
+            fontWeight: "700" as const,
+          },
+        }}
+      />
+      <View style={styles.container}>
       <CustomWebView size={800} title="Match Details" statsHtml={statsHtml} />
     </View>
+    </>
+    
   );
 };
 
