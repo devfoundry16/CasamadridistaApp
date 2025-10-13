@@ -23,12 +23,15 @@ export interface User {
 export interface Address {
   id: string;
   type: 'shipping' | 'billing';
-  fullName: string;
+  email: string,
+  first_name: string;
+  last_name: string,
   address: string;
   city: string;
+  state?: string;
   country: string;
-  postalCode: string;
-  phone: string;
+  postalCode?: string;
+  phone?: string;
 }
 
 export interface PaymentMethod {

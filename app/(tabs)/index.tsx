@@ -100,7 +100,6 @@ export default function HomeScreen() {
 
   const loadInitialData = async () => {
     try {
-      console.log(nextMatch)
       //fetchProfileData(RealMadridId);
       MatchApiService.fetchNextMatch(RealMadridId).then((result) => {
         MatchApiService.fetchLastMatches(result.teams.home.id).then((data) => {

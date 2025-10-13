@@ -1,5 +1,6 @@
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
+import * as ImagePicker from 'expo-image-picker'; // New import for image picker
 import { router } from "expo-router";
 import {
   Camera,
@@ -25,8 +26,60 @@ import {
 } from "react-native";
 
 export default function AccountScreen() {
-  const { user, wallet, orders, logout } = useAuth();
+  const { user, wallet, orders, updateAvatar, logout } = useAuth(); // Added accessToken and updateUser
   const [isLogin, setIsLogin] = useState(true);
+
+  const handleChangePhoto = async () => {
+    Alert.alert(
+      "Change Profile Photo",
+      "Select an option",
+      [
+        {
+          text: "Take Photo",
+          onPress: async () => await pickImage('camera'),
+        },
+        {
+          text: "Choose from Gallery",
+          onPress: async () => await pickImage('gallery'),
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
+  };
+
+  const pickImage = async (source: 'camera' | 'gallery') => {
+    // Request permissions
+    const permission = source === 'camera'
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert("Permission Denied", "Please grant access to proceed.");
+      return;
+    }
+
+    // Launch picker
+    const result = source === 'camera'
+      ? await ImagePicker.launchCameraAsync({
+          allowsEditing: true,
+          aspect: [1, 1], // Square for avatar
+          quality: 0.5,
+        })
+      : await ImagePicker.launchImageLibraryAsync({
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.5,
+        });
+
+    if (result.canceled) return;
+
+    const uri = result.assets[0].uri;
+    const filename = uri.split('/').pop() || `photo_${Date.now()}.jpg`;
+    updateAvatar(uri, filename);
+  };
 
   if (!user) {
     return <AuthForm isLogin={isLogin} setIsLogin={setIsLogin} />;
@@ -45,7 +98,7 @@ export default function AccountScreen() {
               </View>
             )}
           </View>
-          <TouchableOpacity style={styles.changePhotoButton}>
+          <TouchableOpacity style={styles.changePhotoButton} onPress={handleChangePhoto}>
             <Camera size={16} color={Colors.textWhite} />
             <Text style={styles.changePhotoText}>Change Photo</Text>
           </TouchableOpacity>
@@ -268,23 +321,38 @@ function AuthForm({
                 onChangeText={setUserName}
                 placeholder="Enter your username"
                 placeholderTextColor={Colors.darkGray}
+                autoCapitalize="none"
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Email Address *</Text>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter your email"
+                placeholderTextColor={Colors.darkGray}
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
             </View>
           </>
         )}
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email Address *</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Enter your email"
-            placeholderTextColor={Colors.darkGray}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
+        {isLogin && (
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Username or Email Address *</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Enter your username or email"
+              placeholderTextColor={Colors.darkGray}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+        )}
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Password *</Text>

@@ -73,7 +73,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="store-coming-soon"
+        name="store"
         options={{
           title: "Store",
           headerTitle: "Store",

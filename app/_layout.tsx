@@ -32,6 +32,7 @@ export default function RootLayout() {
           <RootLayoutNav />
         </GestureHandlerRootView>
       </AppProvider>
+
       </AuthProvider>
     </QueryClientProvider>
   );

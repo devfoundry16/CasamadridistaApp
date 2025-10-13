@@ -1,43 +1,51 @@
 import Colors, { altColors } from '@/constants/colors';
+import StoreApiService from '@/services/storeApi';
+import { Product } from '@/types/product/product';
 import { Stack } from 'expo-router';
 import { ShoppingCart } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface Product {
-  id: number;
-  name: string;
-  price: string;
-  imageUrl: string;
-  category: string;
-}
 
-const PRODUCTS: Product[] = [
-  { id: 1, name: 'Home Jersey 24/25', price: '$89.99', imageUrl: 'https://casamadridista.com/wp-content/uploads/2025/08/box.png', category: 'Jerseys' },
-  { id: 2, name: 'Away Jersey 24/25', price: '$89.99', imageUrl: 'https://casamadridista.com/wp-content/uploads/2025/08/DAEA05EB-59E7-4316-91D0-926B6F344449.png', category: 'Jerseys' },
-  { id: 3, name: 'Training Kit', price: '$59.99', imageUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400', category: 'Training' },
-  { id: 4, name: 'Scarf', price: '$24.99', imageUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400', category: 'Accessories' },
-  { id: 5, name: 'Cap', price: '$19.99', imageUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400', category: 'Accessories' },
-  { id: 6, name: 'Backpack', price: '$49.99', imageUrl: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400', category: 'Accessories' },
-];
 
 export default function StoreScreen() {
-  const insets = useSafeAreaInsets();
+
+  const [products, setProducts] = useState<Product[] | null>(null);
   const colors = altColors;
+  const [isLoading, setIsLoading] = useState(true);
+  
+
+  useEffect(() => {
+    getAllProducts();
+  }, []);
+
+
+  const getAllProducts = async () => {
+    try {
+      StoreApiService.getProducts().then((data) => {
+        setProducts(data);
+        setIsLoading(false);
+      });
+    } catch (error) {
+      console.error("Error loading store data:", error);
+    } finally {
+      setIsLoading(true);
+    }
+  };
+  
 
   const renderProduct = ({ item }: { item: Product }) => (
     <Pressable
       style={[styles.productCard, { backgroundColor: colors.card, borderWidth: 0}]}
     >
-      <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+      <Image source={{ uri: item.images[0].src }} style={styles.productImage} />
       <View style={styles.productInfo}>
-        <Text style={[styles.productCategory, { color: colors.textWhite }]}>{item.category}</Text>
+        <Text style={[styles.productCategory, { color: colors.textWhite }]}>{item.categories[0].name}</Text>
         <Text style={[styles.productName, { color: colors.textWhite }]} numberOfLines={2}>
           {item.name}
         </Text>
         <View style={styles.productFooter}>
-          <Text style={[styles.productPrice, { color: colors.textWhite }]}>{item.price}</Text>
+          <Text style={[styles.productPrice, { color: colors.textWhite }]}>${item.price}</Text>
           <Pressable style={[styles.addToCartButton, { backgroundColor: colors.primary }]}>
             <ShoppingCart size={18} color={colors.textWhite} />
           </Pressable>
@@ -61,8 +69,9 @@ export default function StoreScreen() {
           },
         }}
       />
+      { isLoading && <Text style={{color: colors.textWhite, textAlign: 'center'}}>Loading...</Text> }
       <FlatList
-        data={PRODUCTS}
+        data={products}
         renderItem={renderProduct}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
