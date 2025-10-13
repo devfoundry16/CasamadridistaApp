@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   welcomeText: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "700" as const,
     color: Colors.accent,
     marginBottom: 12,
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: Colors.textWhite,
+    color: Colors.lightGray,
     marginBottom: 16,
   },
   menuItem: {

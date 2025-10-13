@@ -30,7 +30,7 @@ const altColors = {
   tabIconDefault: "#9CA3AF" as const,
   tabIconSelected: realMadridGold,
   border: "#E5E7EB" as const,
-  card: "#555" as const,
+  card: "#2f2f2f" as const,
   primary: realMadridGold,
   secondary: realMadridNavy,
   accent: realMadridPurple,

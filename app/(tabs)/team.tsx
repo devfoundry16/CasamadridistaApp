@@ -87,14 +87,14 @@ export default function TeamScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: Colors.darkGray }]}
+      style={[styles.container, { backgroundColor: Colors.deepDarkGray }]}
       showsVerticalScrollIndicator={false}
     >
       <View
         style={[
           styles.header,
           {
-            backgroundColor: colors.background,
+            backgroundColor: Colors.deepDarkGray,
             borderBottomColor: colors.border,
             paddingTop: 12,
           },

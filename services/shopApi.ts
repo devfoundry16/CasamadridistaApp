@@ -62,10 +62,10 @@ class ApiService {
     });
   }
   async getProductById(id: number): Promise<any> {
-    return this.fetchWithAuth(`/wc/v3/products/${id}`);
+    return this.fetchWithAuth(`/v3/products/${id}`);
   }
 }
 
-const StoreApiService = new ApiService();
-export default StoreApiService;
+const ShopApiService = new ApiService();
+export default ShopApiService;
  
