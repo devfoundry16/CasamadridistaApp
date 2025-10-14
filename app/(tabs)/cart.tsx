@@ -77,7 +77,7 @@ export default function CartScreen() {
         </View>
         <TouchableOpacity
           style={styles.checkoutButton}
-          onPress={() => router.push("/checkout" as any)}
+          onPress={() => router.push("/checkout")}
           activeOpacity={0.8}
         >
           <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>

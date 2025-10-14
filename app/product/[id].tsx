@@ -1,3 +1,4 @@
+import { useCart } from "@/contexts/CartContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ShoppingCart, Star } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
@@ -13,7 +14,6 @@ import {
 
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
-import { useCart } from "@/contexts/CartContext";
 import ShopApiService from "@/services/shopApi";
 import { Product } from "@/types/product/product";
 import { RenderHTML } from "react-native-render-html";
@@ -54,9 +54,21 @@ export default function ProductDetailScreen() {
     );
   }
 
+  // const addToCart = async (id: number, quantity: number, variation?: any[]) => {
+  //   try {
+  //     ShopApiService.addItemToCart(id, quantity, variation).then((data) => {
+  //       console.log(`Product Id: ${id} Quantity: ${quantity}`);
+  //     });
+  //   } catch (error) {
+  //     console.error("Error loading store data:", error);
+  //   } finally {
+  //     console.log(await AsyncStorage.getItem("jwt_token"));
+  //   }
+  // };
+
   const handleAddToCart = () => {
     addToCart(product);
-    router.push("/cart" as any);
+    // router.push("/cart" as any);
   };
 
   return (

@@ -1,9 +1,8 @@
 import Colors, { altColors } from "@/constants/colors";
 import ShopApiService from "@/services/shopApi";
 import { Product } from "@/types/product/product";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from 'expo-image';
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import { Star } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -36,19 +35,6 @@ export default function ShopScreen() {
     }
   };
 
-  const addToCart = async(id: number, quantity: number, variation?: any[]) => {
-    try {
-      ShopApiService.addItemToCart(id, quantity, variation).then((data) => {
-        console.log(`Product Id: ${id} Quantity: ${quantity}`);
-      });
-    } catch (error) {
-      console.error("Error loading store data:", error);
-    } finally {
-      console.log(await AsyncStorage.getItem('jwt_token'));
-    }
-  }
-
-
   const renderProduct = ({ item }: { item: Product }) => (
     <TouchableOpacity
       style={styles.productCard}
@@ -72,19 +58,6 @@ export default function ShopScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: Colors.deepDarkGray }]}>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: "Shop",
-          headerStyle: {
-            backgroundColor: Colors.secondary,
-          },
-          headerTintColor: Colors.textWhite,
-          headerTitleStyle: {
-            fontWeight: "700" as const,
-          },
-        }}
-      />
       <View style={styles.headerContent}>
         <Image
           source={{

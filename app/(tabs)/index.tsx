@@ -24,7 +24,7 @@ import {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { teamInfoList } = useApp();
+  const { teamInfoList, fetchProfileData } = useApp();
   const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
@@ -100,7 +100,7 @@ export default function HomeScreen() {
 
   const loadInitialData = async () => {
     try {
-      //fetchProfileData(RealMadridId);
+      // fetchProfileData(RealMadridId);
       MatchApiService.fetchNextMatch(RealMadridId).then((result) => {
         MatchApiService.fetchLastMatches(result.teams.home.id).then((data) => {
           setHomeTeamLastMatches(data);

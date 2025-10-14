@@ -1,7 +1,7 @@
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useCart } from "@/contexts/CartContext";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { CheckCircle, CreditCard, MapPin, User } from "lucide-react-native";
 import { useState } from "react";
 import {
@@ -50,7 +50,7 @@ export default function CheckoutScreen() {
           text: "Continue Shopping",
           onPress: () => {
             clearCart();
-            router.push("/shop" as any);
+            router.push("/shop");
           },
         },
       ]
@@ -70,19 +70,7 @@ export default function CheckoutScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: "Checkout",
-          headerStyle: {
-            backgroundColor: Colors.secondary,
-          },
-          headerTintColor: Colors.textWhite,
-          headerTitleStyle: {
-            fontWeight: "700" as const,
-          },
-        }}
-      />
+      <HeaderStack title="Checkout"/>
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
