@@ -1,17 +1,12 @@
+import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { Image } from "expo-image";
-import { Stack } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function TermsOfServiceScreen() {
   return (
     <>
-      <Stack.Screen
-        options={{
-          ...headerOptions,
-          title: "About",          
-        }}
-      />
+      <HeaderStack title="About" />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.headerContent}>
           <Image
@@ -113,15 +108,6 @@ const Terms = [
     ],
   },
 ];
-
-const headerOptions = {
-  headerShown: true,
-  headerTitle: "About",
-  headerBackButtonDisplayMode: "minimal" as const,
-  headerTintColor: Colors.textWhite,
-  headerStyle: { backgroundColor: Colors.darkGold},
-  headerTitleStyle: { fontWeight: "700" as const },
-}
 
 const styles = StyleSheet.create({
   container: {

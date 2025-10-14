@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Stack } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
+import HeaderStack from '@/components/HeaderStack';
 import Colors from '@/constants/colors';
-import { ShoppingBag, Package, CheckCircle, XCircle, Clock } from 'lucide-react-native';
+import { useAuth } from '@/contexts/AuthContext';
+import { CheckCircle, Clock, Package, ShoppingBag, XCircle } from 'lucide-react-native';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function OrdersScreen() {
   const { orders } = useAuth();
@@ -32,13 +32,7 @@ export default function OrdersScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'Orders',
-          headerStyle: { backgroundColor: Colors.secondary },
-          headerTintColor: Colors.textWhite,
-        }}
-      />
+      <HeaderStack title="Orders" />
       <ScrollView style={styles.container}>
         {orders.length === 0 ? (
           <View style={styles.emptyState}>

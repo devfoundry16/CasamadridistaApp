@@ -1,6 +1,7 @@
+import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { Image } from "expo-image";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   Check,
   FileText,
@@ -22,19 +23,7 @@ export default function AboutScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: "About",
-          headerStyle: {
-            backgroundColor: Colors.secondary,
-          },
-          headerTintColor: Colors.textWhite,
-          headerTitleStyle: {
-            fontWeight: "700" as const,
-          },
-        }}
-      />
+      <HeaderStack title="About" />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.headerContent}>
           <Image

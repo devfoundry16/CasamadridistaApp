@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { wooApi } from "./wooApi";
 const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json/wc";
 const API_BASE_URL_KEY = "api_base_url_key";
 const AUTH_USERNAME = "ck_5761f8ce313356e07555cf14a8c2099ab27d7942"; // Replace with actual username
@@ -55,6 +56,45 @@ class ApiService {
 
     return response.json();
   }
+  async getCartToken() {
+    try {
+      const response = await wooApi.get("/cart");
+      const token = response.headers["cart-token"];
+      if (!token) throw new Error("No Cart Token found");
+      return token;
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      throw error;
+    }
+  }
+
+  async addItemToCart(productId: number, quantity = 1, variation?: any[]) {
+    try {
+      const cartToken = await this.getCartToken();
+
+      const response = await wooApi.post(
+        "/cart/add-item",
+        {
+          id: productId,
+          quantity: quantity,
+          variation: variation
+        },
+        {
+          headers: {
+            "Cart-Token": cartToken,
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        "Error adding item to cart:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
+  }
 
   async getProducts(): Promise<any[]> {
     return this.fetchWithAuth("/v3/products", {
@@ -68,4 +108,3 @@ class ApiService {
 
 const ShopApiService = new ApiService();
 export default ShopApiService;
- 

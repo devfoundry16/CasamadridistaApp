@@ -1,6 +1,6 @@
+import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
-import { Stack } from "expo-router";
 import { Save } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -38,13 +38,7 @@ export default function AccountDetailsScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: "Account Details",
-          headerStyle: { backgroundColor: Colors.secondary },
-          headerTintColor: Colors.textWhite,
-        }}
-      />
+      <HeaderStack title="Account Details" />
       <ScrollView style={styles.container}>
         <View style={styles.form}>
           <View style={styles.inputGroup}>

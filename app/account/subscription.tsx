@@ -1,22 +1,17 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Stack, router } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
+import HeaderStack from '@/components/HeaderStack';
 import Colors from '@/constants/colors';
-import { Crown, Calendar, CreditCard, ArrowRight } from 'lucide-react-native';
+import { useAuth } from '@/contexts/AuthContext';
+import { router } from 'expo-router';
+import { ArrowRight, Calendar, CreditCard, Crown } from 'lucide-react-native';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SubscriptionScreen() {
   const { user } = useAuth();
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'My Subscription',
-          headerStyle: { backgroundColor: Colors.secondary },
-          headerTintColor: Colors.textWhite,
-        }}
-      />
+      <HeaderStack title="My Subscription" />
       <ScrollView style={styles.container}>
         {user?.subscription ? (
           <>

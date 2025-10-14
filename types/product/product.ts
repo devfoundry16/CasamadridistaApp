@@ -12,5 +12,10 @@ export interface Product {
     date_modified: Date;
     date_modified_gmt: Date;
   }[];
+  attributes: [];
+  variations: [];
   categories: { id: number; name: string; slug: string }[];
+  average_rating: string;
+  reviews?: number;
+  stock_quantity: number;
 }

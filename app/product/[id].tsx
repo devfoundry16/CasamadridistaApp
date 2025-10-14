@@ -1,27 +1,30 @@
-import Colors from "@/constants/colors";
-import ShopApiService from "@/services/shopApi";
-import { Product } from "@/types/product/product";
-import { Image } from "expo-image";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ShoppingCart, Star } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
-    Dimensions,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import Carousel from "react-native-reanimated-carousel";
-import RenderHtml from "react-native-render-html";
+
+import HeaderStack from "@/components/HeaderStack";
+import Colors from "@/constants/colors";
+import { useCart } from "@/contexts/CartContext";
+import ShopApiService from "@/services/shopApi";
+import { Product } from "@/types/product/product";
+import { RenderHTML } from "react-native-render-html";
 const { width } = Dimensions.get("window");
-const ProductDetailScreen = () => {
-  const { id } = useLocalSearchParams();
+export default function ProductDetailScreen() {
+  const [product, setProduct] = useState<Product>();
+  const [isLoading, setLoading] = useState<boolean>(true);
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [detailUri, setDetailUri] = useState("");
+  const { addToCart } = useCart();
+  const [selectedImageIndex, setSelectedImageIndex] = React.useState<number>(0);
 
   useEffect(() => {
     getProduct(Number(id));
@@ -31,195 +34,264 @@ const ProductDetailScreen = () => {
     try {
       ShopApiService.getProductById(id).then((data) => {
         setProduct(data);
-        setIsLoading(false);
+        setLoading(false);
       });
     } catch (error) {
       console.error("Error loading store data:", error);
     } finally {
-      setIsLoading(true);
+      setLoading(true);
     }
   };
 
-  // Carousel item renderer
-  const renderCarouselItem = ({ item }: { item: string }) => (
-    <TouchableOpacity
-      style={styles.carouselItem}
-      onPress={() => setDetailUri(item)}
-    >
-      <Image source={{ uri: item }} style={styles.detailImage} />
-    </TouchableOpacity>
-  );
+  if (!product) {
+    return (
+      <>
+        <HeaderStack title="No Product" />
+        <View style={styles.container}>
+          <Text style={styles.errorText}>Product not found</Text>
+        </View>
+      </>
+    );
+  }
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    router.push("/cart" as any);
+  };
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: "Product Details",
-          headerStyle: {
-            backgroundColor: Colors.secondary,
-          },
-          headerTintColor: Colors.textWhite,
-          headerTitleStyle: {
-            fontWeight: "700" as const,
-          },
-        }}
-      />
-      <ScrollView style={styles.container}>
-        <View style={styles.headerContent}>
-          <Image
-            source={{
-              uri: "https://casamadridista.com/wp-content/uploads/2025/05/img3.png",
-            }}
-            style={styles.headerImage}
-            contentFit="cover"
-          />
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>{product?.name}</Text>
-            <Text style={styles.headerSubtitle}>
-              {product?.categories[0].name}
-            </Text>
+      <HeaderStack title={product.name} />
+      <View style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View>
+            <Image
+              source={{ uri: product.images[selectedImageIndex].src }}
+              style={styles.productImage}
+            />
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.thumbnailContainer}
+              contentContainerStyle={styles.thumbnailContent}
+            >
+              {product.images.map((img, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => setSelectedImageIndex(index)}
+                  activeOpacity={0.7}
+                >
+                  <Image
+                    source={{ uri: img.src }}
+                    style={[
+                      styles.thumbnail,
+                      selectedImageIndex === index && styles.thumbnailSelected,
+                    ]}
+                  />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-        </View>
-        {/* Original/Main Product Image */}
-        <View style={styles.mainImageContainer}>
-          <Image
-            source={{ uri: detailUri || product?.images[0].src }}
-            style={styles.mainImage}
-          />
-        </View>
 
-        {/* Detail Images Carousel */}
-        {product && product.images.length > 0 && (
-          <Carousel
-            data={product.images.map((img) => img.src)}
-            renderItem={renderCarouselItem}
-            width={width * 0.9}
-            height={250}
-            loop
-            mode="parallax"
-          />
-        )}
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <Text style={styles.productName}>{product.name}</Text>
+              <Text style={styles.productPrice}>
+                ${Number(product.price).toFixed(2)}
+              </Text>
+            </View>
 
-        <View style={{ padding: 16, flex: 1, alignItems: "center" }}>
-          {/* Product Name */}
-          <Text style={styles.name}>{product?.name}</Text>
+            <View style={styles.ratingContainer}>
+              <Star size={18} color={Colors.darkGold} fill={Colors.darkGold} />
+              <Text style={styles.ratingText}>
+                {Number(product.average_rating).toFixed(1)}
+              </Text>
+              <Text style={styles.reviewsText}>
+                ({product.reviews} reviews)
+              </Text>
+              {product.stock_quantity && (
+                <View style={styles.stockBadge}>
+                  <Text style={styles.stockText}>In Stock</Text>
+                </View>
+              )}
+            </View>
 
-          {/* Price */}
-          <Text style={styles.price}>${Number(product?.price).toFixed(2)}</Text>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Description</Text>
+              <Text style={styles.description}>
+                <RenderHTML
+                  contentWidth={width}
+                  source={{ html: product.description }}
+                  tagsStyles={customStyles}
+                />
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
 
-          {/* Description */}
-          <RenderHtml
-            tagsStyles={customStyles}
-            source={{ html: product?.description || "" }}
-            contentWidth={width - 32}
-          />
-          <Pressable
-            style={[
-              styles.submitButton,
-              {
-                backgroundColor: Colors.darkGold,
-              },
-            ]}
-            onPress={() => router.push("/contact")}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.addToCartButton}
+            onPress={handleAddToCart}
+            activeOpacity={0.8}
           >
-            <Text style={[styles.submitButton, { color: Colors.textWhite }]}>
-              Contact Us For More Details
-            </Text>
-          </Pressable>
+            <ShoppingCart size={20} color={Colors.darkBg} />
+            <Text style={styles.addToCartText}>Add to Cart</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
     </>
   );
-};
-export default ProductDetailScreen;
+}
 const customStyles = {
-  p: { color: Colors.textWhite },
-  strong: { color: Colors.textWhite },
+  p: {
+    color: Colors.textWhite,
+  },
+  strong: {
+    color: Colors.textWhite,
+  },
 };
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.deepDarkGray,
   },
-  headerContent: {
-    flexDirection: "column" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
+  errorText: {
+    color: Colors.textPrimary,
+    fontSize: 18,
+    textAlign: "center",
+    marginTop: 40,
+  },
+  productImage: {
+    width: "100%",
+    height: 400,
+    objectFit: "contain",
+    backgroundColor: "transparent",
+  },
+  thumbnailContainer: {
+    backgroundColor: Colors.cardBg,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  thumbnailContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  thumbnail: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    backgroundColor: Colors.border,
+    borderWidth: 2,
+    objectFit: "contain",
+    borderColor: "transparent",
+  },
+  thumbnailSelected: {
+    borderColor: Colors.darkGold,
+  },
+  content: {
+    padding: 20,
   },
   header: {
-    position: "absolute" as const,
-    alignItems: "center" as const,
-  },
-  headerTitle: {
-    fontSize: 36,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 4,
-  },
-  headerImage: {
-    width: "100%",
-    height: 250,
     marginBottom: 12,
   },
-  headerSubtitle: {
-    fontSize: 20,
+  productName: {
+    fontSize: 28,
+    fontWeight: "700" as const,
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  productPrice: {
+    fontSize: 32,
+    fontWeight: "700" as const,
+    color: Colors.darkGold,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24,
+    gap: 6,
+  },
+  ratingText: {
+    fontSize: 16,
+    color: Colors.textPrimary,
     fontWeight: "600" as const,
-    color: Colors.darkGold,
   },
-  mainImageContainer: {
-    alignItems: "center",
-    marginBottom: 16,
+  reviewsText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
   },
-  mainImage: {
-    width: "100%",
-    height: 300,
-    resizeMode: "contain",
-    borderColor: Colors.textWhite,
-    backgroundColor: "#2f2f2f",
-    borderRadius: 10,
-    padding: 12,
+  stockBadge: {
+    backgroundColor: Colors.darkGold,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
   },
-  carouselItem: {
-    backgroundColor: "#2f2f2f",
-    borderRadius: 10,
-    padding: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    width: "90%",
-    height: "100%",
-    alignSelf: "center",
+  stockText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: Colors.darkBg,
   },
-  detailImage: {
-    width: "100%",
-    height: 200,
-    resizeMode: "contain",
+  section: {
+    marginBottom: 24,
   },
-  name: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: Colors.darkGold,
-  },
-  price: {
-    fontSize: 40,
-    fontWeight: "bold",
-    color: Colors.textWhite,
-    marginBottom: 8,
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.textPrimary,
+    marginBottom: 12,
   },
   description: {
     fontSize: 16,
-    marginVertical: 16,
-    color: Colors.textWhite,
+    lineHeight: 24,
+    color: Colors.textSecondary,
   },
-  submitButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 6,
+  detailsGrid: {
+    gap: 16,
+  },
+  detailItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: Colors.cardBg,
+    padding: 16,
     borderRadius: 12,
-    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.border,
+    gap: 12,
   },
-  submitButtonText: {
+  detailTextContainer: {
+    flex: 1,
+  },
+  detailLabel: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginBottom: 4,
+  },
+  detailValue: {
     fontSize: 16,
     fontWeight: "600" as const,
+    color: Colors.textPrimary,
+  },
+  footer: {
+    backgroundColor: Colors.cardBg,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  addToCartButton: {
+    backgroundColor: Colors.darkGold,
+    paddingVertical: 16,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  addToCartText: {
+    fontSize: 18,
+    fontWeight: "600" as const,
+    color: Colors.darkBg,
   },
 });

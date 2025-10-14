@@ -1,6 +1,6 @@
+import HeaderStack from '@/components/HeaderStack';
 import ShiningText from '@/components/ShiningText';
 import Colors from '@/constants/colors';
-import { Stack } from 'expo-router';
 import React from 'react';
 import {
   Dimensions,
@@ -71,19 +71,7 @@ export default function StoreComingSoon() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: 'Store',
-          headerStyle: {
-            backgroundColor: Colors.secondary,
-          },
-          headerTintColor: Colors.textWhite,
-          headerTitleStyle: {
-            fontWeight: '700' as const,
-          },
-        }}
-      />
+      <HeaderStack title="Store is coming" />
       <ScrollView 
         style={styles.container} 
         contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 40 }]}

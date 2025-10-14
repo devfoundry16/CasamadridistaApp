@@ -1,18 +1,18 @@
+import HeaderStack from '@/components/HeaderStack';
+import Colors from '@/constants/colors';
+import { useAuth } from '@/contexts/AuthContext';
+import { CreditCard, Plus, Trash2, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Modal,
   Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Stack } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
-import Colors from '@/constants/colors';
-import { CreditCard, Plus, Trash2, X } from 'lucide-react-native';
 
 export default function PaymentMethodsScreen() {
   const { paymentMethods, addPaymentMethod, deletePaymentMethod } = useAuth();
@@ -79,13 +79,7 @@ export default function PaymentMethodsScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'Payment Methods',
-          headerStyle: { backgroundColor: Colors.secondary },
-          headerTintColor: Colors.textWhite,
-        }}
-      />
+      <HeaderStack title="Payment Methods" />
       <ScrollView style={styles.container}>
         <TouchableOpacity
           style={styles.addButton}

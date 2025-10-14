@@ -1,15 +1,16 @@
 import Colors, { altColors } from "@/constants/colors";
 import ShopApiService from "@/services/shopApi";
 import { Product } from "@/types/product/product";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from 'expo-image';
 import { router, Stack } from "expo-router";
-import { ShoppingCart } from "lucide-react-native";
+import { Star } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
-  Pressable,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View
 } from "react-native";
 
@@ -35,42 +36,38 @@ export default function ShopScreen() {
     }
   };
 
+  const addToCart = async(id: number, quantity: number, variation?: any[]) => {
+    try {
+      ShopApiService.addItemToCart(id, quantity, variation).then((data) => {
+        console.log(`Product Id: ${id} Quantity: ${quantity}`);
+      });
+    } catch (error) {
+      console.error("Error loading store data:", error);
+    } finally {
+      console.log(await AsyncStorage.getItem('jwt_token'));
+    }
+  }
+
+
   const renderProduct = ({ item }: { item: Product }) => (
-    <Pressable
-      style={[
-        styles.productCard,
-        { backgroundColor: colors.card, borderWidth: 0 },
-      ]}
-      onPress={() => {
-        router.push(`/product/${item.id}`);
-      }}
+    <TouchableOpacity
+      style={styles.productCard}
+      onPress={() => router.push(`/product/${item.id}` as any)}
+      activeOpacity={0.8}
     >
-      <Image source={{ uri: item.images[0].src }} contentFit="cover" style={styles.productImage} />
+      <Image source={{ uri: item.images[0].src }} style={styles.productImage} />
       <View style={styles.productInfo}>
-        <Text style={[styles.productCategory, { color: colors.textWhite }]}>
-          {item.categories[0].name}
-        </Text>
-        <Text
-          style={[styles.productName, { color: Colors.darkGold }]}
-          numberOfLines={2}
-        >
+        <Text style={styles.productName} numberOfLines={1}>
           {item.name}
         </Text>
-        <View style={styles.productFooter}>
-          <Text style={[styles.productPrice, { color: colors.textWhite }]}>
-            ${item.price}
-          </Text>
-          <Pressable
-            style={[
-              styles.addToCartButton,
-              { backgroundColor: colors.primary },
-            ]}
-          >
-            <ShoppingCart size={18} color={colors.textWhite} />
-          </Pressable>
+        <View style={styles.ratingContainer}>
+          <Star size={14} color={Colors.darkGold} fill={Colors.darkGold} />
+          <Text style={styles.ratingText}>{Number(item.average_rating).toFixed(1)}</Text>
+          <Text style={styles.reviewsText}>({item.reviews ? 30 : 0})</Text>
         </View>
+        <Text style={styles.productPrice}>${Number(item.price).toFixed(2)}</Text>
       </View>
-    </Pressable>
+    </TouchableOpacity>
   );
 
   return (
@@ -156,39 +153,48 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 16,
   },
-  productCard: {
+ productCard: {
     width: "48%",
-    borderRadius: 16,
-    overflow: "hidden",
+    backgroundColor: Colors.text,
+    borderRadius: 12,
+    marginBottom: 16,
     borderWidth: 1,
+    borderColor: Colors.border,
+    overflow: "hidden",
   },
   productImage: {
     width: "100%",
     height: 180,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: Colors.border,
   },
   productInfo: {
     padding: 12,
   },
-  productCategory: {
-    fontSize: 11,
-    textTransform: "uppercase",
-    marginBottom: 4,
-  },
   productName: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600" as const,
-    marginBottom: 8,
-    minHeight: 36,
+    color: Colors.textWhite,
+    marginBottom: 6,
   },
-  productFooter: {
+  ratingContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 8,
+    gap: 4,
+  },
+  ratingText: {
+    fontSize: 13,
+    color: Colors.textWhite,
+    fontWeight: "600" as const,
+  },
+  reviewsText: {
+    fontSize: 12,
+    color: Colors.textWhite,
   },
   productPrice: {
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: "700" as const,
+    color: Colors.darkGold,
   },
   addToCartButton: {
     width: 36,

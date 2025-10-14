@@ -1,6 +1,7 @@
+import HeaderStack from '@/components/HeaderStack';
 import Colors from '@/constants/colors';
 import * as MailComposer from 'expo-mail-composer';
-import { Link, Stack } from 'expo-router';
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Image, ImageBackground, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -66,19 +67,7 @@ export default function ContactScreen() {
 
   return (
     <>
-    <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: "Contact",
-          headerStyle: {
-            backgroundColor: Colors.secondary,
-          },
-          headerTintColor: Colors.textWhite,
-          headerTitleStyle: {
-            fontWeight: "700" as const,
-          },
-        }}
-      />
+    <HeaderStack title="Contact" />
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <ImageBackground
         source={{ uri: 'https://casamadridista.com/wp-content/uploads/2025/05/img3.png' }}

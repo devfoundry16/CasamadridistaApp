@@ -38,20 +38,19 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const login = useCallback(async (email: string, password: string) => {
     UserApiService.login(email, password).then(async (data) => {
+
       await AsyncStorage.setItem("jwt_token", data.token);
+
       const tokenParts = data.token.split(".");
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.data.user.id;
 
       console.log("User ID from token payload:", userId);
 
-      const userData = {
-        email: data.user_email,
-        name: data.user_display_name,
-        id: userId,
-      };
+      const userData = await UserApiService.getUserById(userId, data.token);
 
-      await AsyncStorage.setItem("user_data", JSON.stringify(userData));
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
+
       setUser(userData);
     }).catch((error) => {
       Alert.alert("Login error", error.message);

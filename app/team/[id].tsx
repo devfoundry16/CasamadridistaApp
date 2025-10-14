@@ -2,7 +2,7 @@ import Colors, { altColors as colors } from "@/constants/colors";
 import countries from "@/constants/countries.json";
 import { Coach, CoachWithTeam, CountryMap, Player } from "@/types/soccer/profile";
 import { Image } from "expo-image";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Building2, Calendar, MapPin } from "lucide-react-native";
 import React, { useEffect } from "react";
 import {
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 
 import CustomWebView from "@/components/CustomWebView";
+import HeaderStack from "@/components/HeaderStack";
 import { useApp } from "@/contexts/AppContext";
 import { useLocalSearchParams } from "expo-router";
 import CountryFlag from "react-native-country-flag";
@@ -91,13 +92,7 @@ export default function TeamDetailScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: teamInfo?.team?.name,
-          headerStyle: { backgroundColor: Colors.secondary },
-          headerTintColor: Colors.primary,
-        }}
-      />
+      <HeaderStack title={teamInfo?.team.name || ''} />
       <ScrollView
         style={[styles.container, { backgroundColor: Colors.darkGray }]}
         showsVerticalScrollIndicator={false}

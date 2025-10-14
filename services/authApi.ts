@@ -69,9 +69,9 @@ class ApiService {
     if (!response.ok) {
       const error = await response.json();
       const message =
-      error.response?.data?.message ||
-      error.message ||
-      "Something went wrong. Please try again.";
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong. Please try again.";
       // Re-throw for upper layers to handle
       throw new Error(message);
     }
@@ -87,12 +87,12 @@ class ApiService {
       method: "POST",
       body: JSON.stringify(userData),
     });
-    if ( !response.ok) {
+    if (!response.ok) {
       const error = await response.json();
       const message =
-      error.response?.data?.message ||
-      error.message ||
-      "Something went wrong. Please try again.";
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong. Please try again.";
       // Re-throw for upper layers to handle
       throw new Error(message);
     }
@@ -106,12 +106,12 @@ class ApiService {
       method: "PUT",
       body: JSON.stringify(userData),
     });
-    if ( !response.ok) {
+    if (!response.ok) {
       const error = await response.json();
       const message =
-      error.response?.data?.message ||
-      error.message ||
-      "Something went wrong. Please try again.";
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong. Please try again.";
       // Re-throw for upper layers to handle
       throw new Error(message);
     }
@@ -148,7 +148,30 @@ class ApiService {
     await AsyncStorage.removeItem("user_data");
     console.log("[WordPress] Logged out");
   }
+  async getUserById(id: number, token: string): Promise<User | null> {
+    const response = await fetch(
+      `${this.baseUrl}/wp/v2/users/${id}?context=edit`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
+    if (!response.ok) {
+      const error = await response.json();
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong. Please try again.";
+      // Re-throw for upper layers to handle
+      throw new Error(message);
+    }
+    const data = response.json();
+
+    return data;
+  }
   async getCurrentUser(): Promise<User | null> {
     try {
       const userData = await AsyncStorage.getItem("user_data");

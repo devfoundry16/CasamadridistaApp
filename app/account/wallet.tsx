@@ -1,17 +1,17 @@
+import HeaderStack from '@/components/HeaderStack';
+import Colors from '@/constants/colors';
+import { useAuth } from '@/contexts/AuthContext';
+import { ArrowDownLeft, ArrowUpRight, Plus, Wallet } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
   Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Stack } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
-import Colors from '@/constants/colors';
-import { Wallet, Plus, ArrowUpRight, ArrowDownLeft } from 'lucide-react-native';
 
 export default function WalletScreen() {
   const { wallet, updateWallet } = useAuth();
@@ -30,13 +30,7 @@ export default function WalletScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'Wallet',
-          headerStyle: { backgroundColor: Colors.secondary },
-          headerTintColor: Colors.textWhite,
-        }}
-      />
+      <HeaderStack title="Wallet" />
       <ScrollView style={styles.container}>
         <View style={styles.balanceCard}>
           <Wallet size={48} color={Colors.accent} />

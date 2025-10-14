@@ -3,22 +3,26 @@ const realMadridWhite = "#FFFFFF" as const;
 const realMadridNavy = "#001F3F" as const;
 const realMadridPurple = "#8B5CF6" as const;
 const Colors = {
-  primary: '#FFFFFF',
+  primary: "#FFFFFF",
   secondary: realMadridGold,
   accent: realMadridGold,
-  royalBlue: '#0033A0',
+  royalBlue: "#0033A0",
   darkGold: realMadridGold,
-  lightGray: '#F5F5F5',
-  mediumGray: '#E0E0E0',
-  darkGray: '#515151',
-  lightDarkGray: '#555',
-  deepDarkGray: '#2A2A2A',
-  text: '#1A1A1A',
-  textLight: '#666666',
+  lightGray: "#F5F5F5",
+  mediumGray: "#E0E0E0",
+  darkGray: "#515151",
+  lightDarkGray: "#555",
+  deepDarkGray: "#2A2A2A",
+  text: "#1A1A1A",
+  textLight: "#666666",
   textWhite: realMadridWhite,
-  border: '#E0E0E0',
-  success: '#4CAF50',
-  error: '#F44336',
+  textPrimary: "#ffffff",
+  textSecondary: "#a0a0a0",
+  border: "#3a3a3a",
+  success: "#4CAF50",
+  error: "#F44336",
+  darkBg : "#0a0a0a",
+  cardBg : "#1a1a1a",
 };
 const altColors = {
   text: "#1A1A1A" as const,
@@ -37,8 +41,8 @@ const altColors = {
   success: "#10B981" as const,
   error: "#EF4444" as const,
   warning: "#F59E0B" as const,
-  royalBlue: '#0033A0',
-  lightGray: '#F5F5F5',
-}
+  royalBlue: "#0033A0",
+  lightGray: "#F5F5F5",
+};
 export { altColors };
 export default Colors;

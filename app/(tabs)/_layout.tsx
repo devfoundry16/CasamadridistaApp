@@ -1,15 +1,30 @@
-import HeaderMenu from '@/components/HeaderMenu';
+import HeaderMenu from "@/components/HeaderMenu";
 import Colors from "@/constants/colors";
+import { useCart } from "@/contexts/CartContext";
 import { Tabs } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
+
 import {
   Gamepad2,
   Home,
   Layout,
-  Store,
+  ShoppingBag,
+  ShoppingCart,
   Users as Team,
-  UserCircle
+  UserCircle,
 } from "lucide-react-native";
 import React from "react";
+function CartBadge() {
+  const { totalItems } = useCart();
+
+  if (totalItems === 0) return null;
+
+  return (
+    <View style={styles.badge}>
+      <Text style={styles.badgeText}>{totalItems}</Text>
+    </View>
+  );
+}
 
 export default function TabLayout() {
   return (
@@ -35,7 +50,7 @@ export default function TabLayout() {
           fontSize: 11,
           fontWeight: "600" as const,
         },
-        headerRight: () => <HeaderMenu />
+        headerRight: () => <HeaderMenu />,
       }}
     >
       <Tabs.Screen
@@ -77,8 +92,21 @@ export default function TabLayout() {
         options={{
           title: "Shop",
           headerTitle: "Shop",
-          tabBarIcon: ({ color, size }) => <Store size={size} color={color} />,
-          
+          tabBarIcon: ({ color, size }) => (
+            <ShoppingBag size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="cart"
+        options={{
+          title: "Cart",
+          tabBarIcon: ({ color }) => (
+            <View>
+              <ShoppingCart color={color} size={24} />
+              <CartBadge />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
@@ -86,9 +114,31 @@ export default function TabLayout() {
         options={{
           title: "Account",
           headerTitle: "My Account",
-          tabBarIcon: ({ color, size }) => <UserCircle size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <UserCircle size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  badge: {
+    position: "absolute",
+    right: -8,
+    top: -4,
+    backgroundColor: Colors.darkGold,
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: Colors.darkGray,
+    fontSize: 11,
+    fontWeight: "700" as const,
+  },
+});

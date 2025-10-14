@@ -1,6 +1,6 @@
+import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
-import { Stack } from "expo-router";
 import { Edit, MapPin, Plus, Trash2, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -93,13 +93,7 @@ export default function AddressesScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: "Addresses",
-          headerStyle: { backgroundColor: Colors.secondary },
-          headerTintColor: Colors.textWhite,
-        }}
-      />
+      <HeaderStack title="Addresses" />
       <ScrollView style={styles.container}>
         <TouchableOpacity
           style={styles.addButton}

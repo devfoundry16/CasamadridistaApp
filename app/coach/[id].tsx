@@ -1,8 +1,9 @@
 import Colors from "@/constants/colors";
 import { Image } from "expo-image";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import HeaderStack from "@/components/HeaderStack";
 import countries from "@/constants/countries.json";
 import { useApp } from "@/contexts/AppContext";
 import { CountryMap } from "@/types/soccer/profile";
@@ -28,13 +29,7 @@ export default function PlayerDetailScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: coach?.name,
-          headerStyle: { backgroundColor: Colors.secondary },
-          headerTintColor: Colors.primary,
-        }}
-      />
+      <HeaderStack title={coach?.name || ''} />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Image

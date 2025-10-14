@@ -1,3 +1,4 @@
+import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import {
   MaterialTopTabNavigationEventMap,
@@ -5,7 +6,7 @@ import {
   createMaterialTopTabNavigator,
 } from "@react-navigation/material-top-tabs";
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
-import { Stack, withLayoutContext } from "expo-router";
+import { withLayoutContext } from "expo-router";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -19,19 +20,7 @@ export const MaterialTopTabs = withLayoutContext<
 export default function MembershipsLayout() {
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: "Memberships",
-          headerStyle: {
-            backgroundColor: Colors.secondary,
-          },
-          headerTintColor: Colors.textWhite,
-          headerTitleStyle: {
-            fontWeight: "700" as const,
-          },
-        }}
-      />
+      <HeaderStack title="Memberships" />
       <MaterialTopTabs
         screenOptions={{
           tabBarActiveTintColor: Colors.primary,

@@ -1,6 +1,7 @@
-import Colors, { altColors as colors } from '@/constants/colors';
+import HeaderStack from '@/components/HeaderStack';
+import { altColors as colors } from '@/constants/colors';
 import { wordpressService, Campaign as WPCampaign, Donor as WPDonor } from '@/services/wordpress';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -97,19 +98,7 @@ export default function CampaignsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          headerTitle: "Donate & Support",
-          headerStyle: {
-            backgroundColor: Colors.secondary,
-          },
-          headerTintColor: Colors.textWhite,
-          headerTitleStyle: {
-            fontWeight: "700" as const,
-          },
-        }}
-      />
+      <HeaderStack title="Donate" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}

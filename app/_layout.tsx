@@ -1,6 +1,7 @@
 import Colors from "@/constants/colors";
 import { AppProvider } from "@/contexts/AppContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -27,12 +28,13 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-      <AppProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <RootLayoutNav />
-        </GestureHandlerRootView>
-      </AppProvider>
-
+        <AppProvider>
+          <CartProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <RootLayoutNav />
+            </GestureHandlerRootView>
+          </CartProvider>
+        </AppProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
@@ -42,6 +44,6 @@ const headerOptions = {
   headerShown: true,
   headerBackButtonDisplayMode: "minimal" as const,
   headerTintColor: Colors.textWhite,
-  headerStyle: { backgroundColor: Colors.darkGold},
+  headerStyle: { backgroundColor: Colors.darkGold },
   headerTitleStyle: { fontWeight: "700" as const },
-}
+};
