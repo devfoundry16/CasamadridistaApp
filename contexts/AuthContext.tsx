@@ -1,4 +1,4 @@
-import UserApiService from "@/services/authService";
+import AuthService from "@/services/authService";
 import { Address, Order, PaymentMethod, User } from "@/types/user/profile";
 import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -37,7 +37,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   };
 
   const login = useCallback(async (email: string, password: string) => {
-    UserApiService.login(email, password).then(async (data) => {
+    AuthService.login(email, password).then(async (data) => {
 
       await AsyncStorage.setItem("jwt_token", data.token);
 
@@ -47,7 +47,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
       console.log("User ID from token payload:", userId);
 
-      const userData = await UserApiService.getUserById(userId, data.token);
+      const userData = await AuthService.getUserById(userId, data.token);
 
       await AsyncStorage.setItem("user", JSON.stringify(userData));
 
@@ -58,7 +58,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   }, []);
 
   const register = useCallback(async (userData: Omit<User, "id">) => {
-    UserApiService.register(userData).then(async (response) => {
+    AuthService.register(userData).then(async (response) => {
       const newUser: User = response;
       console.log("Registered user:", newUser);
       await AsyncStorage.setItem("user", JSON.stringify(newUser));
@@ -86,7 +86,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const updateUser = useCallback(
     async (updates: Partial<User>) => {
       if (!user) return;
-      const response = await UserApiService.update(updates);
+      const response = await AuthService.update(updates);
       const updatedUser: User = response;
       console.log("Updated user:", updatedUser);
       await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
@@ -98,7 +98,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     async (imageUri: string, filename: string) => {
       if (!user) return;
       try {
-        const response = await UserApiService.uploadMedia(imageUri, filename);
+        const response = await AuthService.uploadMedia(imageUri, filename);
         const updatedUser: User = {
           ...user,
           photo: response.source_url,

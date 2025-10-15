@@ -25,6 +25,10 @@ class ApiService {
   getBaseUrl(): string {
     return this.baseUrl;
   }
+  
+  async getJwtToken() {
+    return AsyncStorage.getItem("jwt_token");
+  }
 
   private async fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     // const token = await AsyncStorage.getItem('jwt_token');
@@ -235,5 +239,5 @@ class ApiService {
   }
 }
 
-const UserApiService = new ApiService();
-export default UserApiService;
+const AuthService = new ApiService();
+export default AuthService;

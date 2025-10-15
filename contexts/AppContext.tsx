@@ -1,5 +1,5 @@
-import MatchApiService from "@/services/matchService";
-import ProfileApiService from "@/services/profileService";
+import MatchService from "@/services/matchService";
+import SportsInfoService from "@/services/sportsInfoService";
 import {
   CoachWithTeam,
   PlayerWithTeam,
@@ -57,7 +57,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   }, [loadAppData]);
 
   const fetchNextMatchData = useCallback( async (id: number) => {
-    return MatchApiService.fetchNextMatch(id);
+    return MatchService.fetchNextMatch(id);
   }, []);
 
   const fetchProfileData = useCallback(
@@ -65,18 +65,18 @@ export const [AppProvider, useApp] = createContextHook(() => {
       const index = teamInfoList.findIndex((p) => p.team.id === id); // index = -1 not found
 
       //teamInfo
-      const teamInfo = await ProfileApiService.fetchTeamInfo(id);
-      let nextMatches = await MatchApiService.fetchUpcomingMatches(id);
-      let lastMatches = await MatchApiService.fetchLastMatches(id);
+      const teamInfo = await SportsInfoService.fetchTeamInfo(id);
+      let nextMatches = await MatchService.fetchUpcomingMatches(id);
+      let lastMatches = await MatchService.fetchLastMatches(id);
       teamInfo.nextMatches = nextMatches.slice();
       teamInfo.lastMatches = lastMatches.slice();
 
-      let squads = await ProfileApiService.fetchSquad(id);
+      let squads = await SportsInfoService.fetchSquad(id);
 
       const newTeamInfoList = index == -1 ? [...teamInfoList, teamInfo] : [...teamInfoList.slice(0, index), teamInfo, ...teamInfoList.slice(index + 1)];
 
       //coachList
-      const coach = await ProfileApiService.fetchCoachProfile(teamInfo.team.id);
+      const coach = await SportsInfoService.fetchCoachProfile(teamInfo.team.id);
       const newCoachList = index == -1 ? [
         ...coachList,
         { team: { id }, player: coach },
@@ -94,7 +94,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       //playersList
       Bluebird.Promise.map(
         squads.players,
-        (player: { id: number }) => ProfileApiService.fetchProfile(player.id),
+        (player: { id: number }) => SportsInfoService.fetchProfile(player.id),
         { concurrency: 5 }
       ).then((data: any) => {
         let newPlayersList;

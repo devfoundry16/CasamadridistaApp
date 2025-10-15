@@ -21,7 +21,7 @@ export default function PlayerDetailScreen() {
   const coach = coachWithTeam?.player;
   useEffect(() => {
     const fetchData = async () => {
-      // player = await ProfileApiService.fetchProfile(Number(id));
+      // player = await SportsInfoService.fetchProfile(Number(id));
       console.log("coachId:", coachId);
     };
     fetchData();

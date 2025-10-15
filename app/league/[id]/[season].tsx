@@ -1,6 +1,6 @@
 import CustomWebView from "@/components/CustomWebView";
 import Colors from "@/constants/colors";
-import ProfileApiService from "@/services/profileService";
+import SportsInfoService from "@/services/sportsInfoService";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
@@ -51,13 +51,13 @@ const LeagueDetailScreen = () => {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const teamsList = await ProfileApiService.fetchTeamsInLeague(
+        const teamsList = await SportsInfoService.fetchTeamsInLeague(
           Number(id),
           Number(season)
         );
         setTeams(teamsList);
 
-        const league = await ProfileApiService.fetchLeagueById(Number(id));
+        const league = await SportsInfoService.fetchLeagueById(Number(id));
         setLeague(league.league);
       } catch (error) {
         console.error("Error fetching teams:", error);

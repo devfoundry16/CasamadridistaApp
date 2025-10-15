@@ -1,4 +1,4 @@
-import fetchWithAuth from "./fetchWithAuth";
+import fetchWithAuth from "./footballApi";
 
 class ApiService {
   private API_KEY = "2efab6a210831868664529f16d897809";
@@ -34,5 +34,5 @@ class ApiService {
     return res.response; // Array of match objects
   }
 }
-const MatchApiService = new ApiService();
-export default MatchApiService;
+const MatchService = new ApiService();
+export default MatchService;

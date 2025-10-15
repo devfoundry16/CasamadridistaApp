@@ -8,7 +8,7 @@ import UpcomingForm from "@/components/UpcomingForm";
 import Colors from "@/constants/colors";
 import { useApp } from "@/contexts/AppContext";
 
-import MatchApiService from "@/services/matchService";
+import MatchService from "@/services/matchService";
 import { Match } from "@/types/soccer/match";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -101,11 +101,11 @@ export default function HomeScreen() {
   const loadInitialData = async () => {
     try {
       // fetchProfileData(RealMadridId);
-      MatchApiService.fetchNextMatch(RealMadridId).then((result) => {
-        MatchApiService.fetchLastMatches(result.teams.home.id).then((data) => {
+      MatchService.fetchNextMatch(RealMadridId).then((result) => {
+        MatchService.fetchLastMatches(result.teams.home.id).then((data) => {
           setHomeTeamLastMatches(data);
         });
-        MatchApiService.fetchLastMatches(result.teams.away.id).then((data) => {
+        MatchService.fetchLastMatches(result.teams.away.id).then((data) => {
           setAwayTeamLastMatches(data);
         });
       });

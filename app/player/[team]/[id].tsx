@@ -23,7 +23,7 @@ export default function PlayerDetailScreen() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // player = await ProfileApiService.fetchProfile(Number(id));
+      // player = await SportsInfoService.fetchProfile(Number(id));
       const teamIDs = playersList.map((players) => players.team.id);
 
       console.log("loaded players on player/[id].tsx:", teamIDs);

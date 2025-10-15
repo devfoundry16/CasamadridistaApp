@@ -1,5 +1,5 @@
 import { TeamInfo } from "@/types/soccer/profile";
-import fetchWithAuth from "./fetchWithAuth";
+import fetchWithAuth from "./footballApi";
 class ApiService {
   private API_KEY = "2efab6a210831868664529f16d897809";
 
@@ -73,5 +73,5 @@ class ApiService {
     return res.response[0];
   }
 }
-const ProfileApiService = new ApiService();
-export default ProfileApiService;
+const SportsInfoService = new ApiService();
+export default SportsInfoService;

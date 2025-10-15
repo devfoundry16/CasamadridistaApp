@@ -1,5 +1,5 @@
 import Colors from "@/constants/colors";
-import ProfileApiService from "@/services/profileService";
+import SportsInfoService from "@/services/sportsInfoService";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
@@ -17,7 +17,7 @@ const VenueDetailScreen = () => {
   useEffect(() => {
     const fetchVenue = async () => {
       try {
-        const venue = await ProfileApiService.fetchVenueById(Number(id));
+        const venue = await SportsInfoService.fetchVenueById(Number(id));
         setVenue(venue);
       } catch (error) {
         console.error("Error fetching venue:", error);
