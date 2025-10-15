@@ -1,5 +1,5 @@
-import MatchApiService from "@/services/matchApi";
-import ProfileApiService from "@/services/profileApi";
+import MatchApiService from "@/services/matchService";
+import ProfileApiService from "@/services/profileService";
 import {
   CoachWithTeam,
   PlayerWithTeam,

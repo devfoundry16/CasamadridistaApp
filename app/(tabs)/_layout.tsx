@@ -1,6 +1,6 @@
 import HeaderMenu from "@/components/HeaderMenu";
 import Colors from "@/constants/colors";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/hooks/useCart";
 import { Tabs } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 

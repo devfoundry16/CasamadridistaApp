@@ -1,4 +1,4 @@
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/hooks/useCart";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ShoppingCart, Star } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
@@ -14,7 +14,7 @@ import {
 
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
-import ShopApiService from "@/services/shopApi";
+import ShopApiService from "@/services/shopService";
 import { Product } from "@/types/product/product";
 import { RenderHTML } from "react-native-render-html";
 const { width } = Dimensions.get("window");

@@ -1,5 +1,6 @@
 import { AuthResponse, User } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from 'axios';
 const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json";
 const API_BASE_URL_KEY = "api_base_url_key";
 const AUTH_USERNAME = "iworqs"; // Replace with actual username
@@ -212,26 +213,23 @@ class ApiService {
 
     // Construct the API endpoint
     const endpoint = `${this.baseUrl}/wp/v2/media`;
-    const token = await AsyncStorage.getItem("jwt_token");
+    const token = btoa(`${AUTH_USERNAME}:${AUTH_PASSWORD}`);
     // Headers with Bearer Token
     const headers = {
-      Authorization: `Bearer ${token}`,
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      Authorization: `Basic ${token}`,
+      // "Content-Disposition": `attachment; filename="${filename}"`,
     };
 
     try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers,
-      });
-
-      if (response.status === 201) {
-        return await response.json();
-      } else {
-        throw new Error(`Upload failed with status: ${response.status}`);
-      }
-    } catch (error) {
-      console.error("Error uploading media:", error);
+      const response = await axios.post(endpoint,
+        formData,
+        {
+          headers
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error("Error uploading media:", error.response.data.message);
       throw error;
     }
   }

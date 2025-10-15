@@ -1,7 +1,6 @@
-import ShopApiService from "@/services/shopApi";
+import ShopApiService from "@/services/shopService";
 import { Product } from "@/types/product/product";
-import createContextHook from "@nkzw/create-context-hook";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert } from "react-native";
 
 export interface CartItem extends Product {
@@ -28,7 +27,7 @@ export default function buildVariationsFromAttributes(attributes?: any[]) {
   });
 }
 
-export const [CartProvider, useCart] = createContextHook(() => {
+export const useCart = () => {
   const [items, setItems] = useState<CartItem[]>([]);
 
   const getItemsInCart = useCallback(async () => {
@@ -105,24 +104,13 @@ export const [CartProvider, useCart] = createContextHook(() => {
     0
   );
 
-  return useMemo(
-    () => ({
-      items,
-      addToCart,
-      removeFromCart,
-      updateQuantity,
-      clearCart,
-      totalItems,
-      totalPrice,
-    }),
-    [
-      items,
-      addToCart,
-      removeFromCart,
-      updateQuantity,
-      clearCart,
-      totalItems,
-      totalPrice,
-    ]
-  );
-});
+  return {
+    items,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    totalItems,
+    totalPrice,
+  };
+};

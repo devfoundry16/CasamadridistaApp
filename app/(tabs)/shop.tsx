@@ -1,5 +1,5 @@
 import Colors, { altColors } from "@/constants/colors";
-import ShopApiService from "@/services/shopApi";
+import ShopApiService from "@/services/shopService";
 import { Product } from "@/types/product/product";
 import { Image } from 'expo-image';
 import { router } from "expo-router";

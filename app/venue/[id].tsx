@@ -1,5 +1,5 @@
 import Colors from "@/constants/colors";
-import ProfileApiService from "@/services/profileApi";
+import ProfileApiService from "@/services/profileService";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";

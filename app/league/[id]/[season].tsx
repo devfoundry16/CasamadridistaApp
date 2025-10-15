@@ -1,6 +1,6 @@
 import CustomWebView from "@/components/CustomWebView";
 import Colors from "@/constants/colors";
-import ProfileApiService from "@/services/profileApi";
+import ProfileApiService from "@/services/profileService";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {

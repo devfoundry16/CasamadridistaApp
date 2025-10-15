@@ -1,4 +1,4 @@
-import UserApiService from "@/services/authApi";
+import UserApiService from "@/services/authService";
 import { Address, Order, PaymentMethod, User } from "@/types/user/profile";
 import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -103,7 +103,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
           ...user,
           photo: response.source_url,
         } as User;
-        console.log("Updated user avatar:", updatedUser);
         await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
         setUser(updatedUser);
       } catch (error) {

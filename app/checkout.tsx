@@ -1,6 +1,6 @@
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/hooks/useCart";
 import { useRouter } from "expo-router";
 import { CheckCircle, CreditCard, MapPin, User } from "lucide-react-native";
 import { useState } from "react";

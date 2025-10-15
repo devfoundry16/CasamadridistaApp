@@ -78,6 +78,7 @@ export default function AccountScreen() {
 
     const uri = result.assets[0].uri;
     const filename = uri.split('/').pop() || `photo_${Date.now()}.jpg`;
+    console.log('name: ', filename, 'uri:', uri);
     updateAvatar(uri, filename);
   };
 
