@@ -54,18 +54,6 @@ export default function ProductDetailScreen() {
     );
   }
 
-  // const addToCart = async (id: number, quantity: number, variation?: any[]) => {
-  //   try {
-  //     ShopApiService.addItemToCart(id, quantity, variation).then((data) => {
-  //       console.log(`Product Id: ${id} Quantity: ${quantity}`);
-  //     });
-  //   } catch (error) {
-  //     console.error("Error loading store data:", error);
-  //   } finally {
-  //     console.log(await AsyncStorage.getItem("jwt_token"));
-  //   }
-  // };
-
   const handleAddToCart = () => {
     addToCart(product);
     // router.push("/cart" as any);

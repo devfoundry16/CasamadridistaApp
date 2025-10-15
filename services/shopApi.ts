@@ -57,43 +57,79 @@ class ApiService {
     return response.json();
   }
   async getCartToken() {
-    try {
-      const response = await wooApi.get("/cart");
-      const token = response.headers["cart-token"];
-      if (!token) throw new Error("No Cart Token found");
-      return token;
-    } catch (error) {
-      console.error("Error fetching cart:", error);
-      throw error;
-    }
+    const token = await AsyncStorage.getItem("jwt_token");
+    const response = await wooApi.get("/cart", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const cart_token = response.headers["cart-token"];
+    if (!cart_token) throw new Error("No Cart Token found");
+    return cart_token;
   }
 
   async addItemToCart(productId: number, quantity = 1, variation?: any[]) {
-    try {
-      const cartToken = await this.getCartToken();
-
-      const response = await wooApi.post(
-        "/cart/add-item",
-        {
-          id: productId,
-          quantity: quantity,
-          variation: variation
+    const token = await this.getJwtToken();
+    const cartToken = await this.getCartToken();
+    const response = await wooApi.post(
+      "/cart/add-item",
+      {
+        id: productId,
+        quantity: quantity,
+        variation: variation,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cart-Token": cartToken,
         },
-        {
-          headers: {
-            "Cart-Token": cartToken,
-          },
-        }
-      );
+      }
+    );
+    return response.data;
+  }
+  async getItemsInCart() {
+    const token = await AsyncStorage.getItem("jwt_token");
+    const response = await wooApi.get("/cart", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }
 
-      return response.data;
-    } catch (error: any) {
-      console.error(
-        "Error adding item to cart:",
-        error.response?.data || error.message
-      );
-      throw error;
-    }
+  async removeItemInCart(key: string) {
+    const token = await this.getJwtToken();
+    const cart_token = await this.getCartToken();
+    const response = await wooApi.post(
+      "/cart/remove-item",
+      {
+        key,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cart-Token": cart_token,
+        },
+      }
+    );
+    return response.data;
+  }
+  async updateItemInCart(key: string, quantity: number) {
+    const token = await this.getJwtToken();
+    const cart_token = await this.getCartToken();
+
+    const response = await wooApi.post(
+      "/cart/update-item",
+      {
+        key,
+        quantity,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cart-Token": cart_token,
+        },
+      }
+    );
+    return response.data;
   }
 
   async getProducts(): Promise<any[]> {
@@ -103,6 +139,10 @@ class ApiService {
   }
   async getProductById(id: number): Promise<any> {
     return this.fetchWithAuth(`/v3/products/${id}`);
+  }
+
+  async getJwtToken() {
+    return AsyncStorage.getItem("jwt_token");
   }
 }
 

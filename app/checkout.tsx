@@ -160,12 +160,12 @@ export default function CheckoutScreen() {
             <View style={styles.orderSummary}>
               <Text style={styles.summaryTitle}>Order Summary</Text>
               {items.map((item) => (
-                <View key={item.product.id} style={styles.summaryItem}>
+                <View key={item.id} style={styles.summaryItem}>
                   <Text style={styles.summaryItemName}>
-                    {item.product.name} x {item.quantity}
+                    {item.name} x {item.quantity}
                   </Text>
                   <Text style={styles.summaryItemPrice}>
-                    ${(Number(item.product.price) * item.quantity).toFixed(2)}
+                    ${(Number(item.prices.price) * item.quantity).toFixed(2)}
                   </Text>
                 </View>
               ))}

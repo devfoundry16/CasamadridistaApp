@@ -1,69 +1,107 @@
 import ShopApiService from "@/services/shopApi";
 import { Product } from "@/types/product/product";
 import createContextHook from "@nkzw/create-context-hook";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Alert } from "react-native";
 
-export interface CartItem {
-  product: Product;
+export interface CartItem extends Product {
   quantity: number;
+  key: string;
+  quantity_limits: { minimum: number; maximum: number; editable: boolean };
+  prices: {
+    price: string;
+    regular_price: string;
+    sale_price: string;
+    currency_prefix: string;
+  };
+}
+export default function buildVariationsFromAttributes(attributes?: any[]) {
+  if (!Array.isArray(attributes) || attributes.length === 0) return [];
+
+  return attributes.flatMap((attr) => {
+    const attributeKey = attr.slug ?? attr.name ?? `attr_${attr.id}`;
+    const options = Array.isArray(attr.options) ? attr.options : [];
+    return options.map((opt: string) => ({
+      attribute: attributeKey,
+      value: opt,
+    }));
+  });
 }
 
 export const [CartProvider, useCart] = createContextHook(() => {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  const addToCart = useCallback((product: Product) => {
-    setItems((prevItems) => {
-      const existingItem = prevItems.find(
-        (item) => item.product.id === product.id
-      );
+  const getItemsInCart = useCallback(async () => {
+    try {
+      const res = await ShopApiService.getItemsInCart();
+      console.log("global", res.items.length);
+      return res;
+    } catch (error) {
+      console.error("Error fetching cart items:", error);
+      return { items: [] };
+    }
+  }, []);
 
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      try {
-        ShopApiService.addItemToCart(product.id, 1).then((data) => {
-          console.log(`Product Id: ${product.id} Quantity: 1`);
-        });
-      } catch (error) {
-        console.error("Error loading store data:", error);
-      }
-      return [...prevItems, { product, quantity: 1 }];
+  useEffect(() => {
+    getItemsInCart().then((data) => {
+      setItems(data.items);
     });
-  }, []);
+  }, [getItemsInCart]);
 
+  const addToCart = useCallback((product: Product) => {
+    addItemToCart(product)
+      .then((data) => setItems(data))
+      .catch((error) => Alert.alert(error.response.data.message));
+  }, []);
   const removeFromCart = useCallback((productId: number) => {
-    setItems((prevItems) =>
-      prevItems.filter((item) => item.product.id !== productId)
-    );
+    removeItemFromCart(productId)
+      .then((data) => setItems(data))
+      .catch((error) => Alert.alert(error.response.data.message));
+  }, []); // No dependency on items needed
+  const updateQuantity = useCallback((key: string, quantity: number) => {
+    updateItemInCart(key, quantity)
+      .then((data) => setItems(data))
+      .catch((error) => Alert.alert(error.response.data.message));
   }, []);
-
-  const updateQuantity = useCallback(
-    (productId: number, quantity: number) => {
-      if (quantity <= 0) {
-        removeFromCart(productId);
-        return;
-      }
-
-      setItems((prevItems) =>
-        prevItems.map((item) =>
-          item.product.id === productId ? { ...item, quantity } : item
-        )
-      );
-    },
-    [removeFromCart]
-  );
+  const addItemToCart = async (product: Product) => {
+    const body = {
+      id: product.id,
+      quantity: 1,
+      variation: buildVariationsFromAttributes((product as any).attributes),
+    };
+    // If your ShopApiService expects (id, qty) change this call accordingly.
+    const data = await ShopApiService.addItemToCart(
+      body.id,
+      body.quantity,
+      body.variation
+    );
+    console.log("Successfully Added, remaining item:", data.items.length);
+    return data.items;
+  };
+  const removeItemFromCart = async (productId: number) => {
+    let key;
+    setItems((prevItems) => {
+      key = prevItems.find((item) => item.id == productId)?.key;
+      return prevItems;
+    });
+    const data = await ShopApiService.removeItemInCart(key as any);
+    console.log("Successfully Removed, remaining item:", data.items.length);
+    return data.items;
+  };
+  const updateItemInCart = async (key: string, quantity: number) => {
+    const data = quantity
+      ? await ShopApiService.updateItemInCart(key, quantity)
+      : await ShopApiService.removeItemInCart(key);
+    console.log("Successfully Updated, remaining item:", data.items.length);
+    return data.items;
+  };
 
   const clearCart = useCallback(() => {
     setItems([]);
   }, []);
-
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce(
-    (sum, item) => sum + Number(item.product.price) * item.quantity,
+  const totalItems = items?.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = items?.reduce(
+    (sum, item) => sum + Number(item.prices.price) * item.quantity,
     0
   );
 

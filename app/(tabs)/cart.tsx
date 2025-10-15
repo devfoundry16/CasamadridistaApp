@@ -2,7 +2,14 @@ import Colors from "@/constants/colors";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "expo-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react-native";
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function CartScreen() {
   const router = useRouter();
@@ -13,7 +20,9 @@ export default function CartScreen() {
       <View style={styles.emptyContainer}>
         <ShoppingBag size={80} color={Colors.darkGold} strokeWidth={1.5} />
         <Text style={styles.emptyTitle}>Your cart is empty</Text>
-        <Text style={styles.emptyText}>Add some luxury items to get started</Text>
+        <Text style={styles.emptyText}>
+          Add some luxury items to get started
+        </Text>
         <TouchableOpacity
           style={styles.shopButton}
           onPress={() => router.push("/shop" as any)}
@@ -25,35 +34,39 @@ export default function CartScreen() {
     );
   }
 
-  const renderCartItem = ({ item }: { item: typeof items[0] }) => (
+  const renderCartItem = ({ item }: { item: (typeof items)[0] }) => (
     <View style={styles.cartItem}>
-      <Image source={{ uri: item.product.images[0].src }} style={styles.itemImage} />
+      <Image source={{ uri: item.images[0].src }} style={styles.itemImage} />
       <View style={styles.itemDetails}>
         <Text style={styles.itemName} numberOfLines={2}>
-          {item.product.name}
+          {item.name}
         </Text>
-        <Text style={styles.itemPrice}>${Number(item.product.price).toFixed(2)}</Text>
+        <Text style={styles.itemPrice}>${Number(item.prices.price).toFixed(2)}</Text>
         <View style={styles.quantityContainer}>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => updateQuantity(item.product.id, item.quantity - 1)}
-            activeOpacity={0.7}
-          >
-            <Minus size={16} color={Colors.darkGold} />
-          </TouchableOpacity>
+          {item.quantity_limits.editable && (
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => updateQuantity(item.key, item.quantity - 1)}
+              activeOpacity={0.7}
+            >
+              <Minus size={16} color={Colors.darkGold} />
+            </TouchableOpacity>
+          )}
           <Text style={styles.quantityText}>{item.quantity}</Text>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => updateQuantity(item.product.id, item.quantity + 1)}
-            activeOpacity={0.7}
-          >
-            <Plus size={16} color={Colors.darkGold} />
-          </TouchableOpacity>
+          {item.quantity_limits.editable && (
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => updateQuantity(item.key, item.quantity + 1)}
+              activeOpacity={0.7}
+            >
+              <Plus size={16} color={Colors.darkGold} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => removeFromCart(item.product.id)}
+        onPress={() => removeFromCart(item.id)}
         activeOpacity={0.7}
       >
         <Trash2 size={20} color={Colors.textSecondary} />
@@ -66,7 +79,7 @@ export default function CartScreen() {
       <FlatList
         data={items}
         renderItem={renderCartItem}
-        keyExtractor={(item) => item.product.id.toString()}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
