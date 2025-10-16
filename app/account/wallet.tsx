@@ -1,16 +1,12 @@
 import HeaderStack from '@/components/HeaderStack';
+import { WalletScreenDetail } from '@/components/Wallet/FlinTopWallet';
 import Colors from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowDownLeft, ArrowUpRight, Plus, Wallet } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   Alert,
   ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  StyleSheet
 } from 'react-native';
 
 export default function WalletScreen() {
@@ -32,7 +28,7 @@ export default function WalletScreen() {
     <>
       <HeaderStack title="Wallet" />
       <ScrollView style={styles.container}>
-        <View style={styles.balanceCard}>
+        {/* <View style={styles.balanceCard}>
           <Wallet size={48} color={Colors.accent} />
           <Text style={styles.balanceLabel}>Current Balance</Text>
           <Text style={styles.balanceAmount}>${wallet.toFixed(2)}</Text>
@@ -79,7 +75,8 @@ export default function WalletScreen() {
             </View>
             <Text style={[styles.transactionAmount, styles.negativeAmount]}>-$50.00</Text>
           </View>
-        </View>
+        </View> */}
+        <WalletScreenDetail/>
       </ScrollView>
     </>
   );

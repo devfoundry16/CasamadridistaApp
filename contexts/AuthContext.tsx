@@ -1,4 +1,4 @@
-import AuthService from "@/services/authService";
+import AuthService from "@/services/AuthService";
 import { Address, Order, PaymentMethod, User } from "@/types/user/profile";
 import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -39,19 +39,9 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const login = useCallback(async (email: string, password: string) => {
     AuthService.login(email, password).then(async (data) => {
 
-      await AsyncStorage.setItem("jwt_token", data.token);
-
-      const tokenParts = data.token.split(".");
-      const payload = JSON.parse(atob(tokenParts[1]));
-      const userId = payload.data.user.id;
-
-      console.log("User ID from token payload:", userId);
-
-      const userData = await AuthService.getUserById(userId, data.token);
-
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
-
+      const userData = await AuthService.getUserById();
       setUser(userData);
+
     }).catch((error) => {
       Alert.alert("Login error", error.message);
     });

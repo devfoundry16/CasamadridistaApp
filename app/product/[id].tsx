@@ -14,7 +14,7 @@ import {
 
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
-import ShopApiService from "@/services/shopService";
+import ShopApiService from "@/services/ShopService";
 import { Product } from "@/types/product/product";
 import { RenderHTML } from "react-native-render-html";
 const { width } = Dimensions.get("window");

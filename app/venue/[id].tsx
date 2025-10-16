@@ -1,5 +1,5 @@
 import Colors from "@/constants/colors";
-import SportsInfoService from "@/services/sportsInfoService";
+import SportsInfoService from "@/services/SportsInfoService";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";

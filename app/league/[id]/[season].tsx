@@ -1,6 +1,6 @@
 import CustomWebView from "@/components/CustomWebView";
 import Colors from "@/constants/colors";
-import SportsInfoService from "@/services/sportsInfoService";
+import SportsInfoService from "@/services/SportsInfoService";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {

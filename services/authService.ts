@@ -1,13 +1,15 @@
 import { AuthResponse, User } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from 'axios';
+import axios from "axios";
 const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json";
 const API_BASE_URL_KEY = "api_base_url_key";
 const AUTH_USERNAME = "iworqs"; // Replace with actual username
 const AUTH_PASSWORD = "P8u4 vcXa 7FrR mWXP eVla jstg";
 class ApiService {
   private baseUrl: string = DEFAULT_BASE_URL;
-
+  private readonly AUTH_TOKEN_KEY = "jwt_token";
+  private readonly USER_ID_KEY = "user_id";
+  private readonly USER_KEY = "user";
   async initialize() {
     const savedUrl = await AsyncStorage.getItem(API_BASE_URL_KEY);
     if (savedUrl) {
@@ -25,10 +27,38 @@ class ApiService {
   getBaseUrl(): string {
     return this.baseUrl;
   }
-  
-  async getJwtToken() {
-    return AsyncStorage.getItem("jwt_token");
+
+  async getAuthToken() {
+    return AsyncStorage.getItem(this.AUTH_TOKEN_KEY);
   }
+
+  async isAuthenticated(): Promise<boolean> {
+    const token = await this.getAuthToken();
+    return !!token;
+  }
+
+  async getUserId(): Promise<number | null> {
+    const userId = await AsyncStorage.getItem(this.USER_ID_KEY);
+    return userId ? parseInt(userId, 10) : null;
+  }
+
+  async getUserData() {
+    return await AsyncStorage.getItem(this.USER_KEY);
+  }
+
+  async storeAuthData(
+    token: string,
+    userId: number,
+  ): Promise<void> {
+    await AsyncStorage.multiSet([
+      [this.AUTH_TOKEN_KEY, token],
+      [this.USER_ID_KEY, userId.toString()],
+    ]);
+  }
+
+  async storeUserData(user: User | null) {
+    await AsyncStorage.setItem(this.USER_KEY, JSON.stringify(user));
+  } 
 
   private async fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     // const token = await AsyncStorage.getItem('jwt_token');
@@ -82,6 +112,15 @@ class ApiService {
     }
 
     const data = await response.json();
+
+    const tokenParts = data.token.split(".");
+    const payload = JSON.parse(atob(tokenParts[1]));
+    const userId = payload.data.user.id;
+
+    await this.storeAuthData(data.token, userId); //store auth data
+
+    const userData = await this.getUserById();
+    await this.storeUserData(userData); //store user data
 
     console.log("[WordPress] Login successful:", data.user_display_name);
     return data;
@@ -153,7 +192,9 @@ class ApiService {
     await AsyncStorage.removeItem("user_data");
     console.log("[WordPress] Logged out");
   }
-  async getUserById(id: number, token: string): Promise<User | null> {
+  async getUserById(): Promise<User | null> {
+    const id = await this.getUserId();
+    const token = await this.getAuthToken();
     const response = await fetch(
       `${this.baseUrl}/wp/v2/users/${id}?context=edit`,
       {
@@ -225,12 +266,9 @@ class ApiService {
     };
 
     try {
-      const response = await axios.post(endpoint,
-        formData,
-        {
-          headers
-        }
-      );
+      const response = await axios.post(endpoint, formData, {
+        headers,
+      });
       return response.data;
     } catch (error: any) {
       console.error("Error uploading media:", error.response.data.message);

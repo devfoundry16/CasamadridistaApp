@@ -1,4 +1,4 @@
-import ShopApiService from "@/services/shopService";
+import ShopApiService from "@/services/ShopService";
 import { Product } from "@/types/product/product";
 import { useCallback, useEffect, useState } from "react";
 import { Alert } from "react-native";
