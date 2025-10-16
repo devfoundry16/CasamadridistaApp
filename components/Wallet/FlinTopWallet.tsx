@@ -1,18 +1,19 @@
 // components/WooWalletScreen.tsx
+import { Button } from '@/components/Button';
 import { useFlintopWallet } from '@/hooks/useFlintopWallet';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import { AddFundsModal } from './AddFundsModal';
-import { Button } from './Button';
 import { TransactionList } from './TransactionList';
+import { TransferModal } from './TransferModal';
 
 export const WalletScreenDetail: React.FC = () => {
   const {
@@ -23,6 +24,7 @@ export const WalletScreenDetail: React.FC = () => {
     refreshBalance,
     refreshTransactions,
     addFunds,
+    transferFunds,
   } = useFlintopWallet();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -45,15 +47,15 @@ export const WalletScreenDetail: React.FC = () => {
     }
   };
 
-//   const handleTransfer = async (toUserId: number, amount: number, description?: string) => {
-//     try {
-//       await transferFunds(toUserId, amount, description);
-//       setShowTransferModal(false);
-//       Alert.alert('Success', 'Transfer completed successfully!');
-//     } catch (err) {
-//       Alert.alert('Error', 'Failed to transfer funds. Please try again.');
-//     }
-//   };
+  const handleTransfer = async (toUserId: number, amount: number, description?: string) => {
+    try {
+      await transferFunds(toUserId, amount, description);
+      setShowTransferModal(false);
+      Alert.alert('Success', 'Transfer completed successfully!');
+    } catch (err) {
+      Alert.alert('Error', 'Failed to transfer funds. Please try again.');
+    }
+  };
 
   if (loading && !refreshing) {
     return (
@@ -98,12 +100,12 @@ export const WalletScreenDetail: React.FC = () => {
             variant="primary"
             style={styles.actionButton}
           />
-          <Button
+          {/* <Button
             title="Transfer"
             onPress={() => setShowTransferModal(true)}
             variant="outline"
             style={styles.actionButton}
-          />
+          /> */}
         </View>
 
         {/* Transactions */}
@@ -120,13 +122,13 @@ export const WalletScreenDetail: React.FC = () => {
         onAddFunds={handleAddFunds}
       />
       
-      {/* <TransferModal
+      <TransferModal
         visible={showTransferModal}
         onClose={() => setShowTransferModal(false)}
         onTransfer={handleTransfer}
         currentBalance={balance?.balance || 0}
         currency={balance?.currency_symbol || '$'}
-      /> */}
+      />
     </View>
   );
 };
@@ -176,6 +178,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
+    height: 32,
   },
   errorText: {
     color: 'red',

@@ -2,7 +2,7 @@
 import { FlintopWalletService } from '@/services/FlintopWalletService';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button } from './Button';
+import { Button } from '../Button';
 
 export const FlintopWalletDebug: React.FC = () => {
   const [debugInfo, setDebugInfo] = useState<string[]>([]);

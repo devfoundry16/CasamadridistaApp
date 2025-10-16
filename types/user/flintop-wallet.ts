@@ -45,3 +45,15 @@ export interface FlintopWalletDetails {
   recent_transactions: FlintopWalletTransaction[];
   user_id: number;
 }
+
+export interface FlinTopWalletTransferRequest {
+  to_user_id: number;
+  amount: number;
+  description?: string;
+}
+
+export interface FlinTopWalletWithdrawRequest {
+  amount: number;
+  payment_method: string;
+  account_details?: string;
+}

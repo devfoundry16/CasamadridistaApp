@@ -4,6 +4,8 @@ import {
   FlintopWalletBalance,
   FlintopWalletDetails,
   FlintopWalletTransaction,
+  FlinTopWalletTransferRequest,
+  FlinTopWalletWithdrawRequest,
 } from "@/types/user/flintop-wallet";
 import AuthService from "./AuthService";
 
@@ -113,6 +115,31 @@ export class FlintopWalletService {
         body: JSON.stringify(request),
       }
     );
+  }
+
+  static async transferFunds(request: FlinTopWalletTransferRequest): Promise<any> {
+    return this.authenticatedFetch('/woo-wallet/v1/transfer', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  // Withdraw funds from wallet
+  static async withdrawFunds(request: FlinTopWalletWithdrawRequest): Promise<any> {
+    return this.authenticatedFetch('/woo-wallet/v1/withdraw', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  // Get withdrawal methods
+  static async getWithdrawalMethods(): Promise<string[]> {
+    return this.authenticatedFetch<string[]>('/woo-wallet/v1/withdrawal-methods');
+  }
+
+  // Get payment methods for adding funds
+  static async getPaymentMethods(): Promise<string[]> {
+    return this.authenticatedFetch<string[]>('/woo-wallet/v1/payment-methods');
   }
 
   // Get complete wallet details (balance + recent transactions)

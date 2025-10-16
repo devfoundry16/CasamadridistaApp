@@ -12,6 +12,8 @@ interface UseFlintopWalletReturn {
   refreshBalance: () => Promise<void>;
   refreshTransactions: () => Promise<void>;
   addFunds: (amount: number, paymentMethod: string, description?: string) => Promise<void>;
+  transferFunds: (toUserId: number, amount: number, description?: string) => Promise<void>;
+  withdrawFunds: (amount: number, paymentMethod: string, accountDetails?: string) => Promise<void>;
   testConnection: () => Promise<{ success: boolean; message: string }>;
 }
 
@@ -84,7 +86,41 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
       throw err;
     }
   }, [refreshBalance, refreshTransactions]);
+  const transferFunds = useCallback(async (toUserId: number, amount: number, description?: string) => {
+    try {
+      setError(null);
+      
+      await FlintopWalletService.transferFunds({
+        to_user_id: toUserId,
+        amount,
+        description: description || `Transfer to user ${toUserId}`,
+      });
 
+      await refreshBalance();
+      await refreshTransactions();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to transfer funds');
+      throw err;
+    }
+  }, [refreshBalance, refreshTransactions]);
+
+  const withdrawFunds = useCallback(async (amount: number, paymentMethod: string, accountDetails?: string) => {
+    try {
+      setError(null);
+      
+      await FlintopWalletService.withdrawFunds({
+        amount,
+        payment_method: paymentMethod,
+        account_details: accountDetails,
+      });
+
+      await refreshBalance();
+      await refreshTransactions();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to withdraw funds');
+      throw err;
+    }
+  }, [refreshBalance, refreshTransactions]);
   const testConnection = useCallback(async (): Promise<{ success: boolean; message: string }> => {
     return await FlintopWalletService.testConnection();
   }, []);
@@ -101,6 +137,8 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
     refreshBalance,
     refreshTransactions,
     addFunds,
+    transferFunds,
+    withdrawFunds,
     testConnection,
   };
 };
