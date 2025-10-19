@@ -1,10 +1,12 @@
-import { AuthResponse, User } from "@/types/user/profile";
+import { Address, AuthResponse, User } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json";
 const API_BASE_URL_KEY = "api_base_url_key";
 const AUTH_USERNAME = "iworqs"; // Replace with actual username
 const AUTH_PASSWORD = "P8u4 vcXa 7FrR mWXP eVla jstg";
+const WOO_USERNAME = "ck_5761f8ce313356e07555cf14a8c2099ab27d7942";
+const WOO_PASSWORD = "cs_72d03b9110f7f1e3592f5c4a77cbd7c42b176075";
 class ApiService {
   private baseUrl: string = DEFAULT_BASE_URL;
   private readonly AUTH_TOKEN_KEY = "jwt_token";
@@ -46,10 +48,7 @@ class ApiService {
     return await AsyncStorage.getItem(this.USER_KEY);
   }
 
-  async storeAuthData(
-    token: string,
-    userId: number,
-  ): Promise<void> {
+  async storeAuthData(token: string, userId: number): Promise<void> {
     await AsyncStorage.multiSet([
       [this.AUTH_TOKEN_KEY, token],
       [this.USER_ID_KEY, userId.toString()],
@@ -58,7 +57,7 @@ class ApiService {
 
   async storeUserData(user: User | null) {
     await AsyncStorage.setItem(this.USER_KEY, JSON.stringify(user));
-  } 
+  }
 
   private async fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     // const token = await AsyncStorage.getItem('jwt_token');
@@ -67,12 +66,12 @@ class ApiService {
       "Content-Type": "application/json",
     };
 
-    if (options.headers) {
-      Object.assign(headers, options.headers);
-    }
-
     if (token) {
       headers["Authorization"] = `Basic ${token}`;
+    }
+
+    if (options.headers) {
+      Object.assign(headers, options.headers);
     }
 
     const url = `${this.baseUrl}${endpoint}`;
@@ -131,15 +130,7 @@ class ApiService {
       method: "POST",
       body: JSON.stringify(userData),
     });
-    if (!response.ok) {
-      const error = await response.json();
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Something went wrong. Please try again.";
-      // Re-throw for upper layers to handle
-      throw new Error(message);
-    }
+
     const data = await response.json();
 
     console.log("[WordPress] Register successful:", data);
@@ -150,21 +141,34 @@ class ApiService {
       method: "PUT",
       body: JSON.stringify(userData),
     });
-    if (!response.ok) {
-      const error = await response.json();
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Something went wrong. Please try again.";
-      // Re-throw for upper layers to handle
-      throw new Error(message);
-    }
+
     const data = await response.json();
 
     console.log("[WordPress] Update successful:", data);
     return data;
   }
+  async updateAddress(addressData: Address): Promise<any> {
+    const id = await this.getUserId();
+    const body =
+      addressData.type == "billing"
+        ? { billing: addressData }
+        : { shipping: addressData };
+    const response = await this.fetchWithAuth(`/wc/v3/customers/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+    const data = response;
 
+    console.log("[WordPress] Update Address successful:", data);
+    return data;
+  }
+  async getAddress(): Promise<any> {
+    const id = await this.getUserId();
+    const response = await this.fetchWithAuth(`/wc/v3/customers/${id}`, {
+      method: "get",
+    });
+    return { shipping: response.shipping, billing: response.billing };
+  }
   async validateToken(): Promise<boolean> {
     try {
       const token = await AsyncStorage.getItem("jwt_token");
@@ -214,7 +218,7 @@ class ApiService {
       // Re-throw for upper layers to handle
       throw new Error(message);
     }
-    const data = response.json();
+    const data = await response.json();
 
     return data;
   }

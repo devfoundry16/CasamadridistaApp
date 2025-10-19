@@ -1,6 +1,13 @@
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
+import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
+import {
+  IntentCreationCallbackParams,
+  PaymentMethod,
+  PaymentSheetError,
+  useStripe,
+} from "@stripe/stripe-react-native";
 import { useRouter } from "expo-router";
 import { CheckCircle, CreditCard, MapPin, User } from "lucide-react-native";
 import { useState } from "react";
@@ -17,24 +24,66 @@ import {
 export default function CheckoutScreen() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const { billingAddress, shippingAddress, user} = useAuth();
+  const [name, setName] = useState(user?.name);
+  const [email, setEmail] = useState(user?.email);
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cvv, setCvv] = useState("");
+  const [address, setAddress] = useState(billingAddress);
+  /* Stripe */
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const API_URL = "http://localhost:3000";
 
-  const handlePayment = () => {
-    if (
-      !name ||
-      !email ||
-      !phone ||
-      !address ||
-      !cardNumber ||
-      !expiryDate ||
-      !cvv
-    ) {
+  const initializePaymentSheet = async () => {
+    const { error } = await initPaymentSheet({
+      merchantDisplayName: "Example, Inc.",
+      applePay: {
+        merchantCountryCode: "US",
+      },
+      googlePay: {
+        merchantCountryCode: "US",
+      },
+      defaultBillingDetails: {
+        email: billingAddress?.email,
+        name: billingAddress?.first_name + ' ' + billingAddress?.last_name,
+      },
+      intentConfiguration: {
+        mode: {
+          amount: totalPrice,
+          currencyCode: "usd",
+        },
+        confirmHandler: confirmHandler,
+      },
+    });
+    if (error) {
+      // Handle error
+    }
+  };
+
+  const confirmHandler = async (
+    paymentMethod: PaymentMethod.Result,
+    shouldSavePaymentMethod: boolean,
+    intentCreationCallback: (params: IntentCreationCallbackParams) => void
+  ) => {
+    // Make a request to your own server.
+    const body = { amount: totalPrice};
+    const response = await fetch(`${API_URL}/create-payment-intent`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    // Call the `intentCreationCallback` with your server response's client secret or error.
+    const { client_secret, error } = await response.json();
+    if (client_secret) {
+      intentCreationCallback({ clientSecret: client_secret });
+    } else {
+      intentCreationCallback({ error });
+    }
+  };
+
+  const handlePayment = async () => {
+    if (!name || !email || !address) {
       Alert.alert(
         "Missing Information",
         "Please fill in all fields to complete your purchase."
@@ -42,19 +91,29 @@ export default function CheckoutScreen() {
       return;
     }
 
-    Alert.alert(
-      "Payment Successful!",
-      `Your order of $${totalPrice.toFixed(2)} has been confirmed. Thank you for shopping with us!`,
-      [
-        {
-          text: "Continue Shopping",
-          onPress: () => {
-            clearCart();
-            router.push("/shop");
+    initializePaymentSheet();
+    const { error } = await presentPaymentSheet();
+    if (error) {
+      if (error.code === PaymentSheetError.Canceled) {
+        // Customer canceled - you should probably do nothing.
+      } else {
+        // PaymentSheet encountered an unrecoverable error. You can display the error to the user, log it, and so on.
+      }
+    } else {
+      Alert.alert(
+        "Payment Successful!",
+        `Your order of $${(totalPrice / 100).toFixed(2)} has been confirmed. Thank you for shopping with us!`,
+        [
+          {
+            text: "Continue Shopping",
+            onPress: () => {
+              clearCart();
+              router.push("/shop");
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    }
   };
 
   if (items.length === 0) {
@@ -70,7 +129,7 @@ export default function CheckoutScreen() {
 
   return (
     <>
-      <HeaderStack title="Checkout"/>
+      <HeaderStack title="Checkout" />
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
@@ -114,8 +173,7 @@ export default function CheckoutScreen() {
                 style={[styles.input, styles.textArea]}
                 placeholder="Street Address, City, State, ZIP Code"
                 placeholderTextColor={Colors.textSecondary}
-                value={address}
-                onChangeText={setAddress}
+                value={address?.address_1 + ' ' + address?.city + ' ' + address?.state + ' ' + address?.postalCode}
                 multiline
                 numberOfLines={3}
               />
@@ -125,35 +183,6 @@ export default function CheckoutScreen() {
               <View style={styles.sectionHeader}>
                 <CreditCard size={20} color={Colors.darkGold} />
                 <Text style={styles.sectionTitle}>Payment Information</Text>
-              </View>
-              <TextInput
-                style={styles.input}
-                placeholder="Card Number"
-                placeholderTextColor={Colors.textSecondary}
-                value={cardNumber}
-                onChangeText={setCardNumber}
-                keyboardType="number-pad"
-                maxLength={16}
-              />
-              <View style={styles.row}>
-                <TextInput
-                  style={[styles.input, styles.halfInput]}
-                  placeholder="MM/YY"
-                  placeholderTextColor={Colors.textSecondary}
-                  value={expiryDate}
-                  onChangeText={setExpiryDate}
-                  maxLength={5}
-                />
-                <TextInput
-                  style={[styles.input, styles.halfInput]}
-                  placeholder="CVV"
-                  placeholderTextColor={Colors.textSecondary}
-                  value={cvv}
-                  onChangeText={setCvv}
-                  keyboardType="number-pad"
-                  maxLength={3}
-                  secureTextEntry
-                />
               </View>
             </View>
 
@@ -165,14 +194,14 @@ export default function CheckoutScreen() {
                     {item.name} x {item.quantity}
                   </Text>
                   <Text style={styles.summaryItemPrice}>
-                    ${(Number(item.prices.price) * item.quantity).toFixed(2)}
+                    ${(Number(item.prices.price) / 100 * item.quantity).toFixed(2)}
                   </Text>
                 </View>
               ))}
               <View style={styles.divider} />
               <View style={styles.summaryItem}>
                 <Text style={styles.totalLabel}>Total</Text>
-                <Text style={styles.totalPrice}>${totalPrice.toFixed(2)}</Text>
+                <Text style={styles.totalPrice}>${(totalPrice / 100).toFixed(2)}</Text>
               </View>
             </View>
           </View>

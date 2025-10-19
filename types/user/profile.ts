@@ -21,16 +21,17 @@ export interface User {
 }
 
 export interface Address {
-  id: string;
   type: 'shipping' | 'billing';
+  company: string,
   email: string,
   first_name: string;
   last_name: string,
-  address: string;
+  address_1: string;
+  address_2: string;
   city: string;
-  state?: string;
+  state: string;
   country: string;
-  postalCode?: string;
+  postalCode: string;
   phone?: string;
 }
 

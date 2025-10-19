@@ -1,7 +1,8 @@
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
-import { Edit, MapPin, Plus, Trash2, X } from "lucide-react-native";
+import { Address } from "@/types/user/profile";
+import { Edit, Trash2, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -14,16 +15,68 @@ import {
   View,
 } from "react-native";
 
+function AddressView({
+  address,
+  handleEdit,
+  handleDelete,
+}: {
+  address: Address;
+  handleEdit: (e: Address) => void;
+  handleDelete: (e: Address) => void;
+}) {
+  return (
+    <View style={styles.addressCard}>
+      <View style={styles.addressHeader}>
+        <View style={styles.typeBadge}>
+          <Text style={styles.typeText}>{address.type}</Text>
+        </View>
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => handleEdit(address)}
+          >
+            <Edit size={18} color={Colors.accent} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => handleDelete(address)}
+          >
+            <Trash2 size={18} color={Colors.error} />
+          </TouchableOpacity>
+        </View>
+      </View>
+      {!address.first_name.length ? (
+        <Text style={{ color: Colors.textWhite}}>No Address Found</Text>
+      ) : (
+        <View>
+          <Text style={styles.addressName}>
+            {address.first_name} {address.last_name}
+          </Text>
+          <Text style={styles.addressText}>{address.address_1}</Text>
+          <Text style={styles.addressText}>{address.address_2}</Text>
+          <Text style={styles.addressText}>
+            {address.city}
+            {address.city ? "," : ""} {address.country} {address.postalCode}
+          </Text>
+          <Text style={styles.addressText}>{address.phone}</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
 export default function AddressesScreen() {
-  const { addresses, addAddress, updateAddress, deleteAddress } = useAuth();
+  const { billingAddress, shippingAddress, updateAddress, deleteAddress } =
+    useAuth();
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     type: "shipping" as "shipping" | "billing",
     email: "",
     first_name: "",
     last_name: "",
-    address: "",
+    company: "",
+    address_1: "",
+    address_2: "",
     city: "",
     state: "",
     country: "",
@@ -33,34 +86,29 @@ export default function AddressesScreen() {
 
   const handleSave = () => {
     if (
-      (formData.type === 'billing' && !formData.email) ||
-      !formData.address ||
-      !formData.city ||
-      !formData.first_name ||
-      !formData.last_name ||
-      !formData.country
+      formData.type === "billing" &&
+      !formData.email
+      //  || (!formData.address_1 && !formData.address_2)
+      // || !formData.city
+      // || !formData.first_name
+      // || !formData.last_name
+      // || !formData.country
     ) {
       Alert.alert("Error", "Please fill in all required fields");
       return;
     }
-
-    if (editingId) {
-      updateAddress(editingId, formData);
-    } else {
-      addAddress({ ...formData, id: Date.now().toString() });
-    }
+    updateAddress(formData);
 
     setModalVisible(false);
     resetForm();
   };
 
   const handleEdit = (address: any) => {
-    setEditingId(address.id);
     setFormData(address);
     setModalVisible(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (type: "shipping" | "billing") => {
     Alert.alert(
       "Delete Address",
       "Are you sure you want to delete this address?",
@@ -69,33 +117,31 @@ export default function AddressesScreen() {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => deleteAddress(id),
+          onPress: () => deleteAddress(type),
         },
       ]
     );
   };
 
   const resetForm = () => {
-    setEditingId(null);
-    setFormData({
-      type: "shipping",
-      email: "",
-      first_name: "",
-      last_name: "",
-      address: "",
-      city: "",
-      country: "",
-      state: "",
-      postalCode: "",
-      phone: "",
-    });
+    // setFormData({
+    //   type: "shipping",
+    //   email: "",
+    //   first_name: "",
+    //   last_name: "",
+    //   address: "",
+    //   city: "",
+    //   country: "",
+    //   state: "",
+    //   postalCode: "",
+    //   phone: "",
+    // });
   };
-
   return (
     <>
       <HeaderStack title="Addresses" />
       <ScrollView style={styles.container}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
             resetForm();
@@ -104,54 +150,36 @@ export default function AddressesScreen() {
         >
           <Plus size={20} color={Colors.textWhite} />
           <Text style={styles.addButtonText}>Add New Address</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        {addresses.length === 0 ? (
+        {/* {shippingAddress?.first_name == '' && billingAddress?.first_name == '' ? (
           <View style={styles.emptyState}>
             <MapPin size={64} color={Colors.darkGray} />
             <Text style={styles.emptyText}>No addresses saved</Text>
           </View>
-        ) : (
-          <View style={styles.addressList}>
-            {addresses.map((address) => (
-              <View key={address.id} style={styles.addressCard}>
-                <View style={styles.addressHeader}>
-                  <View style={styles.typeBadge}>
-                    <Text style={styles.typeText}>{address.type}</Text>
-                  </View>
-                  <View style={styles.actions}>
-                    <TouchableOpacity
-                      style={styles.actionButton}
-                      onPress={() => handleEdit(address)}
-                    >
-                      <Edit size={18} color={Colors.accent} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.actionButton}
-                      onPress={() => handleDelete(address.id)}
-                    >
-                      <Trash2 size={18} color={Colors.error} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                <Text style={styles.addressName}>{address.first_name}</Text>
-                <Text style={styles.addressText}>{address.address}</Text>
-                <Text style={styles.addressText}>
-                  {address.city}, {address.country} {address.postalCode}
-                </Text>
-                <Text style={styles.addressText}>{address.phone}</Text>
-              </View>
-            ))}
-          </View>
-        )}
+        ) : ( */}
+        <View style={styles.addressList}>
+          {billingAddress && (
+            <AddressView
+              address={billingAddress}
+              handleEdit={handleEdit}
+              handleDelete={() => handleDelete('billing')}
+            />
+          )}
+          {shippingAddress && (
+            <AddressView
+              address={shippingAddress}
+              handleEdit={handleEdit}
+              handleDelete={() => handleDelete('shipping')}
+            />
+          )}
+        </View>
 
         <Modal visible={modalVisible} animationType="slide" transparent>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>
-                  {editingId ? "Edit Address" : "Add New Address"}
-                </Text>
+                <Text style={styles.modalTitle}>Edit Address</Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
                   <X size={24} color={Colors.textWhite} />
                 </TouchableOpacity>
@@ -164,9 +192,9 @@ export default function AddressesScreen() {
                       styles.typeOption,
                       formData.type === "shipping" && styles.typeOptionActive,
                     ]}
-                    onPress={() =>
-                      setFormData({ ...formData, type: "shipping" })
-                    }
+                    // onPress={() =>
+                    //   setFormData({ ...formData, type: "shipping" })
+                    // }
                   >
                     <Text
                       style={[
@@ -183,9 +211,9 @@ export default function AddressesScreen() {
                       styles.typeOption,
                       formData.type === "billing" && styles.typeOptionActive,
                     ]}
-                    onPress={() =>
-                      setFormData({ ...formData, type: "billing" })
-                    }
+                    // onPress={() =>
+                    //   setFormData({ ...formData, type: "billing" })
+                    // }
                   >
                     <Text
                       style={[
@@ -207,6 +235,7 @@ export default function AddressesScreen() {
                     }
                     placeholder="Email *"
                     placeholderTextColor={Colors.textLight}
+                    autoCapitalize="none"
                   />
                 )}
                 <TextInput
@@ -229,20 +258,29 @@ export default function AddressesScreen() {
                 />
                 <TextInput
                   style={styles.input}
-                  value={formData.country}
+                  value={formData.company}
                   onChangeText={(text) =>
-                    setFormData({ ...formData, country: text })
+                    setFormData({ ...formData, company: text })
                   }
-                  placeholder="Country / Region *"
+                  placeholder="Company"
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
                   style={styles.input}
-                  value={formData.address}
+                  value={formData.address_1}
                   onChangeText={(text) =>
-                    setFormData({ ...formData, address: text })
+                    setFormData({ ...formData, address_1: text })
                   }
-                  placeholder="Street Address *"
+                  placeholder="Address 1"
+                  placeholderTextColor={Colors.textLight}
+                />
+                <TextInput
+                  style={styles.input}
+                  value={formData.address_2}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, address_2: text })
+                  }
+                  placeholder="Address 2"
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
@@ -346,7 +384,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#3A3A3A",
     borderRadius: 16,
     padding: 20,
-    marginBottom: 16,
+    marginBottom: 8,
+    marginTop: 8,
     borderWidth: 1,
     borderColor: "#4A4A4A",
   },

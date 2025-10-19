@@ -41,7 +41,7 @@ export default function CartScreen() {
         <Text style={styles.itemName} numberOfLines={2}>
           {item.name}
         </Text>
-        <Text style={styles.itemPrice}>${Number(item.prices.price).toFixed(2)}</Text>
+        <Text style={styles.itemPrice}>${(Number(item.prices.price) / 100).toFixed(2)}</Text>
         <View style={styles.quantityContainer}>
           {item.quantity_limits.editable && (
             <TouchableOpacity
@@ -86,7 +86,7 @@ export default function CartScreen() {
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalPrice}>${totalPrice.toFixed(2)}</Text>
+          <Text style={styles.totalPrice}>${(Number(totalPrice) / 100).toFixed(2)}</Text>
         </View>
         <TouchableOpacity
           style={styles.checkoutButton}

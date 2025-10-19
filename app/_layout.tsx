@@ -1,6 +1,6 @@
-import Colors from "@/constants/colors";
 import { AppProvider } from "@/contexts/AppContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -26,21 +26,19 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AppProvider>
+      <StripeProvider
+        publishableKey="pk_test_51SJbX1LKFkodhXbkhZyhK8koyJDiF3i0xhq2A3hdXj5DnZasByx2N8aCVp2GJZDLEFMm7EJiwYQOPJqKdA7ShN5j00IvGbHo3c"
+        merchantIdentifier="merchant.identifier" // required for Apple Pay
+        urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
+      >
+        <AuthProvider>
+          <AppProvider>
             <GestureHandlerRootView style={{ flex: 1 }}>
               <RootLayoutNav />
             </GestureHandlerRootView>
-        </AppProvider>
-      </AuthProvider>
+          </AppProvider>
+        </AuthProvider>
+      </StripeProvider>
     </QueryClientProvider>
   );
 }
-
-const headerOptions = {
-  headerShown: true,
-  headerBackButtonDisplayMode: "minimal" as const,
-  headerTintColor: Colors.textWhite,
-  headerStyle: { backgroundColor: Colors.darkGold },
-  headerTitleStyle: { fontWeight: "700" as const },
-};

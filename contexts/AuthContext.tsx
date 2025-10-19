@@ -4,12 +4,45 @@ import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "react-native";
+const initialBillingAddress = {
+  type: "billing" as "shipping" | "billing",
+  email: "",
+  first_name: "",
+  last_name: "",
+  company: "",
+  address_1: "",
+  address_2: "",
+  city: "",
+  state: "",
+  country: "",
+  postalCode: "",
+  phone: "",
+};
+const initialShippingAddress = {
+  type: "shipping" as "shipping" | "billing",
+  email: "",
+  first_name: "",
+  last_name: "",
+  company: "",
+  address_1: "",
+  address_2: "",
+  city: "",
+  state: "",
+  country: "",
+  postalCode: "",
+  phone: "",
+};
 export const [AuthProvider, useAuth] = createContextHook(() => {
   const [user, setUser] = useState<Partial<User> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [wallet, setWallet] = useState(0);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [billingAddress, setBillingAddress] = useState<Address | null>(
+    initialBillingAddress
+  );
+  const [shippingAddress, setShippingAddress] = useState<Address | null>(
+    initialShippingAddress
+  );
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
   useEffect(() => {
@@ -21,13 +54,22 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       const userData = await AsyncStorage.getItem("user");
       const walletData = await AsyncStorage.getItem("wallet");
       const ordersData = await AsyncStorage.getItem("orders");
-      const addressesData = await AsyncStorage.getItem("addresses");
+      // const billingAddressData =
+      //   await AsyncStorage.getItem("billingAddressData");
+      // const shippingAddressData = await AsyncStorage.getItem(
+      //   "shippingAddressData"
+      // );
       const paymentMethodsData = await AsyncStorage.getItem("paymentMethods");
 
-      if (userData) setUser(JSON.parse(userData));
+      if (userData) {
+        setUser(JSON.parse(userData));
+        await getAddressData();
+      }
       if (walletData) setWallet(JSON.parse(walletData));
       if (ordersData) setOrders(JSON.parse(ordersData));
-      if (addressesData) setAddresses(JSON.parse(addressesData));
+      // if (billingAddressData) setBillingAddress(JSON.parse(billingAddressData));
+      // if (shippingAddressData)
+      //   setShippingAddress(JSON.parse(shippingAddressData));
       if (paymentMethodsData) setPaymentMethods(JSON.parse(paymentMethodsData));
     } catch (error) {
       console.error("Error loading user data:", error);
@@ -36,26 +78,35 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   };
 
+  const getAddressData = useCallback(async () => {
+    const addresses = await AuthService.getAddress();
+    setBillingAddress({type: "billing", ...addresses.billing});
+    setShippingAddress({type: "shipping", ...addresses.shipping});
+  }, []);
+
   const login = useCallback(async (email: string, password: string) => {
-    AuthService.login(email, password).then(async (data) => {
-
-      const userData = await AuthService.getUserById();
-      setUser(userData);
-
-    }).catch((error) => {
-      Alert.alert("Login error", error.message);
-    });
+    AuthService.login(email, password)
+      .then(async (data) => {
+        const userData = await AuthService.getUserById();
+        setUser(userData);
+        await getAddressData();
+      })
+      .catch((error) => {
+        Alert.alert("Login error", error.message);
+      });
   }, []);
 
   const register = useCallback(async (userData: Omit<User, "id">) => {
-    AuthService.register(userData).then(async (response) => {
-      const newUser: User = response;
-      console.log("Registered user:", newUser);
-      await AsyncStorage.setItem("user", JSON.stringify(newUser));
-      setUser(newUser);
-    }).catch((error) => {
-      Alert.alert("Registration error", error.message);
-    });
+    AuthService.register(userData)
+      .then(async (response) => {
+        const newUser: User = response;
+        console.log("Registered user:", newUser);
+        await AsyncStorage.setItem("user", JSON.stringify(newUser));
+        setUser(newUser);
+      })
+      .catch((error) => {
+        Alert.alert("Registration error", error.message);
+      });
   }, []);
 
   const logout = useCallback(async () => {
@@ -63,13 +114,15 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       "user",
       "wallet",
       "orders",
-      "addresses",
+      "billingAddressData",
+      "shippingAddressData",
       "paymentMethods",
     ]);
     setUser(null);
     setWallet(0);
     setOrders([]);
-    setAddresses([]);
+    setBillingAddress(null);
+    setShippingAddress(null);
     setPaymentMethods([]);
   }, []);
 
@@ -97,7 +150,10 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         setUser(updatedUser);
       } catch (error) {
         console.error("Error uploading avatar:", error);
-        Alert.alert("Upload Error", "Failed to upload avatar. Please try again.");
+        Alert.alert(
+          "Upload Error",
+          "Failed to upload avatar. Please try again."
+        );
       }
     },
     [user]
@@ -120,33 +176,42 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     [orders]
   );
 
-  const addAddress = useCallback(
-    async (address: Address) => {
-      const newAddresses = [...addresses, address];
-      await AsyncStorage.setItem("addresses", JSON.stringify(newAddresses));
-      setAddresses(newAddresses);
-    },
-    [addresses]
-  );
-
+  const handleAddress = async (address: Address) => {
+    const response = await AuthService.updateAddress(address);
+    let newAddress: Address;
+    if (address.type == "billing") {
+      newAddress = { ...response.billing, type: "billing" };
+      setBillingAddress(newAddress);
+    } else {
+      newAddress = { ...response.shipping, type: "shipping" };
+      setShippingAddress(newAddress);
+    }
+  };
   const updateAddress = useCallback(
-    async (id: string, updates: Partial<Address>) => {
-      const newAddresses = addresses.map((addr) =>
-        addr.id === id ? { ...addr, ...updates } : addr
-      );
-      await AsyncStorage.setItem("addresses", JSON.stringify(newAddresses));
-      setAddresses(newAddresses);
+    async (address: Address) => {
+      await handleAddress(address);
     },
-    [addresses]
+    [billingAddress, shippingAddress]
   );
-
   const deleteAddress = useCallback(
-    async (id: string) => {
-      const newAddresses = addresses.filter((addr) => addr.id !== id);
-      await AsyncStorage.setItem("addresses", JSON.stringify(newAddresses));
-      setAddresses(newAddresses);
+    async (type: "shipping" | "billing") => {
+      let newAddress: Address = {
+        type: type,
+        email: "",
+        first_name: "",
+        last_name: "",
+        company: "",
+        address_1: "",
+        address_2: "",
+        city: "",
+        state: "",
+        country: "",
+        postalCode: "",
+        phone: "",
+      };
+      await handleAddress(newAddress);
     },
-    [addresses]
+    [billingAddress, shippingAddress]
   );
 
   const addPaymentMethod = useCallback(
@@ -173,7 +238,8 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       isLoading,
       wallet,
       orders,
-      addresses,
+      billingAddress,
+      shippingAddress,
       paymentMethods,
       login,
       register,
@@ -181,19 +247,19 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       updateUser,
       updateWallet,
       addOrder,
-      addAddress,
       updateAddress,
       deleteAddress,
       addPaymentMethod,
       deletePaymentMethod,
-      updateAvatar
+      updateAvatar,
     }),
     [
       user,
       isLoading,
       wallet,
       orders,
-      addresses,
+      billingAddress,
+      shippingAddress,
       paymentMethods,
       login,
       register,
@@ -201,12 +267,11 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       updateUser,
       updateWallet,
       addOrder,
-      addAddress,
       updateAddress,
       deleteAddress,
       addPaymentMethod,
       deletePaymentMethod,
-      updateAvatar
+      updateAvatar,
     ]
   );
 });

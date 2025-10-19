@@ -124,7 +124,7 @@ export default function AccountScreen() {
           <Wallet size={24} color={Colors.accent} />
           <View style={styles.menuItemContent}>
             <Text style={styles.menuItemText}>Wallet</Text>
-            <Text style={styles.menuItemValue}>${wallet.toFixed(2)}</Text>
+            {/* <Text style={styles.menuItemValue}>${wallet.toFixed(2)}</Text> */}
           </View>
         </TouchableOpacity>
 
