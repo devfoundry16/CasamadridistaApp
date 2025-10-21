@@ -1,7 +1,8 @@
+import { Spinner } from "@/components/Spinner";
 import Colors, { altColors } from "@/constants/colors";
 import ShopApiService from "@/services/ShopService";
 import { Product } from "@/types/product/product";
-import { Image } from 'expo-image';
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Star } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
@@ -10,13 +11,13 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 export default function ShopScreen() {
   const [products, setProducts] = useState<Product[] | null>(null);
   const colors = altColors;
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     getAllProducts();
@@ -26,14 +27,19 @@ export default function ShopScreen() {
     try {
       ShopApiService.getProducts().then((data) => {
         setProducts(data);
-        setIsLoading(false);
+        setLoading(false);
       });
     } catch (error) {
       console.error("Error loading store data:", error);
     } finally {
-      setIsLoading(true);
+      console.log("**");
+      setLoading(true);
     }
   };
+
+  if (loading) {
+    return <Spinner content="Loading Store" />;
+  }
 
   const renderProduct = ({ item }: { item: Product }) => (
     <TouchableOpacity
@@ -48,10 +54,14 @@ export default function ShopScreen() {
         </Text>
         <View style={styles.ratingContainer}>
           <Star size={14} color={Colors.darkGold} fill={Colors.darkGold} />
-          <Text style={styles.ratingText}>{Number(item.average_rating).toFixed(1)}</Text>
+          <Text style={styles.ratingText}>
+            {Number(item.average_rating).toFixed(1)}
+          </Text>
           <Text style={styles.reviewsText}>({item.reviews ? 30 : 0})</Text>
         </View>
-        <Text style={styles.productPrice}>${Number(item.price).toFixed(2)}</Text>
+        <Text style={styles.productPrice}>
+          ${Number(item.price).toFixed(2)}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -68,12 +78,10 @@ export default function ShopScreen() {
         />
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Welcome</Text>
-          <Text style={styles.headerSubtitle}>
-            CasaMadridista Shop
-          </Text>
+          <Text style={styles.headerSubtitle}>CasaMadridista Shop</Text>
         </View>
       </View>
-      {isLoading && (
+      {loading && (
         <Text style={{ color: colors.textWhite, textAlign: "center" }}>
           Loading...
         </Text>
@@ -126,7 +134,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 16,
   },
- productCard: {
+  productCard: {
     width: "48%",
     backgroundColor: Colors.text,
     borderRadius: 12,

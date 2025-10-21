@@ -13,6 +13,7 @@ export interface CartItem extends Product {
     sale_price: string;
     currency_prefix: string;
   };
+  variation: [];
 }
 export default function buildVariationsFromAttributes(attributes?: any[]) {
   if (!Array.isArray(attributes) || attributes.length === 0) return [];
@@ -29,11 +30,14 @@ export default function buildVariationsFromAttributes(attributes?: any[]) {
 
 export const useCart = () => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const getItemsInCart = useCallback(async () => {
     try {
+      setLoading(true);
       const res = await ShopApiService.getItemsInCart();
       console.log("global", res.items.length);
+      setLoading(false);
       return res;
     } catch (error) {
       console.error("Error fetching cart items:", error);
@@ -47,16 +51,19 @@ export const useCart = () => {
     });
   }, [getItemsInCart]);
 
+  /*Add to cart*/
   const addToCart = useCallback((product: Product) => {
     addItemToCart(product)
       .then((data) => setItems(data))
       .catch((error) => Alert.alert(error.response.data.message));
   }, []);
+  /*Remove from cart*/
   const removeFromCart = useCallback((productId: number) => {
     removeItemFromCart(productId)
       .then((data) => setItems(data))
       .catch((error) => Alert.alert(error.response.data.message));
   }, []); // No dependency on items needed
+  /*Update quantity*/
   const updateQuantity = useCallback((key: string, quantity: number) => {
     updateItemInCart(key, quantity)
       .then((data) => setItems(data))
@@ -103,7 +110,6 @@ export const useCart = () => {
     (sum, item) => sum + Number(item.prices.price) * item.quantity,
     0
   );
-
   return {
     items,
     addToCart,
@@ -112,5 +118,6 @@ export const useCart = () => {
     clearCart,
     totalItems,
     totalPrice,
+    loading,
   };
 };

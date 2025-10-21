@@ -2,13 +2,7 @@ import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
-import {
-  IntentCreationCallbackParams,
-  PaymentMethod,
-  PaymentSheetError,
-  useStripe,
-} from "@stripe/stripe-react-native";
-import { useRouter } from "expo-router";
+import { useStripePay } from "@/hooks/useStripePay";
 import { CheckCircle, CreditCard, MapPin, User } from "lucide-react-native";
 import { useState } from "react";
 import {
@@ -22,65 +16,15 @@ import {
 } from "react-native";
 
 export default function CheckoutScreen() {
-  const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
-  const { billingAddress, shippingAddress, user} = useAuth();
+  const { billingAddress, shippingAddress, user } = useAuth();
   const [name, setName] = useState(user?.name);
   const [email, setEmail] = useState(user?.email);
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState(billingAddress);
-  /* Stripe */
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const API_URL = "http://localhost:3000";
+  const { handlePayment: payWithStripe } = useStripePay();
 
-  const initializePaymentSheet = async () => {
-    const { error } = await initPaymentSheet({
-      merchantDisplayName: "Example, Inc.",
-      applePay: {
-        merchantCountryCode: "US",
-      },
-      googlePay: {
-        merchantCountryCode: "US",
-      },
-      defaultBillingDetails: {
-        email: billingAddress?.email,
-        name: billingAddress?.first_name + ' ' + billingAddress?.last_name,
-      },
-      intentConfiguration: {
-        mode: {
-          amount: totalPrice,
-          currencyCode: "usd",
-        },
-        confirmHandler: confirmHandler,
-      },
-    });
-    if (error) {
-      // Handle error
-    }
-  };
-
-  const confirmHandler = async (
-    paymentMethod: PaymentMethod.Result,
-    shouldSavePaymentMethod: boolean,
-    intentCreationCallback: (params: IntentCreationCallbackParams) => void
-  ) => {
-    // Make a request to your own server.
-    const body = { amount: totalPrice};
-    const response = await fetch(`${API_URL}/create-payment-intent`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-    // Call the `intentCreationCallback` with your server response's client secret or error.
-    const { client_secret, error } = await response.json();
-    if (client_secret) {
-      intentCreationCallback({ clientSecret: client_secret });
-    } else {
-      intentCreationCallback({ error });
-    }
-  };
+  const createOrder = async () => {};
 
   const handlePayment = async () => {
     if (!name || !email || !address) {
@@ -89,30 +33,6 @@ export default function CheckoutScreen() {
         "Please fill in all fields to complete your purchase."
       );
       return;
-    }
-
-    initializePaymentSheet();
-    const { error } = await presentPaymentSheet();
-    if (error) {
-      if (error.code === PaymentSheetError.Canceled) {
-        // Customer canceled - you should probably do nothing.
-      } else {
-        // PaymentSheet encountered an unrecoverable error. You can display the error to the user, log it, and so on.
-      }
-    } else {
-      Alert.alert(
-        "Payment Successful!",
-        `Your order of $${(totalPrice / 100).toFixed(2)} has been confirmed. Thank you for shopping with us!`,
-        [
-          {
-            text: "Continue Shopping",
-            onPress: () => {
-              clearCart();
-              router.push("/shop");
-            },
-          },
-        ]
-      );
     }
   };
 
@@ -173,7 +93,15 @@ export default function CheckoutScreen() {
                 style={[styles.input, styles.textArea]}
                 placeholder="Street Address, City, State, ZIP Code"
                 placeholderTextColor={Colors.textSecondary}
-                value={address?.address_1 + ' ' + address?.city + ' ' + address?.state + ' ' + address?.postalCode}
+                value={
+                  address?.address_1 +
+                  " " +
+                  address?.city +
+                  " " +
+                  address?.state +
+                  " " +
+                  address?.postalCode
+                }
                 multiline
                 numberOfLines={3}
               />
@@ -194,14 +122,20 @@ export default function CheckoutScreen() {
                     {item.name} x {item.quantity}
                   </Text>
                   <Text style={styles.summaryItemPrice}>
-                    ${(Number(item.prices.price) / 100 * item.quantity).toFixed(2)}
+                    $
+                    {(
+                      (Number(item.prices.price) / 100) *
+                      item.quantity
+                    ).toFixed(2)}
                   </Text>
                 </View>
               ))}
               <View style={styles.divider} />
               <View style={styles.summaryItem}>
                 <Text style={styles.totalLabel}>Total</Text>
-                <Text style={styles.totalPrice}>${(totalPrice / 100).toFixed(2)}</Text>
+                <Text style={styles.totalPrice}>
+                  ${(totalPrice / 100).toFixed(2)}
+                </Text>
               </View>
             </View>
           </View>

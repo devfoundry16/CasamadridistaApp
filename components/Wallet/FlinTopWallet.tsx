@@ -1,19 +1,20 @@
 // components/WooWalletScreen.tsx
-import { Button } from '@/components/Button';
-import { useFlintopWallet } from '@/hooks/useFlintopWallet';
-import React, { useState } from 'react';
+import { Button } from "@/components/Button";
+import Colors from "@/constants/colors";
+import { useFlintopWallet } from "@/hooks/useFlintopWallet";
+import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   View,
-} from 'react-native';
-import { AddFundsModal } from './AddFundsModal';
-import { TransactionList } from './TransactionList';
-import { TransferModal } from './TransferModal';
+} from "react-native";
+import { Spinner } from "../Spinner";
+import { AddFundsModal } from "./AddFundsModal";
+import { TransactionList } from "./TransactionList";
+import { TransferModal } from "./TransferModal";
 
 export const WalletScreenDetail: React.FC = () => {
   const {
@@ -41,29 +42,28 @@ export const WalletScreenDetail: React.FC = () => {
     try {
       await addFunds(amount, paymentMethod);
       setShowAddFundsModal(false);
-      Alert.alert('Success', 'Funds added successfully!');
+      Alert.alert("Success", "Funds added successfully!");
     } catch (err) {
-      Alert.alert('Error', 'Failed to add funds. Please try again.');
+      Alert.alert("Error", "Failed to add funds. Please try again.");
     }
   };
 
-  const handleTransfer = async (toUserId: number, amount: number, description?: string) => {
+  const handleTransfer = async (
+    toUserId: number,
+    amount: number,
+    description?: string
+  ) => {
     try {
       await transferFunds(toUserId, amount, description);
       setShowTransferModal(false);
-      Alert.alert('Success', 'Transfer completed successfully!');
+      Alert.alert("Success", "Transfer completed successfully!");
     } catch (err) {
-      Alert.alert('Error', 'Failed to transfer funds. Please try again.');
+      Alert.alert("Error", "Failed to transfer funds. Please try again.");
     }
   };
 
   if (loading && !refreshing) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#eeeeee" />
-        <Text>Loading wallet...</Text>
-      </View>
-    );
+    return <Spinner content="Loading wallet" />;
   }
 
   if (error && !refreshing) {
@@ -86,8 +86,8 @@ export const WalletScreenDetail: React.FC = () => {
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>Wallet Balance</Text>
           <Text style={styles.balanceAmount}>
-            {/* {balance?.formatted_balance || '$0.00'} */}
-            ${balance?.balance.toFixed(2)}
+            {/* {balance?.formatted_balance || '$0.00'} */}$
+            {balance?.balance.toFixed(2)}
           </Text>
           <Text style={styles.balanceSubtitle}>Available Balance</Text>
         </View>
@@ -109,9 +109,9 @@ export const WalletScreenDetail: React.FC = () => {
         </View>
 
         {/* Transactions */}
-        <TransactionList 
-          transactions={transactions} 
-          currency={balance?.currency_symbol || '$'}
+        <TransactionList
+          transactions={transactions}
+          currency={balance?.currency_symbol || "$"}
         />
       </ScrollView>
 
@@ -121,13 +121,13 @@ export const WalletScreenDetail: React.FC = () => {
         onClose={() => setShowAddFundsModal(false)}
         onAddFunds={handleAddFunds}
       />
-      
+
       <TransferModal
         visible={showTransferModal}
         onClose={() => setShowTransferModal(false)}
         onTransfer={handleTransfer}
         currentBalance={balance?.balance || 0}
-        currency={balance?.currency_symbol || '$'}
+        currency={balance?.currency_symbol || "$"}
       />
     </View>
   );
@@ -136,20 +136,20 @@ export const WalletScreenDetail: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.deepDarkGray,
   },
   centered: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   balanceCard: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.cardBg,
     margin: 16,
     padding: 20,
     borderRadius: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -157,21 +157,21 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 16,
-    color: '#666',
+    color: Colors.lightGray,
     marginBottom: 8,
   },
   balanceAmount: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
+    color: Colors.textWhite,
     marginBottom: 4,
   },
   balanceSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: Colors.textLight,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 16,
     marginBottom: 16,
     gap: 12,
@@ -181,8 +181,8 @@ const styles = StyleSheet.create({
     height: 32,
   },
   errorText: {
-    color: 'red',
-    textAlign: 'center',
+    color: "red",
+    textAlign: "center",
     marginBottom: 16,
   },
 });

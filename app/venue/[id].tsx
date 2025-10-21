@@ -1,14 +1,10 @@
+import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import SportsInfoService from "@/services/SportsInfoService";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 const VenueDetailScreen = () => {
   const router = useRouter();
@@ -26,32 +22,39 @@ const VenueDetailScreen = () => {
     fetchVenue();
   }, []);
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={{ alignItems: "center", margin: 20 }}>
-        {/* Venue Name */ }
-        <Text style={styles.venueName}>{venue?.name}</Text>
-        {/* Venue Image */ }
-        {venue?.image && (
-          <Image source={{ uri: venue.image }} contentFit="contain" style={styles.venueLogo} />
-        ) }
-        {/* Venue City and Country */ }
-        <Text style={styles.venueCountry}>
-          {venue?.city}, {venue?.country}
-        </Text>
-        {/* Venue Address */ }
-        {venue?.address && (
-          <Text style={styles.venueAddress}>Address: {venue.address}</Text>
-        ) }
-        {/* Venue Capacity */ }
-        {venue?.capacity && (
-          <Text style={styles.venueCapacity}>Capacity: {venue.capacity}</Text>
-        ) }
-        {/* Venue Surface */ }
-        {venue?.surface && (
-          <Text style={styles.venueSurface}>Surface: {venue.surface}</Text>
-        ) }
-      </View>
-    </ScrollView>
+    <>
+      <HeaderStack title={venue?.name} />
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <View style={{ alignItems: "center", margin: 20 }}>
+          {/* Venue Name */}
+          <Text style={styles.venueName}>{venue?.name}</Text>
+          {/* Venue Image */}
+          {venue?.image && (
+            <Image
+              source={{ uri: venue.image }}
+              contentFit="contain"
+              style={styles.venueLogo}
+            />
+          )}
+          {/* Venue City and Country */}
+          <Text style={styles.venueCountry}>
+            {venue?.city}, {venue?.country}
+          </Text>
+          {/* Venue Address */}
+          {venue?.address && (
+            <Text style={styles.venueAddress}>Address: {venue.address}</Text>
+          )}
+          {/* Venue Capacity */}
+          {venue?.capacity && (
+            <Text style={styles.venueCapacity}>Capacity: {venue.capacity}</Text>
+          )}
+          {/* Venue Surface */}
+          {venue?.surface && (
+            <Text style={styles.venueSurface}>Surface: {venue.surface}</Text>
+          )}
+        </View>
+      </ScrollView>
+    </>
   );
 };
 
@@ -69,8 +72,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   venueLogo: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     marginBottom: 15,
   },
   venueCountry: {

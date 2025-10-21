@@ -1,21 +1,21 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
 import Colors from "@/constants/colors";
 import { Check, X } from "lucide-react-native";
+import React, { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const packages = [
   {
     id: 1,
     name: "Hala Gold Card",
-    monthlyPrice: "$4.9",
-    yearlyPrice: "$48",
-    yearlyOriginal: "$60",
+    monthlyPrice: "4.9",
+    yearlyPrice: "48",
+    yearlyOriginal: "60",
     features: [
       "OLicial digital membership card",
       "WhatsApp news channel access",
@@ -35,9 +35,9 @@ const packages = [
   {
     id: 2,
     name: "Rey de Europa Premium",
-    monthlyPrice: "$14.9",
-    yearlyPrice: "$144",
-    yearlyOriginal: "$180",
+    monthlyPrice: "14.9",
+    yearlyPrice: "144",
+    yearlyOriginal: "180",
     features: [
       "OLicial digital membership card",
       "WhatsApp news channel access",
@@ -58,9 +58,9 @@ const packages = [
   {
     id: 3,
     name: "Galácticos - VIP",
-    monthlyPrice: "$34.9",
-    yearlyPrice: "$336",
-    yearlyOriginal: "$420",
+    monthlyPrice: "34.9",
+    yearlyPrice: "336",
+    yearlyOriginal: "420",
     features: [
       "OLicial digital membership card",
       "WhatsApp news channel access",
@@ -129,7 +129,13 @@ export default function PackagesScreen() {
 
         {packages.map((pkg) => (
           <View key={pkg.id}>
-            <View style={pkg.badge != 'Popular' ? styles.packageNameContainer: styles.popularPackageNameContainer}>
+            <View
+              style={
+                pkg.badge != "Popular"
+                  ? styles.packageNameContainer
+                  : styles.popularPackageNameContainer
+              }
+            >
               {pkg.badge && (
                 <View
                   style={[styles.badge, pkg.badge === "VIP" && styles.vipBadge]}
@@ -155,8 +161,8 @@ export default function PackagesScreen() {
                 )}
                 <Text style={styles.price}>
                   {billingType === "monthly"
-                    ? pkg.monthlyPrice
-                    : pkg.yearlyPrice}
+                    ? `$${pkg.monthlyPrice}`
+                    : `$${pkg.yearlyPrice}`}
                 </Text>
                 <Text style={styles.period}>
                   {billingType === "monthly" ? " per month" : " per year"}
@@ -221,7 +227,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700" as const,
     color: Colors.primary,
-    marginBottom: 8,  
+    marginBottom: 8,
     textAlign: "center" as const,
   },
   subheader: {

@@ -21,8 +21,8 @@ const Colors = {
   border: "#3a3a3a",
   success: "#4CAF50",
   error: "#F44336",
-  darkBg : "#0a0a0a",
-  cardBg : "#1a1a1a",
+  darkBg: "#0a0a0a",
+  cardBg: "#2f2f2f",
 };
 const altColors = {
   text: "#1A1A1A" as const,

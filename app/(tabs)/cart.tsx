@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
 import { useRouter } from "expo-router";
@@ -13,7 +14,12 @@ import {
 
 export default function CartScreen() {
   const router = useRouter();
-  const { items, updateQuantity, removeFromCart, totalPrice } = useCart();
+  const { items, updateQuantity, removeFromCart, totalPrice, loading } =
+    useCart();
+
+  if (loading) {
+    return <Spinner content="Loading cart" />;
+  }
 
   if (items.length === 0) {
     return (
@@ -41,7 +47,9 @@ export default function CartScreen() {
         <Text style={styles.itemName} numberOfLines={2}>
           {item.name}
         </Text>
-        <Text style={styles.itemPrice}>${(Number(item.prices.price) / 100).toFixed(2)}</Text>
+        <Text style={styles.itemPrice}>
+          ${(Number(item.prices.price) / 100).toFixed(2)}
+        </Text>
         <View style={styles.quantityContainer}>
           {item.quantity_limits.editable && (
             <TouchableOpacity
@@ -86,7 +94,9 @@ export default function CartScreen() {
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalPrice}>${(Number(totalPrice) / 100).toFixed(2)}</Text>
+          <Text style={styles.totalPrice}>
+            ${(Number(totalPrice) / 100).toFixed(2)}
+          </Text>
         </View>
         <TouchableOpacity
           style={styles.checkoutButton}

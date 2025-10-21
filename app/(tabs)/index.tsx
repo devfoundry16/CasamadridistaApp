@@ -19,7 +19,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 
 export default function HomeScreen() {
@@ -48,7 +48,6 @@ export default function HomeScreen() {
     setStrengthSectionY(y);
   };
   const mainScrollY = useRef(0);
-
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -100,7 +99,7 @@ export default function HomeScreen() {
 
   const loadInitialData = async () => {
     try {
-      // fetchProfileData(RealMadridId);
+      fetchProfileData(RealMadridId);
       MatchService.fetchNextMatch(RealMadridId).then((result) => {
         MatchService.fetchLastMatches(result.teams.home.id).then((data) => {
           setHomeTeamLastMatches(data);
@@ -184,7 +183,6 @@ export default function HomeScreen() {
       <VisionSection />
       <SquadSection />
       <QuoteSection />
-      
     </ScrollView>
   );
 }

@@ -1,19 +1,20 @@
 // components/Button.tsx
-import React from 'react';
+import Colors from "@/constants/colors";
+import React from "react";
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TextStyle,
-    TouchableOpacity,
-    ViewStyle,
-} from 'react-native';
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
 
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "primary" | "secondary" | "outline" | "danger";
+  size?: "small" | "medium" | "large";
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
@@ -23,8 +24,8 @@ interface ButtonProps {
 export const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
-  variant = 'primary',
-  size = 'medium',
+  variant = "primary",
+  size = "medium",
   disabled = false,
   loading = false,
   style,
@@ -32,29 +33,29 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const getButtonStyle = (): ViewStyle[] => {
     const baseStyle: ViewStyle[] = [styles.button];
-    
+
     // Variant styles
     switch (variant) {
-      case 'primary':
+      case "primary":
         baseStyle.push(styles.primary);
         break;
-      case 'secondary':
+      case "secondary":
         baseStyle.push(styles.secondary);
         break;
-      case 'outline':
+      case "outline":
         baseStyle.push(styles.outline);
         break;
-      case 'danger':
+      case "danger":
         baseStyle.push(styles.danger);
         break;
     }
 
     // Size styles
     switch (size) {
-      case 'small':
+      case "small":
         baseStyle.push(styles.small);
         break;
-      case 'large':
+      case "large":
         baseStyle.push(styles.large);
         break;
     }
@@ -74,29 +75,29 @@ export const Button: React.FC<ButtonProps> = ({
 
   const getTextStyle = (): TextStyle[] => {
     const baseStyle: TextStyle[] = [styles.text];
-    
+
     // Variant text styles
     switch (variant) {
-      case 'primary':
+      case "primary":
         baseStyle.push(styles.primaryText);
         break;
-      case 'secondary':
+      case "secondary":
         baseStyle.push(styles.secondaryText);
         break;
-      case 'outline':
+      case "outline":
         baseStyle.push(styles.outlineText);
         break;
-      case 'danger':
+      case "danger":
         baseStyle.push(styles.dangerText);
         break;
     }
 
     // Size text styles
     switch (size) {
-      case 'small':
+      case "small":
         baseStyle.push(styles.smallText);
         break;
-      case 'large':
+      case "large":
         baseStyle.push(styles.largeText);
         break;
     }
@@ -125,8 +126,11 @@ export const Button: React.FC<ButtonProps> = ({
         <ActivityIndicator
           size="small"
           color={
-            variant === 'outline' ? '#007AFF' : 
-            variant === 'secondary' ? '#666' : '#fff'
+            variant === "outline"
+              ? "#007AFF"
+              : variant === "secondary"
+                ? "#666"
+                : "#fff"
           }
         />
       ) : (
@@ -139,23 +143,23 @@ export const Button: React.FC<ButtonProps> = ({
 const styles = StyleSheet.create({
   button: {
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
   },
   primary: {
-    backgroundColor: '#007AFF',
+    backgroundColor: Colors.darkGold,
   },
   secondary: {
-    backgroundColor: '#6c757d',
+    backgroundColor: "#6c757d",
   },
   outline: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: "#007AFF",
   },
   danger: {
-    backgroundColor: '#dc3545',
+    backgroundColor: "#dc3545",
   },
   small: {
     paddingHorizontal: 12,
@@ -176,20 +180,20 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   text: {
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
   },
   primaryText: {
-    color: '#fff',
+    color: "#fff",
   },
   secondaryText: {
-    color: '#fff',
+    color: "#fff",
   },
   outlineText: {
-    color: '#007AFF',
+    color: "#007AFF",
   },
   dangerText: {
-    color: '#fff',
+    color: "#fff",
   },
   smallText: {
     fontSize: 14,
@@ -206,18 +210,18 @@ const styles = StyleSheet.create({
 });
 
 // Convenience component variants
-export const PrimaryButton: React.FC<Omit<ButtonProps, 'variant'>> = (props) => (
-  <Button variant="primary" {...props} />
-);
+export const PrimaryButton: React.FC<Omit<ButtonProps, "variant">> = (
+  props
+) => <Button variant="primary" {...props} />;
 
-export const SecondaryButton: React.FC<Omit<ButtonProps, 'variant'>> = (props) => (
-  <Button variant="secondary" {...props} />
-);
+export const SecondaryButton: React.FC<Omit<ButtonProps, "variant">> = (
+  props
+) => <Button variant="secondary" {...props} />;
 
-export const OutlineButton: React.FC<Omit<ButtonProps, 'variant'>> = (props) => (
-  <Button variant="outline" {...props} />
-);
+export const OutlineButton: React.FC<Omit<ButtonProps, "variant">> = (
+  props
+) => <Button variant="outline" {...props} />;
 
-export const DangerButton: React.FC<Omit<ButtonProps, 'variant'>> = (props) => (
+export const DangerButton: React.FC<Omit<ButtonProps, "variant">> = (props) => (
   <Button variant="danger" {...props} />
 );
