@@ -1,10 +1,16 @@
-import HeaderStack from '@/components/HeaderStack';
-import Colors from '@/constants/colors';
-import { useAuth } from '@/contexts/AuthContext';
-import { router } from 'expo-router';
-import { ArrowRight, Calendar, CreditCard, Crown } from 'lucide-react-native';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import HeaderStack from "@/components/HeaderStack";
+import Colors from "@/constants/colors";
+import { useAuth } from "@/contexts/AuthContext";
+import { router } from "expo-router";
+import { ArrowRight, Calendar, CreditCard, Crown } from "lucide-react-native";
+import React from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function SubscriptionScreen() {
   const { user } = useAuth();
@@ -21,20 +27,24 @@ export default function SubscriptionScreen() {
               </View>
               <Text style={styles.planName}>{user.subscription.plan}</Text>
               <Text style={styles.planType}>{user.subscription.type}</Text>
-              
+
               <View style={styles.dateContainer}>
                 <View style={styles.dateItem}>
                   <Calendar size={20} color={Colors.accent} />
                   <View style={styles.dateInfo}>
                     <Text style={styles.dateLabel}>Start Date</Text>
-                    <Text style={styles.dateValue}>{user.subscription.startDate}</Text>
+                    <Text style={styles.dateValue}>
+                      {user.subscription.startDate}
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.dateItem}>
                   <Calendar size={20} color={Colors.accent} />
                   <View style={styles.dateInfo}>
                     <Text style={styles.dateLabel}>End Date</Text>
-                    <Text style={styles.dateValue}>{user.subscription.endDate}</Text>
+                    <Text style={styles.dateValue}>
+                      {user.subscription.endDate}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -43,13 +53,15 @@ export default function SubscriptionScreen() {
             <View style={styles.actionsSection}>
               <TouchableOpacity style={styles.actionButton}>
                 <CreditCard size={24} color={Colors.accent} />
-                <Text style={styles.actionButtonText}>Update Payment Method</Text>
+                <Text style={styles.actionButtonText}>
+                  Update Payment Method
+                </Text>
                 <ArrowRight size={20} color={Colors.textWhite} />
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={styles.actionButton}
-                onPress={() => router.push('/memberships/packages')}
+                onPress={() => router.push("/memberships/packages")}
               >
                 <Crown size={24} color={Colors.accent} />
                 <Text style={styles.actionButtonText}>Upgrade Plan</Text>
@@ -61,7 +73,9 @@ export default function SubscriptionScreen() {
               <Text style={styles.sectionTitle}>Your Benefits</Text>
               <View style={styles.benefitItem}>
                 <Text style={styles.benefitBullet}>✓</Text>
-                <Text style={styles.benefitText}>Exclusive access to member events</Text>
+                <Text style={styles.benefitText}>
+                  Exclusive access to member events
+                </Text>
               </View>
               <View style={styles.benefitItem}>
                 <Text style={styles.benefitBullet}>✓</Text>
@@ -69,7 +83,9 @@ export default function SubscriptionScreen() {
               </View>
               <View style={styles.benefitItem}>
                 <Text style={styles.benefitBullet}>✓</Text>
-                <Text style={styles.benefitText}>Official merchandise discounts</Text>
+                <Text style={styles.benefitText}>
+                  Official merchandise discounts
+                </Text>
               </View>
               <View style={styles.benefitItem}>
                 <Text style={styles.benefitBullet}>✓</Text>
@@ -86,9 +102,11 @@ export default function SubscriptionScreen() {
             </Text>
             <TouchableOpacity
               style={styles.subscribeButton}
-              onPress={() => router.push('/memberships/packages')}
+              onPress={() => router.push("/memberships/packages")}
             >
-              <Text style={styles.subscribeButtonText}>View Membership Plans</Text>
+              <Text style={styles.subscribeButtonText}>
+                View Membership Plans
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -100,14 +118,14 @@ export default function SubscriptionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: "#2A2A2A",
   },
   subscriptionCard: {
     margin: 24,
     padding: 32,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: "#1A1A1A",
     borderRadius: 20,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 2,
     borderColor: Colors.accent,
   },
@@ -115,29 +133,29 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#2A2A2A',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#2A2A2A",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 16,
   },
   planName: {
     fontSize: 28,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.accent,
     marginBottom: 8,
   },
   planType: {
     fontSize: 16,
-    color: '#CCCCCC',
+    color: "#CCCCCC",
     marginBottom: 24,
   },
   dateContainer: {
-    width: '100%',
+    width: "100%",
     gap: 16,
   },
   dateItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   dateInfo: {
@@ -145,12 +163,12 @@ const styles = StyleSheet.create({
   },
   dateLabel: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: "#CCCCCC",
     marginBottom: 4,
   },
   dateValue: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.textWhite,
   },
   actionsSection: {
@@ -159,9 +177,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#3A3A3A',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#3A3A3A",
     padding: 16,
     borderRadius: 12,
     gap: 12,
@@ -169,7 +187,7 @@ const styles = StyleSheet.create({
   actionButtonText: {
     flex: 1,
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.textWhite,
   },
   benefitsSection: {
@@ -178,43 +196,43 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.textWhite,
     marginBottom: 16,
   },
   benefitItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
     gap: 12,
   },
   benefitBullet: {
     fontSize: 20,
     color: Colors.accent,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
   },
   benefitText: {
     fontSize: 16,
-    color: '#CCCCCC',
+    color: "#CCCCCC",
   },
   noSubscription: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 48,
     marginTop: 100,
   },
   noSubText: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.textWhite,
     marginTop: 24,
     marginBottom: 8,
   },
   noSubSubtext: {
     fontSize: 16,
-    color: '#CCCCCC',
-    textAlign: 'center',
+    color: "#CCCCCC",
+    textAlign: "center",
     marginBottom: 32,
   },
   subscribeButton: {
@@ -225,7 +243,7 @@ const styles = StyleSheet.create({
   },
   subscribeButtonText: {
     fontSize: 16,
-    fontWeight: '700' as const,
-    color: '#1A1A1A',
+    fontWeight: "700" as const,
+    color: "#1A1A1A",
   },
 });

@@ -1,26 +1,39 @@
 import HeaderStack from "@/components/HeaderStack";
+import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import SportsInfoService from "@/services/SportsInfoService";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const VenueDetailScreen = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const [venue, setVenue] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
   useEffect(() => {
     const fetchVenue = async () => {
       try {
         const venue = await SportsInfoService.fetchVenueById(Number(id));
         setVenue(venue);
+        setLoading(false);
       } catch (error) {
-        console.error("Error fetching venue:", error);
+        Alert.alert("Error", "Error occurs while loading venue");
       }
     };
     fetchVenue();
   }, []);
+
+  if (loading) {
+    return (
+      <>
+        <HeaderStack title="Venue Details" />
+        <Spinner content="Loading venue" />
+      </>
+    );
+  }
+
   return (
     <>
       <HeaderStack title={venue?.name} />

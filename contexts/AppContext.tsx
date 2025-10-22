@@ -3,7 +3,7 @@ import SportsInfoService from "@/services/SportsInfoService";
 import {
   CoachWithTeam,
   PlayerWithTeam,
-  TeamInfo
+  TeamInfo,
 } from "@/types/soccer/profile";
 import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,19 +12,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 type Theme = "light" | "dark";
 const RealMadridId = 541;
 export const [AppProvider, useApp] = createContextHook(() => {
-
   const [playersList, setPlayersList] = useState<PlayerWithTeam[]>([]);
   const [coachList, setCoachList] = useState<CoachWithTeam[]>([]);
   const [teamInfoList, setTeamInfoList] = useState<TeamInfo[]>([]);
 
   const loadAppData = useCallback(async () => {
     try {
+      console.log("---------App Context---------");
       //AsyncStorage.clear(); // for testing only, remove in production
       const playersString = await AsyncStorage.getItem("players");
       let savedPlayersList: PlayerWithTeam[];
       if (playersString) {
         savedPlayersList = JSON.parse(playersString);
-        const teamIDs = savedPlayersList.map(players => players.team.id)
+        console.log("saved players list:", savedPlayersList.length);
+        const teamIDs = savedPlayersList.map((players) => players.team.id);
         console.log("loaded teamIds:", teamIDs);
         setPlayersList(savedPlayersList);
       }
@@ -52,16 +53,19 @@ export const [AppProvider, useApp] = createContextHook(() => {
   }, []);
 
   useEffect(() => {
-    loadAppData();
+    loadAppData().then((data) => {
+      //fetchProfileData(RealMadridId);
+    });
     // return () => subscription.remove();
   }, [loadAppData]);
 
-  const fetchNextMatchData = useCallback( async (id: number) => {
+  const fetchNextMatchData = useCallback(async (id: number) => {
     return MatchService.fetchNextMatch(id);
   }, []);
 
   const fetchProfileData = useCallback(
     async (id: number) => {
+      console.log("AppContext: before teaminfo list", teamInfoList.length);
       const index = teamInfoList.findIndex((p) => p.team.id === id); // index = -1 not found
 
       //teamInfo
@@ -73,18 +77,26 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
       let squads = await SportsInfoService.fetchSquad(id);
 
-      const newTeamInfoList = index == -1 ? [...teamInfoList, teamInfo] : [...teamInfoList.slice(0, index), teamInfo, ...teamInfoList.slice(index + 1)];
+      const newTeamInfoList =
+        index == -1
+          ? [...teamInfoList, teamInfo]
+          : [
+              ...teamInfoList.slice(0, index),
+              teamInfo,
+              ...teamInfoList.slice(index + 1),
+            ];
 
+      console.log("AppContext: teaminfo list", newTeamInfoList.length);
       //coachList
       const coach = await SportsInfoService.fetchCoachProfile(teamInfo.team.id);
-      const newCoachList = index == -1 ? [
-        ...coachList,
-        { team: { id }, player: coach },
-      ] : [
-        ...coachList.slice(0, index),
-        { team: { id }, player: coach },
-        ...coachList.slice(index + 1),
-      ];
+      const newCoachList =
+        index == -1
+          ? [...coachList, { team: { id }, player: coach }]
+          : [
+              ...coachList.slice(0, index),
+              { team: { id }, player: coach },
+              ...coachList.slice(index + 1),
+            ];
 
       setTeamInfoList(newTeamInfoList);
       setCoachList(newCoachList);
@@ -134,11 +146,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
       teamInfoList,
       fetchProfileData,
     }),
-    [
-      playersList,
-      coachList,
-      teamInfoList,
-      fetchProfileData,
-    ]
+    [playersList, coachList, teamInfoList, fetchProfileData]
   );
 });

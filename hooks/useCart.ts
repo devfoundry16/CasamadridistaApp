@@ -36,7 +36,6 @@ export const useCart = () => {
     try {
       setLoading(true);
       const res = await ShopApiService.getItemsInCart();
-      console.log("global", res.items.length);
       setLoading(false);
       return res;
     } catch (error) {

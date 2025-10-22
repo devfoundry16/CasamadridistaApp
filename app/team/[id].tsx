@@ -1,10 +1,15 @@
 import Colors, { altColors as colors } from "@/constants/colors";
 import countries from "@/constants/countries.json";
-import { Coach, CoachWithTeam, CountryMap, Player } from "@/types/soccer/profile";
+import {
+  Coach,
+  CoachWithTeam,
+  CountryMap,
+  Player,
+} from "@/types/soccer/profile";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { Building2, Calendar, MapPin } from "lucide-react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -22,6 +27,7 @@ const map: CountryMap = countries;
 
 export default function TeamDetailScreen() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamId = Number(id);
 
@@ -45,6 +51,8 @@ export default function TeamDetailScreen() {
   const forwards = players.player.filter((p) => p.position === "Attacker");
 
   useEffect(() => {
+    console.log("team id:", teamId);
+    console.log("playerslist length:", playersList.length);
     if (players.player.length === 0) {
       console.log("loaded players from apis");
       fetchProfileData(teamId); // Default Real Madrid team ID
@@ -92,9 +100,9 @@ export default function TeamDetailScreen() {
 
   return (
     <>
-      <HeaderStack title={teamInfo?.team.name || ''} />
+      <HeaderStack title={teamInfo?.team.name || ""} />
       <ScrollView
-        style={[styles.container, { backgroundColor: Colors.darkGray }]}
+        style={[styles.container, { backgroundColor: Colors.deepDarkGray }]}
         showsVerticalScrollIndicator={false}
       >
         <View

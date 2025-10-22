@@ -21,7 +21,7 @@ export default function CartScreen() {
     return <Spinner content="Loading cart" />;
   }
 
-  if (items.length === 0) {
+  if (items && items.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <ShoppingBag size={80} color={Colors.darkGold} strokeWidth={1.5} />

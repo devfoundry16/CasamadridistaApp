@@ -80,8 +80,8 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const getAddressData = useCallback(async () => {
     const addresses = await AuthService.getAddress();
-    setBillingAddress({type: "billing", ...addresses.billing});
-    setShippingAddress({type: "shipping", ...addresses.shipping});
+    setBillingAddress({ type: "billing", ...addresses.billing });
+    setShippingAddress({ type: "shipping", ...addresses.shipping });
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {

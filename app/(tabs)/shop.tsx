@@ -32,7 +32,6 @@ export default function ShopScreen() {
     } catch (error) {
       console.error("Error loading store data:", error);
     } finally {
-      console.log("**");
       setLoading(true);
     }
   };

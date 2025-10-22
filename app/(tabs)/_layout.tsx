@@ -16,7 +16,6 @@ import {
 import React from "react";
 function CartBadge() {
   const { totalItems } = useCart();
-  console.log(totalItems);
 
   if (totalItems === 0) return null;
 

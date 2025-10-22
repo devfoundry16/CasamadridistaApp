@@ -99,7 +99,7 @@ export default function HomeScreen() {
 
   const loadInitialData = async () => {
     try {
-      fetchProfileData(RealMadridId);
+      console.log("---------Home Page---------");
       MatchService.fetchNextMatch(RealMadridId).then((result) => {
         MatchService.fetchLastMatches(result.teams.home.id).then((data) => {
           setHomeTeamLastMatches(data);

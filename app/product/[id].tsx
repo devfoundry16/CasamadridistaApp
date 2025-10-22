@@ -13,6 +13,7 @@ import {
 } from "react-native";
 
 import HeaderStack from "@/components/HeaderStack";
+import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import ShopApiService from "@/services/ShopService";
 import { Product } from "@/types/product/product";
@@ -20,7 +21,7 @@ import { RenderHTML } from "react-native-render-html";
 const { width } = Dimensions.get("window");
 export default function ProductDetailScreen() {
   const [product, setProduct] = useState<Product>();
-  const [isLoading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { addToCart } = useCart();
@@ -42,6 +43,15 @@ export default function ProductDetailScreen() {
       setLoading(true);
     }
   };
+
+  if (loading) {
+    return (
+      <>
+        <HeaderStack title="Product Details" />
+        <Spinner content="Loading product" />
+      </>
+    );
+  }
 
   if (!product) {
     return (
