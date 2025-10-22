@@ -1,6 +1,6 @@
 import { Spinner } from "@/components/Spinner";
 import Colors, { altColors } from "@/constants/colors";
-import ShopApiService from "@/services/ShopService";
+import ProductService from "@/services/Shop/ProductService";
 import { Product } from "@/types/product/product";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -25,7 +25,7 @@ export default function ShopScreen() {
 
   const getAllProducts = async () => {
     try {
-      ShopApiService.getProducts().then((data) => {
+      ProductService.getProducts().then((data) => {
         setProducts(data);
         setLoading(false);
       });

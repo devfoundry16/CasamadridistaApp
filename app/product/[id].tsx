@@ -15,7 +15,7 @@ import {
 import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
-import ShopApiService from "@/services/ShopService";
+import ProductService from "@/services/Shop/ProductService";
 import { Product } from "@/types/product/product";
 import { RenderHTML } from "react-native-render-html";
 const { width } = Dimensions.get("window");
@@ -33,7 +33,7 @@ export default function ProductDetailScreen() {
 
   const getProduct = async (id: number) => {
     try {
-      ShopApiService.getProductById(id).then((data) => {
+      ProductService.getProductById(id).then((data) => {
         setProduct(data);
         setLoading(false);
       });

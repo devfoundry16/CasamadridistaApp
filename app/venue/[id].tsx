@@ -1,7 +1,7 @@
 import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
-import SportsInfoService from "@/services/SportsInfoService";
+import SportsInfoService from "@/services/Football/SportsInfoService";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect } from "react";

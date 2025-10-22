@@ -2,7 +2,7 @@ import CustomWebView from "@/components/CustomWebView";
 import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
-import SportsInfoService from "@/services/SportsInfoService";
+import SportsInfoService from "@/services/Football/SportsInfoService";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {

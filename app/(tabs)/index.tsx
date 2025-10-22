@@ -8,7 +8,7 @@ import UpcomingForm from "@/components/UpcomingForm";
 import Colors from "@/constants/colors";
 import { useApp } from "@/contexts/AppContext";
 
-import MatchService from "@/services/MatchService";
+import MatchService from "@/services/Football/MatchService";
 import { Match } from "@/types/soccer/match";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";

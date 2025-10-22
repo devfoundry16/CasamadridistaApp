@@ -1,5 +1,5 @@
-import MatchService from "@/services/MatchService";
-import SportsInfoService from "@/services/SportsInfoService";
+import MatchService from "@/services/Football/MatchService";
+import SportsInfoService from "@/services/Football/SportsInfoService";
 import {
   CoachWithTeam,
   PlayerWithTeam,

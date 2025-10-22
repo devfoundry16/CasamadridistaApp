@@ -1,4 +1,4 @@
-import ShopApiService from "@/services/ShopService";
+import CartService from "@/services/Shop/CartService";
 import { Product } from "@/types/product/product";
 import { useCallback, useEffect, useState } from "react";
 import { Alert } from "react-native";
@@ -35,7 +35,7 @@ export const useCart = () => {
   const getItemsInCart = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await ShopApiService.getItemsInCart();
+      const res = await CartService.getItemsInCart();
       setLoading(false);
       return res;
     } catch (error) {
@@ -75,7 +75,7 @@ export const useCart = () => {
       variation: buildVariationsFromAttributes((product as any).attributes),
     };
     // If your ShopApiService expects (id, qty) change this call accordingly.
-    const data = await ShopApiService.addItemToCart(
+    const data = await CartService.addItemToCart(
       body.id,
       body.quantity,
       body.variation
@@ -89,14 +89,14 @@ export const useCart = () => {
       key = prevItems.find((item) => item.id == productId)?.key;
       return prevItems;
     });
-    const data = await ShopApiService.removeItemInCart(key as any);
+    const data = await CartService.removeItemInCart(key as any);
     console.log("Successfully Removed, remaining item:", data.items.length);
     return data.items;
   };
   const updateItemInCart = async (key: string, quantity: number) => {
     const data = quantity
-      ? await ShopApiService.updateItemInCart(key, quantity)
-      : await ShopApiService.removeItemInCart(key);
+      ? await CartService.updateItemInCart(key, quantity)
+      : await CartService.removeItemInCart(key);
     console.log("Successfully Updated, remaining item:", data.items.length);
     return data.items;
   };

@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AuthService from "./AuthService";
+import AuthService from "../AuthService";
 import { wooApi } from "./wooApi";
 const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json/wc";
 const API_BASE_URL_KEY = "api_base_url_key";
@@ -141,9 +141,7 @@ class ApiService {
   async getProductById(id: number): Promise<any> {
     return this.fetchWithAuth(`/v3/products/${id}`);
   }
-
-  
 }
 
-const ShopApiService = new ApiService();
-export default ShopApiService;
+const CartApiService = new ApiService();
+export default CartApiService;
