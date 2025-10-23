@@ -1,6 +1,7 @@
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
+import AuthService from "@/services/AuthService";
 import { Save } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -20,20 +21,45 @@ export default function AccountDetailsScreen() {
     last_name: user?.last_name || "",
     email: user?.email || "",
     name: user?.name || "",
+    oldPassword: "",
+    password: "",
+    confirmPassword: "",
   });
-
-  const handleSave = () => {
-    if (
-      !formData.first_name ||
-      !formData.last_name ||
-      !formData.name
-    ) {
+  const checkPassword = async (password: string) => {
+    const response = await AuthService.validCrendential(
+      user?.username as any,
+      password
+    );
+    return response.ok;
+  };
+  const handleSave = async () => {
+    if (!formData.first_name || !formData.last_name || !formData.name) {
       Alert.alert("Error", "Please fill in all required fields");
       return;
     }
-    console.log(formData);
-    updateUser({id: user?.id, ...formData});
-    Alert.alert("Success", "Account details updated successfully");
+    if (formData.oldPassword !== "") {
+      const isValid = await checkPassword(formData.oldPassword);
+      console.log(isValid);
+      if (formData.password !== formData.confirmPassword) {
+        Alert.alert("Error", "Confirm password is incorrect");
+        return;
+      } else {
+        if (!isValid) {
+          Alert.alert("Error", "Current Password is not correct");
+          return;
+        }
+      }
+    }
+    let newData = {
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      email: formData.email,
+      name: formData.name,
+    };
+    console.log(formData.password);
+    if (formData.oldPassword === "") updateUser({ id: user?.id, ...newData });
+    else updateUser({ id: user?.id, ...formData });
+    Alert.alert("Success", "Updated Successfully");
   };
 
   return (
@@ -70,9 +96,7 @@ export default function AccountDetailsScreen() {
             <TextInput
               style={styles.input}
               value={formData.name}
-              onChangeText={(text) =>
-                setFormData({ ...formData, name: text })
-              }
+              onChangeText={(text) => setFormData({ ...formData, name: text })}
               placeholder="Enter your display name"
               placeholderTextColor={Colors.darkGray}
             />
@@ -86,6 +110,51 @@ export default function AccountDetailsScreen() {
               placeholder="Enter your email"
               placeholderTextColor={Colors.darkGray}
               keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.oldPassword}
+              onChangeText={(text) =>
+                setFormData({ ...formData, oldPassword: text })
+              }
+              placeholder="Enter your current password"
+              placeholderTextColor={Colors.darkGray}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>New Password</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.password}
+              onChangeText={(text) =>
+                setFormData({ ...formData, password: text })
+              }
+              placeholder="Enter your new password"
+              placeholderTextColor={Colors.darkGray}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Confirm Password</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.confirmPassword}
+              onChangeText={(text) =>
+                setFormData({ ...formData, confirmPassword: text })
+              }
+              placeholder="Enter confirm password"
+              placeholderTextColor={Colors.darkGray}
+              secureTextEntry
               autoCapitalize="none"
             />
           </View>

@@ -1,6 +1,7 @@
+import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
-import * as ImagePicker from 'expo-image-picker'; // New import for image picker
+import * as ImagePicker from "expo-image-picker"; // New import for image picker
 import { router } from "expo-router";
 import {
   Camera,
@@ -26,35 +27,32 @@ import {
 } from "react-native";
 
 export default function AccountScreen() {
-  const { user, wallet, orders, updateAvatar, logout } = useAuth(); // Added accessToken and updateUser
+  const { user, wallet, orders, updateAvatar, logout, isLoading } = useAuth(); // Added accessToken and updateUser
   const [isLogin, setIsLogin] = useState(true);
 
   const handleChangePhoto = async () => {
-    Alert.alert(
-      "Change Profile Photo",
-      "Select an option",
-      [
-        {
-          text: "Take Photo",
-          onPress: async () => await pickImage('camera'),
-        },
-        {
-          text: "Choose from Gallery",
-          onPress: async () => await pickImage('gallery'),
-        },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-      ]
-    );
+    Alert.alert("Change Profile Photo", "Select an option", [
+      {
+        text: "Take Photo",
+        onPress: async () => await pickImage("camera"),
+      },
+      {
+        text: "Choose from Gallery",
+        onPress: async () => await pickImage("gallery"),
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
   };
 
-  const pickImage = async (source: 'camera' | 'gallery') => {
+  const pickImage = async (source: "camera" | "gallery") => {
     // Request permissions
-    const permission = source === 'camera'
-      ? await ImagePicker.requestCameraPermissionsAsync()
-      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permission =
+      source === "camera"
+        ? await ImagePicker.requestCameraPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
       Alert.alert("Permission Denied", "Please grant access to proceed.");
@@ -62,23 +60,23 @@ export default function AccountScreen() {
     }
 
     // Launch picker
-    const result = source === 'camera'
-      ? await ImagePicker.launchCameraAsync({
-          allowsEditing: true,
-          aspect: [1, 1], // Square for avatar
-          quality: 0.5,
-        })
-      : await ImagePicker.launchImageLibraryAsync({
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 0.5,
-        });
+    const result =
+      source === "camera"
+        ? await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            aspect: [1, 1], // Square for avatar
+            quality: 0.5,
+          })
+        : await ImagePicker.launchImageLibraryAsync({
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.5,
+          });
 
     if (result.canceled) return;
 
     const uri = result.assets[0].uri;
-    const filename = uri.split('/').pop() || `photo_${Date.now()}.jpg`;
-    console.log('name: ', filename, 'uri:', uri);
+    const filename = uri.split("/").pop() || `photo_${Date.now()}.jpg`;
     updateAvatar(uri, filename);
   };
 
@@ -91,15 +89,21 @@ export default function AccountScreen() {
       <View style={styles.header}>
         <View style={styles.profileSection}>
           <View style={styles.photoContainer}>
-            {user.photo ? (
-              <Image source={{ uri: user.photo }} style={styles.photo} />
-            ) : (
-              <View style={[styles.photo, styles.photoPlaceholder]}>
-                <User size={60} color={Colors.darkGray} />
-              </View>
-            )}
+            {isLoading && <Spinner content="Setting avatar" />}
+            {user.url
+              ? !isLoading && (
+                  <Image source={{ uri: user.url }} style={styles.photo} />
+                )
+              : !isLoading && (
+                  <View style={[styles.photo, styles.photoPlaceholder]}>
+                    <User size={60} color={Colors.darkGray} />
+                  </View>
+                )}
           </View>
-          <TouchableOpacity style={styles.changePhotoButton} onPress={handleChangePhoto}>
+          <TouchableOpacity
+            style={styles.changePhotoButton}
+            onPress={handleChangePhoto}
+          >
             <Camera size={16} color={Colors.textWhite} />
             <Text style={styles.changePhotoText}>Change Photo</Text>
           </TouchableOpacity>
@@ -233,7 +237,7 @@ function AuthForm({
   isLogin: boolean;
   setIsLogin: (value: boolean) => void;
 }) {
-  const { login, register } = useAuth();
+  const { login, register, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -247,7 +251,7 @@ function AuthForm({
         Alert.alert("Error", "Please fill in all fields");
         return;
       }
-      await login(email, password);
+      login(email, password);
     } else {
       if (
         !email ||
@@ -268,10 +272,9 @@ function AuthForm({
         email: email,
         password: password,
         role: ["subscriber"],
-      });
+      } as any);
     }
   };
-
   return (
     <ScrollView style={styles.authContainer}>
       <View style={styles.authHeader}>
@@ -367,11 +370,14 @@ function AuthForm({
           />
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>
-            {isLogin ? "Login" : "Register"}
-          </Text>
-        </TouchableOpacity>
+        {isLoading && <Spinner content={isLogin ? "Sign in" : "Sign up"} />}
+        {!isLoading && (
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitButtonText}>
+              {isLogin ? "Login" : "Register"}
+            </Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={styles.switchButton}

@@ -34,7 +34,7 @@ const initialShippingAddress = {
 };
 export const [AuthProvider, useAuth] = createContextHook(() => {
   const [user, setUser] = useState<Partial<User> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [wallet, setWallet] = useState(0);
   const [orders, setOrders] = useState<Order[]>([]);
   const [billingAddress, setBillingAddress] = useState<Address | null>(
@@ -78,10 +78,12 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   };
 
   const login = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
     AuthService.login(email, password)
       .then(async (data) => {
         const userData = await AuthService.getUserById();
         setUser(userData);
+        setIsLoading(false);
       })
       .catch((error) => {
         Alert.alert("Login error", error.message);
@@ -92,7 +94,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     AuthService.register(userData)
       .then(async (response) => {
         const newUser: User = response;
-        console.log("Registered user:", newUser);
+        console.log("Registered user:", newUser.id);
         await AsyncStorage.setItem("user", JSON.stringify(newUser));
         setUser(newUser);
       })
@@ -101,6 +103,21 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       });
   }, []);
 
+  const updateUser = useCallback(
+    async (updates: Partial<User>) => {
+      if (!user) return;
+      AuthService.update(updates)
+        .then(async (response) => {
+          const updatedUser: User = response;
+          await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+          setUser(updatedUser);
+        })
+        .catch((error) => {
+          Alert.alert("Update error", error.message);
+        });
+    },
+    [user]
+  );
   const logout = useCallback(async () => {
     await AsyncStorage.multiRemove([
       "user",
@@ -117,27 +134,17 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     setShippingAddress(null);
     setPaymentMethods([]);
   }, []);
-
-  const updateUser = useCallback(
-    async (updates: Partial<User>) => {
-      if (!user) return;
-      const response = await AuthService.update(updates);
-      const updatedUser: User = response;
-      console.log("Updated user:", updatedUser);
-      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-      setUser(updatedUser);
-    },
-    [user]
-  );
   const updateAvatar = useCallback(
     async (imageUri: string, filename: string) => {
       if (!user) return;
       try {
+        setIsLoading(true);
         const response = await AuthService.uploadMedia(imageUri, filename);
         const updatedUser: User = {
           ...user,
-          photo: response.source_url,
+          url: response.source_url,
         } as User;
+        await updateUser(updatedUser).then(() => setIsLoading(false));
         await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
         setUser(updatedUser);
       } catch (error) {

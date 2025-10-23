@@ -12,10 +12,9 @@ export const Spinner = ({ content }: { content: string }) => {
 
 const styles = StyleSheet.create({
   centered: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.deepDarkGray,
+    backgroundColor: "none",
   },
   content: {
     color: Colors.textWhite,

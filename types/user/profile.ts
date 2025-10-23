@@ -10,7 +10,7 @@ export interface User {
   nationality?: string;
   placeOfResidence?: string;
   annualIncome?: string;
-  photo?: string;
+  url?: string;
   subscription?: {
     type: string;
     plan: string;

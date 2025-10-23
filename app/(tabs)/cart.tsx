@@ -36,6 +36,7 @@ export default function CartScreen() {
         "customer_id:",
         data.customer_id
       );
+      router.push("/checkout");
     });
   };
 

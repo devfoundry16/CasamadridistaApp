@@ -91,14 +91,18 @@ class ApiService {
     return response.json();
   }
 
-  async login(username: string, password: string): Promise<AuthResponse> {
-    const response = await fetch(`${this.baseUrl}/jwt-auth/v1/token`, {
+  async validCrendential(username: string, password: string) {
+    return fetch(`${this.baseUrl}/jwt-auth/v1/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ username, password }),
     });
+  }
+
+  async login(username: string, password: string): Promise<AuthResponse> {
+    const response = await this.validCrendential(username, password);
 
     if (!response.ok) {
       const error = await response.json();
@@ -134,7 +138,7 @@ class ApiService {
 
     const data = await response.json();
 
-    console.log("[WordPress] Register successful:", data);
+    console.log("[WordPress] Register successful:");
     return data;
   }
   async update(userData: Partial<User>): Promise<any> {
@@ -143,10 +147,8 @@ class ApiService {
       body: JSON.stringify(userData),
     });
 
-    const data = await response.json();
-
-    console.log("[WordPress] Update successful:", data);
-    return data;
+    console.log("[WordPress] Update successful:");
+    return response;
   }
   async updateAddress(addressData: Address): Promise<any> {
     const id = await this.getUserId();
@@ -160,7 +162,7 @@ class ApiService {
     });
     const data = response;
 
-    console.log("[WordPress] Update Address successful:", data);
+    console.log("[WordPress] Update Address successful");
     return data;
   }
   async getAddress(): Promise<any> {
