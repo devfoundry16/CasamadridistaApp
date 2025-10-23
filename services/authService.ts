@@ -119,6 +119,7 @@ class ApiService {
     await this.storeAuthData(data.token, userId); //store auth data
 
     const userData = await this.getUserById();
+
     await this.storeUserData(userData); //store user data
 
     console.log("[WordPress] Login successful:", data.user_display_name);
@@ -208,6 +209,7 @@ class ApiService {
         },
       }
     );
+    const address = await this.getAddress();
 
     if (!response.ok) {
       const error = await response.json();
@@ -219,8 +221,13 @@ class ApiService {
       throw new Error(message);
     }
     const data = await response.json();
+    const newData: User = {
+      ...data,
+      billing: address.billing,
+      shipping: address.shipping,
+    };
 
-    return data;
+    return newData;
   }
   async getCurrentUser(): Promise<User | null> {
     try {

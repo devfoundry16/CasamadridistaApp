@@ -24,7 +24,7 @@ import {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { teamInfoList, fetchProfileData } = useApp();
+  const { teamInfoList, fetchProfileData, fetchLiveMatchData } = useApp();
   const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
@@ -96,10 +96,10 @@ export default function HomeScreen() {
                       </body>
                     </html>
                   `;
-
   const loadInitialData = async () => {
     try {
       console.log("---------Home Page---------");
+      if (teamInfoList.length) fetchProfileData(RealMadridId);
       MatchService.fetchNextMatch(RealMadridId).then((result) => {
         MatchService.fetchLastMatches(result.teams.home.id).then((data) => {
           setHomeTeamLastMatches(data);

@@ -7,8 +7,10 @@ import {
 } from "@stripe/stripe-react-native";
 import { useRouter } from "expo-router";
 import { Alert } from "react-native";
+import { useCart } from "./useCart";
 
 export const useStripePay = () => {
+  const { items, totalPrice, clearCart } = useCart();
   const router = useRouter();
   const { billingAddress, shippingAddress, user } = useAuth();
   /* Stripe */

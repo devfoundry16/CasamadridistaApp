@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { useStripePay } from "@/hooks/useStripePay";
 import { CheckCircle, CreditCard, MapPin, User } from "lucide-react-native";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -17,14 +17,13 @@ import {
 
 export default function CheckoutScreen() {
   const { items, totalPrice, clearCart } = useCart();
+  //const { id, type, billing_type } = useLocalSearchParams();
   const { billingAddress, shippingAddress, user } = useAuth();
   const [name, setName] = useState(user?.name);
   const [email, setEmail] = useState(user?.email);
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState(billingAddress);
   const { handlePayment: payWithStripe } = useStripePay();
-
-  const createOrder = async () => {};
 
   const handlePayment = async () => {
     if (!name || !email || !address) {
@@ -34,6 +33,8 @@ export default function CheckoutScreen() {
       );
       return;
     }
+    await payWithStripe();
+    clearCart();
   };
 
   if (items.length === 0) {
@@ -100,7 +101,7 @@ export default function CheckoutScreen() {
                   " " +
                   address?.state +
                   " " +
-                  address?.postalCode
+                  address?.postcode
                 }
                 multiline
                 numberOfLines={3}

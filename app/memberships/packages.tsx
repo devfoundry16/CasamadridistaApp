@@ -1,4 +1,6 @@
 import Colors from "@/constants/colors";
+import { useCart } from "@/hooks/useCart";
+import { router } from "expo-router";
 import { Check, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -8,7 +10,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 const packages = [
   {
     id: 1,
@@ -16,6 +17,8 @@ const packages = [
     monthlyPrice: "4.9",
     yearlyPrice: "48",
     yearlyOriginal: "60",
+    product_id: 50869,
+    variation_id: [50891, 50892],
     features: [
       "OLicial digital membership card",
       "WhatsApp news channel access",
@@ -38,6 +41,8 @@ const packages = [
     monthlyPrice: "14.9",
     yearlyPrice: "144",
     yearlyOriginal: "180",
+    product_id: 50874,
+    variation_id: [50888, 50889],
     features: [
       "OLicial digital membership card",
       "WhatsApp news channel access",
@@ -61,6 +66,8 @@ const packages = [
     monthlyPrice: "34.9",
     yearlyPrice: "336",
     yearlyOriginal: "420",
+    product_id: 50879,
+    variation_id: [50883, 50884],
     features: [
       "OLicial digital membership card",
       "WhatsApp news channel access",
@@ -80,9 +87,33 @@ const packages = [
 ];
 
 export default function PackagesScreen() {
+  const { addToCart } = useCart();
   const [billingType, setBillingType] = useState<"monthly" | "yearly">(
     "monthly"
   );
+
+  const handlePackage = async (product_id: number, variation_id: number) => {
+    const product = {
+      id: product_id,
+      quantity: 1,
+      attributes: [
+        {
+          id: 1,
+          name: "Billing Period",
+          slug: "pa_billing-period",
+          position: 0,
+          visible: true,
+          variation: true,
+          options: [billingType.charAt(0).toUpperCase() + billingType.slice(1)],
+        },
+      ],
+    };
+    addToCart(product);
+
+    console.log("productId: ", product_id, "variationId:", variation_id);
+
+    router.push("/cart");
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -156,7 +187,7 @@ export default function PackagesScreen() {
               <View style={styles.priceContainer}>
                 {billingType === "yearly" && (
                   <Text style={styles.yearlyOriginal}>
-                    {pkg.yearlyOriginal}
+                    ${pkg.yearlyOriginal}
                   </Text>
                 )}
                 <Text style={styles.price}>
@@ -197,6 +228,12 @@ export default function PackagesScreen() {
                   styles.button,
                   pkg.badge === "Popular" && styles.popularButton,
                 ]}
+                onPress={() =>
+                  handlePackage(
+                    pkg.product_id,
+                    pkg.variation_id[billingType == "monthly" ? 0 : 1]
+                  )
+                }
               >
                 <Text
                   style={[

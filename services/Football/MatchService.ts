@@ -10,11 +10,16 @@ class ApiService {
     const res = await fetchWithAuth("fixtures", this.API_KEY, param);
     return res.response[0]; // Returns the next match object
   }
+  async fetchLiveMatch(teamId: number) {
+    const param: Record<string, any> = {
+      team: teamId,
+      live: "all",
+    };
+    const res = await fetchWithAuth("fixtures", this.API_KEY, param);
+    return res.response[0]; // Returns the next match object
+  }
 
-  async fetchUpcomingMatches(
-    teamId: number,
-    count: number = 5
-  ) {
+  async fetchUpcomingMatches(teamId: number, count: number = 5) {
     const param: Record<string, any> = {
       team: teamId,
       next: count,
@@ -22,10 +27,7 @@ class ApiService {
     const res = await fetchWithAuth("fixtures", this.API_KEY, param);
     return res.response; // Array of match objects
   }
-  async fetchLastMatches(
-    teamId: number,
-    count: number = 5
-  ) {
+  async fetchLastMatches(teamId: number, count: number = 5) {
     const param: Record<string, any> = {
       team: teamId,
       last: count,

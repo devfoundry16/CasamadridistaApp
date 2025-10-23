@@ -1,21 +1,8 @@
-import { OrderStatus } from "@/types/user/order";
+import { CreateOrderParams } from "@/types/user/order";
 import axios, { AxiosInstance } from "axios";
 import AuthService from "../AuthService";
-interface CreateOrderParams {
-  productId: number;
-  quantity: number;
-  billingPeriod?: string;
-  variation?: Array<{ attribute: string; value: string }>;
-}
 
-interface OrderResponse {
-  success: boolean;
-  orderId?: number;
-  error?: string;
-  data?: any;
-}
-
-class OrderService {
+class ApiService {
   private api: AxiosInstance;
   private token = "";
   private WOO_USERNAME = "ck_5761f8ce313356e07555cf14a8c2099ab27d7942";
@@ -41,70 +28,39 @@ class OrderService {
     );
   }
 
-  async createOrder(params: CreateOrderParams): Promise<OrderResponse> {
+  async createOrder(params: Partial<CreateOrderParams>[]) {
     try {
-      const user_id = await AuthService.getUserById();
+      const userString = await AuthService.getUserData();
+      const user = userString?.length && JSON.parse(userString);
       const response = await this.api.post("/orders", {
-        line_items: [
-          {
-            product_id: params.productId,
-            quantity: params.quantity,
-            variation: params.variation,
-          },
-        ],
-        customer_id: user_id,
-        status: OrderStatus.PENDING,
+        payment_method: "stripe", // or 'paypal', etc.
+        payment_method_title: "Link",
+        set_paid: false, // Let the payment gateway handle the payment
+        customer_id: user.id,
+        billing: user?.billing,
+        shipping: user?.shipping,
+        line_items: params.map((param) => {
+          return {
+            product_id: param.productId, // The ID of your subscription product
+            quantity: param.quantity,
+          };
+        }),
       });
-
-      return {
-        success: true,
-        orderId: response.data.id,
-        data: response.data,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Unknown error occurred",
-      };
-    }
+      return response.data;
+    } catch (error: any) {}
   }
 
-  async getOrder(orderId: number): Promise<OrderResponse> {
-    try {
-      const data = await this.api.get(`/orders/${orderId}`);
+  // async getOrder(orderId: number): Promise<OrderResponse> {
+  //   try {
+  //     const data = await this.api.get(`/orders/${orderId}`);
 
-      return {
-        success: true,
-        data,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Unknown error occurred",
-      };
-    }
-  }
+  //     return {
 
-  async updateOrderStatus(
-    orderId: number,
-    status: OrderStatus
-  ): Promise<OrderResponse> {
-    try {
-      const data = await this.api.put(`/orders/${orderId}`, {
-        status,
-      });
-
-      return {
-        success: true,
-        data,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Unknown error occurred",
-      };
-    }
-  }
+  //     };
+  //   } catch (error: any) {e || "Unknown error occurred",
+  //     };
+  //   }
+  // }
 }
 
-export const orderService = new OrderService();
+export const OrderService = new ApiService();

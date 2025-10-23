@@ -17,27 +17,29 @@ export interface User {
     startDate: string;
     endDate: string;
   };
+  billing: Partial<Address>;
+  shipping: Partial<Address>;
   role: string[];
 }
 
 export interface Address {
-  type: 'shipping' | 'billing';
-  company: string,
-  email: string,
+  type: "shipping" | "billing";
+  company: string;
+  email: string;
   first_name: string;
-  last_name: string,
+  last_name: string;
   address_1: string;
   address_2: string;
   city: string;
   state: string;
   country: string;
-  postalCode: string;
+  postcode: string;
   phone?: string;
 }
 
 export interface PaymentMethod {
   id: string;
-  type: 'card' | 'paypal';
+  type: "card" | "paypal";
   cardNumber?: string;
   cardHolder?: string;
   expiryDate?: string;
@@ -49,7 +51,7 @@ export interface Order {
   date: string;
   items: string[];
   total: number;
-  status: 'pending' | 'completed' | 'cancelled';
+  status: "pending" | "completed" | "cancelled";
 }
 
 export interface AuthResponse {

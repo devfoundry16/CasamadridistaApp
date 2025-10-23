@@ -15,7 +15,7 @@ const initialBillingAddress = {
   city: "",
   state: "",
   country: "",
-  postalCode: "",
+  postcode: "",
   phone: "",
 };
 const initialShippingAddress = {
@@ -29,7 +29,7 @@ const initialShippingAddress = {
   city: "",
   state: "",
   country: "",
-  postalCode: "",
+  postcode: "",
   phone: "",
 };
 export const [AuthProvider, useAuth] = createContextHook(() => {
@@ -63,7 +63,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
       if (userData) {
         setUser(JSON.parse(userData));
-        await getAddressData();
       }
       if (walletData) setWallet(JSON.parse(walletData));
       if (ordersData) setOrders(JSON.parse(ordersData));
@@ -78,18 +77,11 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   };
 
-  const getAddressData = useCallback(async () => {
-    const addresses = await AuthService.getAddress();
-    setBillingAddress({ type: "billing", ...addresses.billing });
-    setShippingAddress({ type: "shipping", ...addresses.shipping });
-  }, []);
-
   const login = useCallback(async (email: string, password: string) => {
     AuthService.login(email, password)
       .then(async (data) => {
         const userData = await AuthService.getUserById();
         setUser(userData);
-        await getAddressData();
       })
       .catch((error) => {
         Alert.alert("Login error", error.message);
@@ -206,7 +198,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         city: "",
         state: "",
         country: "",
-        postalCode: "",
+        postcode: "",
         phone: "",
       };
       await handleAddress(newAddress);

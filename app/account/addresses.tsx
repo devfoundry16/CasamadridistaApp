@@ -46,7 +46,7 @@ function AddressView({
         </View>
       </View>
       {!address.first_name.length ? (
-        <Text style={{ color: Colors.textWhite}}>No Address Found</Text>
+        <Text style={{ color: Colors.textWhite }}>No Address Found</Text>
       ) : (
         <View>
           <Text style={styles.addressName}>
@@ -56,7 +56,7 @@ function AddressView({
           <Text style={styles.addressText}>{address.address_2}</Text>
           <Text style={styles.addressText}>
             {address.city}
-            {address.city ? "," : ""} {address.country} {address.postalCode}
+            {address.city ? "," : ""} {address.country} {address.postcode}
           </Text>
           <Text style={styles.addressText}>{address.phone}</Text>
         </View>
@@ -66,8 +66,9 @@ function AddressView({
 }
 
 export default function AddressesScreen() {
-  const { billingAddress, shippingAddress, updateAddress, deleteAddress } =
-    useAuth();
+  const { user, updateAddress, deleteAddress } = useAuth();
+  const billingAddress = { type: "billing", ...user?.billing };
+  const shippingAddress = { type: "shipping", ...user?.shipping };
   const [modalVisible, setModalVisible] = useState(false);
   const [formData, setFormData] = useState({
     type: "shipping" as "shipping" | "billing",
@@ -80,10 +81,9 @@ export default function AddressesScreen() {
     city: "",
     state: "",
     country: "",
-    postalCode: "",
+    postcode: "",
     phone: "",
   });
-
   const handleSave = () => {
     if (
       formData.type === "billing" &&
@@ -133,7 +133,7 @@ export default function AddressesScreen() {
     //   city: "",
     //   country: "",
     //   state: "",
-    //   postalCode: "",
+    //   postcode: "",
     //   phone: "",
     // });
   };
@@ -161,16 +161,16 @@ export default function AddressesScreen() {
         <View style={styles.addressList}>
           {billingAddress && (
             <AddressView
-              address={billingAddress}
+              address={billingAddress as any}
               handleEdit={handleEdit}
-              handleDelete={() => handleDelete('billing')}
+              handleDelete={() => handleDelete("billing")}
             />
           )}
           {shippingAddress && (
             <AddressView
-              address={shippingAddress}
+              address={shippingAddress as any}
               handleEdit={handleEdit}
-              handleDelete={() => handleDelete('shipping')}
+              handleDelete={() => handleDelete("shipping")}
             />
           )}
         </View>
@@ -312,9 +312,9 @@ export default function AddressesScreen() {
                 />
                 <TextInput
                   style={styles.input}
-                  value={formData.postalCode}
+                  value={formData.postcode}
                   onChangeText={(text) =>
-                    setFormData({ ...formData, postalCode: text })
+                    setFormData({ ...formData, postcode: text })
                   }
                   placeholder="Postcode / ZIP"
                   placeholderTextColor={Colors.textLight}

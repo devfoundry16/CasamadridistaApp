@@ -1,6 +1,7 @@
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
+import { OrderService } from "@/services/Shop/OrderService";
 import { useRouter } from "expo-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react-native";
 import {
@@ -16,10 +17,27 @@ export default function CartScreen() {
   const router = useRouter();
   const { items, updateQuantity, removeFromCart, totalPrice, loading } =
     useCart();
-
   if (loading) {
     return <Spinner content="Loading cart" />;
   }
+  const handleCheckout = () => {
+    //create an order
+    const line_items = items.map((item) => {
+      return {
+        productId: item.id,
+      };
+    });
+    OrderService.createOrder(line_items).then((data) => {
+      console.log(
+        "order key:",
+        data.order_key,
+        "status: ",
+        data.status,
+        "customer_id:",
+        data.customer_id
+      );
+    });
+  };
 
   if (items && items.length === 0) {
     return (
@@ -47,9 +65,23 @@ export default function CartScreen() {
         <Text style={styles.itemName} numberOfLines={2}>
           {item.name}
         </Text>
-        <Text style={styles.itemPrice}>
-          ${(Number(item.prices.price) / 100).toFixed(2)}
-        </Text>
+        {item.variation.map((val, idx) => {
+          return (
+            <Text key={idx} style={styles.itemVariation} numberOfLines={2}>
+              {val.attribute}: {val.value}
+            </Text>
+          );
+        })}
+        <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+          {item.prices.regular_price !== item.prices.price && (
+            <Text style={styles.itemRegularPrice}>
+              ${(Number(item.prices.regular_price) / 100).toFixed(2)}
+            </Text>
+          )}
+          <Text style={styles.itemPrice}>
+            ${(Number(item.prices.price) / 100).toFixed(2)}
+          </Text>
+        </View>
         <View style={styles.quantityContainer}>
           {item.quantity_limits.editable && (
             <TouchableOpacity
@@ -100,7 +132,7 @@ export default function CartScreen() {
         </View>
         <TouchableOpacity
           style={styles.checkoutButton}
-          onPress={() => router.push("/checkout")}
+          onPress={handleCheckout}
           activeOpacity={0.8}
         >
           <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
@@ -151,7 +183,7 @@ const styles = StyleSheet.create({
   },
   cartItem: {
     flexDirection: "row",
-    backgroundColor: Colors.darkGray,
+    backgroundColor: Colors.cardBg,
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
@@ -175,11 +207,25 @@ const styles = StyleSheet.create({
     color: Colors.textWhite,
     marginBottom: 4,
   },
+  itemVariation: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: Colors.textLight,
+    marginBottom: 4,
+  },
   itemPrice: {
     fontSize: 18,
     fontWeight: "700" as const,
     color: Colors.darkGold,
     marginBottom: 8,
+  },
+  itemRegularPrice: {
+    fontSize: 14,
+    textDecorationLine: "line-through",
+    fontWeight: "600" as const,
+    color: Colors.textWhite,
+    marginBottom: 8,
+    marginRight: 4,
   },
   quantityContainer: {
     flexDirection: "row",
@@ -205,7 +251,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   footer: {
-    backgroundColor: Colors.darkGray,
+    backgroundColor: Colors.deepDarkGray,
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
@@ -235,6 +281,6 @@ const styles = StyleSheet.create({
   checkoutButtonText: {
     fontSize: 18,
     fontWeight: "600" as const,
-    color: Colors.darkGray,
+    color: Colors.textWhite,
   },
 });

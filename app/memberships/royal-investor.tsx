@@ -1,23 +1,24 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-} from "react-native";
 import Colors from "@/constants/colors";
+import { Image } from "expo-image";
+import * as MailComposer from "expo-mail-composer";
 import {
+  Award,
+  Check,
+  ChevronDown,
   Crown,
   TrendingUp,
   Users,
-  Award,
-  ChevronDown,
-  Check,
 } from "lucide-react-native";
-import { Image } from "expo-image";
+import React, { useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const benefits = [
   {
@@ -63,6 +64,40 @@ export default function RoyalInvestorScreen() {
   });
   const [showIncomeDropdown, setShowIncomeDropdown] = useState(false);
 
+  const sendEmail = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+
+    const isAvailable = await MailComposer.isAvailableAsync();
+    if (!isAvailable) {
+      Alert.alert(
+        "Email Not Available",
+        "Email service is not available on this device."
+      );
+      return;
+    }
+
+    const subject = "Contact Form Submission";
+    const body =
+      `Name: ${formData.fullName}\n` +
+      `Age: ${formData.age}\n` +
+      `Phone: ${formData.phoneNumber}\n\n` +
+      `Email:\n${formData.email}` +
+      `Nationality: ${formData.nationality}\n\n` +
+      `Place of Residence:\n${formData.placeOfResidence}` +
+      `Annual Income: ${formData.annualIncome}\n\n`;
+
+    const result = MailComposer.composeAsync({
+      recipients: ["alifayad03@gmail.com"],
+      subject: subject,
+      body: body,
+    });
+
+    return result;
+  };
   const handleSubmit = () => {
     if (
       !formData.fullName ||
@@ -76,18 +111,22 @@ export default function RoyalInvestorScreen() {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
-    Alert.alert(
-      "Success",
-      "Your application has been submitted. Our team will contact you shortly."
-    );
-    setFormData({
-      fullName: "",
-      age: "",
-      phoneNumber: "",
-      email: "",
-      nationality: "",
-      placeOfResidence: "",
-      annualIncome: "",
+    sendEmail().then((res) => {
+      if (res?.status === "sent") {
+        Alert.alert(
+          "Success",
+          "Your application has been submitted. Our team will contact you shortly."
+        );
+        setFormData({
+          fullName: "",
+          age: "",
+          phoneNumber: "",
+          email: "",
+          nationality: "",
+          placeOfResidence: "",
+          annualIncome: "",
+        });
+      }
     });
   };
 
@@ -298,7 +337,14 @@ export default function RoyalInvestorScreen() {
             official Real Madrid association, and your name and photo will shine
             on the honor board in front of thousands of Madridistas!
           </Text>
-          <TouchableOpacity style={{...styles.submitButton, paddingHorizontal: 24, marginTop: 16}}>
+          <TouchableOpacity
+            style={{
+              ...styles.submitButton,
+              paddingHorizontal: 24,
+              marginTop: 16,
+            }}
+            onPress={handleSubmit}
+          >
             <Text style={styles.submitButtonText}>Apply Now</Text>
           </TouchableOpacity>
         </View>
@@ -345,7 +391,7 @@ const Benefits: {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.darkGray,
+    backgroundColor: Colors.deepDarkGray,
   },
   content: {
     padding: 35,

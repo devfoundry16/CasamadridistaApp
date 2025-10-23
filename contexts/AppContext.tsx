@@ -63,6 +63,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
     return MatchService.fetchNextMatch(id);
   }, []);
 
+  const fetchLiveMatchData = useCallback(async (id: number) => {
+    return MatchService.fetchLiveMatch(id);
+  }, []);
+
   const fetchProfileData = useCallback(
     async (id: number) => {
       console.log("AppContext: before teaminfo list", teamInfoList.length);
@@ -145,7 +149,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
       coachList,
       teamInfoList,
       fetchProfileData,
+      fetchLiveMatchData,
     }),
-    [playersList, coachList, teamInfoList, fetchProfileData]
+    [playersList, coachList, teamInfoList, fetchProfileData, fetchLiveMatchData]
   );
 });
