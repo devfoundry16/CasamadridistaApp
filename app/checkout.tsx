@@ -3,6 +3,8 @@ import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { useStripePay } from "@/hooks/useStripePay";
+import { OrderService } from "@/services/Shop/OrderService";
+import { OrderStatus } from "@/types/user/order";
 import { CheckCircle, CreditCard, MapPin, User } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -17,12 +19,13 @@ import {
 
 export default function CheckoutScreen() {
   const { items, totalPrice, clearCart } = useCart();
-  //const { id, type, billing_type } = useLocalSearchParams();
-  const { billingAddress, shippingAddress, user } = useAuth();
+  const { user } = useAuth();
+  const billingAddress = user?.billing;
+  const shippingAddress = user?.shipping;
   const [name, setName] = useState(user?.name);
   const [email, setEmail] = useState(user?.email);
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState(billingAddress);
+  const [address, setAddress] = useState(shippingAddress);
   const { handlePayment: payWithStripe } = useStripePay();
 
   const handlePayment = async () => {
@@ -33,8 +36,50 @@ export default function CheckoutScreen() {
       );
       return;
     }
-    await payWithStripe();
     clearCart();
+  };
+
+  const handlePlaceOrder = () => {
+    //create an order
+    const line_items = items.map((item) => {
+      return {
+        productId: item.id,
+        quantity: item.quantity,
+      };
+    });
+    OrderService.createOrder(line_items).then((data) => {
+      console.log(
+        "order id:",
+        data.id,
+        "status: ",
+        data.status,
+        "customer_id:",
+        data.customer_id,
+        "total: ",
+        data.total
+      );
+      payWithStripe(data.id)
+        .then((intent) => {
+          OrderService.updateOrder(data.id, {
+            payment_method: "stripe",
+            payment_method_title: "Stripe",
+            set_paid: true,
+            status: OrderStatus.PROCESSING,
+            meta_data: [{ key: "_stripe_payment_intent", value: intent.id }],
+          }).then(() => {
+            Alert.alert(
+              "Payment Successful",
+              "Your payment was processed successfully!"
+            );
+          });
+        })
+        .catch((error) => {
+          Alert.alert(
+            "Payment Failed",
+            "There was an issue processing your payment."
+          );
+        });
+    });
   };
 
   if (items.length === 0) {
@@ -145,11 +190,11 @@ export default function CheckoutScreen() {
         <View style={styles.footer}>
           <TouchableOpacity
             style={styles.payButton}
-            onPress={handlePayment}
+            onPress={handlePlaceOrder}
             activeOpacity={0.8}
           >
             <CheckCircle size={20} color={Colors.darkBg} />
-            <Text style={styles.payButtonText}>Complete Payment</Text>
+            <Text style={styles.payButtonText}>Place an Order</Text>
           </TouchableOpacity>
         </View>
       </View>

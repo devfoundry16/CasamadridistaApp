@@ -88,7 +88,6 @@ export class FlintopWalletService {
     const data = await this.authenticatedFetch<FlintopWalletBalance>(
       "/woo-wallet/v1/balance"
     );
-    console.log(data);
     return data;
   }
 
@@ -100,7 +99,6 @@ export class FlintopWalletService {
     const data = await this.authenticatedFetch<FlintopWalletTransaction[]>(
       `/woo-wallet/v1/transactions?page=${page}&limit=${limit}`
     );
-    console.log(data);
     return data;
   }
 
@@ -117,29 +115,35 @@ export class FlintopWalletService {
     );
   }
 
-  static async transferFunds(request: FlinTopWalletTransferRequest): Promise<any> {
-    return this.authenticatedFetch('/woo-wallet/v1/transfer', {
-      method: 'POST',
+  static async transferFunds(
+    request: FlinTopWalletTransferRequest
+  ): Promise<any> {
+    return this.authenticatedFetch("/woo-wallet/v1/transfer", {
+      method: "POST",
       body: JSON.stringify(request),
     });
   }
 
   // Withdraw funds from wallet
-  static async withdrawFunds(request: FlinTopWalletWithdrawRequest): Promise<any> {
-    return this.authenticatedFetch('/woo-wallet/v1/withdraw', {
-      method: 'POST',
+  static async withdrawFunds(
+    request: FlinTopWalletWithdrawRequest
+  ): Promise<any> {
+    return this.authenticatedFetch("/woo-wallet/v1/withdraw", {
+      method: "POST",
       body: JSON.stringify(request),
     });
   }
 
   // Get withdrawal methods
   static async getWithdrawalMethods(): Promise<string[]> {
-    return this.authenticatedFetch<string[]>('/woo-wallet/v1/withdrawal-methods');
+    return this.authenticatedFetch<string[]>(
+      "/woo-wallet/v1/withdrawal-methods"
+    );
   }
 
   // Get payment methods for adding funds
   static async getPaymentMethods(): Promise<string[]> {
-    return this.authenticatedFetch<string[]>('/woo-wallet/v1/payment-methods');
+    return this.authenticatedFetch<string[]>("/woo-wallet/v1/payment-methods");
   }
 
   // Get complete wallet details (balance + recent transactions)

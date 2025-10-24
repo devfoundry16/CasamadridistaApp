@@ -1,7 +1,6 @@
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
-import { OrderService } from "@/services/Shop/OrderService";
 import { useRouter } from "expo-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react-native";
 import {
@@ -20,25 +19,6 @@ export default function CartScreen() {
   if (loading) {
     return <Spinner content="Loading cart" />;
   }
-  const handleCheckout = () => {
-    //create an order
-    const line_items = items.map((item) => {
-      return {
-        productId: item.id,
-      };
-    });
-    OrderService.createOrder(line_items).then((data) => {
-      console.log(
-        "order key:",
-        data.order_key,
-        "status: ",
-        data.status,
-        "customer_id:",
-        data.customer_id
-      );
-      router.push("/checkout");
-    });
-  };
 
   if (items && items.length === 0) {
     return (
@@ -133,7 +113,7 @@ export default function CartScreen() {
         </View>
         <TouchableOpacity
           style={styles.checkoutButton}
-          onPress={handleCheckout}
+          onPress={() => router.push("/checkout" as any)}
           activeOpacity={0.8}
         >
           <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>

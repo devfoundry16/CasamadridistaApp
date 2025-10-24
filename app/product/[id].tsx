@@ -46,10 +46,10 @@ export default function ProductDetailScreen() {
 
   if (loading) {
     return (
-      <>
+      <View style={styles.spinnerContainer}>
         <HeaderStack title="Product Details" />
         <Spinner content="Loading product" />
-      </>
+      </View>
     );
   }
 
@@ -164,6 +164,12 @@ const customStyles = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.deepDarkGray,
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: Colors.deepDarkGray,
   },
   errorText: {

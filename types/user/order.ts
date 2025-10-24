@@ -30,10 +30,12 @@ export interface CreateOrderParams {
   set_paid: boolean;
   productId: number;
   variationId: number;
+  status?: OrderStatus;
   quantity: number;
   billing: Omit<Address, "type">;
   shipping?: Partial<Address>;
   variation?: Array<{ attribute: string; value: string }>;
+  meta_data?: Array<{ key: string; value: string }>;
 }
 
 export interface OrderResponse {

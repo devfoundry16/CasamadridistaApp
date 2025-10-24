@@ -50,17 +50,14 @@ class ApiService {
     } catch (error: any) {}
   }
 
-  // async getOrder(orderId: number): Promise<OrderResponse> {
-  //   try {
-  //     const data = await this.api.get(`/orders/${orderId}`);
-
-  //     return {
-
-  //     };
-  //   } catch (error: any) {e || "Unknown error occurred",
-  //     };
-  //   }
-  // }
+  async updateOrder(orderId: number, data: Partial<CreateOrderParams>) {
+    try {
+      const response = await this.api.put(`/orders/${orderId}`, data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || "An error occurred");
+    }
+  }
 }
 
 export const OrderService = new ApiService();

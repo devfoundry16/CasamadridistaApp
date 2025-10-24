@@ -63,7 +63,11 @@ export const WalletScreenDetail: React.FC = () => {
   };
 
   if (loading && !refreshing) {
-    return <Spinner content="Loading wallet" />;
+    return (
+      <View style={styles.spinnerContainer}>
+        <Spinner content="Loading wallet" />
+      </View>
+    );
   }
 
   if (error && !refreshing) {
@@ -136,6 +140,12 @@ export const WalletScreenDetail: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.deepDarkGray,
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: Colors.deepDarkGray,
   },
   centered: {

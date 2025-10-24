@@ -36,10 +36,6 @@ export default function ShopScreen() {
     }
   };
 
-  if (loading) {
-    return <Spinner content="Loading Store" />;
-  }
-
   const renderProduct = ({ item }: { item: Product }) => (
     <TouchableOpacity
       style={styles.productCard}
@@ -80,11 +76,7 @@ export default function ShopScreen() {
           <Text style={styles.headerSubtitle}>CasaMadridista Shop</Text>
         </View>
       </View>
-      {loading && (
-        <Text style={{ color: colors.textWhite, textAlign: "center" }}>
-          Loading...
-        </Text>
-      )}
+      {loading && <Spinner content="Loading Store" />}
       <FlatList
         data={products}
         renderItem={renderProduct}
