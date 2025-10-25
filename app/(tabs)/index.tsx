@@ -28,6 +28,8 @@ export default function HomeScreen() {
   const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
+  const [live, setLive] = useState<boolean>(false);
+  const [liveMatch, setLiveMatch] = useState<Match>();
 
   const nextMatches = teamInfoList.find(
     (p) => p.team.id == RealMadridId
@@ -112,11 +114,20 @@ export default function HomeScreen() {
       console.error("[App] Failed to load initial data:", error);
     }
   };
+
+  const checkLiveMatch = async () => {
+    const liveMatch = await fetchLiveMatchData(RealMadridId);
+    setLiveMatch(liveMatch);
+    console.log("Live match data:", liveMatch);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       loadInitialData();
     };
     fetchData();
+    // const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
+    // return () => clearInterval(timer);
   }, []);
 
   return (
@@ -156,14 +167,27 @@ export default function HomeScreen() {
           <View style={styles.content}>
             <View style={styles.nextMatchSection}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Upcoming</Text>
-                {nextMatch && (
-                  <UpcomingForm
-                    nextMatch={nextMatch}
-                    homeTeamLastMatches={homeTeamLastMatches}
-                    awayTeamLastMatches={awayTeamLastMatches}
-                  />
-                )}
+                <Text style={styles.sectionTitle}>
+                  {liveMatch
+                    ? liveMatch.fixture.status.long +
+                      ` ${liveMatch.fixture.status.elapsed}' Elapsed`
+                    : "Upcoming"}
+                </Text>
+                {liveMatch
+                  ? nextMatch && (
+                      <UpcomingForm
+                        nextMatch={liveMatch}
+                        homeTeamLastMatches={homeTeamLastMatches}
+                        awayTeamLastMatches={awayTeamLastMatches}
+                      />
+                    )
+                  : nextMatch && (
+                      <UpcomingForm
+                        nextMatch={nextMatch}
+                        homeTeamLastMatches={homeTeamLastMatches}
+                        awayTeamLastMatches={awayTeamLastMatches}
+                      />
+                    )}
               </View>
             </View>
           </View>

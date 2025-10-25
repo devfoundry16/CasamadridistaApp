@@ -7,6 +7,7 @@ import { Circle } from "react-native-progress";
 
 import TeamForm from "./TeamForm";
 interface UpcomingProps {
+  liveMatch?: Match;
   nextMatch: Match;
   homeTeamLastMatches: Match[];
   awayTeamLastMatches: Match[];
@@ -76,9 +77,11 @@ export default function UpcomingForm({
         {nextMatch?.league.name} {nextMatch?.league.season}-
         {nextMatch?.league.season + 1} | {nextMatch?.league.round}
       </Text>
-      <TouchableOpacity onPress={() => router.push(`/venue/${nextMatch?.fixture.venue.id}`)}>
+      <TouchableOpacity
+        onPress={() => router.push(`/venue/${nextMatch?.fixture.venue.id}`)}
+      >
         <Text style={styles.venueText}>
-          {nextMatch?.fixture.venue.name} | {" "}
+          {nextMatch?.fixture.venue.name} |{" "}
           {new Date(nextMatch?.fixture.date).toLocaleDateString("en-US", {
             day: "2-digit",
             month: "short",
@@ -86,7 +89,7 @@ export default function UpcomingForm({
             hour: "2-digit",
             minute: "2-digit",
           })}
-      </Text>
+        </Text>
       </TouchableOpacity>
 
       {/* Teams */}
@@ -101,14 +104,23 @@ export default function UpcomingForm({
             style={styles.logo}
           />
           <Text style={styles.teamName}>{nextMatch?.teams.home.name}</Text>
-
           <TeamForm
             matches={homeTeamLastMatches ?? []}
             nextMatchTeamId={nextMatch?.teams.home.id}
             isHome
           />
         </TouchableOpacity>
-
+        {nextMatch.goals.home != null && (
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={styles.teamScore}>
+              {nextMatch.goals.home == null ? "0" : nextMatch.goals.home}
+            </Text>
+            <Text style={styles.teamScore}>:</Text>
+            <Text style={styles.teamScore}>
+              {nextMatch.goals.away == null ? "2" : nextMatch.goals.away}
+            </Text>
+          </View>
+        )}
         {/* Away Team */}
         <TouchableOpacity
           style={styles.teamBox}
@@ -127,22 +139,22 @@ export default function UpcomingForm({
       </View>
 
       {/* Countdown */}
-      <View style={styles.timerRow}>
-        {Object.entries(timeLeft).map(([label, value], i) => (
-          <View key={i}>
-            {/* <View style={styles.timerInner}>
-              <Text style={styles.timerValue}>{value}</Text>
-              <Text style={styles.timerLabel}>{label}</Text>
-            </View> */}
-            <TimeCircle
-              label={label.toUpperCase()}
-              value={value}
-              max={maxValues[i]}
-              color="#4CAF50"
-            />
-          </View>
-        ))}
-      </View>
+      {nextMatch.goals.home == null && (
+        <View style={styles.timerRow}>
+          {Object.entries(timeLeft).map(([label, value], i) => (
+            <View key={i}>
+              {((i < 3 && value != "00") || i == 3) && (
+                <TimeCircle
+                  label={label.toUpperCase()}
+                  value={value}
+                  max={maxValues[i]}
+                  color="#4CAF50"
+                />
+              )}
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Prediction */}
       <Text style={styles.prediction}>
@@ -225,6 +237,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     marginBottom: 6,
+  },
+  teamScore: {
+    color: Colors.textWhite,
+    fontSize: 24,
+    fontWeight: "700",
+    marginHorizontal: 6,
   },
   formRow: {
     flexDirection: "row",
