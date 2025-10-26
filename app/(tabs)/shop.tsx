@@ -26,7 +26,8 @@ export default function ShopScreen() {
   const getAllProducts = async () => {
     try {
       ProductService.getProducts().then((data) => {
-        setProducts(data);
+        const filtered = data.filter((p) => p.type !== "variable-subscription");
+        setProducts(filtered);
         setLoading(false);
       });
     } catch (error) {

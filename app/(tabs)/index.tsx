@@ -28,7 +28,6 @@ export default function HomeScreen() {
   const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
-  const [live, setLive] = useState<boolean>(false);
   const [liveMatch, setLiveMatch] = useState<Match>();
 
   const nextMatches = teamInfoList.find(
@@ -44,6 +43,8 @@ export default function HomeScreen() {
   const [strengthSectionY, setStrengthSectionY] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
+
+  const live = liveMatch == undefined ? false : true;
 
   const handleStrengthSectionLayout = (event: any) => {
     const { y } = event.nativeEvent.layout;
@@ -101,7 +102,7 @@ export default function HomeScreen() {
   const loadInitialData = async () => {
     try {
       console.log("---------Home Page---------");
-      if (teamInfoList.length) fetchProfileData(RealMadridId);
+      if (teamInfoList.length && !liveMatch) fetchProfileData(RealMadridId);
       MatchService.fetchNextMatch(RealMadridId).then((result) => {
         MatchService.fetchLastMatches(result.teams.home.id).then((data) => {
           setHomeTeamLastMatches(data);
@@ -118,17 +119,17 @@ export default function HomeScreen() {
   const checkLiveMatch = async () => {
     const liveMatch = await fetchLiveMatchData(RealMadridId);
     setLiveMatch(liveMatch);
-    console.log("Live match data:", liveMatch);
   };
 
   useEffect(() => {
+    console.log("useEffect home screen");
     const fetchData = async () => {
       loadInitialData();
     };
     fetchData();
-    // const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
-    // return () => clearInterval(timer);
-  }, []);
+    const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
+    return () => clearInterval(timer);
+  }, [live]);
 
   return (
     <ScrollView
@@ -170,7 +171,10 @@ export default function HomeScreen() {
                 <Text style={styles.sectionTitle}>
                   {liveMatch
                     ? liveMatch.fixture.status.long +
-                      ` ${liveMatch.fixture.status.elapsed}' Elapsed`
+                      ` ${liveMatch.fixture.status.elapsed}' Elapsed` +
+                      (liveMatch.fixture.status.extra != null
+                        ? ` Extra Time ${liveMatch.fixture.status.extra}'`
+                        : "")
                     : "Upcoming"}
                 </Text>
                 {liveMatch

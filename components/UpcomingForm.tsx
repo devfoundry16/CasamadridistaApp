@@ -45,6 +45,7 @@ export default function UpcomingForm({
       seconds: pad(seconds),
     };
   };
+  const live = nextMatch.goals.home == null ? false : true;
   useEffect(() => {
     const calculateTimeLeft = async () => {
       const matchDateString: any = nextMatch?.fixture.date;
@@ -66,9 +67,15 @@ export default function UpcomingForm({
         setTimeLeft({ days: "0", hours: "0", minutes: "0", seconds: "0" });
       }
     };
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(timer);
+    if (!live) {
+      console.log(
+        "Calculating time left for match on ",
+        nextMatch?.fixture.date
+      );
+      calculateTimeLeft();
+      const timer = setInterval(calculateTimeLeft, 1000);
+      return () => clearInterval(timer);
+    }
   }, [nextMatch]);
   return (
     <View style={styles.container}>
@@ -110,14 +117,14 @@ export default function UpcomingForm({
             isHome
           />
         </TouchableOpacity>
-        {nextMatch.goals.home != null && (
+        {live && (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={styles.teamScore}>
               {nextMatch.goals.home == null ? "0" : nextMatch.goals.home}
             </Text>
             <Text style={styles.teamScore}>:</Text>
             <Text style={styles.teamScore}>
-              {nextMatch.goals.away == null ? "2" : nextMatch.goals.away}
+              {nextMatch.goals.away == null ? "0" : nextMatch.goals.away}
             </Text>
           </View>
         )}
@@ -139,7 +146,7 @@ export default function UpcomingForm({
       </View>
 
       {/* Countdown */}
-      {nextMatch.goals.home == null && (
+      {!live && (
         <View style={styles.timerRow}>
           {Object.entries(timeLeft).map(([label, value], i) => (
             <View key={i}>

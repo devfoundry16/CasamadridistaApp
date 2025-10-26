@@ -55,8 +55,18 @@ class ApiService {
 
     return response.json();
   }
-  async getProducts(): Promise<any[]> {
+  async getAllProducts(): Promise<any[]> {
     return this.fetchWithAuth("/v3/products", {
+      method: "GET",
+    });
+  }
+  async getSubscriptionProducts(): Promise<any[]> {
+    return this.fetchWithAuth("/v3/products?type=variable-subscription", {
+      method: "GET",
+    });
+  }
+  async getProducts(): Promise<any[]> {
+    return this.fetchWithAuth("/v3/products?status=publish&virtual=false", {
       method: "GET",
     });
   }
