@@ -2,6 +2,7 @@ import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
+import { useOrder } from "@/hooks/useOrder";
 import { useStripePay } from "@/hooks/useStripePay";
 
 import { OrderStatus } from "@/types/user/order";
@@ -19,7 +20,8 @@ import {
 
 export default function CheckoutScreen() {
   const { items, totalPrice, clearCart } = useCart();
-  const { user, addOrder, updateOrder } = useAuth();
+  const { user } = useAuth();
+  const { addOrder, updateOrder } = useOrder();
   const billingAddress = user?.billing;
   const shippingAddress = user?.shipping;
   const [name, setName] = useState(user?.name);
@@ -39,6 +41,7 @@ export default function CheckoutScreen() {
       return;
     }
     if (status == false) {
+      // place an order
       const payload = {
         payment_method: "stripe", // or 'paypal', etc.
         payment_method_title: "Link",
@@ -71,17 +74,25 @@ export default function CheckoutScreen() {
         //pay with stripe
       });
     } else {
+      // continue payment
       try {
         if (orderId) {
           payWithStripe(orderId)
-            .then((intent) => {
+            .then((res) => {
               updateOrder(orderId, {
                 payment_method: "stripe",
                 payment_method_title: "Stripe",
                 set_paid: true,
                 status: OrderStatus.PROCESSING,
                 meta_data: [
-                  { key: "_stripe_payment_intent", value: intent.id },
+                  {
+                    key: "_stripe_payment_intent",
+                    value: res?.paymentIntent,
+                  },
+                  {
+                    key: "_stripe_customer_id",
+                    value: res?.customer,
+                  },
                 ],
               }).then(() => {
                 Alert.alert(

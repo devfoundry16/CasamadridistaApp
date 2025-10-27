@@ -34,6 +34,26 @@ class ApiService {
     } catch (error: any) {}
   }
 
+  async createSubscriptionOrder(order_id: number) {
+    try {
+      const response = await this.api.post(`/orders/${order_id}/subscriptions`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || "An error occurred");
+    }
+  }
+
+  async getSubscriptionOrders(customer_id: number) {
+    try {
+      const response = await this.api.get(
+        `/subscriptions?customer=${customer_id}`
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || "An error occurred");
+    }
+  }
+
   async getOrders(customerId: number) {
     try {
       const response = await this.api.get("/orders", {

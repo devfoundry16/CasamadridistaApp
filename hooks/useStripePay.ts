@@ -19,7 +19,22 @@ export const useStripePay = () => {
   const handlePayment = async (orderId: number) => {
     // set a ref immediately so confirmHandler (called by Stripe) can read the up-to-date id
     orderIdRef.current = orderId;
-    const body = { amount: totalPrice, orderId: orderId };
+    const body = {
+      amount: totalPrice,
+      orderId: orderId,
+      user: {
+        email: user?.email,
+        name: user?.name,
+        address: {
+          city: billingAddress?.city,
+          country: billingAddress?.country,
+          state: billingAddress?.state,
+          postal_code: billingAddress?.postcode,
+          line1: billingAddress?.address_1,
+          line2: billingAddress?.address_2,
+        },
+      },
+    };
     const response = await fetch(`${API_URL}/create-payment-intent`, {
       method: "POST",
       headers: {
@@ -28,10 +43,18 @@ export const useStripePay = () => {
       body: JSON.stringify(body),
     });
     // Call the `intentCreationCallback` with your server response's client secret or error.
-    const { client_secret, intent, error } = await response.json();
-    if (!error && client_secret) {
+    const { paymentIntent, ephemeralKey, customer, error } =
+      await response.json();
+    if (!error && paymentIntent) {
       const { error: initError } = await initPaymentSheet({
-        paymentIntentClientSecret: client_secret,
+        paymentIntentClientSecret: paymentIntent,
+        applePay: {
+          merchantCountryCode: "DE",
+        },
+        googlePay: {
+          merchantCountryCode: "DE",
+          testEnv: true,
+        },
         merchantDisplayName: "My Store",
         defaultBillingDetails: {
           email: billingAddress?.email,
@@ -53,34 +76,13 @@ export const useStripePay = () => {
       if (!initError) {
         const { error: paymentError } = await presentPaymentSheet();
         if (!paymentError) {
-          return intent;
+          return { paymentIntent, customer };
         } else {
           throw error;
         }
       }
     }
   };
-  // const { error } = await presentPaymentSheet();
-  // if (error) {
-  //   if (error.code === PaymentSheetError.Canceled) {
-  //     // Customer canceled - you should probably do nothing.
-  //   } else {
-  //     // PaymentSheet encountered an unrecoverable error. You can display the error to the user, log it, and so on.
-  //   }
-  // } else {
-  //   Alert.alert(
-  //     "Payment Successful!",
-  //     `Your order of $${(totalPrice / 100).toFixed(2)} has been confirmed. Thank you for shopping with us!`,
-  //     [
-  //       {
-  //         text: "Continue Shopping",
-  //         onPress: () => {
-  //           router.push("/shop");
-  //         },
-  //       },
-  //     ]
-  //   );
-  // }
   return {
     initPaymentSheet,
     handlePayment,

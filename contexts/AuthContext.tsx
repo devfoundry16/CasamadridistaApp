@@ -1,5 +1,4 @@
 import AuthService from "@/services/AuthService";
-import { OrderService } from "@/services/Shop/OrderService";
 import { Order } from "@/types/user/order";
 import { Address, PaymentMethod, User } from "@/types/user/profile";
 import createContextHook from "@nkzw/create-context-hook";
@@ -65,21 +64,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       setIsLoading(false);
     }
   };
-
-  const addOrder = useCallback(async (order: Partial<Order>) => {
-    return OrderService.createOrder(order);
-  }, []);
-
-  const getOrders = useCallback(async (customer_id: number) => {
-    return OrderService.getOrders(customer_id);
-  }, []);
-
-  const updateOrder = useCallback(
-    async (orderId: number, data: Partial<Order>) => {
-      return OrderService.updateOrder(orderId, data);
-    },
-    []
-  );
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
@@ -198,17 +182,25 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     [paymentMethods]
   );
 
+  const updateWallet = useCallback(
+    async (amount: number) => {
+      const newWallet = wallet + amount;
+      await AsyncStorage.setItem("wallet", JSON.stringify(newWallet));
+      setWallet(newWallet);
+    },
+    [wallet]
+  );
+
   return useMemo(
     () => ({
       user,
       isLoading,
+      wallet,
+      updateWallet,
       login,
       register,
       logout,
       updateUser,
-      addOrder,
-      getOrders,
-      updateOrder,
       updateAddress,
       deleteAddress,
       addPaymentMethod,
@@ -218,13 +210,12 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     [
       user,
       isLoading,
+      wallet,
+      updateWallet,
       login,
       register,
       logout,
       updateUser,
-      addOrder,
-      getOrders,
-      updateOrder,
       updateAddress,
       deleteAddress,
       addPaymentMethod,

@@ -1,9 +1,10 @@
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOrder } from "@/hooks/useOrder";
 import { router } from "expo-router";
 import { ArrowRight, Calendar, CreditCard, Crown } from "lucide-react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -13,20 +14,32 @@ import {
 } from "react-native";
 
 export default function SubscriptionScreen() {
+  const { getSubscriptionOrders } = useOrder();
   const { user } = useAuth();
+
+  const [subscription, setSubscription] = React.useState<any>(null);
+
+  const loadSubscription = async () => {
+    const res = await getSubscriptionOrders(user?.id as any);
+    setSubscription(res);
+  };
+
+  useEffect(() => {
+    loadSubscription();
+  }, []);
 
   return (
     <>
       <HeaderStack title="My Subscription" />
       <ScrollView style={styles.container}>
-        {user?.subscription ? (
+        {subscription ? (
           <>
             <View style={styles.subscriptionCard}>
               <View style={styles.iconContainer}>
                 <Crown size={48} color={Colors.accent} />
               </View>
-              <Text style={styles.planName}>{user.subscription.plan}</Text>
-              <Text style={styles.planType}>{user.subscription.type}</Text>
+              {/* <Text style={styles.planName}>{subscription.plan}</Text>
+              <Text style={styles.planType}>{subscription.type}</Text> */}
 
               <View style={styles.dateContainer}>
                 <View style={styles.dateItem}>
@@ -34,7 +47,7 @@ export default function SubscriptionScreen() {
                   <View style={styles.dateInfo}>
                     <Text style={styles.dateLabel}>Start Date</Text>
                     <Text style={styles.dateValue}>
-                      {user.subscription.startDate}
+                      {subscription.start_date_gmt}
                     </Text>
                   </View>
                 </View>
@@ -43,7 +56,7 @@ export default function SubscriptionScreen() {
                   <View style={styles.dateInfo}>
                     <Text style={styles.dateLabel}>End Date</Text>
                     <Text style={styles.dateValue}>
-                      {user.subscription.endDate}
+                      {subscription.end_date_gmt}
                     </Text>
                   </View>
                 </View>
