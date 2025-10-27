@@ -1,6 +1,8 @@
 import HeaderStack from "@/components/HeaderStack";
+import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOrder } from "@/hooks/useOrder";
 import { Order } from "@/types/user/order";
 import {
   CheckCircle,
@@ -19,12 +21,16 @@ import {
 } from "react-native";
 
 export default function OrdersScreen() {
-  const { user, getOrders } = useAuth();
+  const { user } = useAuth();
+  const { getOrders } = useOrder();
   const [orders, setOrders] = React.useState<Order[]>([]);
+  const [loading, setLoading] = React.useState(false);
 
   const loadOrders = async () => {
+    setLoading(true);
     const res = await getOrders(user?.id as any);
     setOrders(res);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -52,6 +58,15 @@ export default function OrdersScreen() {
         return Colors.accent;
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.spinnerContainer}>
+        <HeaderStack title="Orders" />
+        <Spinner content="Loading orders" />
+      </View>
+    );
+  }
 
   return (
     <>
@@ -121,6 +136,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#2A2A2A",
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.deepDarkGray,
   },
   emptyState: {
     flex: 1,

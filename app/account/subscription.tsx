@@ -1,10 +1,12 @@
 import HeaderStack from "@/components/HeaderStack";
+import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrder } from "@/hooks/useOrder";
+import { formatDate } from "@/utils/helper";
 import { router } from "expo-router";
 import { ArrowRight, Calendar, CreditCard, Crown } from "lucide-react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -16,96 +18,119 @@ import {
 export default function SubscriptionScreen() {
   const { getSubscriptionOrders } = useOrder();
   const { user } = useAuth();
+  const [subscriptions, setSubscriptions] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const [subscription, setSubscription] = React.useState<any>(null);
-
-  const loadSubscription = async () => {
+  const loadSubscriptions = async () => {
+    setLoading(true);
     const res = await getSubscriptionOrders(user?.id as any);
-    setSubscription(res);
+    setSubscriptions(res);
+    setLoading(false);
   };
 
   useEffect(() => {
-    loadSubscription();
+    loadSubscriptions();
   }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.spinnerContainer}>
+        <HeaderStack title="Subscription" />
+        <Spinner content="Loading subscription" />
+      </View>
+    );
+  }
 
   return (
     <>
       <HeaderStack title="My Subscription" />
       <ScrollView style={styles.container}>
-        {subscription ? (
-          <>
-            <View style={styles.subscriptionCard}>
-              <View style={styles.iconContainer}>
-                <Crown size={48} color={Colors.accent} />
-              </View>
-              {/* <Text style={styles.planName}>{subscription.plan}</Text>
-              <Text style={styles.planType}>{subscription.type}</Text> */}
+        {subscriptions?.length ? (
+          subscriptions.map((subscription: any) => {
+            return (
+              <View key={subscription.id}>
+                <View style={styles.subscriptionCard}>
+                  <View style={styles.iconContainer}>
+                    <Crown size={48} color={Colors.accent} />
+                  </View>
+                  <Text style={styles.planName}>
+                    {subscription.line_items[0].name}
+                  </Text>
+                  <Text style={styles.planType}>
+                    {subscription.line_items[0].meta_data[0].value}
+                  </Text>
 
-              <View style={styles.dateContainer}>
-                <View style={styles.dateItem}>
-                  <Calendar size={20} color={Colors.accent} />
-                  <View style={styles.dateInfo}>
-                    <Text style={styles.dateLabel}>Start Date</Text>
-                    <Text style={styles.dateValue}>
-                      {subscription.start_date_gmt}
-                    </Text>
+                  <View style={styles.dateContainer}>
+                    <View style={styles.dateItem}>
+                      <Calendar size={20} color={Colors.accent} />
+                      <View style={styles.dateInfo}>
+                        <Text style={styles.dateLabel}>Start Date</Text>
+                        <Text style={styles.dateValue}>
+                          {formatDate(subscription.start_date_gmt)}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.dateItem}>
+                      <Calendar size={20} color={Colors.accent} />
+                      <View style={styles.dateInfo}>
+                        <Text style={styles.dateLabel}>End Date</Text>
+                        <Text style={styles.dateValue}>
+                          {subscription.end_date_gmt
+                            ? formatDate(subscription.end_date_gmt)
+                            : "N/A"}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
-                <View style={styles.dateItem}>
-                  <Calendar size={20} color={Colors.accent} />
-                  <View style={styles.dateInfo}>
-                    <Text style={styles.dateLabel}>End Date</Text>
-                    <Text style={styles.dateValue}>
-                      {subscription.end_date_gmt}
+
+                <View style={styles.actionsSection}>
+                  <TouchableOpacity style={styles.actionButton}>
+                    <CreditCard size={24} color={Colors.accent} />
+                    <Text style={styles.actionButtonText}>
+                      Update Payment Method
                     </Text>
+                    <ArrowRight size={20} color={Colors.textWhite} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => router.push("/memberships/packages")}
+                  >
+                    <Crown size={24} color={Colors.accent} />
+                    <Text style={styles.actionButtonText}>Upgrade Plan</Text>
+                    <ArrowRight size={20} color={Colors.textWhite} />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.benefitsSection}>
+                  <Text style={styles.sectionTitle}>Your Benefits</Text>
+                  <View style={styles.benefitItem}>
+                    <Text style={styles.benefitBullet}>✓</Text>
+                    <Text style={styles.benefitText}>
+                      Exclusive access to member events
+                    </Text>
+                  </View>
+                  <View style={styles.benefitItem}>
+                    <Text style={styles.benefitBullet}>✓</Text>
+                    <Text style={styles.benefitText}>
+                      Priority ticket booking
+                    </Text>
+                  </View>
+                  <View style={styles.benefitItem}>
+                    <Text style={styles.benefitBullet}>✓</Text>
+                    <Text style={styles.benefitText}>
+                      Official merchandise discounts
+                    </Text>
+                  </View>
+                  <View style={styles.benefitItem}>
+                    <Text style={styles.benefitBullet}>✓</Text>
+                    <Text style={styles.benefitText}>Monthly newsletter</Text>
                   </View>
                 </View>
               </View>
-            </View>
-
-            <View style={styles.actionsSection}>
-              <TouchableOpacity style={styles.actionButton}>
-                <CreditCard size={24} color={Colors.accent} />
-                <Text style={styles.actionButtonText}>
-                  Update Payment Method
-                </Text>
-                <ArrowRight size={20} color={Colors.textWhite} />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => router.push("/memberships/packages")}
-              >
-                <Crown size={24} color={Colors.accent} />
-                <Text style={styles.actionButtonText}>Upgrade Plan</Text>
-                <ArrowRight size={20} color={Colors.textWhite} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.benefitsSection}>
-              <Text style={styles.sectionTitle}>Your Benefits</Text>
-              <View style={styles.benefitItem}>
-                <Text style={styles.benefitBullet}>✓</Text>
-                <Text style={styles.benefitText}>
-                  Exclusive access to member events
-                </Text>
-              </View>
-              <View style={styles.benefitItem}>
-                <Text style={styles.benefitBullet}>✓</Text>
-                <Text style={styles.benefitText}>Priority ticket booking</Text>
-              </View>
-              <View style={styles.benefitItem}>
-                <Text style={styles.benefitBullet}>✓</Text>
-                <Text style={styles.benefitText}>
-                  Official merchandise discounts
-                </Text>
-              </View>
-              <View style={styles.benefitItem}>
-                <Text style={styles.benefitBullet}>✓</Text>
-                <Text style={styles.benefitText}>Monthly newsletter</Text>
-              </View>
-            </View>
-          </>
+            );
+          })
         ) : (
           <View style={styles.noSubscription}>
             <Crown size={64} color={Colors.darkGray} />
@@ -132,6 +157,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#2A2A2A",
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.deepDarkGray,
   },
   subscriptionCard: {
     margin: 24,

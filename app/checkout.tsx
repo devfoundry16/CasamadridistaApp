@@ -21,7 +21,7 @@ import {
 export default function CheckoutScreen() {
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
-  const { addOrder, updateOrder } = useOrder();
+  const { addOrder, updateOrder, createSubscriptionOrder } = useOrder();
   const billingAddress = user?.billing;
   const shippingAddress = user?.shipping;
   const [name, setName] = useState(user?.name);
@@ -107,6 +107,11 @@ export default function CheckoutScreen() {
                 "There was an issue processing your payment."
               );
             });
+          createSubscriptionOrder(orderId).then(() => {
+            clearCart();
+            setStatus(false);
+            setOrderId(null);
+          });
         }
       } catch (error) {
         Alert.alert("Payment Failed", "There was an issue with your payment.");
