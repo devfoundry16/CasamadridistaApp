@@ -1,5 +1,7 @@
 import AuthService from "@/services/AuthService";
-import { Address, Order, PaymentMethod, User } from "@/types/user/profile";
+import { OrderService } from "@/services/Shop/OrderService";
+import { Order } from "@/types/user/order";
+import { Address, PaymentMethod, User } from "@/types/user/profile";
 import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -37,12 +39,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const [isLoading, setIsLoading] = useState(false);
   const [wallet, setWallet] = useState(0);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [billingAddress, setBillingAddress] = useState<Address | null>(
-    initialBillingAddress
-  );
-  const [shippingAddress, setShippingAddress] = useState<Address | null>(
-    initialShippingAddress
-  );
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
   useEffect(() => {
@@ -52,30 +48,38 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const loadUserData = async () => {
     try {
       const userData = await AsyncStorage.getItem("user");
-      const walletData = await AsyncStorage.getItem("wallet");
-      const ordersData = await AsyncStorage.getItem("orders");
-      // const billingAddressData =
-      //   await AsyncStorage.getItem("billingAddressData");
-      // const shippingAddressData = await AsyncStorage.getItem(
-      //   "shippingAddressData"
-      // );
-      const paymentMethodsData = await AsyncStorage.getItem("paymentMethods");
-
       if (userData) {
         setUser(JSON.parse(userData));
       }
-      if (walletData) setWallet(JSON.parse(walletData));
-      if (ordersData) setOrders(JSON.parse(ordersData));
-      // if (billingAddressData) setBillingAddress(JSON.parse(billingAddressData));
-      // if (shippingAddressData)
-      //   setShippingAddress(JSON.parse(shippingAddressData));
-      if (paymentMethodsData) setPaymentMethods(JSON.parse(paymentMethodsData));
+      // const walletData = await AsyncStorage.getItem("wallet");
+      // const ordersData = await AsyncStorage.getItem("orders");
+      // const paymentMethodsData = await AsyncStorage.getItem("paymentMethods");
+
+      // if (walletData) setWallet(JSON.parse(walletData));
+      // if (ordersData) setOrders(JSON.parse(ordersData));
+      // if (paymentMethodsData) setPaymentMethods(JSON.parse(paymentMethodsData));
     } catch (error) {
       console.error("Error loading user data:", error);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const addOrder = useCallback(async (order: Partial<Order>) => {
+    return OrderService.createOrder(order);
+  }, []);
+
+  const getOrders = useCallback(async (customer_id: number) => {
+    return OrderService.getOrders(customer_id);
+  }, []);
+
+  const updateOrder = useCallback(
+    async (orderId: number, data: Partial<Order>) => {
+      return OrderService.updateOrder(orderId, data);
+    },
+    []
+  );
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
@@ -87,6 +91,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       })
       .catch((error) => {
         Alert.alert("Login error", error.message);
+        setIsLoading(false);
       });
   }, []);
 
@@ -99,6 +104,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         setUser(newUser);
       })
       .catch((error) => {
+        setIsLoading(false);
         Alert.alert("Registration error", error.message);
       });
   }, []);
@@ -113,26 +119,15 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
           setUser(updatedUser);
         })
         .catch((error) => {
+          setIsLoading(false);
           Alert.alert("Update error", error.message);
         });
     },
     [user]
   );
   const logout = useCallback(async () => {
-    await AsyncStorage.multiRemove([
-      "user",
-      "wallet",
-      "orders",
-      "billingAddressData",
-      "shippingAddressData",
-      "paymentMethods",
-    ]);
+    await AsyncStorage.multiRemove(["user"]);
     setUser(null);
-    setWallet(0);
-    setOrders([]);
-    setBillingAddress(null);
-    setShippingAddress(null);
-    setPaymentMethods([]);
   }, []);
   const updateAvatar = useCallback(
     async (imageUri: string, filename: string) => {
@@ -148,6 +143,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
         setUser(updatedUser);
       } catch (error) {
+        setIsLoading(false);
         console.error("Error uploading avatar:", error);
         Alert.alert(
           "Upload Error",
@@ -157,61 +153,32 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     },
     [user]
   );
-  const updateWallet = useCallback(
-    async (amount: number) => {
-      const newWallet = wallet + amount;
-      await AsyncStorage.setItem("wallet", JSON.stringify(newWallet));
-      setWallet(newWallet);
-    },
-    [wallet]
-  );
-
-  const addOrder = useCallback(
-    async (order: Order) => {
-      const newOrders = [...orders, order];
-      await AsyncStorage.setItem("orders", JSON.stringify(newOrders));
-      setOrders(newOrders);
-    },
-    [orders]
-  );
 
   const handleAddress = async (address: Address) => {
-    const response = await AuthService.updateAddress(address);
-    let newAddress: Address;
-    if (address.type == "billing") {
-      newAddress = { ...response.billing, type: "billing" };
-      setBillingAddress(newAddress);
-    } else {
-      newAddress = { ...response.shipping, type: "shipping" };
-      setShippingAddress(newAddress);
-    }
+    const updatedUser = await AuthService.updateAddress(address);
+    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
   };
-  const updateAddress = useCallback(
-    async (address: Address) => {
-      await handleAddress(address);
-    },
-    [billingAddress, shippingAddress]
-  );
-  const deleteAddress = useCallback(
-    async (type: "shipping" | "billing") => {
-      let newAddress: Address = {
-        type: type,
-        email: "",
-        first_name: "",
-        last_name: "",
-        company: "",
-        address_1: "",
-        address_2: "",
-        city: "",
-        state: "",
-        country: "",
-        postcode: "",
-        phone: "",
-      };
-      await handleAddress(newAddress);
-    },
-    [billingAddress, shippingAddress]
-  );
+  const updateAddress = useCallback(async (address: Address) => {
+    await handleAddress(address);
+  }, []);
+  const deleteAddress = useCallback(async (type: "shipping" | "billing") => {
+    let newAddress: Address = {
+      type: type,
+      email: "",
+      first_name: "",
+      last_name: "",
+      company: "",
+      address_1: "",
+      address_2: "",
+      city: "",
+      state: "",
+      country: "",
+      postcode: "",
+      phone: "",
+    };
+    await handleAddress(newAddress);
+  }, []);
 
   const addPaymentMethod = useCallback(
     async (method: PaymentMethod) => {
@@ -235,17 +202,13 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     () => ({
       user,
       isLoading,
-      wallet,
-      orders,
-      billingAddress,
-      shippingAddress,
-      paymentMethods,
       login,
       register,
       logout,
       updateUser,
-      updateWallet,
       addOrder,
+      getOrders,
+      updateOrder,
       updateAddress,
       deleteAddress,
       addPaymentMethod,
@@ -255,17 +218,13 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     [
       user,
       isLoading,
-      wallet,
-      orders,
-      billingAddress,
-      shippingAddress,
-      paymentMethods,
       login,
       register,
       logout,
       updateUser,
-      updateWallet,
       addOrder,
+      getOrders,
+      updateOrder,
       updateAddress,
       deleteAddress,
       addPaymentMethod,

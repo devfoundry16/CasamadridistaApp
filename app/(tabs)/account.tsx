@@ -27,7 +27,7 @@ import {
 } from "react-native";
 
 export default function AccountScreen() {
-  const { user, wallet, orders, updateAvatar, logout, isLoading } = useAuth(); // Added accessToken and updateUser
+  const { user, updateAvatar, logout, isLoading } = useAuth(); // Added accessToken and updateUser
   const [isLogin, setIsLogin] = useState(true);
 
   const handleChangePhoto = async () => {
@@ -139,7 +139,6 @@ export default function AccountScreen() {
           <ShoppingBag size={24} color={Colors.accent} />
           <View style={styles.menuItemContent}>
             <Text style={styles.menuItemText}>Orders</Text>
-            <Text style={styles.menuItemValue}>{orders.length} orders</Text>
           </View>
         </TouchableOpacity>
 

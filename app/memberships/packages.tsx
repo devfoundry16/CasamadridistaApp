@@ -112,7 +112,7 @@ export default function PackagesScreen() {
 
     console.log("productId: ", product_id, "variationId:", variation_id);
 
-    router.push("/cart");
+    router.push("/checkout");
   };
 
   return (

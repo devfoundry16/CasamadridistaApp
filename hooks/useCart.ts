@@ -112,7 +112,7 @@ export const [CartProvider, useCart] = createContextHook(() => {
       body.quantity,
       body.variation
     );
-    console.log("Successfully Added, remaining item:", data.items);
+    console.log("Successfully Added, remaining item:", data.items.length);
     return data.items;
   };
   const removeItemFromCart = async (productId: number) => {

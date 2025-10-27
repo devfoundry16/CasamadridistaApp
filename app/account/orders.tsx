@@ -1,18 +1,41 @@
-import HeaderStack from '@/components/HeaderStack';
-import Colors from '@/constants/colors';
-import { useAuth } from '@/contexts/AuthContext';
-import { CheckCircle, Clock, Package, ShoppingBag, XCircle } from 'lucide-react-native';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import HeaderStack from "@/components/HeaderStack";
+import Colors from "@/constants/colors";
+import { useAuth } from "@/contexts/AuthContext";
+import { Order } from "@/types/user/order";
+import {
+  CheckCircle,
+  Clock,
+  Package,
+  ShoppingBag,
+  XCircle,
+} from "lucide-react-native";
+import React, { useEffect } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function OrdersScreen() {
-  const { orders } = useAuth();
+  const { user, getOrders } = useAuth();
+  const [orders, setOrders] = React.useState<Order[]>([]);
+
+  const loadOrders = async () => {
+    const res = await getOrders(user?.id as any);
+    setOrders(res);
+  };
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return <CheckCircle size={20} color={Colors.success} />;
-      case 'cancelled':
+      case "cancelled":
         return <XCircle size={20} color={Colors.error} />;
       default:
         return <Clock size={20} color={Colors.accent} />;
@@ -21,9 +44,9 @@ export default function OrdersScreen() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return Colors.success;
-      case 'cancelled':
+      case "cancelled":
         return Colors.error;
       default:
         return Colors.accent;
@@ -52,26 +75,38 @@ export default function OrdersScreen() {
                   </View>
                   <View style={styles.orderInfo}>
                     <Text style={styles.orderId}>Order #{order.id}</Text>
-                    <Text style={styles.orderDate}>{order.date}</Text>
+                    <Text style={styles.orderDate}>{order.created_at}</Text>
                   </View>
-                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) + '20' }]}>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      { backgroundColor: getStatusColor(order.status) + "20" },
+                    ]}
+                  >
                     {getStatusIcon(order.status)}
-                    <Text style={[styles.statusText, { color: getStatusColor(order.status) }]}>
+                    <Text
+                      style={[
+                        styles.statusText,
+                        { color: getStatusColor(order.status) },
+                      ]}
+                    >
                       {order.status}
                     </Text>
                   </View>
                 </View>
                 <View style={styles.orderBody}>
                   <Text style={styles.itemsLabel}>Items:</Text>
-                  {order.items.map((item, index) => (
+                  {order.line_items.map((item, index) => (
                     <Text key={index} style={styles.itemText}>
-                      • {item}
+                      • {item.name}
                     </Text>
                   ))}
                 </View>
                 <View style={styles.orderFooter}>
                   <Text style={styles.totalLabel}>Total:</Text>
-                  <Text style={styles.totalAmount}>${order.total.toFixed(2)}</Text>
+                  <Text style={styles.totalAmount}>
+                    ${Number(order.total).toFixed(2)}
+                  </Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -85,53 +120,53 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: "#2A2A2A",
   },
   emptyState: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 48,
     marginTop: 100,
   },
   emptyText: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.textWhite,
     marginTop: 24,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 16,
-    color: '#CCCCCC',
-    textAlign: 'center',
+    color: "#CCCCCC",
+    textAlign: "center",
   },
   ordersList: {
     padding: 24,
   },
   orderCard: {
-    backgroundColor: '#3A3A3A',
+    backgroundColor: "#3A3A3A",
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#4A4A4A',
+    borderColor: "#4A4A4A",
   },
   orderHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#4A4A4A',
+    borderBottomColor: "#4A4A4A",
   },
   orderIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#2A2A2A',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#2A2A2A",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   orderInfo: {
@@ -139,17 +174,17 @@ const styles = StyleSheet.create({
   },
   orderId: {
     fontSize: 16,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.textWhite,
     marginBottom: 4,
   },
   orderDate: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: "#CCCCCC",
   },
   statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -157,39 +192,39 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '600' as const,
-    textTransform: 'capitalize' as const,
+    fontWeight: "600" as const,
+    textTransform: "capitalize" as const,
   },
   orderBody: {
     marginBottom: 16,
   },
   itemsLabel: {
     fontSize: 14,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.textWhite,
     marginBottom: 8,
   },
   itemText: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: "#CCCCCC",
     marginBottom: 4,
   },
   orderFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#4A4A4A',
+    borderTopColor: "#4A4A4A",
   },
   totalLabel: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: Colors.textWhite,
   },
   totalAmount: {
     fontSize: 24,
-    fontWeight: '700' as const,
+    fontWeight: "700" as const,
     color: Colors.accent,
   },
 });

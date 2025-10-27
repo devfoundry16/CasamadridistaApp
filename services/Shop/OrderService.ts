@@ -1,6 +1,5 @@
-import { CreateOrderParams } from "@/types/user/order";
+import { Order } from "@/types/user/order";
 import axios, { AxiosInstance } from "axios";
-import AuthService from "../AuthService";
 
 class ApiService {
   private api: AxiosInstance;
@@ -28,29 +27,25 @@ class ApiService {
     );
   }
 
-  async createOrder(params: Partial<CreateOrderParams>[]) {
+  async createOrder(params: Partial<Order>) {
     try {
-      const userString = await AuthService.getUserData();
-      const user = userString?.length && JSON.parse(userString);
-      const response = await this.api.post("/orders", {
-        payment_method: "stripe", // or 'paypal', etc.
-        payment_method_title: "Link",
-        set_paid: false, // Let the payment gateway handle the payment
-        customer_id: user.id,
-        billing: user?.billing,
-        shipping: user?.shipping,
-        line_items: params.map((param) => {
-          return {
-            product_id: param.productId, // The ID of your subscription product
-            quantity: param.quantity,
-          };
-        }),
-      });
+      const response = await this.api.post("/orders", params);
       return response.data;
     } catch (error: any) {}
   }
 
-  async updateOrder(orderId: number, data: Partial<CreateOrderParams>) {
+  async getOrders(customerId: number) {
+    try {
+      const response = await this.api.get("/orders", {
+        params: { customer: customerId },
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || "An error occurred");
+    }
+  }
+
+  async updateOrder(orderId: number, data: Partial<Order>) {
     try {
       const response = await this.api.put(`/orders/${orderId}`, data);
       return response.data;

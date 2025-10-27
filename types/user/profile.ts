@@ -46,14 +46,6 @@ export interface PaymentMethod {
   email?: string;
 }
 
-export interface Order {
-  id: string;
-  date: string;
-  items: string[];
-  total: number;
-  status: "pending" | "completed" | "cancelled";
-}
-
 export interface AuthResponse {
   token: string;
   user_email: string;

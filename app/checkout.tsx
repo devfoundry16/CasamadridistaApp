@@ -3,9 +3,9 @@ import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { useStripePay } from "@/hooks/useStripePay";
-import { OrderService } from "@/services/Shop/OrderService";
+
 import { OrderStatus } from "@/types/user/order";
-import { CheckCircle, CreditCard, MapPin, User } from "lucide-react-native";
+import { CheckCircle, User } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -19,13 +19,15 @@ import {
 
 export default function CheckoutScreen() {
   const { items, totalPrice, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, addOrder, updateOrder } = useAuth();
   const billingAddress = user?.billing;
   const shippingAddress = user?.shipping;
   const [name, setName] = useState(user?.name);
   const [email, setEmail] = useState(user?.email);
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState(shippingAddress);
+  const [status, setStatus] = useState<boolean>(false); //false means place an order, true means paying
+  const [orderId, setOrderId] = useState<number | null>(null);
   const { handlePayment: payWithStripe } = useStripePay();
 
   const handlePayment = async () => {
@@ -36,50 +38,69 @@ export default function CheckoutScreen() {
       );
       return;
     }
-    clearCart();
-  };
-
-  const handlePlaceOrder = () => {
-    //create an order
-    const line_items = items.map((item) => {
-      return {
-        productId: item.id,
-        quantity: item.quantity,
+    if (status == false) {
+      const payload = {
+        payment_method: "stripe", // or 'paypal', etc.
+        payment_method_title: "Link",
+        set_paid: false, // Let the payment gateway handle the payment
+        customer_id: user?.id,
+        billing: user?.billing,
+        shipping: user?.shipping,
+        line_items:
+          items.map((item) => {
+            return {
+              product_id: item.id, // The ID of your subscription product
+              quantity: item.quantity,
+            };
+          }) || [],
       };
-    });
-    OrderService.createOrder(line_items).then((data) => {
-      console.log(
-        "order id:",
-        data.id,
-        "status: ",
-        data.status,
-        "customer_id:",
-        data.customer_id,
-        "total: ",
-        data.total
-      );
-      payWithStripe(data.id)
-        .then((intent) => {
-          OrderService.updateOrder(data.id, {
-            payment_method: "stripe",
-            payment_method_title: "Stripe",
-            set_paid: true,
-            status: OrderStatus.PROCESSING,
-            meta_data: [{ key: "_stripe_payment_intent", value: intent.id }],
-          }).then(() => {
-            Alert.alert(
-              "Payment Successful",
-              "Your payment was processed successfully!"
-            );
-          });
-        })
-        .catch((error) => {
-          Alert.alert(
-            "Payment Failed",
-            "There was an issue processing your payment."
-          );
-        });
-    });
+
+      addOrder(payload).then((data) => {
+        console.log(
+          "order id:",
+          data.id,
+          "status: ",
+          data.status,
+          "customer_id:",
+          data.customer_id,
+          "total: ",
+          data.total
+        );
+        setOrderId(data.id);
+        setStatus(data.status === OrderStatus.PENDING ? true : false);
+        //pay with stripe
+      });
+    } else {
+      try {
+        if (orderId) {
+          payWithStripe(orderId)
+            .then((intent) => {
+              updateOrder(orderId, {
+                payment_method: "stripe",
+                payment_method_title: "Stripe",
+                set_paid: true,
+                status: OrderStatus.PROCESSING,
+                meta_data: [
+                  { key: "_stripe_payment_intent", value: intent.id },
+                ],
+              }).then(() => {
+                Alert.alert(
+                  "Payment Successful",
+                  "Your payment was processed successfully!"
+                );
+              });
+            })
+            .catch((error) => {
+              Alert.alert(
+                "Payment Failed",
+                "There was an issue processing your payment."
+              );
+            });
+        }
+      } catch (error) {
+        Alert.alert("Payment Failed", "There was an issue with your payment.");
+      }
+    }
   };
 
   if (items.length === 0) {
@@ -130,42 +151,12 @@ export default function CheckoutScreen() {
               />
             </View>
 
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <MapPin size={20} color={Colors.darkGold} />
-                <Text style={styles.sectionTitle}>Shipping Address</Text>
-              </View>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Street Address, City, State, ZIP Code"
-                placeholderTextColor={Colors.textSecondary}
-                value={
-                  address?.address_1 +
-                  " " +
-                  address?.city +
-                  " " +
-                  address?.state +
-                  " " +
-                  address?.postcode
-                }
-                multiline
-                numberOfLines={3}
-              />
-            </View>
-
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <CreditCard size={20} color={Colors.darkGold} />
-                <Text style={styles.sectionTitle}>Payment Information</Text>
-              </View>
-            </View>
-
             <View style={styles.orderSummary}>
               <Text style={styles.summaryTitle}>Order Summary</Text>
               {items.map((item) => (
                 <View key={item.id} style={styles.summaryItem}>
                   <Text style={styles.summaryItemName}>
-                    {item.name} x {item.quantity}
+                    {item.name} {item.variation[0].value} x {item.quantity}
                   </Text>
                   <Text style={styles.summaryItemPrice}>
                     $
@@ -190,11 +181,13 @@ export default function CheckoutScreen() {
         <View style={styles.footer}>
           <TouchableOpacity
             style={styles.payButton}
-            onPress={handlePlaceOrder}
+            onPress={handlePayment}
             activeOpacity={0.8}
           >
             <CheckCircle size={20} color={Colors.darkBg} />
-            <Text style={styles.payButtonText}>Place an Order</Text>
+            <Text style={styles.payButtonText}>
+              {status ? "Continue Payment" : "Place an Order"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

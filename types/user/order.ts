@@ -12,7 +12,13 @@ export interface Order {
   id: number;
   status: OrderStatus;
   total: string;
+  payment_method: string;
+  payment_method_title: string;
+  set_paid: boolean;
+  variationId: number;
   line_items: Array<{
+    id?: number;
+    name?: string;
     product_id: number;
     quantity: number;
     variation?: Array<{
@@ -20,22 +26,13 @@ export interface Order {
       value: string;
     }>;
   }>;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreateOrderParams {
-  payment_method: string;
-  payment_method_title: string;
-  set_paid: boolean;
-  productId: number;
-  variationId: number;
-  status?: OrderStatus;
-  quantity: number;
-  billing: Omit<Address, "type">;
+  customer_id: number;
+  billing: Partial<Address>;
   shipping?: Partial<Address>;
   variation?: Array<{ attribute: string; value: string }>;
   meta_data?: Array<{ key: string; value: string }>;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface OrderResponse {
