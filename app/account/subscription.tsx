@@ -56,9 +56,9 @@ export default function SubscriptionScreen() {
                   <Text style={styles.planName}>
                     {subscription.line_items[0].name}
                   </Text>
-                  <Text style={styles.planType}>
+                  {/* <Text style={styles.planType}>
                     {subscription.line_items[0].meta_data[0].value}
-                  </Text>
+                  </Text> */}
 
                   <View style={styles.dateContainer}>
                     <View style={styles.dateItem}>
@@ -187,6 +187,7 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: Colors.accent,
     marginBottom: 8,
+    textAlign: "center",
   },
   planType: {
     fontSize: 16,

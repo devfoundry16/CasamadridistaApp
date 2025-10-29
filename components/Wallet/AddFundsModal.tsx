@@ -1,15 +1,15 @@
 // components/AddFundsModal.tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
-    Alert,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface AddFundsModalProps {
   visible: boolean;
@@ -18,10 +18,10 @@ interface AddFundsModalProps {
 }
 
 const PAYMENT_METHODS = [
-  { id: 'stripe', name: 'Credit/Debit Card' },
-  { id: 'paypal', name: 'PayPal' },
-  { id: 'bank_transfer', name: 'Bank Transfer' },
-  { id: 'crypto', name: 'Cryptocurrency' },
+  { id: "stripe", name: "Credit/Debit Card" },
+  { id: "paypal", name: "PayPal" },
+  // { id: 'bank_transfer', name: 'Bank Transfer' },
+  // { id: 'crypto', name: 'Cryptocurrency' },
 ];
 
 export const AddFundsModal: React.FC<AddFundsModalProps> = ({
@@ -29,24 +29,24 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
   onClose,
   onAddFunds,
 }) => {
-  const [amount, setAmount] = useState('');
-  const [selectedMethod, setSelectedMethod] = useState<string>('');
+  const [amount, setAmount] = useState("");
+  const [selectedMethod, setSelectedMethod] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   const handleAddFunds = async () => {
     if (!amount || !selectedMethod) {
-      Alert.alert('Error', 'Please enter amount and select payment method');
+      Alert.alert("Error", "Please enter amount and select payment method");
       return;
     }
 
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount');
+      Alert.alert("Error", "Please enter a valid amount");
       return;
     }
 
     if (numericAmount < 1) {
-      Alert.alert('Error', 'Minimum amount is $1.00');
+      Alert.alert("Error", "Minimum amount is $1.00");
       return;
     }
 
@@ -62,8 +62,8 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
   };
 
   const resetForm = () => {
-    setAmount('');
-    setSelectedMethod('');
+    setAmount("");
+    setSelectedMethod("");
   };
 
   const handleClose = () => {
@@ -101,7 +101,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
               onChangeText={setAmount}
               editable={!loading}
             />
-            
+
             {/* Quick Amount Buttons */}
             <View style={styles.quickAmountsContainer}>
               <Text style={styles.quickAmountsLabel}>Quick Select:</Text>
@@ -111,7 +111,8 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
                     key={quickAmount}
                     style={[
                       styles.quickAmountButton,
-                      amount === quickAmount.toString() && styles.quickAmountButtonSelected,
+                      amount === quickAmount.toString() &&
+                        styles.quickAmountButtonSelected,
                     ]}
                     onPress={() => setAmount(quickAmount.toString())}
                     disabled={loading}
@@ -119,7 +120,8 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
                     <Text
                       style={[
                         styles.quickAmountText,
-                        amount === quickAmount.toString() && styles.quickAmountTextSelected,
+                        amount === quickAmount.toString() &&
+                          styles.quickAmountTextSelected,
                       ]}
                     >
                       ${quickAmount}
@@ -139,7 +141,8 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
                   key={method.id}
                   style={[
                     styles.paymentMethod,
-                    selectedMethod === method.id && styles.paymentMethodSelected,
+                    selectedMethod === method.id &&
+                      styles.paymentMethodSelected,
                   ]}
                   onPress={() => setSelectedMethod(method.id)}
                   disabled={loading}
@@ -162,13 +165,14 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
           <TouchableOpacity
             style={[
               styles.addFundsButton,
-              (!amount || !selectedMethod || loading) && styles.addFundsButtonDisabled,
+              (!amount || !selectedMethod || loading) &&
+                styles.addFundsButtonDisabled,
             ]}
             onPress={handleAddFunds}
             disabled={!amount || !selectedMethod || loading}
           >
             <Text style={styles.addFundsButtonText}>
-              {loading ? 'Processing...' : `Add $${amount || '0.00'}`}
+              {loading ? "Processing..." : `Add $${amount || "0.00"}`}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -180,31 +184,31 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   title: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   closeButton: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
   },
   closeButtonText: {
     fontSize: 20,
-    color: '#666',
+    color: "#666",
   },
   content: {
     flex: 1,
@@ -215,103 +219,103 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 12,
-    color: '#333',
+    color: "#333",
   },
   amountInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
   },
   quickAmountsContainer: {
     marginTop: 12,
   },
   quickAmountsLabel: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 8,
   },
   quickAmounts: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   quickAmountButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
   },
   quickAmountButtonSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: "#007AFF",
+    borderColor: "#007AFF",
   },
   quickAmountText: {
     fontSize: 14,
-    color: '#333',
+    color: "#333",
   },
   quickAmountTextSelected: {
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
   },
   paymentMethods: {
     gap: 8,
   },
   paymentMethod: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 12,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
   },
   paymentMethodSelected: {
-    borderColor: '#007AFF',
-    backgroundColor: '#e3f2fd',
+    borderColor: "#007AFF",
+    backgroundColor: "#e3f2fd",
   },
   radioContainer: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#ccc',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   radio: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   radioSelected: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
   },
   paymentMethodText: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   addFundsButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
   },
   addFundsButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
   },
   addFundsButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

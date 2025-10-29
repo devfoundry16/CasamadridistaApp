@@ -1,5 +1,4 @@
 import AuthService from "@/services/AuthService";
-import { Order } from "@/types/user/order";
 import { Address, PaymentMethod, User } from "@/types/user/profile";
 import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -36,8 +35,6 @@ const initialShippingAddress = {
 export const [AuthProvider, useAuth] = createContextHook(() => {
   const [user, setUser] = useState<Partial<User> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [wallet, setWallet] = useState(0);
-  const [orders, setOrders] = useState<Order[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
   useEffect(() => {
@@ -182,21 +179,11 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     [paymentMethods]
   );
 
-  const updateWallet = useCallback(
-    async (amount: number) => {
-      const newWallet = wallet + amount;
-      await AsyncStorage.setItem("wallet", JSON.stringify(newWallet));
-      setWallet(newWallet);
-    },
-    [wallet]
-  );
-
   return useMemo(
     () => ({
       user,
+      paymentMethods,
       isLoading,
-      wallet,
-      updateWallet,
       login,
       register,
       logout,
@@ -210,8 +197,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     [
       user,
       isLoading,
-      wallet,
-      updateWallet,
+      paymentMethods,
       login,
       register,
       logout,

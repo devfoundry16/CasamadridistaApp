@@ -1,25 +1,10 @@
 import HeaderStack from "@/components/HeaderStack";
 import { WalletScreenDetail } from "@/components/Wallet/FlinTopWallet";
 import Colors from "@/constants/colors";
-import { useAuth } from "@/contexts/AuthContext";
-import React, { useState } from "react";
-import { Alert, StyleSheet } from "react-native";
+import React from "react";
+import { StyleSheet } from "react-native";
 
 export default function WalletScreen() {
-  const { wallet, updateWallet } = useAuth();
-  const [amount, setAmount] = useState("");
-
-  const handleAddFunds = () => {
-    const value = parseFloat(amount);
-    if (isNaN(value) || value <= 0) {
-      Alert.alert("Error", "Please enter a valid amount");
-      return;
-    }
-    updateWallet(value);
-    setAmount("");
-    Alert.alert("Success", `$${value.toFixed(2)} added to your wallet`);
-  };
-
   return (
     <>
       <HeaderStack title="Wallet" />
