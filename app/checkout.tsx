@@ -4,8 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { useOrder } from "@/hooks/useOrder";
 import { useStripePay } from "@/hooks/useStripePay";
-
 import { OrderStatus } from "@/types/user/order";
+import { useRouter } from "expo-router";
 import { CheckCircle, User } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -21,6 +21,7 @@ import {
 export default function CheckoutScreen() {
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
+  const router = useRouter();
   const { addOrder, updateOrder, createSubscriptionOrder } = useOrder();
   const billingAddress = user?.billing;
   const shippingAddress = user?.shipping;
@@ -32,6 +33,86 @@ export default function CheckoutScreen() {
   const [orderId, setOrderId] = useState<number | null>(null);
   const { handlePayment: payWithStripe } = useStripePay();
 
+  const preparePayload = () => {
+    return {
+      payment_method: "stripe", // or 'paypal', etc.
+      payment_method_title: "Link",
+      set_paid: false, // Let the payment gateway handle the payment
+      customer_id: user?.id,
+      billing: user?.billing,
+      shipping: user?.shipping,
+      line_items:
+        items.map((item) => {
+          return {
+            product_id: item.id, // The ID of your subscription product
+            quantity: item.quantity,
+          };
+        }) || [],
+    };
+  };
+
+  const placeOrder = (payload: any) => {
+    addOrder(payload).then((data) => {
+      console.log(
+        "order id:",
+        data.id,
+        "status: ",
+        data.status,
+        "customer_id:",
+        data.customer_id,
+        "total: ",
+        data.total
+      );
+      setOrderId(data.id);
+      setStatus(data.status === OrderStatus.PENDING ? true : false);
+    });
+  };
+
+  const createSubscription = (order_id: number) => {
+    createSubscriptionOrder(order_id).then(() => {
+      clearCart();
+      router.push("/cart");
+      setStatus(false);
+      setOrderId(null);
+    });
+  };
+
+  const stripePay = () => {
+    if (orderId) {
+      payWithStripe(orderId)
+        .then((res) => {
+          updateOrder(orderId, {
+            payment_method: "stripe",
+            payment_method_title: "Stripe",
+            set_paid: true,
+            status: OrderStatus.PROCESSING,
+            meta_data: [
+              {
+                key: "_stripe_payment_intent",
+                value: res?.paymentIntent,
+              },
+              {
+                key: "_stripe_customer_id",
+                value: res?.customer,
+              },
+            ],
+          }).then(() => {
+            createSubscription(orderId);
+            Alert.alert(
+              "Payment Successful",
+              "Your payment was processed successfully!"
+            );
+          });
+        })
+        .catch((error) => {
+          Alert.alert(
+            "Payment Failed",
+            "There was an issue processing your payment."
+          );
+        });
+    }
+  };
+
   const handlePayment = async () => {
     if (!name || !email || !address) {
       Alert.alert(
@@ -42,77 +123,12 @@ export default function CheckoutScreen() {
     }
     if (status == false) {
       // place an order
-      const payload = {
-        payment_method: "stripe", // or 'paypal', etc.
-        payment_method_title: "Link",
-        set_paid: false, // Let the payment gateway handle the payment
-        customer_id: user?.id,
-        billing: user?.billing,
-        shipping: user?.shipping,
-        line_items:
-          items.map((item) => {
-            return {
-              product_id: item.id, // The ID of your subscription product
-              quantity: item.quantity,
-            };
-          }) || [],
-      };
-
-      addOrder(payload).then((data) => {
-        console.log(
-          "order id:",
-          data.id,
-          "status: ",
-          data.status,
-          "customer_id:",
-          data.customer_id,
-          "total: ",
-          data.total
-        );
-        setOrderId(data.id);
-        setStatus(data.status === OrderStatus.PENDING ? true : false);
-        //pay with stripe
-      });
+      const payload = preparePayload();
+      placeOrder(payload);
     } else {
       // continue payment
       try {
-        if (orderId) {
-          payWithStripe(orderId)
-            .then((res) => {
-              updateOrder(orderId, {
-                payment_method: "stripe",
-                payment_method_title: "Stripe",
-                set_paid: true,
-                status: OrderStatus.PROCESSING,
-                meta_data: [
-                  {
-                    key: "_stripe_payment_intent",
-                    value: res?.paymentIntent,
-                  },
-                  {
-                    key: "_stripe_customer_id",
-                    value: res?.customer,
-                  },
-                ],
-              }).then(() => {
-                Alert.alert(
-                  "Payment Successful",
-                  "Your payment was processed successfully!"
-                );
-              });
-            })
-            .catch((error) => {
-              Alert.alert(
-                "Payment Failed",
-                "There was an issue processing your payment."
-              );
-            });
-          createSubscriptionOrder(orderId).then(() => {
-            clearCart();
-            setStatus(false);
-            setOrderId(null);
-          });
-        }
+        stripePay();
       } catch (error) {
         Alert.alert("Payment Failed", "There was an issue with your payment.");
       }
@@ -172,7 +188,9 @@ export default function CheckoutScreen() {
               {items.map((item) => (
                 <View key={item.id} style={styles.summaryItem}>
                   <Text style={styles.summaryItemName}>
-                    {item.name} {item.variation[0].value} x {item.quantity}
+                    {item.name}{" "}
+                    {item.variation.length ? item.variation[0].value : ""} x{" "}
+                    {item.quantity}
                   </Text>
                   <Text style={styles.summaryItemPrice}>
                     $

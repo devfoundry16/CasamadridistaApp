@@ -134,6 +134,7 @@ export const [CartProvider, useCart] = createContextHook(() => {
   };
 
   const clearCart = useCallback(() => {
+    CartService.removeAllItemsInCart();
     setItems([]);
   }, []);
   const totalItems = items?.reduce((sum, item) => sum + item.quantity, 0);

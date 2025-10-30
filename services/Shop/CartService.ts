@@ -132,7 +132,17 @@ class ApiService {
     );
     return response.data;
   }
-
+  async removeAllItemsInCart() {
+    const token = await AuthService.getAuthToken();
+    const cart_token = await this.getCartToken();
+    const response = await wooApi.delete("/cart/items", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Cart-Token": cart_token,
+      },
+    });
+    return response.data;
+  }
   async getProducts(): Promise<any[]> {
     return this.fetchWithAuth("/v3/products", {
       method: "GET",
