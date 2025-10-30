@@ -1,4 +1,4 @@
-import { Address } from "./profile";
+import { Address } from "../user/profile";
 export enum OrderStatus {
   PENDING = "pending",
   PROCESSING = "processing",

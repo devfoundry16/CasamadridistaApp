@@ -1,7 +1,7 @@
 import { Spinner } from "@/components/Spinner";
 import Colors, { altColors } from "@/constants/colors";
 import ProductService from "@/services/Shop/ProductService";
-import { Product } from "@/types/product/product";
+import { Product } from "@/types/shop/product";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Star } from "lucide-react-native";

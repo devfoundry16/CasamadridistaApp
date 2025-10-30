@@ -1,5 +1,5 @@
 import CartService from "@/services/Shop/CartService";
-import { Product } from "@/types/product/product";
+import { Product } from "@/types/shop/product";
 import createContextHook from "@nkzw/create-context-hook";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "react-native";

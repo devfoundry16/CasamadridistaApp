@@ -16,7 +16,7 @@ import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import ProductService from "@/services/Shop/ProductService";
-import { Product } from "@/types/product/product";
+import { Product } from "@/types/shop/product";
 import { RenderHTML } from "react-native-render-html";
 const { width } = Dimensions.get("window");
 export default function ProductDetailScreen() {

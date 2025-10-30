@@ -1,5 +1,6 @@
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
+import { CHECKOUT_PRODUCT_TYPE } from "@/types/shop/checkout";
 import { router } from "expo-router";
 import { Check, X } from "lucide-react-native";
 import React, { useState } from "react";
@@ -112,7 +113,7 @@ export default function PackagesScreen() {
 
     console.log("productId: ", product_id, "variationId:", variation_id);
 
-    router.push("/checkout");
+    router.push(`/checkout?productType=${CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION}`);
   };
 
   return (

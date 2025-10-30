@@ -1,5 +1,5 @@
 import { OrderService } from "@/services/Shop/OrderService";
-import { Order } from "@/types/user/order";
+import { Order } from "@/types/shop/order";
 import { useCallback } from "react";
 
 export const useOrder = () => {

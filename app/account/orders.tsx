@@ -3,7 +3,7 @@ import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrder } from "@/hooks/useOrder";
-import { Order } from "@/types/user/order";
+import { Order } from "@/types/shop/order";
 import {
   CheckCircle,
   Clock,

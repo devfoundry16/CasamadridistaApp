@@ -1,12 +1,10 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { PaymentSheet, useStripe } from "@stripe/stripe-react-native";
-import { useRouter } from "expo-router";
 import { useRef } from "react";
 import { useCart } from "./useCart";
 
 export const useStripePay = () => {
-  const { totalPrice, clearCart } = useCart();
-  const router = useRouter();
+  const { totalPrice } = useCart();
   const { user } = useAuth();
   const billingAddress = user?.billing;
   const shippingAddress = user?.shipping;

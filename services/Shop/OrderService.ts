@@ -1,4 +1,4 @@
-import { Order } from "@/types/user/order";
+import { Order } from "@/types/shop/order";
 import axios, { AxiosInstance } from "axios";
 
 class ApiService {
