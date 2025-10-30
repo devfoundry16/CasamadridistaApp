@@ -2,9 +2,13 @@ import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
+import { useFlintopWallet } from "@/hooks/useFlintopWallet";
 import { useOrder } from "@/hooks/useOrder";
 import { useStripePay } from "@/hooks/useStripePay";
-import { CHECKOUT_PAYMENT_METHOD } from "@/types/shop/checkout";
+import {
+  CHECKOUT_PAYMENT_METHOD,
+  CHECKOUT_PRODUCT_TYPE,
+} from "@/types/shop/checkout";
 import { OrderStatus } from "@/types/shop/order";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle, User } from "lucide-react-native";
@@ -20,7 +24,7 @@ import {
 } from "react-native";
 
 export default function CheckoutScreen() {
-  const { productType } = useLocalSearchParams();
+  const { productType, amount } = useLocalSearchParams();
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
   const router = useRouter();
@@ -36,11 +40,12 @@ export default function CheckoutScreen() {
   const [status, setStatus] = useState<boolean>(false); //false means place an order, true means paying
   const [orderId, setOrderId] = useState<number | null>(null);
   const { handlePayment: payViaStripe } = useStripePay();
+  const { addFunds } = useFlintopWallet();
 
   const preparePayload = () => {
     return {
       payment_method: CHECKOUT_PAYMENT_METHOD.STRIPE, // or 'paypal', etc.
-      payment_method_title: "Link",
+      payment_method_title: "Credit/Debit Card",
       set_paid: false, // Let the payment gateway handle the payment
       customer_id: user?.id,
       billing: user?.billing,
@@ -72,22 +77,27 @@ export default function CheckoutScreen() {
     });
   };
 
-  const createSubscription = (order_id: number) => {
+  const createSubscription = async (order_id: number) => {
     createSubscriptionOrder(order_id).then(() => {
-      clearCart();
-      router.push("/cart");
       setStatus(false);
       setOrderId(null);
     });
   };
 
+  const addFundsToWallet = async (order_id: number) => {
+    await addFunds(Number(amount), CHECKOUT_PAYMENT_METHOD.STRIPE);
+  };
+
   const stripePay = () => {
     if (orderId) {
-      payViaStripe(orderId)
+      payViaStripe(
+        orderId,
+        productType === CHECKOUT_PRODUCT_TYPE.WALLET ? Number(amount) : 0
+      )
         .then((res) => {
           updateOrder(orderId, {
-            payment_method: "stripe",
-            payment_method_title: "Stripe",
+            payment_method: CHECKOUT_PAYMENT_METHOD.STRIPE,
+            payment_method_title: "Credit/Debit Card",
             set_paid: true,
             status: OrderStatus.PROCESSING,
             meta_data: [
@@ -100,8 +110,13 @@ export default function CheckoutScreen() {
                 value: res?.customer,
               },
             ],
-          }).then(() => {
-            createSubscription(orderId);
+          }).then(async () => {
+            if (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION)
+              await createSubscription(orderId);
+            else if (productType === CHECKOUT_PRODUCT_TYPE.WALLET)
+              await addFundsToWallet(orderId);
+            clearCart();
+            router.push("/cart");
             Alert.alert(
               "Payment Successful",
               "Your payment was processed successfully!"
@@ -118,7 +133,7 @@ export default function CheckoutScreen() {
   };
 
   const handlePayment = async () => {
-    if (!name || !email || !address) {
+    if (!name || !email || !address || items.length === 0) {
       Alert.alert(
         "Missing Information",
         "Please fill in all fields to complete your purchase."
@@ -206,21 +221,33 @@ export default function CheckoutScreen() {
                     {item.variation.length ? item.variation[0].value : ""} x{" "}
                     {item.quantity}
                   </Text>
-                  <Text style={styles.summaryItemPrice}>
-                    $
-                    {(
-                      (Number(item.prices.price) / 100) *
-                      item.quantity
-                    ).toFixed(2)}
-                  </Text>
+                  {productType === CHECKOUT_PRODUCT_TYPE.WALLET ? (
+                    <Text style={styles.summaryItemPrice}>
+                      ${(Number(amount) || 0).toFixed(2)}
+                    </Text>
+                  ) : (
+                    <Text style={styles.summaryItemPrice}>
+                      $
+                      {(
+                        (Number(item.prices.price) / 100) *
+                        item.quantity
+                      ).toFixed(2)}
+                    </Text>
+                  )}
                 </View>
               ))}
               <View style={styles.divider} />
               <View style={styles.summaryItem}>
                 <Text style={styles.totalLabel}>Total</Text>
-                <Text style={styles.totalPrice}>
-                  ${(totalPrice / 100).toFixed(2)}
-                </Text>
+                {productType === CHECKOUT_PRODUCT_TYPE.WALLET ? (
+                  <Text style={styles.totalPrice}>
+                    ${(Number(amount) || 0).toFixed(2)}
+                  </Text>
+                ) : (
+                  <Text style={styles.totalPrice}>
+                    ${(totalPrice / 100).toFixed(2)}
+                  </Text>
+                )}
               </View>
             </View>
           </View>
@@ -362,3 +389,6 @@ const styles = StyleSheet.create({
     color: Colors.darkBg,
   },
 });
+function addFundsToWallet() {
+  throw new Error("Function not implemented.");
+}

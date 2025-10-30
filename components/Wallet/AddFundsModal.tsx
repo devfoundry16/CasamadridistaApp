@@ -1,5 +1,8 @@
 // components/AddFundsModal.tsx
-import React, { useState } from "react";
+import { useCart } from "@/hooks/useCart";
+import { CHECKOUT_PRODUCT_TYPE } from "@/types/shop/checkout";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
@@ -30,9 +33,38 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
   onAddFunds,
 }) => {
   const [amount, setAmount] = useState("");
+  const router = useRouter();
   const [selectedMethod, setSelectedMethod] = useState<string>("");
+  const { addToCart, items } = useCart();
+  const cartCount = items.length;
   const [loading, setLoading] = useState(false);
+  const [visibility, setVisibility] = useState(visible);
 
+  useEffect(() => {
+    setVisibility(visible);
+  }, [visible]);
+
+  const handleWallet = async (numericAmount: number) => {
+    const product = {
+      id: 52365, // Flintop Wallet Product ID
+      quantity: 1,
+    };
+    if (cartCount) {
+      Alert.alert(
+        "Invalid Cart",
+        `You cannot purchase wallet with other items in the cart. Please clear your cart and try again.`
+      );
+    } else {
+      // setLoading(true);
+      setVisibility(false);
+      resetForm();
+      addToCart(product);
+      console.log("Funds amount:", numericAmount);
+      router.push(
+        `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.WALLET}&amount=${numericAmount}`
+      );
+    }
+  };
   const handleAddFunds = async () => {
     if (!amount || !selectedMethod) {
       Alert.alert("Error", "Please enter amount and select payment method");
@@ -51,9 +83,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
     }
 
     try {
-      setLoading(true);
-      await onAddFunds(numericAmount, selectedMethod);
-      resetForm();
+      handleWallet(numericAmount);
     } catch (error) {
       // Error is handled in the parent component
     } finally {
@@ -75,7 +105,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      visible={visibility}
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
