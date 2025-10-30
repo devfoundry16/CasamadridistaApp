@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { Check, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -88,7 +89,8 @@ const packages = [
 ];
 
 export default function PackagesScreen() {
-  const { addToCart } = useCart();
+  const { addToCart, items } = useCart();
+  const cartCount = items.length;
   const [billingType, setBillingType] = useState<"monthly" | "yearly">(
     "monthly"
   );
@@ -109,11 +111,18 @@ export default function PackagesScreen() {
         },
       ],
     };
-    addToCart(product);
-
-    console.log("productId: ", product_id, "variationId:", variation_id);
-
-    router.push(`/checkout?productType=${CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION}`);
+    if (cartCount) {
+      Alert.alert(
+        "Invalid Cart",
+        `You cannot purchase subscription with other items in the cart. Please clear your cart and try again.`
+      );
+    } else {
+      addToCart(product);
+      console.log("productId: ", product_id, "variationId:", variation_id);
+      router.push(
+        `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION}`
+      );
+    }
   };
 
   return (

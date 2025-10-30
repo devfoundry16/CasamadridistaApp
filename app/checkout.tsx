@@ -4,10 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { useOrder } from "@/hooks/useOrder";
 import { useStripePay } from "@/hooks/useStripePay";
-import {
-  CHECKOUT_PAYMENT_METHOD,
-  CHECKOUT_PRODUCT_TYPE,
-} from "@/types/shop/checkout";
+import { CHECKOUT_PAYMENT_METHOD } from "@/types/shop/checkout";
 import { OrderStatus } from "@/types/shop/order";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle, User } from "lucide-react-native";
@@ -41,17 +38,6 @@ export default function CheckoutScreen() {
   const { handlePayment: payViaStripe } = useStripePay();
 
   const preparePayload = () => {
-    if (
-      (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION ||
-        productType === CHECKOUT_PRODUCT_TYPE.WALLET) &&
-      items.length
-    ) {
-      Alert.alert(
-        "Invalid Cart",
-        `You cannot purchase ${productType} with other items in the cart. Please clear your cart and try again.`
-      );
-      throw new Error("Invalid cart for the selected product type");
-    }
     return {
       payment_method: CHECKOUT_PAYMENT_METHOD.STRIPE, // or 'paypal', etc.
       payment_method_title: "Link",
@@ -141,14 +127,24 @@ export default function CheckoutScreen() {
     }
     if (status == false) {
       // place an order
-      const payload = preparePayload();
-      placeOrder(payload);
+      try {
+        const payload = preparePayload();
+        placeOrder(payload);
+      } catch (error: any) {
+        Alert.alert(
+          "Order Failed",
+          `There was an issue placing your order. ${error.message}`
+        );
+      }
     } else {
       // continue payment
       try {
         stripePay();
-      } catch (error) {
-        Alert.alert("Payment Failed", "There was an issue with your payment.");
+      } catch (error: any) {
+        Alert.alert(
+          "Payment Failed",
+          `There was an issue with your payment. ${error.message}`
+        );
       }
     }
   };
