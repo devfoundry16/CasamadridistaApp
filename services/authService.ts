@@ -1,12 +1,10 @@
-import { Address, AuthResponse, User } from "@/types/user/profile";
+import { Address, User } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json";
 const API_BASE_URL_KEY = "api_base_url_key";
 const AUTH_USERNAME = "iworqs"; // Replace with actual username
 const AUTH_PASSWORD = "P8u4 vcXa 7FrR mWXP eVla jstg";
-const WOO_USERNAME = "ck_5761f8ce313356e07555cf14a8c2099ab27d7942";
-const WOO_PASSWORD = "cs_72d03b9110f7f1e3592f5c4a77cbd7c42b176075";
 class ApiService {
   private baseUrl: string = DEFAULT_BASE_URL;
   private readonly AUTH_TOKEN_KEY = "jwt_token";
@@ -82,39 +80,47 @@ class ApiService {
       headers,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("[WordPress] Error:", response.status, errorText);
-      throw new Error(`WordPress API Error: ${response.status} ${errorText}`);
-    }
-
     return response.json();
   }
 
+  async validateToken(): Promise<boolean> {
+    try {
+      const token = await AsyncStorage.getItem("jwt_token");
+      if (!token) return false;
+
+      const response = await this.fetchWithAuth("/jwt-auth/v1/token/validate", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response;
+    } catch (error) {
+      console.error("[WordPress] Token validation failed:", error);
+      return false;
+    }
+  }
+
   async validCrendential(username: string, password: string) {
-    return fetch(`${this.baseUrl}/jwt-auth/v1/token`, {
+    const response = await fetch(`${this.baseUrl}/jwt-auth/v1/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ username, password }),
     });
-  }
-
-  async login(username: string, password: string): Promise<AuthResponse> {
-    const response = await this.validCrendential(username, password);
 
     if (!response.ok) {
-      const error = await response.json();
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Something went wrong. Please try again.";
-      // Re-throw for upper layers to handle
-      throw new Error(message);
+      const data = await response.json();
+      throw new Error(`Login failed: ${data.message}`);
     }
 
-    const data = await response.json();
+    return response.json();
+  }
+
+  async login(username: string, password: string) {
+    const data = await this.validCrendential(username, password);
 
     const tokenParts = data.token.split(".");
     const payload = JSON.parse(atob(tokenParts[1]));
@@ -122,12 +128,12 @@ class ApiService {
 
     await this.storeAuthData(data.token, userId); //store auth data
 
-    const userData = await this.getUserById();
+    const userData = await this.getUser();
 
-    await this.storeUserData(userData); //store user data
+    this.storeUserData(userData); //store user data
 
     console.log("[WordPress] Login successful:", data.user_display_name);
-    return data;
+    return userData;
   }
 
   async register(userData: Omit<User, "id">): Promise<any> {
@@ -136,10 +142,8 @@ class ApiService {
       body: JSON.stringify(userData),
     });
 
-    const data = await response.json();
-
     console.log("[WordPress] Register successful:");
-    return data;
+    return response;
   }
   async update(userData: Partial<User>): Promise<any> {
     const response = await this.fetchWithAuth(`/wp/v2/users/${userData.id}`, {
@@ -160,10 +164,8 @@ class ApiService {
       method: "PUT",
       body: JSON.stringify(body),
     });
-    const data = response;
-
     console.log("[WordPress] Update Address successful");
-    return data;
+    return response;
   }
   async getAddress(): Promise<any> {
     const id = await this.getUserId();
@@ -172,59 +174,32 @@ class ApiService {
     });
     return { shipping: response.shipping, billing: response.billing };
   }
-  async validateToken(): Promise<boolean> {
-    try {
-      const token = await AsyncStorage.getItem("jwt_token");
-      if (!token) return false;
-
-      const response = await fetch(
-        `${this.baseUrl}/jwt-auth/v1/token/validate`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      return response.ok;
-    } catch (error) {
-      console.error("[WordPress] Token validation failed:", error);
-      return false;
-    }
-  }
 
   async logout() {
     await AsyncStorage.removeItem("jwt_token");
     await AsyncStorage.removeItem("user_data");
     console.log("[WordPress] Logged out");
   }
-  async getUserById(): Promise<User | null> {
-    const id = await this.getUserId();
-    const token = await this.getAuthToken();
-    const response = await fetch(
-      `${this.baseUrl}/wp/v2/users/${id}?context=edit`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const address = await this.getAddress();
+  async getUser() {
+    const [id, token] = await Promise.all([
+      this.getUserId(),
+      this.getAuthToken(),
+    ]);
+    console.log(id, token);
 
-    if (!response.ok) {
-      const error = await response.json();
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Something went wrong. Please try again.";
-      // Re-throw for upper layers to handle
-      throw new Error(message);
-    }
-    const data = await response.json();
+    const fetchUser = this.fetchWithAuth(`/wp/v2/users/${id}?context=edit`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const fetchAddress = this.getAddress();
+
+    const [response, address] = await Promise.all([fetchUser, fetchAddress]);
+
     const newData: User = {
-      ...data,
+      ...response,
       billing: address.billing,
       shipping: address.shipping,
     };

@@ -43,7 +43,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const loadUserData = async () => {
     try {
-      const userData = await AsyncStorage.getItem("user");
+      const userData = await AsyncStorage.getItem("user_data");
       if (userData) {
         setUser(JSON.parse(userData));
       }
@@ -66,8 +66,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     setIsLoading(true);
     AuthService.login(email, password)
       .then(async (data) => {
-        const userData = await AuthService.getUserById();
-        setUser(userData);
+        setUser(data);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -81,8 +80,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       .then(async (response) => {
         const newUser: User = response;
         console.log("Registered user:", newUser.id);
-        await AsyncStorage.setItem("user", JSON.stringify(newUser));
-        setUser(newUser);
+        Alert.alert("Registration Success");
       })
       .catch((error) => {
         setIsLoading(false);
@@ -107,7 +105,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     [user]
   );
   const logout = useCallback(async () => {
-    await AsyncStorage.multiRemove(["user"]);
+    await AuthService.logout();
     setUser(null);
   }, []);
   const updateAvatar = useCallback(
