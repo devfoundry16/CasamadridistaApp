@@ -1,8 +1,8 @@
 import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
-import { useAuth } from "@/contexts/AuthContext";
 import { useOrder } from "@/hooks/useOrder";
+import { useUser } from "@/hooks/useUser";
 import { formatDate } from "@/utils/helper";
 import { router } from "expo-router";
 import { ArrowRight, Calendar, CreditCard, Crown } from "lucide-react-native";
@@ -17,7 +17,7 @@ import {
 
 export default function SubscriptionScreen() {
   const { getSubscriptionOrders } = useOrder();
-  const { user } = useAuth();
+  const { user } = useUser();
   const [subscriptions, setSubscriptions] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(false);
 

@@ -7,7 +7,7 @@ import {
   FlinTopWalletTransferRequest,
   FlinTopWalletWithdrawRequest,
 } from "@/types/user/flintop-wallet";
-import AuthService from "./AuthService";
+import UserService from "./UserService";
 
 export class FlintopWalletService {
   private static readonly BASE_URL = "https://casamadridista.com/wp-json";
@@ -16,7 +16,7 @@ export class FlintopWalletService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const token = await AuthService.getAuthToken();
+    const token = await UserService.getAuthToken();
 
     if (!token) {
       throw new Error("Authentication required. Please log in.");

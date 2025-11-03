@@ -1,8 +1,8 @@
 import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
-import { useAuth } from "@/contexts/AuthContext";
 import { useOrder } from "@/hooks/useOrder";
+import { useUser } from "@/hooks/useUser";
 import { Order } from "@/types/shop/order";
 import {
   CheckCircle,
@@ -21,7 +21,7 @@ import {
 } from "react-native";
 
 export default function OrdersScreen() {
-  const { user } = useAuth();
+  const { user } = useUser();
   const { getOrders } = useOrder();
   const [orders, setOrders] = React.useState<Order[]>([]);
   const [loading, setLoading] = React.useState(false);

@@ -1,6 +1,6 @@
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
-import { useAuth } from "@/contexts/AuthContext";
+import { useUser } from "@/hooks/useUser";
 import * as ImagePicker from "expo-image-picker"; // New import for image picker
 import { router } from "expo-router";
 import {
@@ -27,7 +27,7 @@ import {
 } from "react-native";
 
 export default function AccountScreen() {
-  const { user, updateAvatar, logout, isLoading } = useAuth(); // Added accessToken and updateUser
+  const { user, updateAvatar, logout, isLoading } = useUser(); // Added accessToken and updateUser
   const [isLogin, setIsLogin] = useState(true);
 
   const handleChangePhoto = async () => {
@@ -236,7 +236,7 @@ function AuthForm({
   isLogin: boolean;
   setIsLogin: (value: boolean) => void;
 }) {
-  const { login, register, isLoading } = useAuth();
+  const { login, register, isLoading } = useUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");

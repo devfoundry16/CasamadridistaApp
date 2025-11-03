@@ -1,6 +1,6 @@
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
-import { useAuth } from "@/contexts/AuthContext";
+import { useUser } from "@/hooks/useUser";
 import { Address } from "@/types/user/profile";
 import { Edit, Trash2, X } from "lucide-react-native";
 import React, { useState } from "react";
@@ -66,7 +66,7 @@ function AddressView({
 }
 
 export default function AddressesScreen() {
-  const { user, updateAddress, deleteAddress } = useAuth();
+  const { user, updateAddress, deleteAddress } = useUser();
   const billingAddress = { type: "billing", ...user?.billing };
   const shippingAddress = { type: "shipping", ...user?.shipping };
   const [modalVisible, setModalVisible] = useState(false);

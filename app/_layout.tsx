@@ -1,12 +1,13 @@
 import { AppProvider } from "@/contexts/AppContext";
-import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/hooks/useCart";
+import { store } from "@/store/store";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Provider } from "react-redux";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,7 +33,7 @@ export default function RootLayout() {
         merchantIdentifier="merchant.identifier" // required for Apple Pay
         urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
       >
-        <AuthProvider>
+        <Provider store={store}>
           <AppProvider>
             <CartProvider>
               <GestureHandlerRootView style={{ flex: 1 }}>
@@ -40,7 +41,7 @@ export default function RootLayout() {
               </GestureHandlerRootView>
             </CartProvider>
           </AppProvider>
-        </AuthProvider>
+        </Provider>
       </StripeProvider>
     </QueryClientProvider>
   );

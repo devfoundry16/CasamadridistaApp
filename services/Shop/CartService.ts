@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AuthService from "../AuthService";
+import UserService from "../UserService";
 import { wooApi } from "./wooApi";
 const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json/wc";
 const API_BASE_URL_KEY = "api_base_url_key";
@@ -68,7 +68,7 @@ class ApiService {
   }
 
   async addItemToCart(productId: number, quantity = 1, variation?: any[]) {
-    const token = await AuthService.getAuthToken();
+    const token = await UserService.getAuthToken();
     const cartToken = await this.getCartToken();
     const response = await wooApi.post(
       "/cart/add-item",
@@ -97,7 +97,7 @@ class ApiService {
   }
 
   async removeItemInCart(key: string) {
-    const token = await AuthService.getAuthToken();
+    const token = await UserService.getAuthToken();
     const cart_token = await this.getCartToken();
     const response = await wooApi.post(
       "/cart/remove-item",
@@ -114,7 +114,7 @@ class ApiService {
     return response.data;
   }
   async updateItemInCart(key: string, quantity: number) {
-    const token = await AuthService.getAuthToken();
+    const token = await UserService.getAuthToken();
     const cart_token = await this.getCartToken();
 
     const response = await wooApi.post(
@@ -133,7 +133,7 @@ class ApiService {
     return response.data;
   }
   async removeAllItemsInCart() {
-    const token = await AuthService.getAuthToken();
+    const token = await UserService.getAuthToken();
     const cart_token = await this.getCartToken();
     const response = await wooApi.delete("/cart/items", {
       headers: {

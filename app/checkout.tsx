@@ -1,10 +1,10 @@
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
-import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/hooks/useCart";
 import { useFlintopWallet } from "@/hooks/useFlintopWallet";
 import { useOrder } from "@/hooks/useOrder";
 import { useStripePay } from "@/hooks/useStripePay";
+import { useUser } from "@/hooks/useUser";
 import {
   CHECKOUT_PAYMENT_METHOD,
   CHECKOUT_PRODUCT_TYPE,
@@ -26,7 +26,7 @@ import {
 export default function CheckoutScreen() {
   const { productType, amount } = useLocalSearchParams();
   const { items, totalPrice, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
   const { addOrder, updateOrder, createSubscriptionOrder } = useOrder();
   const billingAddress = user?.billing;
@@ -36,7 +36,7 @@ export default function CheckoutScreen() {
   );
   const [email, setEmail] = useState(billingAddress?.email);
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState(shippingAddress);
+  const [address] = useState(shippingAddress);
   const [status, setStatus] = useState<boolean>(false); //false means place an order, true means paying
   const [orderId, setOrderId] = useState<number | null>(null);
   const { handlePayment: payViaStripe } = useStripePay();
@@ -140,7 +140,7 @@ export default function CheckoutScreen() {
       );
       return;
     }
-    if (status == false) {
+    if (status === false) {
       // place an order
       try {
         const payload = preparePayload();
@@ -389,6 +389,3 @@ const styles = StyleSheet.create({
     color: Colors.darkBg,
   },
 });
-function addFundsToWallet() {
-  throw new Error("Function not implemented.");
-}

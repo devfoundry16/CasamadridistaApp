@@ -1,7 +1,7 @@
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
-import { useAuth } from "@/contexts/AuthContext";
-import AuthService from "@/services/AuthService";
+import { useUser } from "@/hooks/useUser";
+import UserService from "@/services/UserService";
 import { Save } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -15,7 +15,7 @@ import {
 } from "react-native";
 
 export default function AccountDetailsScreen() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser } = useUser();
   const [formData, setFormData] = useState({
     first_name: user?.first_name || "",
     last_name: user?.last_name || "",
@@ -26,7 +26,7 @@ export default function AccountDetailsScreen() {
     confirmPassword: "",
   });
   const checkPassword = async (password: string) => {
-    const response = await AuthService.validCrendential(
+    const response = await UserService.validCrendential(
       user?.username as any,
       password
     );

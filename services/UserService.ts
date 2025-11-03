@@ -265,5 +265,5 @@ class ApiService {
   }
 }
 
-const AuthService = new ApiService();
-export default AuthService;
+const UserService = new ApiService();
+export default UserService;

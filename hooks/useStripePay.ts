@@ -1,11 +1,11 @@
-import { useAuth } from "@/contexts/AuthContext";
+import { useUser } from "@/hooks/useUser";
 import { PaymentSheet, useStripe } from "@stripe/stripe-react-native";
 import { useRef } from "react";
 import { useCart } from "./useCart";
 
 export const useStripePay = () => {
   const { totalPrice } = useCart();
-  const { user } = useAuth();
+  const { user } = useUser();
   const billingAddress = user?.billing;
   // const shippingAddress = user?.shipping;
 
