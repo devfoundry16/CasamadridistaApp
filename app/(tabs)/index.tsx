@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import CustomWebView from "@/components/CustomWebView";
 import QuoteSection from "@/components/Home/QuoteSection";
 import SquadSection from "@/components/Home/SquadSection";
@@ -12,7 +13,7 @@ import MatchService from "@/services/Football/MatchService";
 import { Match } from "@/types/soccer/match";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Pressable,
@@ -31,11 +32,11 @@ export default function HomeScreen() {
   const [liveMatch, setLiveMatch] = useState<Match>();
 
   const nextMatches = teamInfoList.find(
-    (p) => p.team.id == RealMadridId
+    (p) => p.team.id === RealMadridId
   )?.nextMatches;
 
   const lastMatches = teamInfoList.find(
-    (p) => p.team.id == RealMadridId
+    (p) => p.team.id === RealMadridId
   )?.lastMatches;
 
   const matches = [...(nextMatches ?? []), ...(lastMatches ?? [])];
@@ -44,7 +45,7 @@ export default function HomeScreen() {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
 
-  const live = liveMatch == undefined ? false : true;
+  const live = liveMatch === undefined ? false : true;
 
   const handleStrengthSectionLayout = (event: any) => {
     const { y } = event.nativeEvent.layout;
@@ -99,7 +100,21 @@ export default function HomeScreen() {
                       </body>
                     </html>
                   `;
-  const loadInitialData = async () => {
+
+  const checkLiveMatch = useCallback(async () => {
+    try {
+      const liveMatchData = await fetchLiveMatchData(RealMadridId);
+      if (liveMatchData) {
+        setLiveMatch(liveMatchData);
+      } else {
+        setLiveMatch(undefined);
+      }
+    } catch (error) {
+      console.error("Error fetching live match data:", error);
+    }
+  }, [fetchLiveMatchData]);
+
+  const loadInitialData = useCallback(async () => {
     try {
       console.log("---------Home Page---------");
       if (teamInfoList.length && !liveMatch) fetchProfileData(RealMadridId);
@@ -114,22 +129,14 @@ export default function HomeScreen() {
     } catch (error) {
       console.error("[App] Failed to load initial data:", error);
     }
-  };
-
-  const checkLiveMatch = async () => {
-    const liveMatch = await fetchLiveMatchData(RealMadridId);
-    setLiveMatch(liveMatch);
-  };
+  }, [liveMatch]);
 
   useEffect(() => {
     console.log("useEffect home screen");
-    const fetchData = async () => {
-      loadInitialData();
-    };
-    fetchData();
+    loadInitialData();
     const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
     return () => clearInterval(timer);
-  }, [live]);
+  }, [live, checkLiveMatch, loadInitialData]);
 
   return (
     <ScrollView

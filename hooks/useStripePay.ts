@@ -7,7 +7,7 @@ export const useStripePay = () => {
   const { totalPrice } = useCart();
   const { user } = useAuth();
   const billingAddress = user?.billing;
-  const shippingAddress = user?.shipping;
+  // const shippingAddress = user?.shipping;
 
   const orderIdRef = useRef<number>(0);
   /* Stripe */
@@ -43,8 +43,7 @@ export const useStripePay = () => {
       body: JSON.stringify(body),
     });
     // Call the `intentCreationCallback` with your server response's client secret or error.
-    const { paymentIntent, ephemeralKey, customer, error } =
-      await response.json();
+    const { paymentIntent, customer, error } = await response.json();
     if (!error && paymentIntent) {
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: paymentIntent,

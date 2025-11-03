@@ -48,7 +48,7 @@ export default function CartScreen() {
         </Text>
         {item.variation.map((val, idx) => {
           return (
-            <Text style={styles.itemVariation} numberOfLines={2}>
+            <Text key={idx} style={styles.itemVariation} numberOfLines={2}>
               {val.attribute}: {val.value}
             </Text>
           );

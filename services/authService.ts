@@ -157,7 +157,7 @@ class ApiService {
   async updateAddress(addressData: Address): Promise<any> {
     const id = await this.getUserId();
     const body =
-      addressData.type == "billing"
+      addressData.type === "billing"
         ? { billing: addressData }
         : { shipping: addressData };
     const response = await this.fetchWithAuth(`/wc/v3/customers/${id}`, {

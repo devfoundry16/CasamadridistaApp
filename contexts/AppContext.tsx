@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import MatchService from "@/services/Football/MatchService";
 import SportsInfoService from "@/services/Football/SportsInfoService";
 import {
@@ -9,7 +10,6 @@ import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Bluebird from "bluebird";
 import { useCallback, useEffect, useMemo, useState } from "react";
-type Theme = "light" | "dark";
 const RealMadridId = 541;
 export const [AppProvider, useApp] = createContextHook(() => {
   const [playersList, setPlayersList] = useState<PlayerWithTeam[]>([]);
@@ -52,21 +52,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     }
   }, []);
 
-  useEffect(() => {
-    loadAppData().then((data) => {
-      //fetchProfileData(RealMadridId);
-    });
-    // return () => subscription.remove();
-  }, [loadAppData]);
-
-  const fetchNextMatchData = useCallback(async (id: number) => {
-    return MatchService.fetchNextMatch(id);
-  }, []);
-
-  const fetchLiveMatchData = useCallback(async (id: number) => {
-    return MatchService.fetchLiveMatch(id);
-  }, []);
-
   const fetchProfileData = useCallback(
     async (id: number) => {
       console.log("AppContext: before teaminfo list", teamInfoList.length);
@@ -82,7 +67,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       let squads = await SportsInfoService.fetchSquad(id);
 
       const newTeamInfoList =
-        index == -1
+        index === -1
           ? [...teamInfoList, teamInfo]
           : [
               ...teamInfoList.slice(0, index),
@@ -94,7 +79,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       //coachList
       const coach = await SportsInfoService.fetchCoachProfile(teamInfo.team.id);
       const newCoachList =
-        index == -1
+        index === -1
           ? [...coachList, { team: { id }, player: coach }]
           : [
               ...coachList.slice(0, index),
@@ -114,7 +99,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         { concurrency: 5 }
       ).then((data: any) => {
         let newPlayersList;
-        if (index == -1) {
+        if (index === -1) {
           newPlayersList = [
             ...playersList,
             {
@@ -142,6 +127,17 @@ export const [AppProvider, useApp] = createContextHook(() => {
     },
     [playersList, coachList, teamInfoList]
   );
+
+  useEffect(() => {
+    loadAppData().then((data) => {
+      fetchProfileData(RealMadridId);
+    });
+    // return () => subscription.remove();
+  }, []);
+
+  const fetchLiveMatchData = useCallback(async (id: number) => {
+    return MatchService.fetchLiveMatch(id);
+  }, []);
 
   return useMemo(
     () => ({
