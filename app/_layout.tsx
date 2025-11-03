@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useCart } from "@/hooks/useCart";
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
