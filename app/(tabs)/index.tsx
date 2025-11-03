@@ -7,7 +7,7 @@ import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
 import VisionSection from "@/components/Home/VisionSection";
 import UpcomingForm from "@/components/UpcomingForm";
 import Colors from "@/constants/colors";
-import { useApp } from "@/contexts/AppContext";
+import { useFootball } from "@/hooks/useFootball";
 
 import MatchService from "@/services/Football/MatchService";
 import { Match } from "@/types/soccer/match";
@@ -25,7 +25,7 @@ import {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { teamInfoList, fetchProfileData, fetchLiveMatchData } = useApp();
+  const { teamInfoList, fetchProfileData, fetchLiveMatchData } = useFootball();
   const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
@@ -104,6 +104,7 @@ export default function HomeScreen() {
   const checkLiveMatch = useCallback(async () => {
     try {
       const liveMatchData = await fetchLiveMatchData(RealMadridId);
+      console.log("Live match data:", liveMatchData);
       if (liveMatchData) {
         setLiveMatch(liveMatchData);
       } else {
@@ -131,12 +132,27 @@ export default function HomeScreen() {
     }
   }, [liveMatch]);
 
+  // useEffect(() => {
+  //   console.log("HomeScreen mounted - loading initial data");
+  //   loadInitialData();
+  // }, [loadInitialData]);
+
   useEffect(() => {
-    console.log("useEffect home screen");
-    loadInitialData();
-    const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
-    return () => clearInterval(timer);
-  }, [live, checkLiveMatch, loadInitialData]);
+    // checkLiveMatch();
+    // console.log("Starting live match polling");
+    // const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
+    // // Initial check
+    // checkLiveMatch();
+    // return () => {
+    //   console.log("Cleaning up live match polling");
+    //   clearInterval(timer);
+    // };
+  }, [checkLiveMatch]);
+
+  useEffect(() => {
+    setHasAnimated(false);
+    setShouldAnimate(false);
+  }, []);
 
   return (
     <ScrollView

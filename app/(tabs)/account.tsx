@@ -1,5 +1,6 @@
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
+import { useCart } from "@/hooks/useCart";
 import { useUser } from "@/hooks/useUser";
 import * as ImagePicker from "expo-image-picker"; // New import for image picker
 import { router } from "expo-router";
@@ -237,6 +238,7 @@ function AuthForm({
   setIsLogin: (value: boolean) => void;
 }) {
   const { login, register, isLoading } = useUser();
+  const { loadCartItems } = useCart();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -250,7 +252,9 @@ function AuthForm({
         Alert.alert("Error", "Please fill in all fields");
         return;
       }
-      login(email, password);
+      login(email, password).then(() => {
+        loadCartItems();
+      });
     } else {
       if (
         !email ||

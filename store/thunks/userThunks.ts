@@ -1,11 +1,11 @@
-// store/thunks/authThunks.ts
+// store/thunks/userThunks.ts
 import UserService from "@/services/UserService";
 import { Address, PaymentMethod, User } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { Alert } from "react-native";
 import {
-  clearAuth,
+  clearUser,
   setLoading,
   setPaymentMethods,
   setUser,
@@ -14,7 +14,7 @@ import { RootState } from "../store";
 
 // Login thunk
 export const loginUser = createAsyncThunk(
-  "auth/login",
+  "user/login",
   async (
     { email, password }: { email: string; password: string },
     { dispatch }
@@ -36,7 +36,7 @@ export const loginUser = createAsyncThunk(
 
 // Register thunk
 export const registerUser = createAsyncThunk(
-  "auth/register",
+  "user/register",
   async (userData: Omit<User, "id">, { dispatch }) => {
     dispatch(setLoading(true));
     try {
@@ -55,10 +55,10 @@ export const registerUser = createAsyncThunk(
 
 // Update user thunk
 export const updateUser = createAsyncThunk(
-  "auth/updateUser",
+  "user/updateUser",
   async (updates: Partial<User>, { dispatch, getState }) => {
     const state = getState() as RootState;
-    if (!state.auth.user) return;
+    if (!state.user.user) return;
 
     dispatch(setLoading(true));
     try {
@@ -78,19 +78,19 @@ export const updateUser = createAsyncThunk(
 
 // Update avatar thunk
 export const updateAvatar = createAsyncThunk(
-  "auth/updateAvatar",
+  "user/updateAvatar",
   async (
     { imageUri, filename }: { imageUri: string; filename: string },
     { dispatch, getState }
   ) => {
     const state = getState() as RootState;
-    if (!state.auth.user) return;
+    if (!state.user.user) return;
 
     dispatch(setLoading(true));
     try {
       const response = await UserService.uploadMedia(imageUri, filename);
       const updatedUser: User = {
-        ...state.auth.user,
+        ...state.user.user,
         url: response.source_url,
       } as User;
 
@@ -109,7 +109,7 @@ export const updateAvatar = createAsyncThunk(
 
 // Update address thunk
 export const updateAddress = createAsyncThunk(
-  "auth/updateAddress",
+  "user/updateAddress",
   async (address: Address, { dispatch }) => {
     try {
       const updatedUser = await UserService.updateAddress(address);
@@ -125,7 +125,7 @@ export const updateAddress = createAsyncThunk(
 
 // Delete address thunk
 export const deleteAddress = createAsyncThunk(
-  "auth/deleteAddress",
+  "user/deleteAddress",
   async (type: "shipping" | "billing", { dispatch }) => {
     const newAddress: Address = {
       type: type,
@@ -156,7 +156,7 @@ export const deleteAddress = createAsyncThunk(
 
 // Load user data thunk
 export const loadUserData = createAsyncThunk(
-  "auth/loadUserData",
+  "user/loadUserData",
   async (_, { dispatch }) => {
     try {
       const userData = await AsyncStorage.getItem("user_data");
@@ -176,20 +176,20 @@ export const loadUserData = createAsyncThunk(
 
 // Logout thunk
 export const logoutUser = createAsyncThunk(
-  "auth/logout",
+  "user/logout",
   async (_, { dispatch }) => {
     await UserService.logout();
     await AsyncStorage.multiRemove(["user_data", "paymentMethods"]);
-    dispatch(clearAuth());
+    dispatch(clearUser());
   }
 );
 
 // Payment methods thunks
 export const addPaymentMethod = createAsyncThunk(
-  "auth/addPaymentMethod",
+  "user/addPaymentMethod",
   async (method: PaymentMethod, { dispatch, getState }) => {
     const state = getState() as RootState;
-    const newMethods = [...state.auth.paymentMethods, method];
+    const newMethods = [...state.user.paymentMethods, method];
     await AsyncStorage.setItem("paymentMethods", JSON.stringify(newMethods));
     dispatch(setPaymentMethods(newMethods));
     return newMethods;
@@ -197,10 +197,10 @@ export const addPaymentMethod = createAsyncThunk(
 );
 
 export const deletePaymentMethod = createAsyncThunk(
-  "auth/deletePaymentMethod",
+  "user/deletePaymentMethod",
   async (id: string, { dispatch, getState }) => {
     const state = getState() as RootState;
-    const newMethods = state.auth.paymentMethods.filter(
+    const newMethods = state.user.paymentMethods.filter(
       (method) => method.id !== id
     );
     await AsyncStorage.setItem("paymentMethods", JSON.stringify(newMethods));

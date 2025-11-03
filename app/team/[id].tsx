@@ -7,7 +7,7 @@ import {
   Player,
 } from "@/types/soccer/profile";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Building2, Calendar, MapPin } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -20,8 +20,7 @@ import {
 
 import CustomWebView from "@/components/CustomWebView";
 import HeaderStack from "@/components/HeaderStack";
-import { useApp } from "@/contexts/AppContext";
-import { useLocalSearchParams } from "expo-router";
+import { useFootball } from "@/hooks/useFootball";
 import CountryFlag from "react-native-country-flag";
 const map: CountryMap = countries;
 
@@ -31,7 +30,8 @@ export default function TeamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamId = Number(id);
 
-  const { playersList, coachList, teamInfoList, fetchProfileData } = useApp();
+  const { playersList, coachList, teamInfoList, fetchProfileData } =
+    useFootball();
 
   const players = playersList.find((p) => p.team.id === teamId) ?? {
     player: [],

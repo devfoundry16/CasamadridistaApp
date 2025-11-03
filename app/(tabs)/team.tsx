@@ -1,8 +1,13 @@
 import CustomWebView from "@/components/CustomWebView";
 import Colors, { altColors as colors } from "@/constants/colors";
 import countries from "@/constants/countries.json";
-import { useApp } from "@/contexts/AppContext";
-import { Coach, CoachWithTeam, CountryMap, Player } from "@/types/soccer/profile";
+import { useFootball } from "@/hooks/useFootball";
+import {
+  Coach,
+  CoachWithTeam,
+  CountryMap,
+  Player,
+} from "@/types/soccer/profile";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { Building2, Calendar, MapPin } from "lucide-react-native";
@@ -19,7 +24,8 @@ const map: CountryMap = countries;
 
 export default function TeamScreen() {
   const router = useRouter();
-  const { playersList, coachList, teamInfoList, fetchProfileData } = useApp();
+  const { playersList, coachList, teamInfoList, fetchProfileData } =
+    useFootball();
   const id = 541;
 
   const players = playersList.find((p) => p.team.id === id) ?? {
@@ -41,7 +47,7 @@ export default function TeamScreen() {
 
   useEffect(() => {
     if (players.player.length === 0) {
-      console.log('loaded players from apis');
+      console.log("loaded players from apis");
       //fetchProfileData(id); // Default Real Madrid team ID
     }
     const teamIDs = playersList.map((players) => players.team.id);
@@ -129,11 +135,14 @@ export default function TeamScreen() {
               <Text style={styles.infoLabel}>Founded</Text>
               <Text style={styles.infoValue}>{teamInfo?.team?.founded}</Text>
             </View>
-            <TouchableOpacity style={styles.infoItem} onPress={() => {
-              if (teamInfo?.venue?.id) {
-                router.push(`/venue/${teamInfo.venue.id}`);
-              }
-            }}>
+            <TouchableOpacity
+              style={styles.infoItem}
+              onPress={() => {
+                if (teamInfo?.venue?.id) {
+                  router.push(`/venue/${teamInfo.venue.id}`);
+                }
+              }}
+            >
               <Building2 size={20} color={colors.textWhite} />
               <Text style={styles.infoLabel}>Stadium</Text>
               <Text style={styles.infoValue}>{teamInfo?.venue?.name}</Text>
@@ -154,7 +163,11 @@ export default function TeamScreen() {
             <View key={player.id}>
               <PlayerCard
                 player={player}
-                onPress={() => router.push(`/player/${teamInfo?.team.id}/${player.id}` as any)}
+                onPress={() =>
+                  router.push(
+                    `/player/${teamInfo?.team.id}/${player.id}` as any
+                  )
+                }
               />
               <View style={styles.accentLine} />
             </View>
@@ -169,7 +182,11 @@ export default function TeamScreen() {
             <View key={player.id}>
               <PlayerCard
                 player={player}
-                onPress={() => router.push(`/player/${teamInfo?.team.id}/${player.id}` as any)}
+                onPress={() =>
+                  router.push(
+                    `/player/${teamInfo?.team.id}/${player.id}` as any
+                  )
+                }
               />
               <View style={styles.accentLine} />
             </View>
@@ -184,7 +201,11 @@ export default function TeamScreen() {
             <View key={player.id}>
               <PlayerCard
                 player={player}
-                onPress={() => router.push(`/player/${teamInfo?.team.id}/${player.id}` as any)}
+                onPress={() =>
+                  router.push(
+                    `/player/${teamInfo?.team.id}/${player.id}` as any
+                  )
+                }
               />
               <View style={styles.accentLine} />
             </View>
@@ -199,7 +220,11 @@ export default function TeamScreen() {
             <View key={player.id}>
               <PlayerCard
                 player={player}
-                onPress={() => router.push(`/player/${teamInfo?.team.id}/${player.id}` as any)}
+                onPress={() =>
+                  router.push(
+                    `/player/${teamInfo?.team.id}/${player.id}` as any
+                  )
+                }
               />
               <View style={styles.accentLine} />
             </View>
@@ -263,7 +288,6 @@ export default function TeamScreen() {
           </View>
         ))} */}
         <CustomWebView size={600} statsHtml={statsHtml} title="Team Stats" />
-
       </View>
     </ScrollView>
   );

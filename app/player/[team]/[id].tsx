@@ -2,7 +2,7 @@ import CustomWebView from "@/components/CustomWebView";
 import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import countries from "@/constants/countries.json";
-import { useApp } from "@/contexts/AppContext";
+import { useFootball } from "@/hooks/useFootball";
 import { CountryMap } from "@/types/soccer/profile";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
@@ -13,13 +13,15 @@ import CountryFlag from "react-native-country-flag";
 const map: CountryMap = countries;
 export default function PlayerDetailScreen() {
   const { team, id } = useLocalSearchParams();
-  const { playersList } = useApp();
+  const { playersList } = useFootball();
 
   const teamId = Number(team);
   const playerId = Number(id);
 
-  const players =  playersList.find((p) => p.team.id == teamId);
-  const player = players ? players.player?.find((p) => p.id == playerId) : undefined;
+  const players = playersList.find((p) => p.team.id == teamId);
+  const player = players
+    ? players.player?.find((p) => p.id == playerId)
+    : undefined;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,7 +74,7 @@ export default function PlayerDetailScreen() {
 
   return (
     <>
-      <HeaderStack title={player?.name || ''} />
+      <HeaderStack title={player?.name || ""} />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Image
@@ -151,9 +153,11 @@ export default function PlayerDetailScreen() {
             </View>
           </View>
 
-          <CustomWebView size={600} statsHtml={statsHtml} title="Player Stats"/>
-          
-
+          <CustomWebView
+            size={600}
+            statsHtml={statsHtml}
+            title="Player Stats"
+          />
         </View>
       </ScrollView>
     </>

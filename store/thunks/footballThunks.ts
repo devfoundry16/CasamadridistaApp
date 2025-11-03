@@ -1,0 +1,178 @@
+// store/thunks/footballThunks.ts
+import MatchService from "@/services/Football/MatchService";
+import SportsInfoService from "@/services/Football/SportsInfoService";
+import {
+  CoachWithTeam,
+  PlayerWithTeam,
+  TeamInfo,
+} from "@/types/soccer/profile";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import * as Bluebird from "bluebird";
+import {
+  setCoachList,
+  setLoading,
+  setPlayersList,
+  setTeamInfoList,
+} from "../slices/footballSlice";
+import { RootState } from "../store";
+
+const RealMadridId = 541;
+
+// Load app data from storage
+export const loadAppData = createAsyncThunk(
+  "football/loadAppData",
+  async (_, { dispatch }) => {
+    try {
+      console.log("---------Redux Football: Loading App Data---------");
+
+      const playersString = await AsyncStorage.getItem("players");
+      if (playersString) {
+        const savedPlayersList: PlayerWithTeam[] = JSON.parse(playersString);
+        console.log("saved players list:", savedPlayersList.length);
+        const teamIDs = savedPlayersList.map((players) => players.team.id);
+        console.log("loaded teamIds:", teamIDs);
+        dispatch(setPlayersList(savedPlayersList));
+      }
+
+      const coachString = await AsyncStorage.getItem("coaches");
+      if (coachString) {
+        const coachList: CoachWithTeam[] = JSON.parse(coachString);
+        console.log("loaded coaches:", coachList.length);
+        dispatch(setCoachList(coachList));
+      }
+
+      const teamString = await AsyncStorage.getItem("teams");
+      if (teamString) {
+        const teamList: TeamInfo[] = JSON.parse(teamString);
+        console.log("loaded teams:", teamList.length);
+        dispatch(setTeamInfoList(teamList));
+      }
+
+      console.log("[Redux Football] Data loaded");
+    } catch (error) {
+      console.error("[Redux Football] Failed to load data:", error);
+      throw error;
+    }
+  }
+);
+
+// Fetch profile data for a team
+export const fetchProfileData = createAsyncThunk(
+  "football/fetchProfileData",
+  async (id: number, { dispatch, getState }) => {
+    dispatch(setLoading(true));
+    try {
+      const state = getState() as RootState;
+      const { teamInfoList, coachList, playersList } = state.football;
+
+      console.log("Redux Football: before teaminfo list", teamInfoList.length);
+      const index = teamInfoList.findIndex((p) => p.team.id === id);
+
+      // Fetch team info with matches
+      const teamInfo = await SportsInfoService.fetchTeamInfo(id);
+
+      const newTeamInfoList =
+        index === -1
+          ? [...teamInfoList, teamInfo]
+          : [
+              ...teamInfoList.slice(0, index),
+              teamInfo,
+              ...teamInfoList.slice(index + 1),
+            ];
+
+      const [nextMatches, lastMatches] = await Promise.all([
+        MatchService.fetchUpcomingMatches(id),
+        MatchService.fetchLastMatches(id),
+      ]);
+
+      teamInfo.nextMatches = nextMatches.slice();
+      teamInfo.lastMatches = lastMatches.slice();
+
+      // Fetch and update coach
+      const coach = await SportsInfoService.fetchCoachProfile(teamInfo.team.id);
+      const newCoachList =
+        index === -1
+          ? [...coachList, { team: { id }, player: coach }]
+          : [
+              ...coachList.slice(0, index),
+              { team: { id }, player: coach },
+              ...coachList.slice(index + 1),
+            ];
+
+      // Fetch squad and players
+      const squads = await SportsInfoService.fetchSquad(id);
+
+      // Process players with concurrency control
+      Bluebird.Promise.map(
+        squads.players,
+        (player: { id: number }) => SportsInfoService.fetchProfile(player.id),
+        { concurrency: 5 }
+      ).then((data: any) => {
+        let newPlayersList;
+
+        if (index === -1) {
+          newPlayersList = [
+            ...playersList,
+            {
+              player: data,
+              team: {
+                id,
+              },
+            },
+          ];
+        } else {
+          newPlayersList = [
+            ...playersList.slice(0, index),
+            {
+              player: data,
+              team: {
+                id,
+              },
+            },
+            ...playersList.slice(index + 1),
+          ];
+        }
+        dispatch(setPlayersList(newPlayersList));
+
+        AsyncStorage.setItem("players", JSON.stringify(newPlayersList));
+      });
+
+      // Save to AsyncStorage
+      dispatch(setTeamInfoList(newTeamInfoList));
+      dispatch(setCoachList(newCoachList));
+
+      await Promise.all([
+        AsyncStorage.setItem("teams", JSON.stringify(newTeamInfoList)),
+        AsyncStorage.setItem("coaches", JSON.stringify(newCoachList)),
+      ]);
+
+      console.log("Redux Football: teaminfo list updated");
+    } catch (error) {
+      console.error("[Redux Football] Failed to fetch profile data:", error);
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+);
+
+// Initialize app data
+export const initializeAppData = createAsyncThunk(
+  "football/initializeAppData",
+  async (_, { dispatch }) => {
+    await dispatch(loadAppData());
+    await dispatch(fetchProfileData(RealMadridId));
+  }
+);
+
+// Clear all football data
+export const clearFootballData = createAsyncThunk(
+  "football/clearFootballData",
+  async (_, { dispatch }) => {
+    await AsyncStorage.multiRemove(["players", "coaches", "teams"]);
+    dispatch(setPlayersList([]));
+    dispatch(setCoachList([]));
+    dispatch(setTeamInfoList([]));
+  }
+);

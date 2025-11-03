@@ -1,5 +1,6 @@
-import { AppProvider } from "@/contexts/AppContext";
-import { CartProvider } from "@/hooks/useCart";
+import { useCart } from "@/hooks/useCart";
+import { useFootball } from "@/hooks/useFootball";
+import { useUser } from "@/hooks/useUser";
 import { store } from "@/store/store";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -21,6 +22,20 @@ function RootLayoutNav() {
   );
 }
 
+const DataInitializer = () => {
+  const { initializeAppData } = useFootball();
+  const { loadUserData } = useUser();
+  const { loadCartItems } = useCart();
+  useEffect(() => {
+    //AsyncStorage.clear();
+    //initializeAppData();
+    loadUserData();
+    loadCartItems();
+  }, []);
+
+  return null;
+};
+
 export default function RootLayout() {
   useEffect(() => {
     SplashScreen.hideAsync();
@@ -34,13 +49,10 @@ export default function RootLayout() {
         urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
       >
         <Provider store={store}>
-          <AppProvider>
-            <CartProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <RootLayoutNav />
-              </GestureHandlerRootView>
-            </CartProvider>
-          </AppProvider>
+          <DataInitializer />
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <RootLayoutNav />
+          </GestureHandlerRootView>
         </Provider>
       </StripeProvider>
     </QueryClientProvider>

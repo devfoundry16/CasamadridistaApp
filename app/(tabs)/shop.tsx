@@ -1,5 +1,5 @@
 import { Spinner } from "@/components/Spinner";
-import Colors, { altColors } from "@/constants/colors";
+import Colors from "@/constants/colors";
 import ProductService from "@/services/Shop/ProductService";
 import { Product } from "@/types/shop/product";
 import { Image } from "expo-image";
@@ -16,7 +16,6 @@ import {
 
 export default function ShopScreen() {
   const [products, setProducts] = useState<Product[] | null>(null);
-  const colors = altColors;
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
