@@ -12,7 +12,7 @@ export const useStripePay = () => {
   const orderIdRef = useRef<number>(0);
   /* Stripe */
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const API_URL = "http://localhost:3000";
+  const API_URL = "http://localhost:3000/api/stripe";
 
   const handlePayment = async (orderId: number, walletAmount: number) => {
     console.log(walletAmount);

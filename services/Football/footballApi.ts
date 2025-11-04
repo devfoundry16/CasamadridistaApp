@@ -6,7 +6,7 @@ type QueryValue =
   | boolean
   | null
   | undefined
-  | Array<string | number | boolean>
+  | (string | number | boolean)[]
   | Record<string, any>;
 
 const BASE_API_URL = "https://v3.football.api-sports.io/";

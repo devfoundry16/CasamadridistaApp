@@ -29,7 +29,7 @@ const DataInitializer = () => {
   const { loadCartItems } = useCart();
   useEffect(() => {
     //AsyncStorage.clear();
-    //initializeAppData();
+    initializeAppData();
     loadUserData();
     loadCartItems();
   }, []);

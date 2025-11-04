@@ -132,22 +132,22 @@ export default function HomeScreen() {
     }
   }, [liveMatch]);
 
-  // useEffect(() => {
-  //   console.log("HomeScreen mounted - loading initial data");
-  //   loadInitialData();
-  // }, [loadInitialData]);
-
   useEffect(() => {
-    // checkLiveMatch();
-    // console.log("Starting live match polling");
-    // const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
-    // // Initial check
-    // checkLiveMatch();
-    // return () => {
-    //   console.log("Cleaning up live match polling");
-    //   clearInterval(timer);
-    // };
-  }, [checkLiveMatch]);
+    console.log("HomeScreen mounted - loading initial data");
+    loadInitialData();
+  }, [loadInitialData]);
+
+  // useEffect(() => {
+  //   checkLiveMatch();
+  //   console.log("Starting live match polling");
+  //   const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
+  //   // Initial check
+  //   checkLiveMatch();
+  //   return () => {
+  //     console.log("Cleaning up live match polling");
+  //     clearInterval(timer);
+  //   };
+  // }, [checkLiveMatch]);
 
   useEffect(() => {
     setHasAnimated(false);

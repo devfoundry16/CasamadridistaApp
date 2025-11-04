@@ -46,7 +46,7 @@ class ApiService {
       player: id,
     };
     const res = await fetchWithAuth("players/profiles/", this.API_KEY, param);
-    if (res.response[0] == undefined) console.log('error player: ', id, res)
+    if (res.response[0] == undefined) console.log("error player: ", id, res);
     return res.response[0].player;
   }
   async fetchCoachProfile(id: number) {
@@ -60,7 +60,7 @@ class ApiService {
   async fetchCountryFlag(country: string) {
     const param: Record<string, string> = {
       name:
-        country.toLowerCase() == "türkiye" ? "turkey" : country.toLowerCase(),
+        country.toLowerCase() === "türkiye" ? "turkey" : country.toLowerCase(),
     };
     const res = await fetchWithAuth("countries/", this.API_KEY, param);
     return res.response[0]?.flag;
