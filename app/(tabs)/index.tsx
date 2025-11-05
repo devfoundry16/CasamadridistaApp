@@ -104,7 +104,6 @@ export default function HomeScreen() {
   const checkLiveMatch = useCallback(async () => {
     try {
       const liveMatchData = await fetchLiveMatchData(RealMadridId);
-      console.log("Live match data:", liveMatchData);
       if (liveMatchData) {
         setLiveMatch(liveMatchData);
       } else {
@@ -137,17 +136,16 @@ export default function HomeScreen() {
     loadInitialData();
   }, [loadInitialData]);
 
-  // useEffect(() => {
-  //   checkLiveMatch();
-  //   console.log("Starting live match polling");
-  //   const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
-  //   // Initial check
-  //   checkLiveMatch();
-  //   return () => {
-  //     console.log("Cleaning up live match polling");
-  //     clearInterval(timer);
-  //   };
-  // }, [checkLiveMatch]);
+  useEffect(() => {
+    console.log("Starting live match polling");
+    const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
+    // Initial check
+    checkLiveMatch();
+    return () => {
+      console.log("Cleaning up live match polling");
+      clearInterval(timer);
+    };
+  }, [checkLiveMatch]);
 
   useEffect(() => {
     setHasAnimated(false);
