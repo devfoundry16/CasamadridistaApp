@@ -123,7 +123,7 @@ export default function PlayerDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.darkGray,
+    backgroundColor: Colors.deepDarkGray,
   },
   header: {
     paddingTop: 40,

@@ -67,10 +67,12 @@ export const fetchProfileData = createAsyncThunk(
       const { teamInfoList, coachList, playersList } = state.football;
 
       console.log("Redux Football: before teaminfo list", teamInfoList.length);
+      const profile = await SportsInfoService.fetchProfile(id);
+
       const index = teamInfoList.findIndex((p) => p.team.id === id);
 
       // Fetch team info with matches
-      const teamInfo = await SportsInfoService.fetchTeamInfo(id);
+      const teamInfo = profile.teamInfo;
 
       const newTeamInfoList =
         index === -1
@@ -90,7 +92,7 @@ export const fetchProfileData = createAsyncThunk(
       teamInfo.lastMatches = lastMatches.slice();
 
       // Fetch and update coach
-      const coach = await SportsInfoService.fetchCoachProfile(teamInfo.team.id);
+      const coach = profile.coach.player;
       const newCoachList =
         index === -1
           ? [...coachList, { team: { id }, player: coach }]
@@ -100,43 +102,33 @@ export const fetchProfileData = createAsyncThunk(
               ...coachList.slice(index + 1),
             ];
 
-      // Fetch squad and players
-      const squads = await SportsInfoService.fetchSquad(id);
+      let newPlayersList;
 
-      // Process players with concurrency control
-      Bluebird.Promise.map(
-        squads.players,
-        (player: { id: number }) => SportsInfoService.fetchProfile(player.id),
-        { concurrency: 5 }
-      ).then((data: any) => {
-        let newPlayersList;
-
-        if (index === -1) {
-          newPlayersList = [
-            ...playersList,
-            {
-              player: data,
-              team: {
-                id,
-              },
+      if (index === -1) {
+        newPlayersList = [
+          ...playersList,
+          {
+            player: profile.players.player,
+            team: {
+              id,
             },
-          ];
-        } else {
-          newPlayersList = [
-            ...playersList.slice(0, index),
-            {
-              player: data,
-              team: {
-                id,
-              },
+          },
+        ];
+      } else {
+        newPlayersList = [
+          ...playersList.slice(0, index),
+          {
+            player: profile.players.player,
+            team: {
+              id,
             },
-            ...playersList.slice(index + 1),
-          ];
-        }
-        dispatch(setPlayersList(newPlayersList));
+          },
+          ...playersList.slice(index + 1),
+        ];
+      }
+      dispatch(setPlayersList(newPlayersList));
 
-        AsyncStorage.setItem("players", JSON.stringify(newPlayersList));
-      });
+      AsyncStorage.setItem("players", JSON.stringify(newPlayersList));
 
       // Save to AsyncStorage
       dispatch(setTeamInfoList(newTeamInfoList));

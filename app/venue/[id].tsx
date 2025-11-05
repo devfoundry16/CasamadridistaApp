@@ -24,8 +24,6 @@ const VenueDetailScreen = () => {
     fetchVenue();
   }, []);
 
-  console.log(typeof id, "id:", id);
-
   if (id === "null") {
     return (
       <>

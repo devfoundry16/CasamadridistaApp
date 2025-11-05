@@ -37,6 +37,7 @@ export default function TeamDetailScreen() {
     player: [],
     team: {},
   };
+
   const coachWithTeam: CoachWithTeam = coachList.find(
     (c) => c.team.id === teamId
   ) ?? { player: {} as Coach, team: { id: 0 } };

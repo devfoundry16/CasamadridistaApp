@@ -9,7 +9,9 @@ type QueryValue =
   | (string | number | boolean)[]
   | Record<string, any>;
 
-const BASE_API_URL = "https://v3.football.api-sports.io/";
+//const BASE_API_URL = "https://v3.football.api-sports.io/";
+
+const BASE_API_URL = "http://localhost:3000/api/";
 
 const fetchWithAuth = async (
   endpoint: string,

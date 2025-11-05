@@ -3,6 +3,7 @@ import { useCart } from "@/hooks/useCart";
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
 import { store } from "@/store/store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
@@ -28,7 +29,7 @@ const DataInitializer = () => {
   const { loadUserData } = useUser();
   const { loadCartItems } = useCart();
   useEffect(() => {
-    //AsyncStorage.clear();
+    // AsyncStorage.clear();
     initializeAppData();
     loadUserData();
     loadCartItems();
