@@ -215,16 +215,6 @@ export default function AccountScreen() {
           </Text>
           )
         </Text>
-        <Text style={styles.infoText}>
-          From your account dashboard you can view your{" "}
-          <Text style={styles.linkText}>recent orders</Text>, manage your{" "}
-          <Text style={styles.linkText}>shipping and billing addresses</Text>,
-          and{" "}
-          <Text style={styles.linkText}>
-            edit your password and account details
-          </Text>
-          .
-        </Text>
       </View>
     </ScrollView>
   );
