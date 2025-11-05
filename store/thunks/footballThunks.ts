@@ -8,7 +8,6 @@ import {
 } from "@/types/soccer/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import * as Bluebird from "bluebird";
 import {
   setCoachList,
   setLoading,
@@ -141,7 +140,8 @@ export const fetchProfileData = createAsyncThunk(
 
       console.log("Redux Football: teaminfo list updated");
     } catch (error) {
-      console.error("[Redux Football] Failed to fetch profile data:", error);
+      dispatch(setLoading(false));
+      //console.error("[Redux Football] Failed to fetch profile data:", error);
       throw error;
     } finally {
       dispatch(setLoading(false));

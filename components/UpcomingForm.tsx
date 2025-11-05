@@ -7,7 +7,6 @@ import { Circle } from "react-native-progress";
 
 import TeamForm from "./TeamForm";
 interface UpcomingProps {
-  liveMatch?: Match;
   nextMatch: Match;
   homeTeamLastMatches: Match[];
   awayTeamLastMatches: Match[];
@@ -45,6 +44,7 @@ export default function UpcomingForm({
       seconds: pad(seconds),
     };
   };
+
   const live = nextMatch.goals.home == null ? false : true;
   useEffect(() => {
     const calculateTimeLeft = async () => {
@@ -77,6 +77,7 @@ export default function UpcomingForm({
       return () => clearInterval(timer);
     }
   }, [nextMatch]);
+
   return (
     <View style={styles.container}>
       {/* Header */}

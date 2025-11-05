@@ -22,15 +22,15 @@ import CustomWebView from "@/components/CustomWebView";
 import HeaderStack from "@/components/HeaderStack";
 import { useFootball } from "@/hooks/useFootball";
 import CountryFlag from "react-native-country-flag";
+import { Spinner } from "@/components/Spinner";
 const map: CountryMap = countries;
 
 export default function TeamDetailScreen() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamId = Number(id);
 
-  const { playersList, coachList, teamInfoList, fetchProfileData } =
+  const { playersList, coachList, teamInfoList, fetchProfileData, isLoading } =
     useFootball();
 
   const players = playersList.find((p) => p.team.id === teamId) ?? {
@@ -98,6 +98,15 @@ export default function TeamDetailScreen() {
                       </body>
                     </html>
                   `;
+
+  if (isLoading) {
+    return (
+      <View style={styles.spinnerContainer}>
+        <HeaderStack title="Squads" />
+        <Spinner content="Loading squads" />
+      </View>
+    );
+  }
 
   return (
     <>
@@ -328,6 +337,12 @@ function PlayerCard({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.deepDarkGray,
   },
   content: {
     padding: 16,

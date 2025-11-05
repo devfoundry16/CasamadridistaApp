@@ -5,6 +5,7 @@ import SquadSection from "@/components/Home/SquadSection";
 import StrengthSection from "@/components/Home/StrengthSection";
 import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
 import VisionSection from "@/components/Home/VisionSection";
+import { Spinner } from "@/components/Spinner";
 import UpcomingForm from "@/components/UpcomingForm";
 import Colors from "@/constants/colors";
 import { useFootball } from "@/hooks/useFootball";
@@ -25,7 +26,8 @@ import {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { teamInfoList, fetchProfileData, fetchLiveMatchData } = useFootball();
+  const { teamInfoList, fetchProfileData, fetchLiveMatchData, isLoading } =
+    useFootball();
   const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
@@ -150,6 +152,14 @@ export default function HomeScreen() {
     setShouldAnimate(false);
   }, []);
 
+  if (isLoading) {
+    return (
+      <View style={styles.spinnerContainer}>
+        <Spinner content="Loading Context" />
+      </View>
+    );
+  }
+
   return (
     <ScrollView
       style={styles.container}
@@ -238,6 +248,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.darkGray,
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.deepDarkGray,
   },
   header: {
     alignItems: "center",
