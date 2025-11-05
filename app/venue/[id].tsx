@@ -3,12 +3,11 @@ import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import SportsInfoService from "@/services/Football/SportsInfoService";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const VenueDetailScreen = () => {
-  const router = useRouter();
   const { id } = useLocalSearchParams();
   const [venue, setVenue] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
@@ -24,6 +23,19 @@ const VenueDetailScreen = () => {
     };
     fetchVenue();
   }, []);
+
+  console.log(typeof id, "id:", id);
+
+  if (id === "null") {
+    return (
+      <>
+        <HeaderStack title="Venue Details" />
+        <View style={styles.container}>
+          <Text style={styles.venueName}>No Venue Information</Text>
+        </View>
+      </>
+    );
+  }
 
   if (loading) {
     return (
@@ -83,6 +95,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "bold",
     marginBottom: 15,
+    textAlign: "center",
   },
   venueLogo: {
     width: "100%",

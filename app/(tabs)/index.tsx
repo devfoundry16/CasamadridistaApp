@@ -45,8 +45,6 @@ export default function HomeScreen() {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
 
-  const live = liveMatch === undefined ? false : true;
-
   const handleStrengthSectionLayout = (event: any) => {
     const { y } = event.nativeEvent.layout;
     setStrengthSectionY(y);

@@ -1116,17 +1116,13 @@
 import Colors from "@/constants/colors";
 import { Stack } from "expo-router";
 import React, { useRef } from "react";
-import {
-  Platform,
-  StyleSheet,
-  View
-} from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 
 import { WebView } from "react-native-webview";
 export default function CreateFormationScreen() {
   const htmlSource = Platform.select({
-    default: { uri: "http://localhost:5000" },
-    android: { uri: "http://192.168.110.111:5000" },
+    default: { uri: "https://casamadridista.com/formation" },
+    android: { uri: "https://casamadridista.com/formation" },
   });
   const pitchRef = useRef<WebView>(null);
   return (
@@ -1144,11 +1140,7 @@ export default function CreateFormationScreen() {
         }}
       />
       <View style={styles.container}>
-        <WebView
-          ref={pitchRef}
-          source={htmlSource}
-          style={styles.webview}
-        />
+        <WebView ref={pitchRef} source={htmlSource} style={styles.webview} />
       </View>
     </>
   );
