@@ -16,7 +16,7 @@ export const useStripePay = () => {
   const API_URL = STRIPE_API_URL;
 
   const handlePayment = async (orderId: number, walletAmount: number) => {
-    console.log(walletAmount);
+    console.log("wallet amount:", walletAmount);
     // this is only for wallet top-up
     // set a ref immediately so confirmHandler (called by Stripe) can read the up-to-date id
     orderIdRef.current = orderId;

@@ -85,7 +85,11 @@ export default function CheckoutScreen() {
   };
 
   const addFundsToWallet = async (order_id: number) => {
-    await addFunds(Number(amount), CHECKOUT_PAYMENT_METHOD.STRIPE);
+    await addFunds(
+      Number(amount),
+      CHECKOUT_PAYMENT_METHOD.STRIPE,
+      "Wallet Top-Up"
+    );
   };
 
   const stripePay = () => {

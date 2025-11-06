@@ -86,7 +86,7 @@ export class FlintopWalletService {
   // Get wallet balance
   static async getBalance(): Promise<FlintopWalletBalance> {
     const data = await this.authenticatedFetch<FlintopWalletBalance>(
-      "/woo-wallet/v1/balance"
+      "woo-wallet/v1/balance"
     );
     return data;
   }
@@ -97,7 +97,7 @@ export class FlintopWalletService {
     limit: number = 20
   ): Promise<FlintopWalletTransaction[]> {
     const data = await this.authenticatedFetch<FlintopWalletTransaction[]>(
-      `/woo-wallet/v1/transactions?page=${page}&limit=${limit}`
+      `woo-wallet/v1/transactions?page=${page}&limit=${limit}`
     );
     return data;
   }
@@ -107,7 +107,7 @@ export class FlintopWalletService {
     request: FlintopWalletAddFundsRequest
   ): Promise<FlintopWalletAddFundsResponse> {
     return this.authenticatedFetch<FlintopWalletAddFundsResponse>(
-      "/woo-wallet/v1/add-funds",
+      "woo-wallet/v1/add-funds",
       {
         method: "POST",
         body: JSON.stringify(request),

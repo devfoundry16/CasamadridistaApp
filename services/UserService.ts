@@ -89,7 +89,7 @@ class ApiService {
       const token = await AsyncStorage.getItem("jwt_token");
       if (!token) return false;
 
-      const response = await this.fetchWithAuth("/jwt-auth/v1/token/validate", {
+      const response = await this.fetchWithAuth("jwt-auth/v1/token/validate", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -104,7 +104,7 @@ class ApiService {
   }
 
   async validCrendential(username: string, password: string) {
-    const response = await fetch(`${this.baseUrl}/jwt-auth/v1/token`, {
+    const response = await fetch(`${this.baseUrl}jwt-auth/v1/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -138,7 +138,7 @@ class ApiService {
   }
 
   async register(userData: Omit<User, "id">): Promise<any> {
-    const response = await this.fetchWithAuth("/wp/v2/users", {
+    const response = await this.fetchWithAuth("wp/v2/users", {
       method: "POST",
       body: JSON.stringify(userData),
     });
@@ -147,7 +147,7 @@ class ApiService {
     return response;
   }
   async update(userData: Partial<User>): Promise<any> {
-    const response = await this.fetchWithAuth(`/wp/v2/users/${userData.id}`, {
+    const response = await this.fetchWithAuth(`wp/v2/users/${userData.id}`, {
       method: "PUT",
       body: JSON.stringify(userData),
     });
@@ -161,7 +161,7 @@ class ApiService {
       addressData.type === "billing"
         ? { billing: addressData }
         : { shipping: addressData };
-    const response = await this.fetchWithAuth(`/wc/v3/customers/${id}`, {
+    const response = await this.fetchWithAuth(`wc/v3/customers/${id}`, {
       method: "PUT",
       body: JSON.stringify(body),
     });
@@ -170,7 +170,7 @@ class ApiService {
   }
   async getAddress(): Promise<any> {
     const id = await this.getUserId();
-    const response = await this.fetchWithAuth(`/wc/v3/customers/${id}`, {
+    const response = await this.fetchWithAuth(`wc/v3/customers/${id}`, {
       method: "get",
     });
     return { shipping: response.shipping, billing: response.billing };
@@ -188,7 +188,7 @@ class ApiService {
     ]);
     console.log(id, token);
 
-    const fetchUser = this.fetchWithAuth(`/wp/v2/users/${id}?context=edit`, {
+    const fetchUser = this.fetchWithAuth(`wp/v2/users/${id}?context=edit`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -246,7 +246,7 @@ class ApiService {
     } as any); // Type assertion for React Native FormData
 
     // Construct the API endpoint
-    const endpoint = `${this.baseUrl}/wp/v2/media`;
+    const endpoint = `${this.baseUrl}wp/v2/media`;
     const token = btoa(`${AUTH_USERNAME}:${AUTH_PASSWORD}`);
     // Headers with Bearer Token
     const headers = {
