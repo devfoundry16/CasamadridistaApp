@@ -119,7 +119,7 @@ export default function TeamDetailScreen() {
           style={[
             styles.header,
             {
-              backgroundColor: colors.background,
+              backgroundColor: Colors.deepDarkGray,
               borderBottomColor: colors.border,
               paddingTop: 12,
             },

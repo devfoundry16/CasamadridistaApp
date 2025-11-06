@@ -32,6 +32,7 @@ export default function HomeScreen() {
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
   const [liveMatch, setLiveMatch] = useState<Match>();
+  const [isLive, setIsLive] = useState<boolean>(false);
 
   const nextMatches = teamInfoList.find(
     (p) => p.team.id === RealMadridId
@@ -43,6 +44,7 @@ export default function HomeScreen() {
 
   const matches = [...(nextMatches ?? []), ...(lastMatches ?? [])];
   const nextMatch = nextMatches?.at(0);
+
   const [strengthSectionY, setStrengthSectionY] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
@@ -103,8 +105,9 @@ export default function HomeScreen() {
 
   const checkLiveMatch = useCallback(async () => {
     try {
-      const liveMatchData = await fetchLiveMatchData(RealMadridId);
-      if (liveMatchData) {
+      console.log("*");
+      if (isLive) {
+        const liveMatchData = await fetchLiveMatchData(RealMadridId);
         setLiveMatch(liveMatchData);
       } else {
         setLiveMatch(undefined);
@@ -112,12 +115,12 @@ export default function HomeScreen() {
     } catch (error) {
       console.error("Error fetching live match data:", error);
     }
-  }, [fetchLiveMatchData]);
+  }, [isLive]);
 
   const loadInitialData = useCallback(async () => {
     try {
       console.log("---------Home Page---------");
-      if (teamInfoList.length && !liveMatch) fetchProfileData(RealMadridId);
+      if (teamInfoList.length && !isLive) fetchProfileData(RealMadridId);
       MatchService.fetchNextMatch(RealMadridId).then((result) => {
         MatchService.fetchLastMatches(result.teams.home.id).then((data) => {
           setHomeTeamLastMatches(data);
@@ -129,23 +132,23 @@ export default function HomeScreen() {
     } catch (error) {
       console.error("[App] Failed to load initial data:", error);
     }
-  }, [liveMatch]);
+  }, []);
 
   useEffect(() => {
     console.log("HomeScreen mounted - loading initial data");
     loadInitialData();
-  }, [loadInitialData]);
+  }, [loadInitialData, isLive]);
 
   useEffect(() => {
     console.log("Starting live match polling");
-    const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
-    // Initial check
-    checkLiveMatch();
-    return () => {
-      console.log("Cleaning up live match polling");
-      clearInterval(timer);
-    };
-  }, [checkLiveMatch]);
+    if (isLive) {
+      const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
+      return () => {
+        console.log("Cleaning up live match polling");
+        clearInterval(timer);
+      };
+    }
+  }, [isLive]);
 
   useEffect(() => {
     setHasAnimated(false);
@@ -169,9 +172,10 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <Image
-          source={{
-            uri: "https://casamadridista.com/wp-content/uploads/2025/09/435345345.webp",
-          }}
+          source={
+            // uri: "https://casamadridista.com/wp-content/uploads/2025/09/435345345.webp",
+            require("@/assets/images/back.webp")
+          }
           style={styles.headerImage}
           contentFit="cover"
         />
@@ -209,6 +213,7 @@ export default function HomeScreen() {
                 {liveMatch
                   ? nextMatch && (
                       <UpcomingForm
+                        setLive={setIsLive}
                         nextMatch={liveMatch}
                         homeTeamLastMatches={homeTeamLastMatches}
                         awayTeamLastMatches={awayTeamLastMatches}
@@ -216,6 +221,7 @@ export default function HomeScreen() {
                     )
                   : nextMatch && (
                       <UpcomingForm
+                        setLive={setIsLive}
                         nextMatch={nextMatch}
                         homeTeamLastMatches={homeTeamLastMatches}
                         awayTeamLastMatches={awayTeamLastMatches}

@@ -65,7 +65,7 @@ export const fetchProfileData = createAsyncThunk(
       const state = getState() as RootState;
       const { teamInfoList, coachList, playersList } = state.football;
 
-      console.log("Redux Football: before teaminfo list", teamInfoList.length);
+      console.log("Redux Football: Current Team InfoList", teamInfoList.length);
       const profile = await SportsInfoService.fetchProfile(id);
 
       const index = teamInfoList.findIndex((p) => p.team.id === id);

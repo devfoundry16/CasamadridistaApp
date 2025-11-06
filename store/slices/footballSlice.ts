@@ -17,7 +17,7 @@ const initialState: FootballState = {
   playersList: [],
   coachList: [],
   teamInfoList: [],
-  isLoading: false,
+  isLoading: true,
 };
 
 const footballSlice = createSlice({

@@ -7,6 +7,7 @@ import { Circle } from "react-native-progress";
 
 import TeamForm from "./TeamForm";
 interface UpcomingProps {
+  setLive: React.Dispatch<React.SetStateAction<boolean>>;
   nextMatch: Match;
   homeTeamLastMatches: Match[];
   awayTeamLastMatches: Match[];
@@ -18,6 +19,7 @@ type TimeLeft = {
   seconds: string;
 };
 export default function UpcomingForm({
+  setLive,
   nextMatch,
   homeTeamLastMatches,
   awayTeamLastMatches,
@@ -63,7 +65,9 @@ export default function UpcomingForm({
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
         setTimeLeft(formatTime(days, hours, minutes, seconds));
+        setLive(false);
       } else {
+        setLive(true);
         setTimeLeft({ days: "0", hours: "0", minutes: "0", seconds: "0" });
       }
     };
