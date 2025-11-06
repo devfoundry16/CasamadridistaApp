@@ -1,5 +1,3 @@
-import fetchWithAuth from "./footballApi";
-
 // class ApiService {
 //   private API_KEY = "2efab6a210831868664529f16d897809";
 //   async fetchNextMatch(teamId: number) {
@@ -39,12 +37,12 @@ import fetchWithAuth from "./footballApi";
 // const MatchService = new ApiService();
 // export default MatchService;
 import axios, { AxiosInstance } from "axios";
-
+import { MATCH_BASE_API_URL } from "@env";
 class ApiService {
   private api: AxiosInstance;
   constructor() {
     this.api = axios.create({
-      baseURL: "http://localhost:3000/api/match",
+      baseURL: MATCH_BASE_API_URL,
       headers: { Accept: "application/json" },
     });
   }

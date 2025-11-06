@@ -1,10 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import UserService from "../UserService";
 import { wooApi } from "./wooApi";
-const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json/wc";
+import { WOO_CONSUMER_KEY, WOO_CONSUMER_SECRET, WP_BASE_URL } from "@env";
+const DEFAULT_BASE_URL = `${WP_BASE_URL}/wc`;
 const API_BASE_URL_KEY = "api_base_url_key";
-const AUTH_USERNAME = "ck_5761f8ce313356e07555cf14a8c2099ab27d7942"; // Replace with actual username
-const AUTH_PASSWORD = "cs_72d03b9110f7f1e3592f5c4a77cbd7c42b176075";
+const WOO_USERNAME = WOO_CONSUMER_KEY; // Replace with actual username
+const WOO_PASSWORD = WOO_CONSUMER_SECRET;
 class ApiService {
   private baseUrl: string = DEFAULT_BASE_URL;
 
@@ -28,7 +29,7 @@ class ApiService {
 
   private async fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     // const token = await AsyncStorage.getItem('jwt_token');
-    const token = btoa(`${AUTH_USERNAME}:${AUTH_PASSWORD}`);
+    const token = btoa(`${WOO_USERNAME}:${WOO_PASSWORD}`);
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };

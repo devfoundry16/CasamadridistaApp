@@ -74,11 +74,12 @@
 // }
 //}
 import axios, { AxiosInstance } from "axios";
+import { PROFILE_BASE_API_URL } from "@env";
 class ApiService {
   private api: AxiosInstance;
   constructor() {
     this.api = axios.create({
-      baseURL: "http://localhost:3000/api/profile",
+      baseURL: PROFILE_BASE_API_URL,
       headers: { Accept: "application/json" },
     });
   }
