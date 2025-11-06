@@ -1,6 +1,7 @@
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
 import { CHECKOUT_PRODUCT_TYPE } from "@/types/shop/checkout";
+import { Product } from "@/types/shop/product";
 import { router } from "expo-router";
 import { Check, X } from "lucide-react-native";
 import React, { useState } from "react";
@@ -117,7 +118,7 @@ export default function PackagesScreen() {
         `You cannot purchase subscription with other items in the cart. Please clear your cart and try again.`
       );
     } else {
-      addToCart(product);
+      addToCart(product as Product);
       console.log("productId: ", product_id, "variationId:", variation_id);
       router.push(
         `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION}`
@@ -172,7 +173,7 @@ export default function PackagesScreen() {
           <View key={pkg.id}>
             <View
               style={
-                pkg.badge != "Popular"
+                pkg.badge !== "Popular"
                   ? styles.packageNameContainer
                   : styles.popularPackageNameContainer
               }
@@ -241,7 +242,7 @@ export default function PackagesScreen() {
                 onPress={() =>
                   handlePackage(
                     pkg.product_id,
-                    pkg.variation_id[billingType == "monthly" ? 0 : 1]
+                    pkg.variation_id[billingType === "monthly" ? 0 : 1]
                   )
                 }
               >

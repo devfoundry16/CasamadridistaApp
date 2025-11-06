@@ -1,6 +1,7 @@
 // components/AddFundsModal.tsx
 import { useCart } from "@/hooks/useCart";
 import { CHECKOUT_PRODUCT_TYPE } from "@/types/shop/checkout";
+import { Product } from "@/types/shop/product";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -58,7 +59,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
       // setLoading(true);
       setVisibility(false);
       resetForm();
-      addToCart(product);
+      addToCart(product as Product);
       console.log("Funds amount:", numericAmount);
       router.push(
         `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.WALLET}&amount=${numericAmount}`

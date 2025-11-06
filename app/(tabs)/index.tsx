@@ -172,10 +172,9 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <Image
-          source={
-            // uri: "https://casamadridista.com/wp-content/uploads/2025/09/435345345.webp",
-            require("@/assets/images/back.webp")
-          }
+          source={{
+            uri: "https://casamadridista.com/wp-content/uploads/2025/09/435345345.webp",
+          }}
           style={styles.headerImage}
           contentFit="cover"
         />
