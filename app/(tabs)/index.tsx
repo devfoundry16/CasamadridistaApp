@@ -105,7 +105,6 @@ export default function HomeScreen() {
 
   const checkLiveMatch = useCallback(async () => {
     try {
-      console.log("*");
       if (isLive) {
         const liveMatchData = await fetchLiveMatchData(RealMadridId);
         setLiveMatch(liveMatchData);

@@ -118,11 +118,12 @@ export default function PackagesScreen() {
         `You cannot purchase subscription with other items in the cart. Please clear your cart and try again.`
       );
     } else {
-      addToCart(product as Product);
-      console.log("productId: ", product_id, "variationId:", variation_id);
-      router.push(
-        `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION}`
-      );
+      addToCart(product as Product).then((items) => {
+        console.log("productId: ", product_id, "variationId:", variation_id);
+        router.push(
+          `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION}`
+        );
+      });
     }
   };
 

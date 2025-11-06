@@ -6,5 +6,14 @@ module.exports = defineConfig([
   expoConfig,
   {
     ignores: ['dist/*'],
+    rules: {
+      // Allow Babel-resolved module from react-native-dotenv
+      'import/no-unresolved': [
+        'error',
+        {
+          ignore: ['^@env$'],
+        },
+      ],
+    },
   },
 ]);
