@@ -23,7 +23,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Switch,
 } from "react-native";
+import { useDispatch } from "react-redux";
+import { updateAddress } from "@/store/thunks/userThunks";
 
 export default function CheckoutScreen() {
   const { productType, amount, pendingOrderId } = useLocalSearchParams();
@@ -32,13 +35,23 @@ export default function CheckoutScreen() {
   const router = useRouter();
   const { addOrder, updateOrder, createSubscriptionOrder } = useOrder();
   const billingAddress = user?.billing;
-  const shippingAddress = user?.shipping;
   const [name, setName] = useState(
     billingAddress?.first_name + " " + billingAddress?.last_name
   );
-  const [email, setEmail] = useState(billingAddress?.email);
-  const [phone, setPhone] = useState("");
-  const [address] = useState(shippingAddress);
+  const [email, setEmail] = useState(
+    billingAddress?.email ? billingAddress?.email : user?.email
+  );
+  const [phone, setPhone] = useState(billingAddress?.phone || "");
+  // Billing address form fields (pre-filled from user billing when available)
+  const [address1, setAddress1] = useState(billingAddress?.address_1 || "");
+  const [address2, setAddress2] = useState(billingAddress?.address_2 || "");
+  const [city, setCity] = useState(billingAddress?.city || "");
+  const [stateField, setStateField] = useState(billingAddress?.state || "");
+  const [country, setCountry] = useState(billingAddress?.country || "");
+  const [postcode, setPostcode] = useState(billingAddress?.postcode || "");
+  const [updateBillingChecked, setUpdateBillingChecked] = useState(false);
+
+  const dispatch = useDispatch();
   const [status, setStatus] = useState<boolean>(pendingOrderId ? true : false); //false means place an order, true means paying
   const [orderId, setOrderId] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>(
@@ -48,6 +61,24 @@ export default function CheckoutScreen() {
   const { addFunds } = useFlintopWallet();
 
   const preparePayload = () => {
+    const nameParts = name ? name.trim().split(" ") : ["", ""];
+    const firstName = nameParts.shift() || "";
+    const lastName = nameParts.join(" ") || "";
+
+    const billingPayload = {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      phone: phone,
+      address_1: address1,
+      address_2: address2,
+      city: city,
+      state: stateField,
+      country: country,
+      postcode: postcode,
+      type: "billing",
+    } as any;
+
     return {
       payment_method: paymentMethod, // or 'paypal', etc.
       payment_method_title:
@@ -56,7 +87,7 @@ export default function CheckoutScreen() {
           : "Credit/Debit Card",
       set_paid: false, // Let the payment gateway handle the payment
       customer_id: user?.id,
-      billing: user?.billing,
+      billing: billingPayload,
       shipping: user?.shipping,
       line_items:
         items.map((item) => {
@@ -70,6 +101,7 @@ export default function CheckoutScreen() {
 
   const placeOrder = (payload: any) => {
     addOrder(payload).then((data) => {
+      console.log(data);
       console.log(
         "order id:",
         data.id,
@@ -82,6 +114,27 @@ export default function CheckoutScreen() {
       );
       setOrderId(data.id);
       setStatus(data.status === OrderStatus.PENDING ? true : false);
+      // If user opted to update their saved billing address, dispatch updateAddress
+      if (updateBillingChecked) {
+        const nameParts = name ? name.trim().split(" ") : ["", ""];
+        const firstName = nameParts.shift() || "";
+        const lastName = nameParts.join(" ") || "";
+        const billingPayload = {
+          type: "billing",
+          email: email,
+          first_name: firstName,
+          last_name: lastName,
+          company: "",
+          address_1: address1,
+          address_2: address2,
+          city: city,
+          state: stateField,
+          country: country,
+          postcode: postcode,
+          phone: phone,
+        };
+        (dispatch as any)(updateAddress(billingPayload as any));
+      }
     });
   };
 
@@ -112,9 +165,26 @@ export default function CheckoutScreen() {
       return;
     }
 
+    const nameParts = name ? name.trim().split(" ") : ["", ""];
+    const firstName = nameParts.shift() || "";
+    const lastName = nameParts.join(" ") || "";
+    const billingPayload = {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      phone: phone,
+      address_1: address1,
+      address_2: address2,
+      city: city,
+      state: stateField,
+      country: country,
+      postcode: postcode,
+    } as any;
+
     payViaStripe(
       orderId ? orderId : Number(pendingOrderId),
-      productType === CHECKOUT_PRODUCT_TYPE.WALLET ? Number(amount) : 0
+      productType === CHECKOUT_PRODUCT_TYPE.WALLET ? Number(amount) : 0,
+      billingPayload
     )
       .then((res) => {
         updateOrder(orderId ? orderId : Number(pendingOrderId), {
@@ -153,7 +223,7 @@ export default function CheckoutScreen() {
   };
 
   const handlePayment = async () => {
-    if (!name || !email || !address || items.length === 0) {
+    if (!name || !email || !address1 || !city || items.length === 0) {
       Alert.alert(
         "Missing Information",
         "Please fill in all fields to complete your purchase."
@@ -231,48 +301,114 @@ export default function CheckoutScreen() {
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
               />
+              <View style={{ marginTop: 8 }} />
+              <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>
+                Billing Address
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Address line 1"
+                placeholderTextColor={Colors.textSecondary}
+                value={address1}
+                onChangeText={setAddress1}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Address line 2 (optional)"
+                placeholderTextColor={Colors.textSecondary}
+                value={address2}
+                onChangeText={setAddress2}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="City"
+                placeholderTextColor={Colors.textSecondary}
+                value={city}
+                onChangeText={setCity}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="State / Region"
+                placeholderTextColor={Colors.textSecondary}
+                value={stateField}
+                onChangeText={setStateField}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Postal Code"
+                placeholderTextColor={Colors.textSecondary}
+                value={postcode}
+                onChangeText={setPostcode}
+                keyboardType="numeric"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Country"
+                placeholderTextColor={Colors.textSecondary}
+                value={country}
+                onChangeText={setCountry}
+              />
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 8,
+                }}
+              >
+                <Switch
+                  value={updateBillingChecked}
+                  onValueChange={setUpdateBillingChecked}
+                  thumbColor={Colors.darkGold}
+                  trackColor={{ false: Colors.darkBg, true: Colors.darkGray }}
+                />
+                <Text style={{ marginLeft: 8, color: Colors.textPrimary }}>
+                  Update account billing address with this information
+                </Text>
+              </View>
             </View>
 
             {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
               <PayPalPaymentScreen />
             )}
 
-            <View style={styles.paymentMethodsContainer}>
-              <Text style={styles.summaryTitle}>Payment Method</Text>
-              <View style={styles.radioRow}>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() =>
-                    setPaymentMethod(CHECKOUT_PAYMENT_METHOD.STRIPE)
-                  }
-                >
-                  <View
-                    style={[
-                      styles.radioCircle,
-                      paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE &&
-                        styles.radioSelected,
-                    ]}
-                  />
-                  <Text style={styles.radioLabel}>Credit/Debit Card</Text>
-                </TouchableOpacity>
+            {status === true && (
+              <View style={styles.paymentMethodsContainer}>
+                <Text style={styles.summaryTitle}>Payment Method</Text>
+                <View style={styles.radioRow}>
+                  <TouchableOpacity
+                    style={styles.radioButton}
+                    onPress={() =>
+                      setPaymentMethod(CHECKOUT_PAYMENT_METHOD.STRIPE)
+                    }
+                  >
+                    <View
+                      style={[
+                        styles.radioCircle,
+                        paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE &&
+                          styles.radioSelected,
+                      ]}
+                    />
+                    <Text style={styles.radioLabel}>Credit/Debit Card</Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() =>
-                    setPaymentMethod(CHECKOUT_PAYMENT_METHOD.PAYPAL)
-                  }
-                >
-                  <View
-                    style={[
-                      styles.radioCircle,
-                      paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL &&
-                        styles.radioSelected,
-                    ]}
-                  />
-                  <Text style={styles.radioLabel}>PayPal</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.radioButton}
+                    onPress={() =>
+                      setPaymentMethod(CHECKOUT_PAYMENT_METHOD.PAYPAL)
+                    }
+                  >
+                    <View
+                      style={[
+                        styles.radioCircle,
+                        paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL &&
+                          styles.radioSelected,
+                      ]}
+                    />
+                    <Text style={styles.radioLabel}>PayPal</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            )}
 
             <View style={styles.orderSummary}>
               <Text style={styles.summaryTitle}>Order Summary</Text>

@@ -1,10 +1,12 @@
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
+import { useOrder } from "@/hooks/useOrder";
+import { useUser } from "@/hooks/useUser";
 import { CHECKOUT_PRODUCT_TYPE } from "@/types/shop/checkout";
 import { Product } from "@/types/shop/product";
 import { router } from "expo-router";
-import { Check, X } from "lucide-react-native";
-import React, { useState } from "react";
+import { Check, Crown, RefreshCcw, X } from "lucide-react-native";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -91,12 +93,38 @@ const packages = [
 
 export default function PackagesScreen() {
   const { addToCart, items } = useCart();
+  const { getSubscriptionOrders } = useOrder();
+  const { user } = useUser();
   const cartCount = items.length;
+  const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [billingType, setBillingType] = useState<"monthly" | "yearly">(
     "monthly"
   );
+  const [loading, setLoading] = useState(false);
+
+  const loadCurrentSubscription = useCallback(async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    try {
+      const subs = await getSubscriptionOrders(user.id);
+      const activeSub = subs?.[0]; // Get most recent subscription
+      setCurrentSubscription(activeSub);
+    } catch (error) {
+      console.error("Error loading subscription:", error);
+    }
+    setLoading(false);
+  }, [getSubscriptionOrders, user?.id]);
+
+  useEffect(() => {
+    loadCurrentSubscription();
+  }, [loadCurrentSubscription]);
 
   const handlePackage = async (product_id: number, variation_id: number) => {
+    // Don't process if it's the current plan
+    if (currentSubscription?.line_items[0]?.product_id === product_id) {
+      return;
+    }
+
     const product = {
       id: product_id,
       quantity: 1,
@@ -112,18 +140,56 @@ export default function PackagesScreen() {
         },
       ],
     };
+
+    // Show confirmation if this is a plan change
+    if (currentSubscription) {
+      const isUpgrade =
+        Number(
+          packages.find((p) => p.product_id === product_id)?.monthlyPrice
+        ) > Number(currentSubscription.line_items[0].price);
+      const action = isUpgrade ? "upgrade to" : "downgrade to";
+      const currentPlan = currentSubscription.line_items[0].name;
+      const newPlan = packages.find((p) => p.product_id === product_id)?.name;
+
+      Alert.alert(
+        `Confirm ${isUpgrade ? "Upgrade" : "Downgrade"}`,
+        `Are you sure you want to ${action} ${newPlan} from ${currentPlan}?`,
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Continue",
+            onPress: () => processPlanChange(product),
+          },
+        ]
+      );
+      return;
+    }
+
+    // New subscription flow
     if (cartCount) {
       Alert.alert(
         "Invalid Cart",
         `You cannot purchase subscription with other items in the cart. Please clear your cart and try again.`
       );
     } else {
-      addToCart(product as Product).then((items) => {
-        console.log("productId: ", product_id, "variationId:", variation_id);
-        router.push(
-          `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION}`
-        );
-      });
+      processPlanChange(product);
+    }
+  };
+
+  const processPlanChange = async (product: any) => {
+    try {
+      await addToCart(product as Product);
+      router.push(
+        `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION}`
+      );
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.message || "There was a problem processing your request"
+      );
     }
   };
 
@@ -134,6 +200,24 @@ export default function PackagesScreen() {
         <Text style={styles.subheader}>
           Join Casa Madridista and get exclusive access to Real Madrid content
         </Text>
+
+        {currentSubscription && (
+          <View style={styles.currentPlanContainer}>
+            <View style={styles.currentPlanHeader}>
+              <Crown size={24} color={Colors.darkGold} />
+              <Text style={styles.currentPlanTitle}>Current Plan</Text>
+            </View>
+            <Text style={styles.currentPlanName}>
+              {currentSubscription.line_items[0].name}
+            </Text>
+            <Text style={styles.currentPlanPeriod}>
+              {currentSubscription.billing_period === "month"
+                ? "Monthly"
+                : "Yearly"}{" "}
+              Plan
+            </Text>
+          </View>
+        )}
 
         <View style={styles.toggleContainer}>
           <TouchableOpacity
@@ -239,6 +323,8 @@ export default function PackagesScreen() {
                 style={[
                   styles.button,
                   pkg.badge === "Popular" && styles.popularButton,
+                  currentSubscription?.line_items[0]?.product_id ===
+                    pkg.product_id && styles.currentButton,
                 ]}
                 onPress={() =>
                   handlePackage(
@@ -246,15 +332,48 @@ export default function PackagesScreen() {
                     pkg.variation_id[billingType === "monthly" ? 0 : 1]
                   )
                 }
+                disabled={
+                  currentSubscription?.line_items[0]?.product_id ===
+                  pkg.product_id
+                }
               >
-                <Text
-                  style={[
-                    styles.buttonText,
-                    pkg.badge === "Popular" && styles.popularButtonText,
-                  ]}
-                >
-                  BUY NOW
-                </Text>
+                {currentSubscription?.line_items[0]?.product_id ===
+                pkg.product_id ? (
+                  <Text style={[styles.buttonText, styles.currentButtonText]}>
+                    CURRENT PLAN
+                  </Text>
+                ) : currentSubscription ? (
+                  <>
+                    <RefreshCcw
+                      size={16}
+                      color={
+                        pkg.badge === "Popular"
+                          ? Colors.primary
+                          : Colors.textWhite
+                      }
+                    />
+                    <Text
+                      style={[
+                        styles.buttonText,
+                        pkg.badge === "Popular" && styles.popularButtonText,
+                      ]}
+                    >
+                      {Number(pkg.monthlyPrice) >
+                      Number(currentSubscription.line_items[0].price)
+                        ? "UPGRADE"
+                        : "DOWNGRADE"}
+                    </Text>
+                  </>
+                ) : (
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      pkg.badge === "Popular" && styles.popularButtonText,
+                    ]}
+                  >
+                    BUY NOW
+                  </Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -265,6 +384,35 @@ export default function PackagesScreen() {
 }
 
 const styles = StyleSheet.create({
+  currentPlanContainer: {
+    backgroundColor: Colors.cardBg,
+    marginBottom: 24,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.darkGold,
+  },
+  currentPlanHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  currentPlanTitle: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.darkGold,
+  },
+  currentPlanName: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.textPrimary,
+    marginBottom: 4,
+  },
+  currentPlanPeriod: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.darkGray,
@@ -432,5 +580,13 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: Colors.lightGray,
     borderRadius: 2,
+  },
+  currentButton: {
+    backgroundColor: Colors.cardBg,
+    borderColor: Colors.darkGold,
+    borderWidth: 1,
+  },
+  currentButtonText: {
+    color: Colors.darkGold,
   },
 });

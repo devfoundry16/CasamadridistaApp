@@ -15,23 +15,43 @@ export const useStripePay = () => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const API_URL = STRIPE_API_URL;
 
-  const handlePayment = async (orderId: number, walletAmount: number) => {
+  const handlePayment = async (
+    orderId: number,
+    walletAmount: number,
+    billing?: {
+      first_name?: string;
+      last_name?: string;
+      email?: string;
+      phone?: string;
+      address_1?: string;
+      address_2?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      postcode?: string;
+    }
+  ) => {
     // this is only for wallet top-up
     // set a ref immediately so confirmHandler (called by Stripe) can read the up-to-date id
     orderIdRef.current = orderId;
+    const effectiveBilling = billing || billingAddress;
+
     const body = {
       amount: walletAmount ? walletAmount * 100 : totalPrice,
       orderId: orderId,
       user: {
-        email: user?.email,
-        name: user?.name,
+        email: effectiveBilling?.email || user?.email,
+        name:
+          (effectiveBilling?.first_name || user?.name || "") +
+          " " +
+          (effectiveBilling?.last_name || ""),
         address: {
-          city: billingAddress?.city,
-          country: billingAddress?.country,
-          state: billingAddress?.state,
-          postal_code: billingAddress?.postcode,
-          line1: billingAddress?.address_1,
-          line2: billingAddress?.address_2,
+          city: effectiveBilling?.city,
+          country: effectiveBilling?.country,
+          state: effectiveBilling?.state,
+          postal_code: effectiveBilling?.postcode,
+          line1: effectiveBilling?.address_1,
+          line2: effectiveBilling?.address_2,
         },
       },
     };
@@ -43,8 +63,7 @@ export const useStripePay = () => {
       body: JSON.stringify(body),
     });
     // Call the `intentCreationCallback` with your server response's client secret or error.
-    const { paymentIntent, ephemeralKey, customer, error } =
-      await response.json();
+    const { paymentIntent, customer, error } = await response.json();
     if (!error && paymentIntent) {
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: paymentIntent,
@@ -57,12 +76,14 @@ export const useStripePay = () => {
         },
         merchantDisplayName: "My Store",
         defaultBillingDetails: {
-          email: billingAddress?.email,
+          email: effectiveBilling?.email || billingAddress?.email,
           address: {
-            ...billingAddress,
-            postalCode: billingAddress?.postcode,
-            line1: billingAddress?.address_1,
-            line2: billingAddress?.address_2,
+            city: effectiveBilling?.city || billingAddress?.city,
+            country: effectiveBilling?.country || billingAddress?.country,
+            state: effectiveBilling?.state || billingAddress?.state,
+            postalCode: effectiveBilling?.postcode || billingAddress?.postcode,
+            line1: effectiveBilling?.address_1 || billingAddress?.address_1,
+            line2: effectiveBilling?.address_2 || billingAddress?.address_2,
           },
         },
         billingDetailsCollectionConfiguration: {

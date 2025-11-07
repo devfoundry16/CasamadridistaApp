@@ -141,23 +141,6 @@ export default function AddressesScreen() {
     <>
       <HeaderStack title="Addresses" />
       <ScrollView style={styles.container}>
-        {/* <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => {
-            resetForm();
-            setModalVisible(true);
-          }}
-        >
-          <Plus size={20} color={Colors.textWhite} />
-          <Text style={styles.addButtonText}>Add New Address</Text>
-        </TouchableOpacity> */}
-
-        {/* {shippingAddress?.first_name == '' && billingAddress?.first_name == '' ? (
-          <View style={styles.emptyState}>
-            <MapPin size={64} color={Colors.darkGray} />
-            <Text style={styles.emptyText}>No addresses saved</Text>
-          </View>
-        ) : ( */}
         <View style={styles.addressList}>
           {billingAddress && (
             <AddressView

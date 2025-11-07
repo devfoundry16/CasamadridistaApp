@@ -64,8 +64,14 @@ export const updateUser = createAsyncThunk(
     try {
       const response = await UserService.update(updates);
       const updatedUser: User = response;
-      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-      dispatch(setUser(updatedUser));
+      await AsyncStorage.setItem("user_data", JSON.stringify(updatedUser));
+      dispatch(
+        setUser({
+          ...state.user,
+          billing: response.billing,
+          shipping: response.shipping,
+        })
+      );
       return updatedUser;
     } catch (error: any) {
       Alert.alert("Update error", error.message);
@@ -95,7 +101,7 @@ export const updateAvatar = createAsyncThunk(
       } as User;
 
       await dispatch(updateUser(updatedUser));
-      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+      await AsyncStorage.setItem("user_data", JSON.stringify(updatedUser));
       return updatedUser;
     } catch (error: any) {
       console.error("Error uploading avatar:", error);
@@ -110,10 +116,16 @@ export const updateAvatar = createAsyncThunk(
 // Update address thunk
 export const updateAddress = createAsyncThunk(
   "user/updateAddress",
-  async (address: Address, { dispatch }) => {
+  async (address: Address, { dispatch, getState }) => {
+    const state = getState() as RootState;
     try {
-      const updatedUser = await UserService.updateAddress(address);
-      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+      const response = await UserService.updateAddress(address);
+      const updatedUser = {
+        ...state.user.user,
+        billing: response.billing,
+        shipping: response.shipping,
+      };
+      await AsyncStorage.setItem("user_data", JSON.stringify(updatedUser));
       dispatch(setUser(updatedUser));
       return updatedUser;
     } catch (error: any) {
@@ -126,7 +138,7 @@ export const updateAddress = createAsyncThunk(
 // Delete address thunk
 export const deleteAddress = createAsyncThunk(
   "user/deleteAddress",
-  async (type: "shipping" | "billing", { dispatch }) => {
+  async (type: "shipping" | "billing", { dispatch, getState }) => {
     const newAddress: Address = {
       type: type,
       email: "",
@@ -141,10 +153,15 @@ export const deleteAddress = createAsyncThunk(
       postcode: "",
       phone: "",
     };
-
+    const state = getState() as RootState;
     try {
-      const updatedUser = await UserService.updateAddress(newAddress);
-      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+      const response = await UserService.updateAddress(newAddress);
+      const updatedUser = {
+        ...state.user.user,
+        billing: response.billing,
+        shipping: response.shipping,
+      };
+      await AsyncStorage.setItem("user_data", JSON.stringify(updatedUser));
       dispatch(setUser(updatedUser));
       return updatedUser;
     } catch (error: any) {

@@ -85,13 +85,13 @@ export default function SubscriptionScreen() {
                 </View>
 
                 <View style={styles.actionsSection}>
-                  <TouchableOpacity style={styles.actionButton}>
+                  {/* <TouchableOpacity style={styles.actionButton}>
                     <CreditCard size={24} color={Colors.accent} />
                     <Text style={styles.actionButtonText}>
                       Update Payment Method
                     </Text>
                     <ArrowRight size={20} color={Colors.textWhite} />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
 
                   <TouchableOpacity
                     style={styles.actionButton}
@@ -101,32 +101,6 @@ export default function SubscriptionScreen() {
                     <Text style={styles.actionButtonText}>Upgrade Plan</Text>
                     <ArrowRight size={20} color={Colors.textWhite} />
                   </TouchableOpacity>
-                </View>
-
-                <View style={styles.benefitsSection}>
-                  <Text style={styles.sectionTitle}>Your Benefits</Text>
-                  <View style={styles.benefitItem}>
-                    <Text style={styles.benefitBullet}>✓</Text>
-                    <Text style={styles.benefitText}>
-                      Exclusive access to member events
-                    </Text>
-                  </View>
-                  <View style={styles.benefitItem}>
-                    <Text style={styles.benefitBullet}>✓</Text>
-                    <Text style={styles.benefitText}>
-                      Priority ticket booking
-                    </Text>
-                  </View>
-                  <View style={styles.benefitItem}>
-                    <Text style={styles.benefitBullet}>✓</Text>
-                    <Text style={styles.benefitText}>
-                      Official merchandise discounts
-                    </Text>
-                  </View>
-                  <View style={styles.benefitItem}>
-                    <Text style={styles.benefitBullet}>✓</Text>
-                    <Text style={styles.benefitText}>Monthly newsletter</Text>
-                  </View>
                 </View>
               </View>
             );

@@ -2,24 +2,24 @@ import { useState } from "react";
 import { useCart } from "./useCart";
 import { BRAINTREE_API_URL } from "@env"; // Assume you have this in your .env file, e.g., BRAINTREE_API_URL=https://your-server.com/braintree
 export const useBraintreePay = () => {
-const { totalPrice } = useCart();
-const [paypalHtml, setPaypalHtml] = useState<string>("");
-const handlePayment = async (orderId: number, walletAmount: number = 0) => {
-try {
-const amount = (walletAmount || totalPrice / 100).toFixed(2);
-// Fetch Braintree client token from your server
-const tokenResponse = await fetch(${BRAINTREE_API_URL}/client_token, {
-method: "GET",
-headers: {
-"Content-Type": "application/json",
-},
-});
-const clientToken = await tokenResponse.text(); // Braintree client token is typically a string
-if (!clientToken) {
-throw new Error("Failed to retrieve client token");
-}
-// Generate HTML for WebView with Braintree and PayPal SDKs
-const html = `
+  const { totalPrice } = useCart();
+  const [paypalHtml, setPaypalHtml] = useState<string>("");
+  const handlePayment = async (orderId: number, walletAmount: number = 0) => {
+    try {
+      const amount = (walletAmount || totalPrice / 100).toFixed(2);
+      // Fetch Braintree client token from your server
+      const tokenResponse = await fetch(`${BRAINTREE_API_URL}/client_token`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const clientToken = await tokenResponse.text(); // Braintree client token is typically a string
+      if (!clientToken) {
+        throw new Error("Failed to retrieve client token");
+      }
+      // Generate HTML for WebView with Braintree and PayPal SDKs
+      const html = `
         
         
         
@@ -84,11 +84,11 @@ const html = `
         
         
       `;
-setPaypalHtml(html);
-} catch (error) {
-console.error("Braintree Payment Error:", error);
-Alert.alert("Error", "Failed to initialize payment.");
-}
-};
-return { handlePayment, paypalHtml, setPaypalHtml };
+      setPaypalHtml(html);
+    } catch (error) {
+      console.error("Braintree Payment Error:", error);
+      Alert.alert("Error", "Failed to initialize payment.");
+    }
+  };
+  return { handlePayment, paypalHtml, setPaypalHtml };
 };

@@ -199,6 +199,8 @@ class ApiService {
 
     const [response, address] = await Promise.all([fetchUser, fetchAddress]);
 
+    console.log(address.billing, address.shipping);
+
     const newData: User = {
       ...response,
       billing: address.billing,
