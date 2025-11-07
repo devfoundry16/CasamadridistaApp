@@ -24,7 +24,6 @@ export const WalletScreenDetail: React.FC = () => {
     error,
     refreshBalance,
     refreshTransactions,
-    addFunds,
     transferFunds,
   } = useFlintopWallet();
 
@@ -40,7 +39,6 @@ export const WalletScreenDetail: React.FC = () => {
 
   const handleAddFunds = async (amount: number, paymentMethod: string) => {
     try {
-      // await addFunds(amount, paymentMethod);
       setShowAddFundsModal(false);
       Alert.alert("Success", "Funds added successfully!");
     } catch (err) {

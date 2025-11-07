@@ -1,4 +1,5 @@
 import HeaderStack from "@/components/HeaderStack";
+import PayPalPaymentScreen from "@/components/PayPalPaymentScreen";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
 import { useFlintopWallet } from "@/hooks/useFlintopWallet";
@@ -15,6 +16,7 @@ import { CheckCircle, User } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -24,7 +26,7 @@ import {
 } from "react-native";
 
 export default function CheckoutScreen() {
-  const { productType, amount } = useLocalSearchParams();
+  const { productType, amount, pendingOrderId } = useLocalSearchParams();
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useUser();
   const router = useRouter();
@@ -37,15 +39,21 @@ export default function CheckoutScreen() {
   const [email, setEmail] = useState(billingAddress?.email);
   const [phone, setPhone] = useState("");
   const [address] = useState(shippingAddress);
-  const [status, setStatus] = useState<boolean>(false); //false means place an order, true means paying
+  const [status, setStatus] = useState<boolean>(pendingOrderId ? true : false); //false means place an order, true means paying
   const [orderId, setOrderId] = useState<number | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<string>(
+    CHECKOUT_PAYMENT_METHOD.STRIPE
+  );
   const { handlePayment: payViaStripe } = useStripePay();
   const { addFunds } = useFlintopWallet();
 
   const preparePayload = () => {
     return {
-      payment_method: CHECKOUT_PAYMENT_METHOD.STRIPE, // or 'paypal', etc.
-      payment_method_title: "Credit/Debit Card",
+      payment_method: paymentMethod, // or 'paypal', etc.
+      payment_method_title:
+        paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL
+          ? "PayPal"
+          : "Credit/Debit Card",
       set_paid: false, // Let the payment gateway handle the payment
       customer_id: user?.id,
       billing: user?.billing,
@@ -78,6 +86,7 @@ export default function CheckoutScreen() {
   };
 
   const createSubscription = async (order_id: number) => {
+    console.log(order_id);
     createSubscriptionOrder(order_id).then(() => {
       setStatus(false);
       setOrderId(null);
@@ -93,47 +102,54 @@ export default function CheckoutScreen() {
   };
 
   const stripePay = () => {
-    if (orderId) {
-      payViaStripe(
-        orderId,
-        productType === CHECKOUT_PRODUCT_TYPE.WALLET ? Number(amount) : 0
-      )
-        .then((res) => {
-          updateOrder(orderId, {
-            payment_method: CHECKOUT_PAYMENT_METHOD.STRIPE,
-            payment_method_title: "Credit/Debit Card",
-            set_paid: true,
-            status: OrderStatus.PROCESSING,
-            meta_data: [
-              {
-                key: "_stripe_payment_intent",
-                value: res?.paymentIntent,
-              },
-              {
-                key: "_stripe_customer_id",
-                value: res?.customer,
-              },
-            ],
-          }).then(async () => {
-            if (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION)
-              await createSubscription(orderId);
-            else if (productType === CHECKOUT_PRODUCT_TYPE.WALLET)
-              await addFundsToWallet(orderId);
-            clearCart();
-            router.push("/cart");
-            Alert.alert(
-              "Payment Successful",
-              "Your payment was processed successfully!"
+    if (!orderId && !pendingOrderId) return;
+
+    if (paymentMethod !== CHECKOUT_PAYMENT_METHOD.STRIPE) {
+      Alert.alert(
+        "Payment Method",
+        `${paymentMethod} payment flow is not implemented in the app.`
+      );
+      return;
+    }
+
+    payViaStripe(
+      orderId ? orderId : Number(pendingOrderId),
+      productType === CHECKOUT_PRODUCT_TYPE.WALLET ? Number(amount) : 0
+    )
+      .then((res) => {
+        updateOrder(orderId ? orderId : Number(pendingOrderId), {
+          payment_method: CHECKOUT_PAYMENT_METHOD.STRIPE,
+          payment_method_title: "Credit/Debit Card",
+          set_paid: true,
+          status: OrderStatus.PROCESSING,
+          meta_data: [
+            {
+              key: "_stripe_payment_intent",
+              value: res?.paymentIntent,
+            },
+            {
+              key: "_stripe_customer_id",
+              value: res?.customer,
+            },
+          ],
+        }).then(async () => {
+          if (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION)
+            await createSubscription(
+              orderId ? orderId : Number(pendingOrderId)
             );
-          });
-        })
-        .catch((error) => {
+          else if (productType === CHECKOUT_PRODUCT_TYPE.WALLET)
+            await addFundsToWallet(orderId ? orderId : Number(pendingOrderId));
+          clearCart();
+          router.push("/cart");
           Alert.alert(
-            "Payment Failed",
-            "There was an issue processing your payment."
+            "Payment Successful",
+            "Your payment was processed successfully!"
           );
         });
-    }
+      })
+      .catch((error) => {
+        Alert.alert("Payment Failed", error.message);
+      });
   };
 
   const handlePayment = async () => {
@@ -144,6 +160,7 @@ export default function CheckoutScreen() {
       );
       return;
     }
+    console.log(status);
     if (status === false) {
       // place an order
       try {
@@ -214,6 +231,47 @@ export default function CheckoutScreen() {
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
               />
+            </View>
+
+            {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
+              <PayPalPaymentScreen />
+            )}
+
+            <View style={styles.paymentMethodsContainer}>
+              <Text style={styles.summaryTitle}>Payment Method</Text>
+              <View style={styles.radioRow}>
+                <TouchableOpacity
+                  style={styles.radioButton}
+                  onPress={() =>
+                    setPaymentMethod(CHECKOUT_PAYMENT_METHOD.STRIPE)
+                  }
+                >
+                  <View
+                    style={[
+                      styles.radioCircle,
+                      paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE &&
+                        styles.radioSelected,
+                    ]}
+                  />
+                  <Text style={styles.radioLabel}>Credit/Debit Card</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.radioButton}
+                  onPress={() =>
+                    setPaymentMethod(CHECKOUT_PAYMENT_METHOD.PAYPAL)
+                  }
+                >
+                  <View
+                    style={[
+                      styles.radioCircle,
+                      paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL &&
+                        styles.radioSelected,
+                    ]}
+                  />
+                  <Text style={styles.radioLabel}>PayPal</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.orderSummary}>
@@ -340,6 +398,41 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: Colors.textPrimary,
     marginBottom: 16,
+  },
+  paymentMethodsContainer: {
+    backgroundColor: Colors.cardBg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  radioRow: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
+  },
+  radioButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  radioCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: Colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioSelected: {
+    backgroundColor: Colors.darkGold,
+    borderColor: Colors.darkGold,
+  },
+  radioLabel: {
+    fontSize: 14,
+    color: Colors.textPrimary,
   },
   summaryItem: {
     flexDirection: "row",

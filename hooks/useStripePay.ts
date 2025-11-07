@@ -16,7 +16,6 @@ export const useStripePay = () => {
   const API_URL = STRIPE_API_URL;
 
   const handlePayment = async (orderId: number, walletAmount: number) => {
-    console.log("wallet amount:", walletAmount);
     // this is only for wallet top-up
     // set a ref immediately so confirmHandler (called by Stripe) can read the up-to-date id
     orderIdRef.current = orderId;
@@ -44,7 +43,8 @@ export const useStripePay = () => {
       body: JSON.stringify(body),
     });
     // Call the `intentCreationCallback` with your server response's client secret or error.
-    const { paymentIntent, customer, error } = await response.json();
+    const { paymentIntent, ephemeralKey, customer, error } =
+      await response.json();
     if (!error && paymentIntent) {
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: paymentIntent,
@@ -74,8 +74,8 @@ export const useStripePay = () => {
         },
       });
       if (!initError) {
-        const { error: paymentError } = await presentPaymentSheet();
-        if (!paymentError) {
+        const { error } = await presentPaymentSheet();
+        if (!error) {
           return { paymentIntent, customer };
         } else {
           throw error;

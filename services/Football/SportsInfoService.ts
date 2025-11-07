@@ -1,10 +1,10 @@
 import axios, { AxiosInstance } from "axios";
-import { PROFILE_BASE_API_URL } from "@env";
+import { BACKEND_BASE_API_URL } from "@env";
 class ApiService {
   private api: AxiosInstance;
   constructor() {
     this.api = axios.create({
-      baseURL: PROFILE_BASE_API_URL,
+      baseURL: `${BACKEND_BASE_API_URL}/profile`,
       headers: { Accept: "application/json" },
     });
   }

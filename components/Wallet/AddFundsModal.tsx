@@ -59,11 +59,12 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
       // setLoading(true);
       setVisibility(false);
       resetForm();
-      addToCart(product as Product);
-      console.log("Funds amount:", numericAmount);
-      router.push(
-        `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.WALLET}&amount=${numericAmount}`
-      );
+      addToCart(product as Product).then((data) => {
+        console.log("Funds amount:", numericAmount);
+        router.push(
+          `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.WALLET}&amount=${numericAmount}`
+        );
+      });
     }
   };
   const handleAddFunds = async () => {

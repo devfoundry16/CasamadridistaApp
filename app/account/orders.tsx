@@ -3,7 +3,11 @@ import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useOrder } from "@/hooks/useOrder";
 import { useUser } from "@/hooks/useUser";
-import { Order } from "@/types/shop/order";
+import { useCart } from "@/hooks/useCart";
+import { Order, OrderStatus } from "@/types/shop/order";
+import { getProductType } from "@/utils/helper";
+import { router } from "expo-router";
+import { Alert } from "react-native";
 import {
   CheckCircle,
   Clock,
@@ -11,7 +15,7 @@ import {
   ShoppingBag,
   XCircle,
 } from "lucide-react-native";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -22,40 +26,82 @@ import {
 
 export default function OrdersScreen() {
   const { user } = useUser();
-  const { getOrders } = useOrder();
+  const { getOrders, updateOrder } = useOrder();
+  const { removeFromCart } = useCart();
   const [orders, setOrders] = React.useState<Order[]>([]);
   const [loading, setLoading] = React.useState(false);
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     setLoading(true);
     const res = await getOrders(user?.id as any);
     setOrders(res);
     setLoading(false);
-  };
+  }, [getOrders, user?.id]);
 
   useEffect(() => {
     loadOrders();
-  }, []);
+  }, [loadOrders]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "completed":
+      case OrderStatus.PROCESSING:
         return <CheckCircle size={20} color={Colors.success} />;
-      case "cancelled":
+      case OrderStatus.PENDING:
+        return <Clock size={20} color={Colors.accent} />;
+      case OrderStatus.CANCELLED:
         return <XCircle size={20} color={Colors.error} />;
       default:
-        return <Clock size={20} color={Colors.accent} />;
+        return <Clock size={20} color={Colors.royalBlue} />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed":
+      case OrderStatus.PROCESSING:
         return Colors.success;
-      case "cancelled":
+      case OrderStatus.PENDING:
+        return Colors.accent;
+      case OrderStatus.CANCELLED:
         return Colors.error;
       default:
-        return Colors.accent;
+        return Colors.royalBlue;
+    }
+  };
+
+  const handleProcessPayment = (order: Order) => {
+    console.log(order.line_items);
+    const productType = getProductType(order.line_items);
+    console.log(productType);
+    router.push(
+      `/checkout?pendingOrderId=${order.id}&productType=${productType}`
+    );
+  };
+
+  const cancelOrder = async (order: Order) => {
+    try {
+      // Update order status to cancelled
+      await updateOrder(order.id, {
+        status: OrderStatus.CANCELLED,
+      });
+
+      // Remove any matching line items from cart
+      const productIds = order.line_items.map((item) => item.product_id);
+      for (const productId of productIds) {
+        await removeFromCart(productId);
+      }
+
+      // Refresh orders list
+      await loadOrders();
+
+      Alert.alert(
+        "Order Cancelled",
+        "Your order has been cancelled successfully"
+      );
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.message || "There was a problem cancelling your order"
+      );
     }
   };
 
@@ -83,10 +129,10 @@ export default function OrdersScreen() {
         ) : (
           <View style={styles.ordersList}>
             {orders.map((order) => (
-              <TouchableOpacity key={order.id} style={styles.orderCard}>
+              <View key={order.id} style={styles.orderCard}>
                 <View style={styles.orderHeader}>
                   <View style={styles.orderIconContainer}>
-                    <Package size={24} color={Colors.accent} />
+                    <Package size={24} color={getStatusColor(order.status)} />
                   </View>
                   <View style={styles.orderInfo}>
                     <Text style={styles.orderId}>Order #{order.id}</Text>
@@ -119,11 +165,55 @@ export default function OrdersScreen() {
                 </View>
                 <View style={styles.orderFooter}>
                   <Text style={styles.totalLabel}>Total:</Text>
-                  <Text style={styles.totalAmount}>
+                  <Text
+                    style={{
+                      ...styles.totalAmount,
+                      color: getStatusColor(order.status),
+                    }}
+                  >
                     ${Number(order.total).toFixed(2)}
                   </Text>
                 </View>
-              </TouchableOpacity>
+                {order.status === OrderStatus.PENDING && (
+                  <View style={{ gap: 10 }}>
+                    <TouchableOpacity
+                      style={[
+                        styles.statusBadge,
+                        {
+                          backgroundColor: getStatusColor(order.status) + "20",
+                          justifyContent: "center",
+                        },
+                      ]}
+                      onPress={() => handleProcessPayment(order)}
+                    >
+                      <Text
+                        style={[
+                          styles.statusText,
+                          { color: getStatusColor(order.status) },
+                        ]}
+                      >
+                        Process Payment
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.statusBadge,
+                        {
+                          backgroundColor: Colors.lightGray + "20",
+                          justifyContent: "center",
+                        },
+                      ]}
+                      onPress={() => cancelOrder(order)}
+                    >
+                      <Text
+                        style={[styles.statusText, { color: Colors.lightGray }]}
+                      >
+                        Cancel
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
             ))}
           </View>
         )}
