@@ -32,10 +32,15 @@ export default function OrdersScreen() {
   const [loading, setLoading] = React.useState(false);
 
   const loadOrders = useCallback(async () => {
-    setLoading(true);
-    const res = await getOrders(user?.id as any);
-    setOrders(res);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const res = await getOrders(user?.id as any);
+      setOrders(res);
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      Alert.alert("Error", error.message);
+    }
   }, [getOrders, user?.id]);
 
   useEffect(() => {

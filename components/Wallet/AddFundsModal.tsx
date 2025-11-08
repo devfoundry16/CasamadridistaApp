@@ -1,6 +1,9 @@
 // components/AddFundsModal.tsx
 import { useCart } from "@/hooks/useCart";
-import { CHECKOUT_PRODUCT_TYPE } from "@/types/shop/checkout";
+import {
+  CHECKOUT_PAYMENT_METHOD,
+  CHECKOUT_PRODUCT_TYPE,
+} from "@/types/shop/checkout";
 import { Product } from "@/types/shop/product";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -14,7 +17,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
+import Colors from "@/constants/colors";
 interface AddFundsModalProps {
   visible: boolean;
   onClose: () => void;
@@ -22,8 +25,8 @@ interface AddFundsModalProps {
 }
 
 const PAYMENT_METHODS = [
-  { id: "stripe", name: "Credit/Debit Card" },
-  { id: "paypal", name: "PayPal" },
+  { id: CHECKOUT_PAYMENT_METHOD.STRIPE, name: "Credit/Debit Card" },
+  { id: CHECKOUT_PAYMENT_METHOD.PAYPAL, name: "PayPal" },
   // { id: 'bank_transfer', name: 'Bank Transfer' },
   // { id: 'crypto', name: 'Cryptocurrency' },
 ];
@@ -103,7 +106,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
     onClose();
   };
 
-  const quickAmounts = [10, 25, 50, 100, 200];
+  const quickAmounts = [10, 25, 50, 100, 200, 500, 1000];
 
   return (
     <Modal
@@ -285,8 +288,8 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
   },
   quickAmountButtonSelected: {
-    backgroundColor: "#007AFF",
-    borderColor: "#007AFF",
+    backgroundColor: Colors.darkGold,
+    borderColor: Colors.darkGold,
   },
   quickAmountText: {
     fontSize: 14,
@@ -309,7 +312,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   paymentMethodSelected: {
-    borderColor: "#007AFF",
+    borderColor: Colors.darkGold,
     backgroundColor: "#e3f2fd",
   },
   radioContainer: {
@@ -329,14 +332,14 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   radioSelected: {
-    backgroundColor: "#007AFF",
+    backgroundColor: Colors.darkGold,
   },
   paymentMethodText: {
     fontSize: 16,
     color: "#333",
   },
   addFundsButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: Colors.darkGold,
     padding: 16,
     borderRadius: 8,
     alignItems: "center",

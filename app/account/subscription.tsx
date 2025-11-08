@@ -75,8 +75,8 @@ export default function SubscriptionScreen() {
                       <View style={styles.dateInfo}>
                         <Text style={styles.dateLabel}>End Date</Text>
                         <Text style={styles.dateValue}>
-                          {subscription.end_date_gmt
-                            ? formatDate(subscription.end_date_gmt)
+                          {subscription.next_payment_date_gmt
+                            ? formatDate(subscription.next_payment_date_gmt)
                             : "N/A"}
                         </Text>
                       </View>

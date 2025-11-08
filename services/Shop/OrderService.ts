@@ -8,8 +8,9 @@ class ApiService {
   private WOO_PASSWORD = WOO_CONSUMER_SECRET;
   constructor() {
     this.token = btoa(`${this.WOO_USERNAME}:${this.WOO_PASSWORD}`);
+    console.log(this.WOO_PASSWORD);
     this.api = axios.create({
-      baseURL: process.env.EXPO_PUBLIC_API_URL || `${WP_BASE_URL}/wc/v3`,
+      baseURL: process.env.EXPO_PUBLIC_API_URL || `${WP_BASE_URL}wc/v3`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Basic ${this.token}`,
@@ -54,18 +55,31 @@ class ApiService {
 
   async getOrders(customerId: number) {
     try {
-      const response = await this.api.get("/orders", {
-        params: { customer: customerId },
-      });
+      console.log("customer Id:", customerId);
+      const response = await this.api.get(`/orders?customer=${customerId}`);
+      console.log(response);
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || "An error occurred");
+      throw new Error(error || "An error occurred");
     }
   }
 
   async updateOrder(orderId: number, data: Partial<Order>) {
     try {
       const response = await this.api.put(`/orders/${orderId}`, data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || "An error occurred");
+    }
+  }
+
+  // Update a subscription (e.g., schedule changes or modify status)
+  async updateSubscription(subscriptionId: number, data: any) {
+    try {
+      const response = await this.api.put(
+        `/subscriptions/${subscriptionId}`,
+        data
+      );
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || "An error occurred");
