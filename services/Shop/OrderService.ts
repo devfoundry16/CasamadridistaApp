@@ -8,7 +8,6 @@ class ApiService {
   private WOO_PASSWORD = WOO_CONSUMER_SECRET;
   constructor() {
     this.token = btoa(`${this.WOO_USERNAME}:${this.WOO_PASSWORD}`);
-    console.log(this.WOO_PASSWORD);
     this.api = axios.create({
       baseURL: process.env.EXPO_PUBLIC_API_URL || `${WP_BASE_URL}wc/v3`,
       headers: {
@@ -57,7 +56,6 @@ class ApiService {
     try {
       console.log("customer Id:", customerId);
       const response = await this.api.get(`/orders?customer=${customerId}`);
-      console.log(response);
       return response.data;
     } catch (error: any) {
       throw new Error(error || "An error occurred");

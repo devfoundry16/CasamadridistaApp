@@ -16,6 +16,7 @@ interface UseFlintopWalletReturn {
   refreshTransactions: () => Promise<void>;
   addFunds: (
     amount: number,
+    order_id: number,
     paymentMethod: string,
     description?: string
   ) => Promise<void>;
@@ -26,9 +27,10 @@ interface UseFlintopWalletReturn {
   ) => Promise<void>;
   withdrawFunds: (
     amount: number,
+    order_id: number,
     paymentMethod: string,
-    accountDetails?: string
-  ) => Promise<void>;
+    description?: string
+  ) => Promise<any>;
   testConnection: () => Promise<{ success: boolean; message: string }>;
 }
 
@@ -50,10 +52,12 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
         throw new Error("User not authenticated");
       }
 
-      const [balanceData, transactionsData] = await Promise.all([
+      const [testData, balanceData, transactionsData] = await Promise.all([
+        FlintopWalletService.testConnection(),
         FlintopWalletService.getBalance(),
         FlintopWalletService.getTransactions(),
       ]);
+      console.log(testData);
       setBalance(balanceData);
       setTransactions(transactionsData);
     } catch (err) {
@@ -89,12 +93,18 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
   }, []);
 
   const addFunds = useCallback(
-    async (amount: number, paymentMethod: string, description?: string) => {
+    async (
+      amount: number,
+      order_id: number,
+      paymentMethod: string,
+      description?: string
+    ) => {
       try {
         setError(null);
 
         await FlintopWalletService.addFunds({
           amount,
+          order_id,
           payment_method: paymentMethod,
           description:
             description || `Added funds via mobile app using ${paymentMethod}`,
@@ -111,6 +121,7 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
     },
     [refreshBalance, refreshTransactions]
   );
+
   const transferFunds = useCallback(
     async (toUserId: number, amount: number, description?: string) => {
       try {
@@ -135,19 +146,30 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
   );
 
   const withdrawFunds = useCallback(
-    async (amount: number, paymentMethod: string, accountDetails?: string) => {
+    async (
+      amount: number,
+      order_id: number,
+      paymentMethod: string,
+      description?: string
+    ) => {
       try {
         setError(null);
+        console.log(amount, order_id, paymentMethod, description);
 
-        await FlintopWalletService.withdrawFunds({
-          amount,
+        const resp = await FlintopWalletService.withdrawFunds({
+          amount: amount / 100,
+          order_id,
           payment_method: paymentMethod,
-          account_details: accountDetails,
+          description:
+            description || `Withdraw via mobile app using ${paymentMethod}`,
         });
 
         await refreshBalance();
         await refreshTransactions();
+
+        return resp;
       } catch (err) {
+        console.log(err);
         setError(
           err instanceof Error ? err.message : "Failed to withdraw funds"
         );
@@ -156,6 +178,7 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
     },
     [refreshBalance, refreshTransactions]
   );
+
   const testConnection = useCallback(async (): Promise<{
     success: boolean;
     message: string;

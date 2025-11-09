@@ -155,6 +155,16 @@ class ApiService {
     console.log("[WordPress] Update successful:");
     return response;
   }
+  async updateCustomer(data: any): Promise<any> {
+    const id = await this.getUserId();
+    const body = data;
+    const response = await this.fetchWithAuth(`wc/v3/customers/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+    console.log("[WordPress] Update Customer successful");
+    return response;
+  }
   async updateAddress(addressData: Address): Promise<any> {
     const id = await this.getUserId();
     const body =

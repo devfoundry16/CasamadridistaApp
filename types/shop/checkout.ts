@@ -6,4 +6,5 @@ export const enum CHECKOUT_PRODUCT_TYPE {
 export const enum CHECKOUT_PAYMENT_METHOD {
   STRIPE = "stripe",
   PAYPAL = "paypal",
+  WALLET = "wallet",
 }

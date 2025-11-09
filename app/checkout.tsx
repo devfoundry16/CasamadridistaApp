@@ -16,7 +16,6 @@ import { CheckCircle, User } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
-  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -58,7 +57,7 @@ export default function CheckoutScreen() {
     CHECKOUT_PAYMENT_METHOD.STRIPE
   );
   const { handlePayment: payViaStripe } = useStripePay();
-  const { addFunds } = useFlintopWallet();
+  const { addFunds, withdrawFunds, balance } = useFlintopWallet();
 
   const preparePayload = () => {
     const nameParts = name ? name.trim().split(" ") : ["", ""];
@@ -146,16 +145,88 @@ export default function CheckoutScreen() {
     });
   };
 
-  const addFundsToWallet = async (order_id: number) => {
+  const addFundsToWallet = async (order_id: number, description: string) => {
     await addFunds(
       Number(amount),
+      order_id,
       CHECKOUT_PAYMENT_METHOD.STRIPE,
-      "Wallet Top-Up"
+      description
     );
+  };
+
+  const withDrawFundsFromWallet = async (
+    order_id: number,
+    description: string
+  ) => {
+    const resp = await withdrawFunds(
+      totalPrice,
+      order_id,
+      CHECKOUT_PAYMENT_METHOD.WALLET,
+      description
+    );
+    return resp;
   };
 
   const stripePay = () => {
     if (!orderId && !pendingOrderId) return;
+
+    const id = orderId ? orderId : Number(pendingOrderId);
+
+    // Wallet payment branch
+    if (paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET) {
+      withDrawFundsFromWallet(
+        id,
+        productType === CHECKOUT_PRODUCT_TYPE.WALLET
+          ? "Wallet Top Up"
+          : "Order Payment"
+      )
+        .then(async (res) => {
+          // Update order with wallet payment info
+          await updateOrder(id, {
+            payment_method: CHECKOUT_PAYMENT_METHOD.WALLET,
+            payment_method_title: "Wallet",
+            set_paid: true,
+            status: OrderStatus.PROCESSING,
+            meta_data: [
+              {
+                key: "_wallet_response",
+                value: JSON.stringify(res),
+              },
+            ],
+          });
+
+          if (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION) {
+            await createSubscription(id);
+          }
+
+          clearCart();
+          router.push("/cart");
+          Alert.alert("Payment Successful", JSON.stringify(res));
+        })
+        .catch((err: any) => {
+          const resp = err?.response || err?.data || null;
+          if (
+            resp &&
+            (resp.code === "insufficient_funds" || resp.status === 400)
+          ) {
+            const current =
+              resp.current_balance ?? resp.current_balance ?? "N/A";
+            const requested =
+              resp.requested_amount ?? resp.requested_amount ?? "N/A";
+            Alert.alert(
+              "Insufficient funds",
+              `${resp.message || err.message}\nCurrent balance: ${current}\nRequested amount: ${requested}`
+            );
+          } else {
+            Alert.alert(
+              "Payment Failed",
+              err.message || "There was an issue with your payment."
+            );
+          }
+        });
+
+      return;
+    }
 
     if (paymentMethod !== CHECKOUT_PAYMENT_METHOD.STRIPE) {
       Alert.alert(
@@ -208,7 +279,10 @@ export default function CheckoutScreen() {
               orderId ? orderId : Number(pendingOrderId)
             );
           else if (productType === CHECKOUT_PRODUCT_TYPE.WALLET)
-            await addFundsToWallet(orderId ? orderId : Number(pendingOrderId));
+            await addFundsToWallet(
+              orderId ? orderId : Number(pendingOrderId),
+              "Wallet Top Up"
+            );
           clearCart();
           router.push("/cart");
           Alert.alert(
@@ -405,6 +479,27 @@ export default function CheckoutScreen() {
                       ]}
                     />
                     <Text style={styles.radioLabel}>PayPal</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.radioButton}
+                    onPress={() =>
+                      setPaymentMethod(CHECKOUT_PAYMENT_METHOD.WALLET)
+                    }
+                  >
+                    <View
+                      style={[
+                        styles.radioCircle,
+                        paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
+                          styles.radioSelected,
+                      ]}
+                    />
+                    <Text style={styles.radioLabel}>
+                      Wallet{" "}
+                      {balance
+                        ? `(${balance.formatted_balance})`
+                        : "(loading...)"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>

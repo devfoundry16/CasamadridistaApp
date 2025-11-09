@@ -11,18 +11,20 @@ export interface FlintopWalletBalance {
 export interface FlintopWalletTransaction {
   id: number;
   user_id: number;
-  type: 'credit' | 'debit';
+  type: "credit" | "debit";
   amount: number;
   balance: number;
   currency: string;
   details?: string;
   date: string;
+  transaction_id: number;
   order_id: number;
   created_by?: number;
 }
 
 export interface FlintopWalletAddFundsRequest {
   amount: number;
+  order_id: number;
   payment_method: string;
   description?: string;
 }
@@ -54,6 +56,15 @@ export interface FlinTopWalletTransferRequest {
 
 export interface FlinTopWalletWithdrawRequest {
   amount: number;
+  order_id: number;
   payment_method: string;
-  account_details?: string;
+  description?: string;
+}
+export interface FlinTopWalletWithdrawResponse {
+  success: boolean;
+  message: string;
+  transaction_id: number;
+  amount_withdrawn: number;
+  previous_balance: number;
+  new_balance: number;
 }

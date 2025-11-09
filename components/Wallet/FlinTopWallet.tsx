@@ -88,8 +88,7 @@ export const WalletScreenDetail: React.FC = () => {
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>Wallet Balance</Text>
           <Text style={styles.balanceAmount}>
-            {/* {balance?.formatted_balance || '$0.00'} */}$
-            {balance?.balance.toFixed(2)}
+            {balance?.formatted_balance || "$0.00"}
           </Text>
           <Text style={styles.balanceSubtitle}>Available Balance</Text>
         </View>

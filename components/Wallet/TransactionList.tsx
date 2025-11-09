@@ -43,6 +43,11 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         {item.order_id && (
           <Text style={styles.orderId}>Order #: {item.order_id}</Text>
         )}
+        {item.transaction_id && (
+          <Text style={styles.orderId}>
+            Transaction #: {item.transaction_id}
+          </Text>
+        )}
       </View>
 
       <View style={styles.amountContainer}>

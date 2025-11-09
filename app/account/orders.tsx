@@ -74,9 +74,7 @@ export default function OrdersScreen() {
   };
 
   const handleProcessPayment = (order: Order) => {
-    console.log(order.line_items);
     const productType = getProductType(order.line_items);
-    console.log(productType);
     router.push(
       `/checkout?pendingOrderId=${order.id}&productType=${productType}`
     );
