@@ -100,7 +100,6 @@ export default function CheckoutScreen() {
 
   const placeOrder = (payload: any) => {
     addOrder(payload).then((data) => {
-      console.log(data);
       console.log(
         "order id:",
         data.id,
@@ -178,7 +177,9 @@ export default function CheckoutScreen() {
         id,
         productType === CHECKOUT_PRODUCT_TYPE.WALLET
           ? "Wallet Top Up"
-          : "Order Payment"
+          : productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION
+            ? "Order Subscription"
+            : "Order Standard Product"
       )
         .then(async (res) => {
           // Update order with wallet payment info

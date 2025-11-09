@@ -54,7 +54,6 @@ class ApiService {
 
   async getOrders(customerId: number) {
     try {
-      console.log("customer Id:", customerId);
       const response = await this.api.get(`/orders?customer=${customerId}`);
       return response.data;
     } catch (error: any) {

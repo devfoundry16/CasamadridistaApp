@@ -39,7 +39,6 @@ export default function AccountDetailsScreen() {
     }
     if (formData.oldPassword !== "") {
       const isValid = await checkPassword(formData.oldPassword);
-      console.log(isValid);
       if (formData.password !== formData.confirmPassword) {
         Alert.alert("Error", "Confirm password is incorrect");
         return;
@@ -56,7 +55,6 @@ export default function AccountDetailsScreen() {
       email: formData.email,
       name: formData.name,
     };
-    console.log(formData.password);
     if (formData.oldPassword === "") updateUser({ id: user?.id, ...newData });
     else updateUser({ id: user?.id, ...formData });
     Alert.alert("Success", "Updated Successfully");

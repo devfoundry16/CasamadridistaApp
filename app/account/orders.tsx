@@ -7,7 +7,6 @@ import { useCart } from "@/hooks/useCart";
 import { Order, OrderStatus } from "@/types/shop/order";
 import { getProductType } from "@/utils/helper";
 import { router } from "expo-router";
-import { Alert } from "react-native";
 import {
   CheckCircle,
   Clock,
@@ -17,6 +16,7 @@ import {
 } from "lucide-react-native";
 import React, { useCallback, useEffect } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,

@@ -57,7 +57,6 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
         FlintopWalletService.getBalance(),
         FlintopWalletService.getTransactions(),
       ]);
-      console.log(testData);
       setBalance(balanceData);
       setTransactions(transactionsData);
     } catch (err) {
@@ -154,8 +153,6 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
     ) => {
       try {
         setError(null);
-        console.log(amount, order_id, paymentMethod, description);
-
         const resp = await FlintopWalletService.withdrawFunds({
           amount: amount / 100,
           order_id,
@@ -169,7 +166,6 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
 
         return resp;
       } catch (err) {
-        console.log(err);
         setError(
           err instanceof Error ? err.message : "Failed to withdraw funds"
         );
