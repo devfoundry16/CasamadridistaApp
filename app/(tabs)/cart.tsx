@@ -1,6 +1,7 @@
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
+import { CHECKOUT_PRODUCT_TYPE } from "@/types/shop/checkout";
 import { useRouter } from "expo-router";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react-native";
 import {
@@ -18,7 +19,7 @@ export default function CartScreen() {
     useCart();
   if (loading) {
     return <Spinner content="Loading cart" />;
-  }
+  } 
 
   if (items && items.length === 0) {
     return (
@@ -113,7 +114,11 @@ export default function CartScreen() {
         </View>
         <TouchableOpacity
           style={styles.checkoutButton}
-          onPress={() => router.push("/checkout" as any)}
+          onPress={() =>
+            router.push(
+              `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.STANDARD}` as any
+            )
+          }
           activeOpacity={0.8}
         >
           <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>

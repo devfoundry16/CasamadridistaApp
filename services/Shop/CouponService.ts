@@ -1,15 +1,14 @@
 import { Coupon } from "@/types/shop/coupon";
 import axios, { AxiosInstance } from "axios";
-import { WOO_CONSUMER_KEY, WOO_CONSUMER_SECRET, WP_BASE_URL } from "@env";
 class ApiService {
   private api: AxiosInstance;
   private token = "";
-  private WOO_USERNAME = WOO_CONSUMER_KEY;
-  private WOO_PASSWORD = WOO_CONSUMER_SECRET;
+  private WOO_USERNAME = "ck_5761f8ce313356e07555cf14a8c2099ab27d7942";
+  private WOO_PASSWORD = "cs_72d03b9110f7f1e3592f5c4a77cbd7c42b176075";
   constructor() {
     this.token = btoa(`${this.WOO_USERNAME}:${this.WOO_PASSWORD}`);
     this.api = axios.create({
-      baseURL: process.env.EXPO_PUBLIC_API_URL || `${WP_BASE_URL}/wc/v3`,
+      baseURL: "https://casamadridista.com/wp-json/wc/v3",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Basic ${this.token}`,

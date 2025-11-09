@@ -15,7 +15,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 export default function AboutScreen() {
@@ -43,7 +43,7 @@ export default function AboutScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Casa Madridista</Text>
             <Text style={styles.sectionText}>
-              Casa Madridista is more than just a website it's the digital home
+              Casa Madridista is more than just a website it is the digital home
               of every passionate Madridista around the world. We are an
               official fan network, proudly uniting Real Madrid fan clubs from
               more than 30 countries under one banner.
@@ -156,9 +156,9 @@ export default function AboutScreen() {
                   color: Colors.primary,
                 }}
               >
-                Real Madrid is not just a football club. It's a story. A legacy.
-                A force. We believe every fan deserves to be part of that story
-                not just as a spectator, but as a participant.
+                Real Madrid is not just a football club. It&apos;s a story. A
+                legacy. A force. We believe every fan deserves to be part of
+                that story not just as a spectator, but as a participant.
               </Text>
             </View>
 
@@ -174,9 +174,9 @@ export default function AboutScreen() {
                   color: Colors.primary,
                 }}
               >
-                Whether you're in Madrid, Morocco, Mexico, or Malaysia you are
-                part of One Madridista Family. Our strength lies in our unity,
-                and our voice becomes louder with every member who joins.
+                Whether you&apos;re in Madrid, Morocco, Mexico, or Malaysia you
+                are part of One Madridista Family. Our strength lies in our
+                unity, and our voice becomes louder with every member who joins.
               </Text>
             </View>
             <Text style={styles.featureContent}>

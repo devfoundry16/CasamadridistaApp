@@ -16,21 +16,21 @@ export interface Order {
   payment_method_title: string;
   set_paid: boolean;
   variationId: number;
-  line_items: Array<{
+  line_items: {
     id?: number;
     name?: string;
     product_id: number;
     quantity: number;
-    variation?: Array<{
+    variation?: {
       attribute: string;
       value: string;
-    }>;
-  }>;
+    }[];
+  }[];
   customer_id: number;
   billing: Partial<Address>;
   shipping?: Partial<Address>;
-  variation?: Array<{ attribute: string; value: string }>;
-  meta_data?: Array<{ key: string; value: string }>;
+  variation?: { attribute: string; value: string }[];
+  meta_data?: { key: string; value: string }[];
   created_at: string;
   updated_at: string;
 }

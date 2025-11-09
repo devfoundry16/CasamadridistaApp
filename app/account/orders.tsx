@@ -183,17 +183,14 @@ export default function OrdersScreen() {
                       style={[
                         styles.statusBadge,
                         {
-                          backgroundColor: getStatusColor(order.status) + "20",
+                          backgroundColor: Colors.lightGray + "20",
                           justifyContent: "center",
                         },
                       ]}
                       onPress={() => handleProcessPayment(order)}
                     >
                       <Text
-                        style={[
-                          styles.statusText,
-                          { color: getStatusColor(order.status) },
-                        ]}
+                        style={[styles.statusText, { color: Colors.lightGray }]}
                       >
                         Process Payment
                       </Text>

@@ -10,10 +10,11 @@ import {
   CHECKOUT_PAYMENT_METHOD,
   CHECKOUT_PRODUCT_TYPE,
 } from "@/types/shop/checkout";
-import { OrderStatus } from "@/types/shop/order";
+import { CartItem } from "@/types/shop/cart";
+import { Order, OrderStatus } from "@/types/shop/order";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle, User } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -32,7 +33,8 @@ export default function CheckoutScreen() {
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useUser();
   const router = useRouter();
-  const { addOrder, updateOrder, createSubscriptionOrder } = useOrder();
+  const { addOrder, getOrderById, updateOrder, createSubscriptionOrder } =
+    useOrder();
   const billingAddress = user?.billing;
   const [name, setName] = useState(
     billingAddress?.first_name + " " + billingAddress?.last_name
@@ -49,15 +51,85 @@ export default function CheckoutScreen() {
   const [country, setCountry] = useState(billingAddress?.country || "");
   const [postcode, setPostcode] = useState(billingAddress?.postcode || "");
   const [updateBillingChecked, setUpdateBillingChecked] = useState(false);
-
-  const dispatch = useDispatch();
   const [status, setStatus] = useState<boolean>(pendingOrderId ? true : false); //false means place an order, true means paying
   const [orderId, setOrderId] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>(
     CHECKOUT_PAYMENT_METHOD.STRIPE
   );
+  const [summaryOrder, setSummaryOrder] = useState<Order>();
   const { handlePayment: payViaStripe } = useStripePay();
   const { addFunds, withdrawFunds, balance } = useFlintopWallet();
+  const dispatch = useDispatch();
+
+  const loadSummaryItems = async () => {
+    const id = Number(pendingOrderId);
+    if (pendingOrderId) {
+      const res = await getOrderById(id);
+      setSummaryOrder(res);
+    }
+  };
+
+  useEffect(() => {
+    loadSummaryItems();
+  }, []);
+
+  const getTotalPrice = (): number => {
+    if (productType === CHECKOUT_PRODUCT_TYPE.WALLET) return Number(amount);
+    if (pendingOrderId) return Number(summaryOrder?.total);
+    return totalPrice;
+  };
+
+  const getSummary = () => {
+    if (productType === CHECKOUT_PRODUCT_TYPE.WALLET) {
+      return (
+        <View style={styles.summaryItem}>
+          <Text style={styles.summaryItemName}>Wallet Top Up</Text>
+          {productType === CHECKOUT_PRODUCT_TYPE.WALLET ? (
+            <Text style={styles.summaryItemPrice}>
+              ${Number(amount).toFixed(2)}
+            </Text>
+          ) : (
+            <Text style={styles.summaryItemPrice}>
+              ${Number(amount).toFixed(2)}
+            </Text>
+          )}
+        </View>
+      );
+    }
+    if (pendingOrderId) {
+      return summaryOrder?.line_items.map((item: any) => (
+        <View key={item.id} style={styles.summaryItem}>
+          <Text style={styles.summaryItemName}>
+            {item.name} {item.subtotal} x {item.quantity}
+          </Text>
+          {productType === CHECKOUT_PRODUCT_TYPE.WALLET ? (
+            <Text style={styles.summaryItemPrice}>
+              ${(Number(amount) || 0).toFixed(2)}
+            </Text>
+          ) : (
+            <Text style={styles.summaryItemPrice}>
+              ${Number(item.total).toFixed(2)}
+            </Text>
+          )}
+        </View>
+      ));
+    }
+    return items.map((item: any) => (
+      <View key={item.id} style={styles.summaryItem}>
+        <Text style={styles.summaryItemName}>
+          {item.name} {item.variation.length ? item.variation[0].value : ""} x{" "}
+          {item.quantity}
+        </Text>
+        {productType === CHECKOUT_PRODUCT_TYPE.WALLET ? (
+          <Text style={styles.summaryItemPrice}>
+            ${(Number(amount) || 0).toFixed(2)}
+          </Text>
+        ) : (
+          <Text style={styles.summaryItemPrice}>${totalPrice.toFixed(2)}</Text>
+        )}
+      </View>
+    ));
+  };
 
   const preparePayload = () => {
     const nameParts = name ? name.trim().split(" ") : ["", ""];
@@ -137,7 +209,7 @@ export default function CheckoutScreen() {
   };
 
   const createSubscription = async (order_id: number) => {
-    console.log(order_id);
+    console.log("subscription order id: ", order_id);
     createSubscriptionOrder(order_id).then(() => {
       setStatus(false);
       setOrderId(null);
@@ -255,7 +327,7 @@ export default function CheckoutScreen() {
 
     payViaStripe(
       orderId ? orderId : Number(pendingOrderId),
-      productType === CHECKOUT_PRODUCT_TYPE.WALLET ? Number(amount) : 0,
+      getTotalPrice(),
       billingPayload
     )
       .then((res) => {
@@ -330,16 +402,16 @@ export default function CheckoutScreen() {
     }
   };
 
-  if (items.length === 0) {
-    return (
-      <>
-        <HeaderStack title="Checkout" />
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Your cart is empty</Text>
-        </View>
-      </>
-    );
-  }
+  // if (items.length === 0) {
+  //   return (
+  //     <>
+  //       <HeaderStack title="Checkout" />
+  //       <View style={styles.emptyContainer}>
+  //         <Text style={styles.emptyText}>Your cart is empty</Text>
+  //       </View>
+  //     </>
+  //   );
+  // }
 
   return (
     <>
@@ -508,40 +580,13 @@ export default function CheckoutScreen() {
 
             <View style={styles.orderSummary}>
               <Text style={styles.summaryTitle}>Order Summary</Text>
-              {items.map((item) => (
-                <View key={item.id} style={styles.summaryItem}>
-                  <Text style={styles.summaryItemName}>
-                    {item.name}{" "}
-                    {item.variation.length ? item.variation[0].value : ""} x{" "}
-                    {item.quantity}
-                  </Text>
-                  {productType === CHECKOUT_PRODUCT_TYPE.WALLET ? (
-                    <Text style={styles.summaryItemPrice}>
-                      ${(Number(amount) || 0).toFixed(2)}
-                    </Text>
-                  ) : (
-                    <Text style={styles.summaryItemPrice}>
-                      $
-                      {(
-                        (Number(item.prices.price) / 100) *
-                        item.quantity
-                      ).toFixed(2)}
-                    </Text>
-                  )}
-                </View>
-              ))}
+              <View>{getSummary()}</View>
               <View style={styles.divider} />
               <View style={styles.summaryItem}>
                 <Text style={styles.totalLabel}>Total</Text>
-                {productType === CHECKOUT_PRODUCT_TYPE.WALLET ? (
-                  <Text style={styles.totalPrice}>
-                    ${(Number(amount) || 0).toFixed(2)}
-                  </Text>
-                ) : (
-                  <Text style={styles.totalPrice}>
-                    ${(totalPrice / 100).toFixed(2)}
-                  </Text>
-                )}
+                <Text style={styles.totalPrice}>
+                  ${getTotalPrice().toFixed(2)}
+                </Text>
               </View>
             </View>
           </View>

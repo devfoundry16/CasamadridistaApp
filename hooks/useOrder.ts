@@ -7,6 +7,10 @@ export const useOrder = () => {
     return OrderService.createOrder(order);
   }, []);
 
+  const getOrderById = useCallback(async (id: number) => {
+    return OrderService.getOrderById(id);
+  }, []);
+
   const getOrders = useCallback(async (customer_id: number) => {
     return OrderService.getOrders(customer_id);
   }, []);
@@ -34,6 +38,7 @@ export const useOrder = () => {
   );
   return {
     addOrder,
+    getOrderById,
     getOrders,
     createSubscriptionOrder,
     getSubscriptionOrders,

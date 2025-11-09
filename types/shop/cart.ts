@@ -40,4 +40,5 @@ export interface CartItem {
       value: string; //"Yearly";
     },
   ];
+  meta_data: [];
 }

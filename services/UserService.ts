@@ -2,10 +2,10 @@ import { Address, User } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { WP_BASE_URL, WP_USERNAME, WP_PASSWORD } from "@env";
-const DEFAULT_BASE_URL = WP_BASE_URL;
+const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json/";
 const API_BASE_URL_KEY = "api_base_url_key";
-const AUTH_USERNAME = WP_USERNAME; // Replace with actual username
-const AUTH_PASSWORD = WP_PASSWORD;
+const AUTH_USERNAME = "iworqs"; // Replace with actual username
+const AUTH_PASSWORD = "P8u4 vcXa 7FrR mWXP eVla jstg";
 class ApiService {
   private baseUrl: string = DEFAULT_BASE_URL;
   private readonly AUTH_TOKEN_KEY = "jwt_token";

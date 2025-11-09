@@ -1,6 +1,5 @@
 import axios from "axios";
-import { WP_BASE_URL } from "@env";
-const API_BASE = `${WP_BASE_URL}/wc/store`;
+const API_BASE = `https://casamadridista.com/wp-json/wc/store`;
 
 export const wooApi = axios.create({
   baseURL: API_BASE,

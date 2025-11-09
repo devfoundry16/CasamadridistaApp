@@ -2,7 +2,6 @@ import { useUser } from "@/hooks/useUser";
 import { PaymentSheet, useStripe } from "@stripe/stripe-react-native";
 import { useRef } from "react";
 import { useCart } from "./useCart";
-import { STRIPE_API_URL } from "@env";
 
 export const useStripePay = () => {
   const { totalPrice } = useCart();
@@ -13,7 +12,7 @@ export const useStripePay = () => {
   const orderIdRef = useRef<number>(0);
   /* Stripe */
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const API_URL = STRIPE_API_URL;
+  const API_URL = "http://localhost:3000/api/stripe";
 
   const handlePayment = async (
     orderId: number,
@@ -37,7 +36,7 @@ export const useStripePay = () => {
     const effectiveBilling = billing || billingAddress;
 
     const body = {
-      amount: walletAmount ? walletAmount * 100 : totalPrice,
+      amount: walletAmount ? walletAmount : totalPrice,
       orderId: orderId,
       user: {
         email: effectiveBilling?.email || user?.email,
