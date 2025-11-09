@@ -76,7 +76,7 @@ export default function CheckoutScreen() {
   const getTotalPrice = (): number => {
     if (productType === CHECKOUT_PRODUCT_TYPE.WALLET) return Number(amount);
     if (pendingOrderId) return Number(summaryOrder?.total);
-    return totalPrice;
+    return totalPrice / 100;
   };
 
   const getSummary = () => {
@@ -125,7 +125,9 @@ export default function CheckoutScreen() {
             ${(Number(amount) || 0).toFixed(2)}
           </Text>
         ) : (
-          <Text style={styles.summaryItemPrice}>${totalPrice.toFixed(2)}</Text>
+          <Text style={styles.summaryItemPrice}>
+            ${(Number(item.prices.price) / 100).toFixed(2)}
+          </Text>
         )}
       </View>
     ));
@@ -263,7 +265,7 @@ export default function CheckoutScreen() {
             meta_data: [
               {
                 key: "_wallet_response",
-                value: JSON.stringify(res),
+                value: res,
               },
             ],
           });
@@ -274,7 +276,9 @@ export default function CheckoutScreen() {
 
           clearCart();
           router.push("/cart");
-          Alert.alert("Payment Successful", JSON.stringify(res));
+          Alert.alert(
+            `Payment Successful. Current wallet balance: ${res.new_balance}`
+          );
         })
         .catch((err: any) => {
           const resp = err?.response || err?.data || null;
@@ -401,17 +405,6 @@ export default function CheckoutScreen() {
       }
     }
   };
-
-  // if (items.length === 0) {
-  //   return (
-  //     <>
-  //       <HeaderStack title="Checkout" />
-  //       <View style={styles.emptyContainer}>
-  //         <Text style={styles.emptyText}>Your cart is empty</Text>
-  //       </View>
-  //     </>
-  //   );
-  // }
 
   return (
     <>

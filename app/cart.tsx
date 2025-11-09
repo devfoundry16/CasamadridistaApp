@@ -1,3 +1,4 @@
+import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
@@ -19,23 +20,26 @@ export default function CartScreen() {
     useCart();
   if (loading) {
     return <Spinner content="Loading cart" />;
-  } 
+  }
 
   if (items && items.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <ShoppingBag size={80} color={Colors.darkGold} strokeWidth={1.5} />
-        <Text style={styles.emptyTitle}>Your cart is empty</Text>
-        <Text style={styles.emptyText}>
-          Add some luxury items to get started
-        </Text>
-        <TouchableOpacity
-          style={styles.shopButton}
-          onPress={() => router.push("/shop" as any)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.shopButtonText}>Start Shopping</Text>
-        </TouchableOpacity>
+        <HeaderStack title="Cart" />
+        <View style={styles.emptyContainer}>
+          <ShoppingBag size={80} color={Colors.darkGold} strokeWidth={1.5} />
+          <Text style={styles.emptyTitle}>Your cart is empty</Text>
+          <Text style={styles.emptyText}>
+            Add some luxury items to get started
+          </Text>
+          <TouchableOpacity
+            style={styles.shopButton}
+            onPress={() => router.push("/shop" as any)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.shopButtonText}>Start Shopping</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -98,6 +102,7 @@ export default function CartScreen() {
 
   return (
     <View style={styles.container}>
+      <HeaderStack title="Cart" />
       <FlatList
         data={items}
         renderItem={renderCartItem}

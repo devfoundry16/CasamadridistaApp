@@ -1,7 +1,13 @@
 import Colors from "@/constants/colors";
 import { Stack, router } from "expo-router";
 import { Text, TouchableOpacity } from "react-native";
-
+export const headerOptions = {
+  headerShown: true,
+  headerBackButtonDisplayMode: "minimal" as const,
+  headerTintColor: Colors.textWhite,
+  headerStyle: { backgroundColor: Colors.darkGold },
+  headerTitleStyle: { fontWeight: "700" as const },
+};
 const HeaderStack = ({ title }: { title: string }) => {
   return (
     <Stack.Screen

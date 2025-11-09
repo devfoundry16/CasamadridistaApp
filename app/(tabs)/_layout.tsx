@@ -1,6 +1,5 @@
 import HeaderMenu from "@/components/HeaderMenu";
 import Colors from "@/constants/colors";
-import { useCart } from "@/hooks/useCart";
 import { Tabs } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -9,22 +8,11 @@ import {
   Home,
   Layout,
   ShoppingBag,
-  ShoppingCart,
   Users as Team,
   UserCircle,
+  Gift,
 } from "lucide-react-native";
 import React from "react";
-function CartBadge() {
-  const { totalItems } = useCart();
-
-  if (totalItems === 0) return null;
-
-  return (
-    <View style={styles.badge}>
-      <Text style={styles.badgeText}>{totalItems}</Text>
-    </View>
-  );
-}
 
 export default function TabLayout() {
   return (
@@ -98,15 +86,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="cart"
+        name="donate"
         options={{
-          title: "Cart",
-          tabBarIcon: ({ color }) => (
-            <View>
-              <ShoppingCart color={color} size={24} />
-              <CartBadge />
-            </View>
-          ),
+          title: "Donation",
+          headerTitle: "Donation",
+          tabBarIcon: ({ color, size }) => <Gift size={size} color={color} />,
         }}
       />
       <Tabs.Screen

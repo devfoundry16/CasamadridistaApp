@@ -1,7 +1,6 @@
 import { Address, User } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { WP_BASE_URL, WP_USERNAME, WP_PASSWORD } from "@env";
 const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json/";
 const API_BASE_URL_KEY = "api_base_url_key";
 const AUTH_USERNAME = "iworqs"; // Replace with actual username
@@ -11,6 +10,9 @@ class ApiService {
   private readonly AUTH_TOKEN_KEY = "jwt_token";
   private readonly USER_ID_KEY = "user_id";
   private readonly USER_KEY = "user";
+  private readonly GiveWP_API_KEY = "give_wp_api_key";
+  private readonly GiveWP_SECRET_KEY = "give_wp_secret_key";
+  private readonly GiveWP_TOKEN = "give_wp_token";
   async initialize() {
     const savedUrl = await AsyncStorage.getItem(API_BASE_URL_KEY);
     if (savedUrl) {
@@ -47,10 +49,38 @@ class ApiService {
     return await AsyncStorage.getItem(this.USER_KEY);
   }
 
+  async getGiveWPAuth() {
+    //Get GiveWP Keys
+    await this.storeGiveWPData(
+      "fdb5d4c7f4795fc2a5322bfc88f2660f",
+      "931a3e70dc548a0bbc032d90fc114028",
+      "a67af49d175801e596c21c6224dab0db"
+    );
+
+    const api_key = await AsyncStorage.getItem(this.GiveWP_API_KEY);
+    const secret_key = await AsyncStorage.getItem(this.GiveWP_SECRET_KEY);
+    const token = await AsyncStorage.getItem(this.GiveWP_TOKEN);
+
+    console.log(api_key);
+    return {
+      apiKey: api_key,
+      secretKey: secret_key,
+      token,
+    };
+  }
+
   async storeAuthData(token: string, userId: number): Promise<void> {
     await AsyncStorage.multiSet([
       [this.AUTH_TOKEN_KEY, token],
       [this.USER_ID_KEY, userId.toString()],
+    ]);
+  }
+
+  async storeGiveWPData(apiKey: string, secretKey: string, token: string) {
+    await AsyncStorage.multiSet([
+      [this.GiveWP_API_KEY, apiKey],
+      [this.GiveWP_SECRET_KEY, secretKey],
+      [this.GiveWP_TOKEN, token],
     ]);
   }
 
@@ -142,7 +172,7 @@ class ApiService {
       method: "POST",
       body: JSON.stringify(userData),
     });
-
+    //set give wp api key
     console.log("[WordPress] Register successful:");
     return response;
   }
