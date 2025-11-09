@@ -507,60 +507,75 @@ export default function CheckoutScreen() {
               </View>
             </View>
 
-            {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
-              <PayPalPaymentScreen />
-            )}
-
             {status === true && (
               <View style={styles.paymentMethodsContainer}>
                 <Text style={styles.summaryTitle}>Payment Method</Text>
-                <View style={styles.radioRow}>
+                <View style={styles.paymentMethods}>
                   <TouchableOpacity
-                    style={styles.radioButton}
+                    style={[
+                      styles.paymentMethod,
+                      paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE &&
+                        styles.paymentMethodSelected,
+                    ]}
                     onPress={() =>
                       setPaymentMethod(CHECKOUT_PAYMENT_METHOD.STRIPE)
                     }
                   >
-                    <View
-                      style={[
-                        styles.radioCircle,
-                        paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE &&
-                          styles.radioSelected,
-                      ]}
-                    />
-                    <Text style={styles.radioLabel}>Credit/Debit Card</Text>
+                    <View style={styles.radioContainer}>
+                      <View
+                        style={[
+                          styles.radio,
+                          paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE &&
+                            styles.radioSelected,
+                        ]}
+                      />
+                    </View>
+                    <Text style={styles.paymentMethodText}>
+                      Credit/Debit Card
+                    </Text>
                   </TouchableOpacity>
-
                   <TouchableOpacity
-                    style={styles.radioButton}
+                    style={[
+                      styles.paymentMethod,
+                      paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL &&
+                        styles.paymentMethodSelected,
+                    ]}
                     onPress={() =>
                       setPaymentMethod(CHECKOUT_PAYMENT_METHOD.PAYPAL)
                     }
                   >
-                    <View
-                      style={[
-                        styles.radioCircle,
-                        paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL &&
-                          styles.radioSelected,
-                      ]}
-                    />
-                    <Text style={styles.radioLabel}>PayPal</Text>
+                    <View style={styles.radioContainer}>
+                      <View
+                        style={[
+                          styles.radio,
+                          paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL &&
+                            styles.radioSelected,
+                        ]}
+                      />
+                    </View>
+                    <Text style={styles.paymentMethodText}>PayPal</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={styles.radioButton}
+                    style={[
+                      styles.paymentMethod,
+                      paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
+                        styles.paymentMethodSelected,
+                    ]}
                     onPress={() =>
                       setPaymentMethod(CHECKOUT_PAYMENT_METHOD.WALLET)
                     }
                   >
-                    <View
-                      style={[
-                        styles.radioCircle,
-                        paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
-                          styles.radioSelected,
-                      ]}
-                    />
-                    <Text style={styles.radioLabel}>
+                    <View style={styles.radioContainer}>
+                      <View
+                        style={[
+                          styles.radio,
+                          paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
+                            styles.radioSelected,
+                        ]}
+                      />
+                    </View>
+                    <Text style={styles.paymentMethodText}>
                       Wallet{" "}
                       {balance
                         ? `(${balance.formatted_balance})`
@@ -570,7 +585,9 @@ export default function CheckoutScreen() {
                 </View>
               </View>
             )}
-
+            {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
+              <PayPalPaymentScreen />
+            )}
             <View style={styles.orderSummary}>
               <Text style={styles.summaryTitle}>Order Summary</Text>
               <View>{getSummary()}</View>
@@ -670,39 +687,45 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   paymentMethodsContainer: {
-    backgroundColor: Colors.cardBg,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    marginBottom: 15,
   },
-  radioRow: {
-    flexDirection: "row",
-    gap: 12,
-    alignItems: "center",
-  },
-  radioButton: {
-    flexDirection: "row",
-    alignItems: "center",
+  paymentMethods: {
     gap: 8,
   },
-  radioCircle: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 2,
-    borderColor: Colors.border,
+  paymentMethod: {
+    flexDirection: "row",
     alignItems: "center",
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+  },
+  paymentMethodSelected: {
+    borderColor: Colors.darkGold,
+    backgroundColor: Colors.cardBg,
+  },
+  radioContainer: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: Colors.darkGold,
     justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  radio: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "transparent",
   },
   radioSelected: {
     backgroundColor: Colors.darkGold,
-    borderColor: Colors.darkGold,
   },
-  radioLabel: {
-    fontSize: 14,
-    color: Colors.textPrimary,
+  paymentMethodText: {
+    fontSize: 16,
+    color: "#eee",
   },
   summaryItem: {
     flexDirection: "row",
