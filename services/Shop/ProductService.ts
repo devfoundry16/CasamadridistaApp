@@ -1,8 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json/wc";
-const API_BASE_URL_KEY = "api_base_url_key";
-const WOO_USERNAME = "ck_5761f8ce313356e07555cf14a8c2099ab27d7942"; // Replace with actual username
-const WOO_PASSWORD = "cs_72d03b9110f7f1e3592f5c4a77cbd7c42b176075";
+import { development } from "@/config/environment";
+const DEFAULT_BASE_URL = `${development.DEFAULT_BASE_URL}wc`;
+const API_BASE_URL_KEY = development.API_BASE_URL_KEY;
+const WOO_USERNAME = development.WOO_USERNAME; // Replace with actual username
+const WOO_PASSWORD = development.WOO_PASSWORD;
 class ApiService {
   private baseUrl: string = DEFAULT_BASE_URL;
 

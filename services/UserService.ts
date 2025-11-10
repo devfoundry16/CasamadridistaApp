@@ -1,10 +1,11 @@
 import { Address, User } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-const DEFAULT_BASE_URL = "https://casamadridista.com/wp-json/";
+import { development } from "@/config/environment";
+const DEFAULT_BASE_URL = development.DEFAULT_BASE_URL;
 const API_BASE_URL_KEY = "api_base_url_key";
-const AUTH_USERNAME = "iworqs"; // Replace with actual username
-const AUTH_PASSWORD = "P8u4 vcXa 7FrR mWXP eVla jstg";
+const AUTH_USERNAME = development.AUTH_USERNAME;
+const AUTH_PASSWORD = development.AUTH_PASSWORD;
 class ApiService {
   private baseUrl: string = DEFAULT_BASE_URL;
   private readonly AUTH_TOKEN_KEY = "jwt_token";

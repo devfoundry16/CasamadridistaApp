@@ -809,7 +809,7 @@ const styles = StyleSheet.create({
   formationTitleText: {
     fontSize: 28,
     fontWeight: "800" as const,
-    color: "#fff",
+    color: "#f59e0b",
     textAlign: "center" as const,
     marginBottom: 4,
     letterSpacing: 1,

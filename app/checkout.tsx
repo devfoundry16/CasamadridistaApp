@@ -10,7 +10,6 @@ import {
   CHECKOUT_PAYMENT_METHOD,
   CHECKOUT_PRODUCT_TYPE,
 } from "@/types/shop/checkout";
-import { CartItem } from "@/types/shop/cart";
 import { Order, OrderStatus } from "@/types/shop/order";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CheckCircle, User } from "lucide-react-native";
