@@ -9,8 +9,9 @@ import {
   FlinTopWalletWithdrawResponse,
 } from "@/types/user/flintop-wallet";
 import UserService from "./UserService";
+import { development } from "@/config/environment";
 export class FlintopWalletService {
-  private static readonly BASE_URL = "https://casamadridista.com/wp-json/";
+  private static readonly BASE_URL = development.DEFAULT_BASE_URL;
 
   private static async authenticatedFetch<T>(
     endpoint: string,
