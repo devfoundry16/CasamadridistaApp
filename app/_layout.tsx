@@ -12,6 +12,7 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider } from "react-redux";
+import { development } from "@/config/environment";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -47,7 +48,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <StripeProvider
-        publishableKey="pk_test_51SJbX1LKFkodhXbkhZyhK8koyJDiF3i0xhq2A3hdXj5DnZasByx2N8aCVp2GJZDLEFMm7EJiwYQOPJqKdA7ShN5j00IvGbHo3c"
+        publishableKey={development.STRIPE_PUBLISHABLE_KEY}
         merchantIdentifier="merchant.identifier" // required for Apple Pay
         urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
       >

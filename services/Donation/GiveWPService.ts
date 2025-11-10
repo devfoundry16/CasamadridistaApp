@@ -8,10 +8,27 @@ const AUTH_PASSWORD = development.AUTH_PASSWORD;
 class ApiService {
   private api: AxiosInstance;
 
+  private stripHtml(html: string): string {
+    // Remove HTML tags and decode entities
+    return html
+      .replace(/<[^>]*>/g, "")
+      .replace(/&[^;]+;/g, (entity) => {
+        const entities: { [key: string]: string } = {
+          "&#36;": "$",
+          "&": "&",
+          "<": "<",
+          ">": ">",
+          '"': '"',
+        };
+        return entities[entity] || entity;
+      })
+      .trim();
+  }
+
   constructor() {
     const token = btoa(`${AUTH_USERNAME}:${AUTH_PASSWORD}`);
     this.api = axios.create({
-      baseURL: "https://casamadridista.com/json/givewp/v3",
+      baseURL: `${development.DEFAULT_BASE_URL}givewp/v3`,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Basic ${token}`,
@@ -52,6 +69,31 @@ class ApiService {
   async getForm(id: number) {
     try {
       const response = await this.api.get(`/form/${id}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error || "An error occurred");
+    }
+  }
+  async getCampaignsList() {
+    try {
+      const response = await this.api.get(`/campaigns/list-table`);
+      // Parse HTML strings to plain text
+      const parsedItems = response.data.items.map((item: any) => ({
+        ...item,
+        title: this.stripHtml(item.title),
+        goal: this.stripHtml(item.goal),
+        donationsCount: this.stripHtml(item.donationsCount),
+        revenue: this.stripHtml(item.revenue),
+        status: this.stripHtml(item.status),
+      }));
+      return { ...response.data, items: parsedItems };
+    } catch (error: any) {
+      throw new Error(error || "An error occurred");
+    }
+  }
+  async getCampaignById(id: number) {
+    try {
+      const response = await this.api.get(`/campaigns/${id}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error || "An error occurred");
