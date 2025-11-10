@@ -1,55 +1,3 @@
-// import { altColors as colors } from "@/constants/colors";
-// import { File, Paths } from "expo-file-system";
-// import * as Sharing from "expo-sharing";
-// import {
-//   ChevronDown,
-//   Download,
-//   Eye,
-//   EyeOff,
-//   RotateCcw,
-// } from "lucide-react-native";
-// import React, { useRef, useState } from "react";
-// import {
-//   Alert,
-//   Animated,
-//   Dimensions,
-//   Image,
-//   PanResponder,
-//   Platform,
-//   Pressable,
-//   ScrollView,
-//   StyleSheet,
-//   Text,
-//   TouchableOpacity,
-//   View,
-// } from "react-native";
-// import { useSafeAreaInsets } from "react-native-safe-area-context";
-// import { captureRef } from "react-native-view-shot";
-
-// const SCREEN_WIDTH = Dimensions.get("window").width;
-// const PITCH_WIDTH = SCREEN_WIDTH - 32;
-// const PITCH_HEIGHT = Math.max(872, PITCH_WIDTH * 1.4);
-// const PLAYER_SIZE = 80;
-
-// interface Player {
-//   id: string;
-//   name: string;
-//   position: string;
-//   number: number;
-//   imageUrl: string;
-// }
-
-// interface PositionSlot {
-//   id: string;
-//   x: number;
-//   y: number;
-//   label: string;
-//   playerId: string | null;
-// }
-// const PITCH_IMAGE = {
-//   uri: require("@/assets/images/pitch.png"),
-// };
-
 import React, { useRef, useState } from "react";
 import {
   View,
@@ -72,8 +20,9 @@ import {
   FORMATIONS,
 } from "@/types/soccer/formation";
 import { ChevronDown, Download, RotateCcw } from "lucide-react-native";
-import ViewShot from "react-native-view-shot";
-import * as MediaLibrary from "expo-media-library";
+import ViewShot, { captureRef } from "react-native-view-shot";
+import { File, Paths } from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const PLAYER_SIZE = 80;
@@ -402,38 +351,69 @@ export default function LineupBuilder() {
   };
 
   const downloadFormation = async () => {
-    try {
-      if (Platform.OS === "web") {
-        if (viewShotRef.current) {
-          const uri = await viewShotRef.current.capture?.();
-          if (uri) {
-            const link = document.createElement("a");
-            link.download = `${formationTitle.replace(/\s+/g, "_")}.png`;
-            link.href = uri;
-            link.click();
-          }
-        }
-      } else {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert(
-            "Permission needed",
-            "Please grant media library permission to save images"
-          );
-          return;
-        }
+    // try {
+    //   if (Platform.OS === "web") {
+    //     if (viewShotRef.current) {
+    //       const uri = await viewShotRef.current.capture?.();
+    //       if (uri) {
+    //         const link = document.createElement("a");
+    //         link.download = `${formationTitle.replace(/\s+/g, "_")}.png`;
+    //         link.href = uri;
+    //         link.click();
+    //       }
+    //     }
+    //   } else {
+    //     const { status } = await MediaLibrary.requestPermissionsAsync();
+    //     if (status !== "granted") {
+    //       Alert.alert(
+    //         "Permission needed",
+    //         "Please grant media library permission to save images"
+    //       );
+    //       return;
+    //     }
 
-        if (viewShotRef.current) {
-          const uri = await viewShotRef.current.capture?.();
-          if (uri) {
-            await MediaLibrary.saveToLibraryAsync(uri);
-            Alert.alert("Success", "Formation saved to gallery!");
-          }
+    //     if (viewShotRef.current) {
+    //       const uri = await viewShotRef.current.capture?.();
+    //       if (uri) {
+    //         await MediaLibrary.saveToLibraryAsync(uri);
+    //         Alert.alert("Success", "Formation saved to gallery!");
+    //       }
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.error("Error downloading formation:", error);
+    //   Alert.alert("Error", "Failed to save formation");
+    // }
+    try {
+      if (!viewShotRef.current) return;
+      const uri = await captureRef(viewShotRef, {
+        format: "png",
+        quality: 1,
+      });
+
+      if (Platform.OS === "web") {
+        const link = document.createElement("a");
+        link.href = uri;
+        link.download = `formation-${formationTitle}-${Date.now()}.png`;
+        link.click();
+      } else {
+        const destination = new File(
+          Paths.cache,
+          `formation-${formationTitle}-${Date.now()}.png`
+        );
+        const source = new File(uri);
+        source.copy(destination);
+
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(source.uri);
+        } else {
+          Alert.alert("Success", "Formation saved!");
+          Alert.alert("Success", "Formation saved!");
         }
       }
     } catch (error) {
       console.error("Error downloading formation:", error);
-      Alert.alert("Error", "Failed to save formation");
+      Alert.alert("Error", "Failed to download formation");
     }
   };
 
