@@ -49,7 +49,6 @@ class ApiService {
   }
 
   async getDonors() {
-    const params = await this.getAuth();
     try {
       const response = await this.api.get(`/donors`);
       return response.data;
@@ -58,7 +57,6 @@ class ApiService {
     }
   }
   async getForms() {
-    // const params = await this.getAuth();
     try {
       const response = await this.api.get(`/forms`);
       return response.data;

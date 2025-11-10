@@ -1,4 +1,5 @@
 // hooks/useUser.ts
+import UserService from "@/services/UserService";
 import { AppDispatch, RootState } from "@/store/store";
 import {
   addPaymentMethod,
@@ -50,6 +51,14 @@ export const useUser = () => {
     [dispatch]
   );
 
+  const updateCustomerProfile = useCallback((data: any) => {
+    return UserService.updateCustomer(data);
+  }, []);
+
+  const getCustomerStripeId = useCallback(() => {
+    return UserService.getStripeId();
+  }, []);
+
   const updateUserAddress = useCallback(
     (address: Address) => {
       return dispatch(updateAddress(address));
@@ -95,8 +104,10 @@ export const useUser = () => {
     // Actions
     login,
     register,
+    getStripeId: getCustomerStripeId,
     updateUser: updateUserProfile,
     updateAvatar: updateUserAvatar,
+    updateCustomer: updateCustomerProfile,
     updateAddress: updateUserAddress,
     deleteAddress: removeAddress,
     addPaymentMethod: addPaymentMethodToUser,

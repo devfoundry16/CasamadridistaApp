@@ -29,6 +29,7 @@ export default function DonateScreen() {
             onPress={() => {
               // Navigate to campaign details or donation page
               console.log(`Selected campaign: ${cp.title}`);
+              router.push(`/campaign/${cp.id}`);
               // You can add navigation here, e.g., router.push(`/donate/${cp.id}`)
             }}
           >

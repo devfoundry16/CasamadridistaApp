@@ -261,6 +261,19 @@ class ApiService {
     }
   }
 
+  async getStripeId(): Promise<string | null> {
+    const id = await this.getUserId();
+    const response = await this.fetchWithAuth(`wc/v3/customers/${id}`, {
+      method: "get",
+    });
+    return this.findStripeId(response.meta_data);
+  }
+
+  findStripeId(meta: { key: string; value: string; id: number }[]): string {
+    const item = meta.find((item) => item.key === "stripe_customer_id");
+    return item ? item.value : "";
+  }
+
   async uploadMedia(
     fileUri: string, // Local URI of the file, e.g., from image picker
     filename: string // e.g., 'file.jpg'

@@ -30,7 +30,7 @@ import { updateAddress } from "@/store/thunks/userThunks";
 export default function CheckoutScreen() {
   const { productType, amount, pendingOrderId } = useLocalSearchParams();
   const { items, totalPrice, clearCart } = useCart();
-  const { user } = useUser();
+  const { user, updateCustomer } = useUser();
   const router = useRouter();
   const { addOrder, getOrderById, updateOrder, createSubscriptionOrder } =
     useOrder();
@@ -334,6 +334,16 @@ export default function CheckoutScreen() {
       billingPayload
     )
       .then((res) => {
+        updateCustomer({
+          meta_data: [
+            {
+              key: "stripe_customer_id",
+              value: res?.customer,
+            },
+          ],
+        }).then((data) => {
+          console.log("======meta data in checkout==========");
+        });
         updateOrder(orderId ? orderId : Number(pendingOrderId), {
           payment_method: CHECKOUT_PAYMENT_METHOD.STRIPE,
           payment_method_title: "Credit/Debit Card",

@@ -5,7 +5,7 @@ import { useCart } from "./useCart";
 
 export const useStripePay = () => {
   const { totalPrice } = useCart();
-  const { user } = useUser();
+  const { user, getStripeId } = useUser();
   const billingAddress = user?.billing;
   // const shippingAddress = user?.shipping;
 
@@ -34,7 +34,8 @@ export const useStripePay = () => {
     // set a ref immediately so confirmHandler (called by Stripe) can read the up-to-date id
     orderIdRef.current = orderId;
     const effectiveBilling = billing || billingAddress;
-
+    const stripe_id = await getStripeId();
+    console.log("====stripe id in pay with stripe=====", stripe_id);
     const body = {
       amount: walletAmount ? walletAmount : totalPrice,
       orderId: orderId,
@@ -53,6 +54,7 @@ export const useStripePay = () => {
           line2: effectiveBilling?.address_2,
         },
       },
+      stripeCustomerId: stripe_id,
     };
     const response = await fetch(`${API_URL}/create-payment-intent`, {
       method: "POST",
