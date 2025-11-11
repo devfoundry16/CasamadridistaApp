@@ -62,7 +62,6 @@ class ApiService {
     const secret_key = await AsyncStorage.getItem(this.GiveWP_SECRET_KEY);
     const token = await AsyncStorage.getItem(this.GiveWP_TOKEN);
 
-    console.log(api_key);
     return {
       apiKey: api_key,
       secretKey: secret_key,
@@ -227,7 +226,6 @@ class ApiService {
       this.getUserId(),
       this.getAuthToken(),
     ]);
-    console.log(id, token);
 
     const fetchUser = this.fetchWithAuth(`wp/v2/users/${id}?context=edit`, {
       method: "GET",
@@ -239,8 +237,6 @@ class ApiService {
     const fetchAddress = this.getAddress();
 
     const [response, address] = await Promise.all([fetchUser, fetchAddress]);
-
-    console.log(address.billing, address.shipping);
 
     const newData: User = {
       ...response,

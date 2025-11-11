@@ -18,5 +18,6 @@ const styles = StyleSheet.create({
   },
   content: {
     color: Colors.textWhite,
+    fontSize: 18,
   },
 });
