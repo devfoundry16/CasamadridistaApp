@@ -1,6 +1,8 @@
 import HeaderStack from "@/components/HeaderStack";
+import { development } from "@/config/environment";
 import Colors from "@/constants/colors";
 import { useUser } from "@/hooks/useUser";
+import axios from "axios";
 import { CreditCard, Plus, Trash2, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -19,20 +21,16 @@ export default function PaymentMethodsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [formData, setFormData] = useState({
     type: "card" as "card" | "paypal",
-    cardNumber: "",
+    number: "",
     cardHolder: "",
     expiryDate: "",
-    cvv: "",
+    cvc: "",
     email: "",
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (formData.type === "card") {
-      if (
-        !formData.cardNumber ||
-        !formData.cardHolder ||
-        !formData.expiryDate
-      ) {
+      if (!formData.number || !formData.cardHolder || !formData.expiryDate) {
         Alert.alert("Error", "Please fill in all card details");
         return;
       }
@@ -42,19 +40,17 @@ export default function PaymentMethodsScreen() {
         return;
       }
     }
-
     addPaymentMethod({
       id: Date.now().toString(),
       type: formData.type,
       ...(formData.type === "card"
         ? {
-            cardNumber: formData.cardNumber,
+            number: formData.number,
             cardHolder: formData.cardHolder,
             expiryDate: formData.expiryDate,
           }
         : { email: formData.email }),
     });
-
     setModalVisible(false);
     resetForm();
   };
@@ -77,10 +73,10 @@ export default function PaymentMethodsScreen() {
   const resetForm = () => {
     setFormData({
       type: "card",
-      cardNumber: "",
+      number: "",
       cardHolder: "",
       expiryDate: "",
-      cvv: "",
+      cvc: "",
       email: "",
     });
   };
@@ -124,7 +120,7 @@ export default function PaymentMethodsScreen() {
                           {method.cardHolder}
                         </Text>
                         <Text style={styles.methodSubtitle}>
-                          {maskCardNumber(method.cardNumber || "")}
+                          {maskCardNumber(method.number || "")}
                         </Text>
                         <Text style={styles.methodExpiry}>
                           Expires: {method.expiryDate}
@@ -202,9 +198,9 @@ export default function PaymentMethodsScreen() {
                   <>
                     <TextInput
                       style={styles.input}
-                      value={formData.cardNumber}
+                      value={formData.number}
                       onChangeText={(text) =>
-                        setFormData({ ...formData, cardNumber: text })
+                        setFormData({ ...formData, number: text })
                       }
                       placeholder="Card Number"
                       placeholderTextColor={Colors.darkGray}
@@ -233,9 +229,9 @@ export default function PaymentMethodsScreen() {
                       />
                       <TextInput
                         style={[styles.input, styles.halfInput]}
-                        value={formData.cvv}
+                        value={formData.cvc}
                         onChangeText={(text) =>
-                          setFormData({ ...formData, cvv: text })
+                          setFormData({ ...formData, cvc: text })
                         }
                         placeholder="CVV"
                         placeholderTextColor={Colors.darkGray}

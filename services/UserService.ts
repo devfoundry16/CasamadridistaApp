@@ -144,7 +144,7 @@ class ApiService {
 
     if (!response.ok) {
       const data = await response.json();
-      throw new Error(`Login failed: ${data.message}`);
+      throw new Error(`${data.message}`);
     }
 
     return response.json();
@@ -235,13 +235,19 @@ class ApiService {
     });
 
     const fetchAddress = this.getAddress();
+    const fetchStripeId = this.getStripeId();
 
-    const [response, address] = await Promise.all([fetchUser, fetchAddress]);
+    const [response, address, stripe_id] = await Promise.all([
+      fetchUser,
+      fetchAddress,
+      fetchStripeId,
+    ]);
 
     const newData: User = {
       ...response,
       billing: address.billing,
       shipping: address.shipping,
+      stripe_id,
     };
 
     return newData;

@@ -5,7 +5,7 @@ import { useCart } from "./useCart";
 
 export const useStripePay = () => {
   const { totalPrice } = useCart();
-  const { user, getStripeId } = useUser();
+  const { user } = useUser();
   const billingAddress = user?.billing;
   // const shippingAddress = user?.shipping;
 
@@ -34,8 +34,7 @@ export const useStripePay = () => {
     // set a ref immediately so confirmHandler (called by Stripe) can read the up-to-date id
     orderIdRef.current = orderId;
     const effectiveBilling = billing || billingAddress;
-    const stripe_id = await getStripeId();
-    console.log("====stripe id in pay with stripe=====", stripe_id);
+    console.log("====stripe id in pay with stripe=====", user?.stripe_id);
     const body = {
       amount: walletAmount ? walletAmount : totalPrice,
       orderId: orderId,
@@ -54,7 +53,7 @@ export const useStripePay = () => {
           line2: effectiveBilling?.address_2,
         },
       },
-      stripeCustomerId: stripe_id,
+      stripeCustomerId: user?.stripe_id,
     };
     const response = await fetch(`${API_URL}/create-payment-intent`, {
       method: "POST",
@@ -64,17 +63,20 @@ export const useStripePay = () => {
       body: JSON.stringify(body),
     });
     // Call the `intentCreationCallback` with your server response's client secret or error.
-    const { paymentIntent, customer, error } = await response.json();
+    const { paymentIntent, ephemeralKey, customer, error } =
+      await response.json();
     if (!error && paymentIntent) {
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: paymentIntent,
         applePay: {
           merchantCountryCode: "DE",
         },
+        customerId: customer,
         googlePay: {
           merchantCountryCode: "DE",
           testEnv: true,
         },
+        customerEphemeralKeySecret: ephemeralKey,
         merchantDisplayName: "My Store",
         defaultBillingDetails: {
           email: effectiveBilling?.email || billingAddress?.email,

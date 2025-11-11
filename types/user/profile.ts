@@ -19,6 +19,7 @@ export interface User {
   };
   billing: Partial<Address>;
   shipping: Partial<Address>;
+  stripe_id: string;
   role: string[];
 }
 
@@ -40,10 +41,14 @@ export interface Address {
 export interface PaymentMethod {
   id: string;
   type: "card" | "paypal";
-  cardNumber?: string;
+  number?: string;
   cardHolder?: string;
   expiryDate?: string;
   email?: string;
+  cvc?: string;
+  exp_month?: number;
+  exp_year?: number;
+  stripe?: string;
 }
 
 export interface AuthResponse {

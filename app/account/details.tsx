@@ -38,15 +38,21 @@ export default function AccountDetailsScreen() {
       return;
     }
     if (formData.oldPassword !== "") {
-      const isValid = await checkPassword(formData.oldPassword);
-      if (formData.password !== formData.confirmPassword) {
-        Alert.alert("Error", "Confirm password is incorrect");
-        return;
-      } else {
-        if (!isValid) {
-          Alert.alert("Error", "Current Password is not correct");
+      try {
+        const isValid = await checkPassword(formData.oldPassword);
+        console.log(isValid);
+        if (formData.password !== formData.confirmPassword) {
+          Alert.alert("Error", "Confirm password is incorrect");
           return;
+        } else {
+          if (!isValid) {
+            Alert.alert("Error", "Current Password is not correct");
+            return;
+          }
         }
+      } catch (error: any) {
+        Alert.alert("Error", error.message);
+        return;
       }
     }
     let newData = {

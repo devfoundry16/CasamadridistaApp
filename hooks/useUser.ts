@@ -12,6 +12,7 @@ import {
   updateAddress,
   updateAvatar,
   updateUser,
+  updateCustomer,
 } from "@/store/thunks/userThunks";
 import { Address, PaymentMethod, User } from "@/types/user/profile";
 import { useCallback } from "react";
@@ -51,9 +52,12 @@ export const useUser = () => {
     [dispatch]
   );
 
-  const updateCustomerProfile = useCallback((data: any) => {
-    return UserService.updateCustomer(data);
-  }, []);
+  const updateCustomerProfile = useCallback(
+    (data: any) => {
+      return dispatch(updateCustomer(data));
+    },
+    [dispatch]
+  );
 
   const getCustomerStripeId = useCallback(() => {
     return UserService.getStripeId();

@@ -4,11 +4,13 @@ import { Address, PaymentMethod, User } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { Alert } from "react-native";
+import axios from "axios";
 import {
   clearUser,
   setLoading,
   setPaymentMethods,
   setUser,
+  updateUserData,
 } from "../slices/userSlice";
 import { RootState } from "../store";
 
@@ -23,7 +25,6 @@ export const loginUser = createAsyncThunk(
     try {
       const userData = await UserService.login(email, password);
       dispatch(setUser(userData));
-      await AsyncStorage.setItem("user_data", JSON.stringify(userData));
       return userData;
     } catch (error: any) {
       Alert.alert("Login error", error.message);
@@ -62,16 +63,32 @@ export const updateUser = createAsyncThunk(
 
     dispatch(setLoading(true));
     try {
-      const response = await UserService.update(updates);
-      const updatedUser: User = response;
-      await AsyncStorage.setItem("user_data", JSON.stringify(updatedUser));
-      dispatch(
-        setUser({
-          ...state.user,
-          billing: response.billing,
-          shipping: response.shipping,
-        })
-      );
+      await UserService.update(updates);
+      const updatedUser = await UserService.getUser();
+      await UserService.storeUserData(updatedUser);
+      dispatch(setUser(updatedUser));
+      return updatedUser;
+    } catch (error: any) {
+      Alert.alert("Update error", error.message);
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+);
+
+export const updateCustomer = createAsyncThunk(
+  "user/updateCustomer",
+  async (updates: Partial<User>, { dispatch, getState }) => {
+    const state = getState() as RootState;
+    if (!state.user.user) return;
+
+    dispatch(setLoading(true));
+    try {
+      await UserService.updateCustomer(updates);
+      const updatedUser = await UserService.getUser();
+      await UserService.storeUserData(updatedUser);
+      dispatch(setUser(updatedUser));
       return updatedUser;
     } catch (error: any) {
       Alert.alert("Update error", error.message);
@@ -206,7 +223,18 @@ export const addPaymentMethod = createAsyncThunk(
   "user/addPaymentMethod",
   async (method: PaymentMethod, { dispatch, getState }) => {
     const state = getState() as RootState;
-    const newMethods = [...state.user.paymentMethods, method];
+    let methodWithExpiry = method;
+    if (method.expiryDate) {
+      const [month, year] = method.expiryDate.split("/");
+      const exp_month = parseInt(month, 10);
+      const exp_year = 2000 + parseInt(year, 10);
+      methodWithExpiry = { ...method, exp_month, exp_year };
+    }
+    console.log("=======method with expiry=========", methodWithExpiry);
+    // add payment method
+
+    const newMethods = [...state.user.paymentMethods, { ...methodWithExpiry }];
+    console.log("=======Payment Method========", newMethods);
     await AsyncStorage.setItem("paymentMethods", JSON.stringify(newMethods));
     dispatch(setPaymentMethods(newMethods));
     return newMethods;

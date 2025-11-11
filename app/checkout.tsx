@@ -274,9 +274,9 @@ export default function CheckoutScreen() {
           }
 
           clearCart();
-          router.push("/cart");
+          router.navigate("/cart");
           Alert.alert(
-            `Payment Successful. Current wallet balance: ${res.new_balance}`
+            `Payment Successful. Current wallet balance: $${res.new_balance}`
           );
         })
         .catch((err: any) => {
@@ -291,8 +291,9 @@ export default function CheckoutScreen() {
               resp.requested_amount ?? resp.requested_amount ?? "N/A";
             Alert.alert(
               "Insufficient funds",
-              `${resp.message || err.message}\nCurrent balance: ${current}\nRequested amount: ${requested}`
+              `${resp.message || err.message}\nCurrent balance: $${current}\nRequested amount: $${requested}`
             );
+            router.navigate("/account/wallet");
           } else {
             Alert.alert(
               "Payment Failed",
@@ -300,7 +301,6 @@ export default function CheckoutScreen() {
             );
           }
         });
-
       return;
     }
 
@@ -370,7 +370,7 @@ export default function CheckoutScreen() {
               "Wallet Top Up"
             );
           clearCart();
-          router.push("/cart");
+          router.navigate("/cart");
           Alert.alert(
             "Payment Successful",
             "Your payment was processed successfully!"
@@ -383,7 +383,7 @@ export default function CheckoutScreen() {
   };
 
   const handlePayment = async () => {
-    if (!name || !email || !address1 || !city || items.length === 0) {
+    if (!name || !email || !address1 || !city) {
       Alert.alert(
         "Missing Information",
         "Please fill in all fields to complete your purchase."
