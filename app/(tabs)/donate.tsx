@@ -1,25 +1,19 @@
 import HeaderStack from "@/components/HeaderStack";
 import { useEffect, useState } from "react";
 import { GiveWPService } from "@/services/Donation/GiveWPService";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
-import { Campaigns } from "@/types/campaigns/campaigns";
+import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import { CampaignDetail } from "@/types/campaigns/campaigns";
 import Colors from "@/constants/colors";
 import { ScrollView } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
-
-const parseAmount = (str: string): number => {
-  const cleaned = str.replace(/[$,]/g, "").trim();
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? 0 : num;
-};
-
+import { parseAmount } from "@/utils/helper";
 export default function DonateScreen() {
   const router = useRouter();
-  const [campaignsList, setCampaignsList] = useState<Campaigns[]>([]);
+  const [campaignsList, setCampaignsList] = useState<CampaignDetail[]>([]);
   const loadCampaignsList = async () => {
     const res = await GiveWPService.getCampaignsList();
     console.log("========Campaign List=========");
-    setCampaignsList(res.items);
+    setCampaignsList(res);
   };
   useEffect(() => {
     loadCampaignsList();
@@ -29,24 +23,24 @@ export default function DonateScreen() {
       <HeaderStack title="Donate" />
       <View style={styles.campaignsContainer}>
         {campaignsList.map((cp) => {
-          const goalAmount = parseAmount(cp.goal);
-          const raisedAmount = parseAmount(cp.revenue);
-          const progress =
-            goalAmount > 0 ? (raisedAmount / goalAmount) * 100 : 0;
-
+          const progress = (cp.goalStats.actual / cp.goalStats.goal) * 100;
           return (
             <TouchableOpacity
               key={cp.id}
               style={styles.campaignCard}
               onPress={() => {
                 // Navigate to campaign details or donation page
-                console.log(`Selected campaign: ${cp.title}`);
                 router.push(`/campaign/${cp.id}`);
                 // You can add navigation here, e.g., router.push(`/donate/${cp.id}`)
               }}
             >
-              <Text style={styles.campaignTitle}>{cp.title}</Text>
-              <Text style={styles.campaignGoal}>{cp.goal}</Text>
+              <View style={styles.title}>
+                <Image
+                  source={{ uri: cp.image }}
+                  style={styles.campaignImage}
+                />
+                <Text style={styles.campaignTitle}>{cp.title}</Text>
+              </View>
               <View style={styles.progressContainer}>
                 <View
                   style={[
@@ -55,13 +49,15 @@ export default function DonateScreen() {
                   ]}
                 />
               </View>
-              <Text style={styles.progressText}>
-                {cp.revenue} raised of {cp.goal} ({progress.toFixed(1)}%)
-              </Text>
-              <Text style={styles.campaignStats}>
-                Donations: {cp.donationsCount}
-              </Text>
-              <Text style={styles.campaignStatus}>Status: {cp.status}</Text>
+              <View style={styles.info}>
+                <Text style={styles.campaignStats}>
+                  Amount Raised: ${parseAmount(cp.goalStats.actual)}
+                </Text>
+                <Text style={styles.campaignStats}>
+                  Our Goal: ${parseAmount(cp.goalStats.goal)}
+                </Text>
+                <Text style={styles.campaignStatus}>Status: {cp.status}</Text>
+              </View>
             </TouchableOpacity>
           );
         })}
@@ -76,16 +72,37 @@ const styles = StyleSheet.create({
     margin: 0,
     padding: 0,
   },
+  title: {
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  info: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   campaignsContainer: {
     padding: 16,
   },
   campaignCard: {
+    flexDirection: "column",
     backgroundColor: Colors.cardBg,
     padding: 16,
+    paddingLeft: 50,
+    paddingRight: 50,
     marginBottom: 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.border,
+    gap: 10,
+  },
+  campaignImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 8,
   },
   campaignTitle: {
     fontSize: 18,
@@ -95,16 +112,16 @@ const styles = StyleSheet.create({
   },
   campaignGoal: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: Colors.lightGray,
     marginBottom: 4,
   },
   campaignStats: {
-    fontSize: 14,
-    color: Colors.textLight,
+    fontSize: 16,
+    color: Colors.lightGray,
     marginBottom: 4,
   },
   campaignStatus: {
-    fontSize: 14,
+    fontSize: 16,
     color: Colors.accent,
     fontWeight: "600",
   },

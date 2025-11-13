@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import UserService from "../UserService";
 import { development } from "@/config/environment";
+import { Donation } from "@/types/campaigns/campaigns";
 
 const AUTH_USERNAME = development.AUTH_USERNAME;
 const AUTH_PASSWORD = development.AUTH_PASSWORD;
@@ -74,17 +75,9 @@ class ApiService {
   }
   async getCampaignsList() {
     try {
-      const response = await this.api.get(`/campaigns/list-table`);
+      const response = await this.api.get(`/campaigns`);
       // Parse HTML strings to plain text
-      const parsedItems = response.data.items.map((item: any) => ({
-        ...item,
-        title: this.stripHtml(item.title),
-        goal: this.stripHtml(item.goal),
-        donationsCount: this.stripHtml(item.donationsCount),
-        revenue: this.stripHtml(item.revenue),
-        status: this.stripHtml(item.status),
-      }));
-      return { ...response.data, items: parsedItems };
+      return response.data;
     } catch (error: any) {
       throw new Error(error || "An error occurred");
     }
@@ -94,6 +87,15 @@ class ApiService {
       const response = await this.api.get(`/campaigns/${id}`);
       return response.data;
     } catch (error: any) {
+      throw new Error(error || "An error occurred");
+    }
+  }
+  async giveDonation(donation_data: Donation) {
+    try {
+      const response = await this.api.post(`/donations`, donation_data);
+      return response.data;
+    } catch (error: any) {
+      console.log(error.message);
       throw new Error(error || "An error occurred");
     }
   }

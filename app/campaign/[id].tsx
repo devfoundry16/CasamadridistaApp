@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import HeaderStack from "@/components/HeaderStack";
 import { GiveWPService } from "@/services/Donation/GiveWPService";
-import { CampaignDetail } from "@/types/campaigns/campaigns";
+import { CampaignDetail, Donation } from "@/types/campaigns/campaigns";
 import Colors from "@/constants/colors";
 import { Spinner } from "@/components/Spinner";
 import { CHECKOUT_PAYMENT_METHOD } from "@/types/shop/checkout";
@@ -25,7 +25,7 @@ export default function CampaignDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
   const { handlePayment: payViaStripe } = useStripePay();
-  const { user } = useUser();
+  const { user, updateCustomer } = useUser();
   const [donationData, setDonationData] = useState({
     amount: 10,
     customAmount: "",
@@ -52,9 +52,39 @@ export default function CampaignDetailScreen() {
 
   const handleStripePay = () => {
     payViaStripe(0, donationData.amount, user?.billing)
-      .then((data) => {
-        console.log("stripe:", data);
-        Alert.alert("Donate sucessfully");
+      .then((res) => {
+        updateCustomer({
+          meta_data: [
+            {
+              key: "stripe_customer_id",
+              value: res?.customer,
+            },
+          ],
+        }).then((data) => {
+          console.log("======meta data in checkout==========");
+        });
+        const donation_data: Donation = {
+          formId: 52470,
+          firstName: donationData.firstName ?? "",
+          lastName: donationData.lastName ?? "",
+          email: donationData.email ?? "",
+          type: donationData.frequency === "one-time" ? "single" : "recurring",
+          mode: "test",
+          amount: {
+            amount: donationData.amount,
+            amountInMinorUnits: donationData.amount * 100,
+            currency: "USD",
+          },
+          gatewayTransactionId: res?.paymentIntentId,
+          campaignId: Number(id),
+          donorId: 1,
+          gatewayId: "stripe_payment_element",
+        };
+        console.log(donation_data);
+        GiveWPService.giveDonation(donation_data).then((res) => {
+          console.log(res);
+          Alert.alert("Donate sucessfully");
+        });
       })
       .catch((err) => {
         Alert.alert(err.message);
@@ -323,10 +353,10 @@ export default function CampaignDetailScreen() {
         <Text style={styles.description}>{campaign.shortDescription}</Text>
         <View style={styles.statsContainer}>
           <Text style={styles.goal}>
-            Goal: {campaign.goalStats.goalFormatted}
+            Goal: {campaign.goalStats.goalFormatted.replace("&#36;", "$")}
           </Text>
           <Text style={styles.raised}>
-            Raised: {campaign.goalStats.actualFormatted}
+            Raised: {campaign.goalStats.actualFormatted.replace("&#36;", "$")}
           </Text>
           <Text style={styles.status}>Status: {campaign.status}</Text>
         </View>

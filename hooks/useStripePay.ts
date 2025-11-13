@@ -63,7 +63,7 @@ export const useStripePay = () => {
       body: JSON.stringify(body),
     });
     // Call the `intentCreationCallback` with your server response's client secret or error.
-    const { paymentIntent, ephemeralKey, customer, error } =
+    const { paymentIntentId, paymentIntent, ephemeralKey, customer, error } =
       await response.json();
     if (!error && paymentIntent) {
       const { error: initError } = await initPaymentSheet({
@@ -100,7 +100,7 @@ export const useStripePay = () => {
       if (!initError) {
         const { error } = await presentPaymentSheet();
         if (!error) {
-          return { paymentIntent, customer };
+          return { paymentIntent, paymentIntentId, customer };
         } else {
           throw error;
         }

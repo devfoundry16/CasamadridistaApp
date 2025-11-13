@@ -11,6 +11,10 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
+export const parseAmount = (num: number): string => {
+  return num.toLocaleString("en-US");
+};
+
 export const getProductType = (line_items: any[]) => {
   // Determine the product type from order line items.
   // - Wallet top-ups are represented by the Flintop wallet product id (52365)
