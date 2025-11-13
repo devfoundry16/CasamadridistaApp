@@ -2,6 +2,7 @@ import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useUser } from "@/hooks/useUser";
 import UserService from "@/services/UserService";
+import { router } from "expo-router";
 import { Save } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -30,7 +31,7 @@ export default function AccountDetailsScreen() {
       user?.username as any,
       password
     );
-    return response.ok;
+    return response;
   };
   const handleSave = async () => {
     if (!formData.first_name || !formData.last_name || !formData.name) {
@@ -63,6 +64,7 @@ export default function AccountDetailsScreen() {
     };
     if (formData.oldPassword === "") updateUser({ id: user?.id, ...newData });
     else updateUser({ id: user?.id, ...formData });
+    router.navigate("/account");
     Alert.alert("Success", "Updated Successfully");
   };
 

@@ -34,7 +34,7 @@ function HeaderMenu() {
   const [menuVisible, setMenuVisible] = useState(false);
 
   const menuItems = [
-    { label: "Campaigns", icon: Heart, route: "/campaigns" },
+    { label: "Campaigns", icon: Heart, route: "/donate" },
     { label: "About Us", icon: Info, route: "/about" },
     { label: "Memberships", icon: Crown, route: "/memberships" },
     { label: "Contact", icon: Mail, route: "/contact" },
@@ -42,7 +42,7 @@ function HeaderMenu() {
 
   const handleMenuItemPress = (route: string) => {
     setMenuVisible(false);
-    router.push(route as any);
+    router.navigate(route as any);
   };
 
   return (

@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import { useEffect, useState } from "react";
 import { GiveWPService } from "@/services/Donation/GiveWPService";
 import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
@@ -7,20 +6,32 @@ import Colors from "@/constants/colors";
 import { ScrollView } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
 import { parseAmount } from "@/utils/helper";
+import { Spinner } from "@/components/Spinner";
 export default function DonateScreen() {
   const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
   const [campaignsList, setCampaignsList] = useState<CampaignDetail[]>([]);
   const loadCampaignsList = async () => {
+    setLoading(true);
     const res = await GiveWPService.getCampaignsList();
     console.log("========Campaign List=========");
     setCampaignsList(res);
+    setLoading(false);
   };
   useEffect(() => {
     loadCampaignsList();
   }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.spinnerContainer}>
+        <Spinner content="Loading campaign" />
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
-      <HeaderStack title="Donate" />
       <View style={styles.campaignsContainer}>
         {campaignsList.map((cp) => {
           const progress = (cp.goalStats.actual / cp.goalStats.goal) * 100;
@@ -71,6 +82,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.deepDarkGray,
     margin: 0,
     padding: 0,
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.deepDarkGray,
   },
   title: {
     flexDirection: "row",

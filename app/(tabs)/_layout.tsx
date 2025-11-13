@@ -1,8 +1,6 @@
 import HeaderMenu from "@/components/HeaderMenu";
 import Colors from "@/constants/colors";
 import { Tabs } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
-
 import {
   Gamepad2,
   Home,
@@ -106,23 +104,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  badge: {
-    position: "absolute",
-    right: -8,
-    top: -4,
-    backgroundColor: Colors.darkGold,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 4,
-  },
-  badgeText: {
-    color: Colors.darkGray,
-    fontSize: 11,
-    fontWeight: "700" as const,
-  },
-});
