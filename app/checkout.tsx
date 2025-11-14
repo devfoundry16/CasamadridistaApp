@@ -26,6 +26,7 @@ import {
 } from "react-native";
 import { useDispatch } from "react-redux";
 import { updateAddress } from "@/store/thunks/userThunks";
+import { Spinner } from "@/components/Spinner";
 
 export default function CheckoutScreen() {
   const { productType, amount, pendingOrderId } = useLocalSearchParams();
@@ -58,6 +59,7 @@ export default function CheckoutScreen() {
   const [summaryOrder, setSummaryOrder] = useState<Order>();
   const { handlePayment: payViaStripe } = useStripePay();
   const { addFunds, withdrawFunds, balance } = useFlintopWallet();
+  const [loading, setLoading] = useState<boolean>(false);
   const dispatch = useDispatch();
 
   const loadSummaryItems = async () => {
@@ -172,71 +174,95 @@ export default function CheckoutScreen() {
   };
 
   const placeOrder = (payload: any) => {
-    addOrder(payload).then((data) => {
-      console.log(
-        "order id:",
-        data.id,
-        "status: ",
-        data.status,
-        "customer_id:",
-        data.customer_id,
-        "total: ",
-        data.total
-      );
-      setOrderId(data.id);
-      setStatus(data.status === OrderStatus.PENDING ? true : false);
-      // If user opted to update their saved billing address, dispatch updateAddress
-      if (updateBillingChecked) {
-        const nameParts = name ? name.trim().split(" ") : ["", ""];
-        const firstName = nameParts.shift() || "";
-        const lastName = nameParts.join(" ") || "";
-        const billingPayload = {
-          type: "billing",
-          email: email,
-          first_name: firstName,
-          last_name: lastName,
-          company: "",
-          address_1: address1,
-          address_2: address2,
-          city: city,
-          state: stateField,
-          country: country,
-          postcode: postcode,
-          phone: phone,
-        };
-        (dispatch as any)(updateAddress(billingPayload as any));
-      }
-    });
+    setLoading(true);
+    addOrder(payload)
+      .then((data) => {
+        console.log(
+          "order id:",
+          data.id,
+          "status: ",
+          data.status,
+          "customer_id:",
+          data.customer_id,
+          "total: ",
+          data.total
+        );
+        setOrderId(data.id);
+        setStatus(data.status === OrderStatus.PENDING ? true : false);
+        // If user opted to update their saved billing address, dispatch updateAddress
+        if (updateBillingChecked) {
+          const nameParts = name ? name.trim().split(" ") : ["", ""];
+          const firstName = nameParts.shift() || "";
+          const lastName = nameParts.join(" ") || "";
+          const billingPayload = {
+            type: "billing",
+            email: email,
+            first_name: firstName,
+            last_name: lastName,
+            company: "",
+            address_1: address1,
+            address_2: address2,
+            city: city,
+            state: stateField,
+            country: country,
+            postcode: postcode,
+            phone: phone,
+          };
+          (dispatch as any)(updateAddress(billingPayload as any));
+        }
+        setLoading(false);
+      })
+      .catch((error: any) => {
+        setLoading(false);
+      });
   };
 
   const createSubscription = async (order_id: number) => {
     console.log("subscription order id: ", order_id);
-    createSubscriptionOrder(order_id).then(() => {
-      setStatus(false);
-      setOrderId(null);
-    });
+    setLoading(true);
+    createSubscriptionOrder(order_id)
+      .then(() => {
+        setStatus(false);
+        setOrderId(null);
+        setLoading(false);
+      })
+      .catch((error: any) => {
+        setLoading(false);
+      });
   };
 
   const addFundsToWallet = async (order_id: number, description: string) => {
-    await addFunds(
-      Number(amount),
-      order_id,
-      CHECKOUT_PAYMENT_METHOD.STRIPE,
-      description
-    );
+    try {
+      setLoading(true);
+      await addFunds(
+        Number(amount),
+        order_id,
+        CHECKOUT_PAYMENT_METHOD.STRIPE,
+        description
+      );
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+    }
   };
 
   const withDrawFundsFromWallet = async (
     order_id: number,
     description: string
   ) => {
-    const resp = await withdrawFunds(
-      totalPrice,
-      order_id,
-      CHECKOUT_PAYMENT_METHOD.WALLET,
-      description
-    );
-    return resp;
+    try {
+      setLoading(true);
+      const resp = await withdrawFunds(
+        totalPrice,
+        order_id,
+        CHECKOUT_PAYMENT_METHOD.WALLET,
+        description
+      );
+      setLoading(false);
+      return resp;
+    } catch (error: any) {
+      setLoading(false);
+    }
   };
 
   const stripePay = () => {
@@ -246,6 +272,7 @@ export default function CheckoutScreen() {
 
     // Wallet payment branch
     if (paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET) {
+      setLoading(true);
       withDrawFundsFromWallet(
         id,
         productType === CHECKOUT_PRODUCT_TYPE.WALLET
@@ -272,9 +299,10 @@ export default function CheckoutScreen() {
           if (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION) {
             await createSubscription(id);
           }
-
           clearCart();
-          router.navigate("/cart");
+          router.dismissAll();
+          setLoading(false);
+          router.navigate("/account/wallet");
           Alert.alert(
             `Payment Successful. Current wallet balance: $${res.new_balance}`
           );
@@ -293,8 +321,11 @@ export default function CheckoutScreen() {
               "Insufficient funds",
               `${resp.message || err.message}\nCurrent balance: $${current}\nRequested amount: $${requested}`
             );
+            router.dismissAll();
+            setLoading(false);
             router.navigate("/account/wallet");
           } else {
+            setLoading(false);
             Alert.alert(
               "Payment Failed",
               err.message || "There was an issue with your payment."
@@ -334,6 +365,7 @@ export default function CheckoutScreen() {
       billingPayload
     )
       .then((res) => {
+        setLoading(true);
         updateCustomer({
           meta_data: [
             {
@@ -370,7 +402,9 @@ export default function CheckoutScreen() {
               "Wallet Top Up"
             );
           clearCart();
-          router.navigate("/cart");
+          router.dismissAll();
+          setLoading(false);
+          router.navigate("/account");
           Alert.alert(
             "Payment Successful",
             "Your payment was processed successfully!"
@@ -378,6 +412,7 @@ export default function CheckoutScreen() {
         });
       })
       .catch((error) => {
+        setLoading(false);
         Alert.alert("Payment Failed", error.message);
       });
   };
@@ -390,7 +425,6 @@ export default function CheckoutScreen() {
       );
       return;
     }
-    console.log(status);
     if (status === false) {
       // place an order
       try {
@@ -414,6 +448,15 @@ export default function CheckoutScreen() {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.spinnerContainer}>
+        <HeaderStack title="Checkout" />
+        <Spinner content={status ? "Processing Payment" : "Placing Order"} />
+      </View>
+    );
+  }
 
   return (
     <>
@@ -565,32 +608,34 @@ export default function CheckoutScreen() {
                     <Text style={styles.paymentMethodText}>PayPal</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={[
-                      styles.paymentMethod,
-                      paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
-                        styles.paymentMethodSelected,
-                    ]}
-                    onPress={() =>
-                      setPaymentMethod(CHECKOUT_PAYMENT_METHOD.WALLET)
-                    }
-                  >
-                    <View style={styles.radioContainer}>
-                      <View
-                        style={[
-                          styles.radio,
-                          paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
-                            styles.radioSelected,
-                        ]}
-                      />
-                    </View>
-                    <Text style={styles.paymentMethodText}>
-                      Wallet{" "}
-                      {balance
-                        ? `(${balance.formatted_balance})`
-                        : "(loading...)"}
-                    </Text>
-                  </TouchableOpacity>
+                  {productType !== CHECKOUT_PRODUCT_TYPE.WALLET && (
+                    <TouchableOpacity
+                      style={[
+                        styles.paymentMethod,
+                        paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
+                          styles.paymentMethodSelected,
+                      ]}
+                      onPress={() =>
+                        setPaymentMethod(CHECKOUT_PAYMENT_METHOD.WALLET)
+                      }
+                    >
+                      <View style={styles.radioContainer}>
+                        <View
+                          style={[
+                            styles.radio,
+                            paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
+                              styles.radioSelected,
+                          ]}
+                        />
+                      </View>
+                      <Text style={styles.paymentMethodText}>
+                        Wallet{" "}
+                        {balance
+                          ? `(${balance.formatted_balance})`
+                          : "(loading...)"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             )}
@@ -631,6 +676,12 @@ export default function CheckoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.deepDarkGray,
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: Colors.deepDarkGray,
   },
   emptyContainer: {

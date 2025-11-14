@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import Colors from "@/constants/colors";
+import { Spinner } from "../Spinner";
 interface AddFundsModalProps {
   visible: boolean;
   onClose: () => void;
@@ -59,15 +60,25 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
         `You cannot purchase wallet with other items in the cart. Please clear your cart and try again.`
       );
     } else {
-      // setLoading(true);
+      setLoading(true);
       setVisibility(false);
       resetForm();
-      addToCart(product as Product).then((data) => {
-        console.log("Funds amount:", numericAmount);
-        router.push(
-          `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.WALLET}&amount=${numericAmount}`
-        );
-      });
+      addToCart(product as Product)
+        .then((data) => {
+          console.log("Funds amount:", numericAmount);
+          router.dismissAll();
+          setLoading(false);
+          router.navigate(
+            `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.WALLET}&amount=${numericAmount}`
+          );
+        })
+        .catch((error) => {
+          setLoading(false);
+          Alert.alert(
+            "Error",
+            "Failed to add funds to cart. Please try again."
+          );
+        });
     }
   };
   const handleAddFunds = async () => {
@@ -91,8 +102,6 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
       handleWallet(numericAmount);
     } catch (error) {
       // Error is handled in the parent component
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -105,6 +114,14 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
     resetForm();
     onClose();
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.label}>Processing...</Text>
+      </View>
+    );
+  }
 
   const quickAmounts = [10, 25, 50, 100, 200, 500, 1000];
 

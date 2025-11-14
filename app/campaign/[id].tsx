@@ -69,7 +69,7 @@ export default function CampaignDetailScreen() {
           lastName: donationData.lastName ?? "",
           email: donationData.email ?? "",
           type: donationData.frequency === "one-time" ? "single" : "recurring",
-          mode: "test",
+          mode: "live",
           amount: {
             amount: donationData.amount,
             amountInMinorUnits: donationData.amount * 100,
@@ -77,7 +77,7 @@ export default function CampaignDetailScreen() {
           },
           gatewayTransactionId: res?.paymentIntentId,
           campaignId: Number(id),
-          donorId: 1,
+          donorId: 2,
           gatewayId: "stripe_payment_element",
         };
         console.log(donation_data);

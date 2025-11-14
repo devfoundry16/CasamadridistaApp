@@ -19,7 +19,11 @@ export default function CartScreen() {
   const { items, updateQuantity, removeFromCart, totalPrice, loading } =
     useCart();
   if (loading) {
-    return <Spinner content="Loading cart" />;
+    return (
+      <View style={styles.spinnerContainer}>
+        <Spinner content="Loading cart" />
+      </View>
+    );
   }
 
   if (items && items.length === 0) {
@@ -136,6 +140,12 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.deepDarkGray,
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: Colors.deepDarkGray,
   },
   emptyContainer: {
