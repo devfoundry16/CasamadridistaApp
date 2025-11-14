@@ -408,12 +408,10 @@ export default function LineupBuilder() {
           await Sharing.shareAsync(source.uri);
         } else {
           Alert.alert("Success", "Formation saved!");
-          Alert.alert("Success", "Formation saved!");
         }
       }
-    } catch (error) {
-      console.error("Error downloading formation:", error);
-      Alert.alert("Error", "Failed to download formation");
+    } catch (error: any) {
+      Alert.alert("Error", `Failed to download formation ${error.message}`);
     }
   };
 

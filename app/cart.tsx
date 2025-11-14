@@ -21,7 +21,7 @@ export default function CartScreen() {
   if (loading) {
     return (
       <View style={styles.spinnerContainer}>
-        <Spinner content="Loading cart" />
+        <Spinner content="Processing cart" />
       </View>
     );
   }

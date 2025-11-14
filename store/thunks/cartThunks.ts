@@ -60,7 +60,6 @@ export const addToCart = createAsyncThunk(
       dispatch(setCartItems(data.items || []));
       return data.items;
     } catch (error: any) {
-      console.error("Error adding to cart:", error);
       Alert.alert(
         error.response?.data?.message || "Failed to add item to cart"
       );
@@ -73,6 +72,7 @@ export const addToCart = createAsyncThunk(
 export const removeFromCart = createAsyncThunk(
   "cart/removeItem",
   async (productId: number, { dispatch, getState }) => {
+    dispatch(setLoading(true));
     try {
       const state = getState() as RootState;
       const key = state.cart.items.find((item) => item.id === productId)?.key;
@@ -84,9 +84,10 @@ export const removeFromCart = createAsyncThunk(
       const data = await CartService.removeItemInCart(key);
       console.log("Successfully Removed, remaining item:", data.items.length);
       dispatch(setCartItems(data.items || []));
+      dispatch(setLoading(false));
       return data.items;
     } catch (error: any) {
-      console.error("Error removing from cart:", error);
+      dispatch(setLoading(false));
       Alert.alert(
         error.response?.data?.message || "Failed to remove item from cart"
       );
