@@ -8,6 +8,11 @@ const development = {
   API_BASE_URL_KEY: "api_base_url_key",
   STRIPE_PUBLISHABLE_KEY:
     "pk_test_51SJbX1LKFkodhXbkhZyhK8koyJDiF3i0xhq2A3hdXj5DnZasByx2N8aCVp2GJZDLEFMm7EJiwYQOPJqKdA7ShN5j00IvGbHo3c",
+  PAYPAL_CLIENT_ID:
+    "AatmU4dh1rXaxbvYSOCXIL-mQPSeUZQeX2xZabaei0XydRTpR3ewgBtvXl8E_ZW0tSIvBWEia6Xxgohs",
+  PAYPAL_CLIENT_SECRET:
+    "EMx_LLE_qS6Kj8k-u43rjDKyvDuGhe-10VuCqXoX0srXFNjanvqY-nyvvX8DQ0GtaiD57h2atBm4EQ4l",
+  PAYPAL_MODE: "sandbox",
 };
 
 const production = {};

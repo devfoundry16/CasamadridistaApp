@@ -1,213 +1,470 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Text,
   View,
+  Text,
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
+  ScrollView,
 } from "react-native";
 import { WebView } from "react-native-webview";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ChevronLeft } from "lucide-react-native";
+import Colors from "@/constants/colors";
+import { useOrder } from "@/hooks/useOrder";
+import { OrderStatus } from "@/types/shop/order";
 import axios from "axios";
+import { development } from "@/config/environment";
 
-const PayPalPaymentScreen = () => {
-  const [isWebViewLoading, SetIsWebViewLoading] = useState(false);
-  const [paypalUrl, setPaypalUrl] = useState("");
-  const [accessToken, setAccessToken] = useState("");
-  //When loading paypal page it refirects lots of times. This prop to control start loading only first time
-  const [shouldShowWebViewLoading, setShouldShowWebviewLoading] =
-    useState(true);
+interface PayPalConfig {
+  clientId: string;
+  baseUrl: string;
+}
 
-  /*---Paypal checkout section---*/
-  const buyBook = async () => {
-    //Check out https://developer.paypal.com/docs/integration/direct/payments/paypal-payments/# for more detail paypal checkout
-    const dataDetail = {
-      intent: "sale",
-      payer: {
-        payment_method: "paypal",
-      },
-      transactions: [
-        {
-          amount: {
-            currency: "USD",
-            total: "26",
-            details: {
-              shipping: "6",
-              subtotal: "20",
-              shipping_discount: "0",
-              insurance: "0",
-              handling_fee: "0",
-              tax: "0",
-            },
-          },
-        },
-      ],
-      redirect_urls: {
-        return_url: "https://example.com",
-        cancel_url: "https://example.com",
-      },
-    };
+interface PayPalOrder {
+  id: string;
+  status: string;
+}
 
-    const url = `https://api.sandbox.paypal.com/v1/oauth2/token`;
+interface PayPalApprovalData {
+  orderID: string;
+  payerID?: string;
+}
 
-    const data = "grant_type=client_credentials";
+interface PayPalErrorData {
+  error: string;
+  errorMessage: string;
+}
 
-    const auth = {
-      username:
-        "AapxI4eDA_IYOkdxLaucbB_niz7HFRWa75EWSmNqdF4ncue96ai9kvs9-t3l1BwtuvgCLf0UqdEoKyaw", //"your_paypal-app-client-ID",
-      password:
-        "EBY9B2Tktx_NssrKdYnghJ5J9GSCUo5Y4HRq5fIv_GonVm4P6_gRroyetwxTCqYPsfkOGgaC12yMboR_", //"your-paypal-app-secret-ID
-    };
+export default function PayPalPaymentScreen(props: any) {
+  const router = useRouter();
+  const { orderId, amount, productType } = props;
+  const { updateOrder, createSubscriptionOrder } = useOrder();
 
-    // const token = btoa(`${auth.username}:${auth.password}`);
-    const token =
-      "A21AALYThv4lbvRXFh3wgILA8Qi1j1uUG6RSsW0QBK3xKxDRxgLFjtSdKOHlnf-hc1zRZfSqZF1Cz2rMC1Xd5sW01ZOTlfaCA";
-    // Authorise with seller app information (clientId and secret key)
-    axios
-      .post(url, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        setAccessToken(response.data.access_token);
+  const [loading, setLoading] = useState(true);
+  const [orderCreated, setOrderCreated] = useState(false);
+  const [paypalOrderId, setPaypalOrderId] = useState<string>("");
+  const [approvalUrl, setApprovalUrl] = useState<string>("");
+  const [isCapturing, setIsCapturing] = useState(false);
 
-        //Resquest payal payment (It will load login page payment detail on the way)
-        axios
-          .post(
-            `https://api.sandbox.paypal.com/v1/payments/payment`,
-            JSON.stringify(dataDetail),
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${response.data.access_token}`,
-              },
-            }
-          )
-          .then((response) => {
-            const { id, links } = response.data;
-            const approvalUrl = links.find(
-              (data: any) => data.rel === "approval_url"
-            ).href;
-            console.log("response", approvalUrl);
-            setPaypalUrl(approvalUrl);
-          })
-          .catch((err) => {
-            console.log({ ...err });
-          });
-      })
-      .catch((err) => {
-        console.log(err);
+  const PAYPAL_CLIENT_ID = development.PAYPAL_CLIENT_ID || "";
+  const BACKEND_API_URL = `${development.DEFAULT_BACKEND_API_URL}paypal` || "";
+
+  // Create PayPal order on component mount
+  useEffect(() => {
+    createPayPalOrder();
+  }, []);
+
+  /**
+   * Create a PayPal order with the specified amount and order details
+   */
+  const createPayPalOrder = async () => {
+    try {
+      setLoading(true);
+
+      const orderAmount = Number(amount) || 0;
+
+      console.log(
+        "Creating PayPal order for amount:",
+        orderAmount,
+        productType,
+        orderId
+      );
+      // Call your backend to create a PayPal order
+      const response = await axios.post(`${BACKEND_API_URL}/create-order`, {
+        amount: orderAmount,
+        currency: "USD",
+        orderDescription: `Order for ${productType}`,
+        pendingOrderId: Number(orderId),
       });
-  };
 
-  /*---End Paypal checkout section---*/
+      const { id, links } = response.data;
 
-  const onWebviewLoadStart = () => {
-    // if (shouldShowWebViewLoading) {
-    //   SetIsWebViewLoading(true);
-    // }
-  };
+      if (!id) {
+        throw new Error("Failed to create PayPal order");
+      }
 
-  const _onNavigationStateChange = (webViewState: any) => {
-    console.log("webViewState", webViewState);
+      setPaypalOrderId(id);
 
-    //When the webViewState.title is empty this mean it's in process loading the first paypal page so there is no paypal's loading icon
-    //We show our loading icon then. After that we don't want to show our icon we need to set setShouldShowWebviewLoading to limit it
+      // Find the approval link
+      const approvalLink = links?.find((link: any) => link.rel === "approve");
 
-    if (webViewState.url.includes("https://example.com/")) {
-      //   setPaypalUrl("");
-      const { PayerID, paymentId } = webViewState.url;
+      if (approvalLink?.href) {
+        setApprovalUrl(approvalLink.href);
+        setOrderCreated(true);
+      } else {
+        throw new Error("No approval link found");
+      }
 
-      console.log(paymentId, PayerID);
-
-      axios
-        .post(
-          `https://api.sandbox.paypal.com/v1/payments/payment/${paymentId}/execute`,
-          { payer_id: PayerID },
+      setLoading(false);
+    } catch (error: any) {
+      console.error("PayPal Order Creation Error:", error);
+      setLoading(false);
+      Alert.alert(
+        "Payment Error",
+        error.message || "Failed to create PayPal order. Please try again.",
+        [
           {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        )
-        .then((response) => {
-          setShouldShowWebviewLoading(true);
-          console.log("execute:", response);
-        })
-        .catch((err) => {
-          setShouldShowWebviewLoading(true);
-          console.log("error:", { ...err });
-        });
+            text: "Retry",
+            onPress: createPayPalOrder,
+          },
+          {
+            text: "Cancel",
+            onPress: () => router.back(),
+          },
+        ]
+      );
     }
   };
 
-  return (
-    <React.Fragment>
-      <View style={styles.container}>
-        <Text>Paypal in React Native</Text>
-        <TouchableOpacity
-          activeOpacity={0.5}
-          onPress={buyBook}
-          style={styles.btn}
-        >
-          <Text
-            style={{
-              fontSize: 22,
-              fontWeight: "400",
-              textAlign: "center",
-              color: "#ffffff",
-            }}
-          >
-            BUY NOW
-          </Text>
-        </TouchableOpacity>
-      </View>
-      {paypalUrl ? (
-        <View style={styles.webview}>
-          <WebView
-            source={{ uri: paypalUrl }}
-            onNavigationStateChange={_onNavigationStateChange}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            startInLoadingState={false}
-            onLoadStart={onWebviewLoadStart}
-            onLoadEnd={() => SetIsWebViewLoading(false)}
-          />
-        </View>
-      ) : null}
-      {isWebViewLoading ? (
-        <View
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#ffffff",
-          }}
-        >
-          <ActivityIndicator size="small" color="#A02AE0" />
-        </View>
-      ) : null}
-    </React.Fragment>
-  );
-};
+  /**
+   * Handle PayPal approval by intercepting the return URL
+   */
+  const handlePayPalApproval = async (navState: any) => {
+    try {
+      const url = navState.url;
 
-export default PayPalPaymentScreen;
+      // Check if this is the return URL with PayPal order ID and payer ID
+      if (
+        url.includes("paypal.com") ||
+        url.includes("returnUrl") ||
+        url.includes("orderID")
+      ) {
+        // Extract orderID and payerID from URL or callback data
+        const orderIDMatch = url.match(/orderID=([^&]*)/);
+        const payerIDMatch = url.match(/payerID=([^&]*)/);
+
+        if (orderIDMatch) {
+          const extractedOrderId = orderIDMatch[1];
+
+          // Capture the PayPal payment
+          await capturePayPalPayment(extractedOrderId, payerIDMatch?.[1]);
+          return false; // Stop loading the page
+        }
+      }
+
+      return true; // Continue loading
+    } catch (error) {
+      console.error("Error handling PayPal approval:", error);
+      return true;
+    }
+  };
+
+  /**
+   * Capture the approved PayPal payment
+   */
+  const capturePayPalPayment = async (
+    paypalOrderId: string,
+    payerId?: string
+  ) => {
+    try {
+      setIsCapturing(true);
+
+      // Call your backend to capture the payment
+      const response = await axios.post(`${BACKEND_API_URL}/capture-order`, {
+        orderID: paypalOrderId,
+        payerID: payerId,
+        pendingOrderId: Number(orderId),
+      });
+
+      const { status } = response.data;
+
+      if (status === "COMPLETED") {
+        // Update the order with PayPal payment details
+        await updateOrder(Number(orderId), {
+          payment_method: "paypal",
+          payment_method_title: "PayPal",
+          set_paid: true,
+          status: OrderStatus.PROCESSING,
+          meta_data: [
+            {
+              key: "_paypal_order_id",
+              value: paypalOrderId,
+            },
+            {
+              key: "_paypal_payer_id",
+              value: payerId || "N/A",
+            },
+          ],
+        });
+
+        // If this is a subscription product, create the subscription
+        if (productType === "subscription") {
+          await createSubscriptionOrder(Number(orderId));
+        }
+
+        setIsCapturing(false);
+
+        Alert.alert(
+          "Payment Successful",
+          "Your PayPal payment has been processed successfully!",
+          [
+            {
+              text: "Continue",
+              onPress: () => {
+                router.push("/cart");
+              },
+            },
+          ]
+        );
+      } else {
+        throw new Error(`Payment not completed. Status: ${status}`);
+      }
+    } catch (error: any) {
+      setIsCapturing(false);
+      console.error("PayPal Capture Error:", error);
+
+      Alert.alert(
+        "Payment Capture Failed",
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to capture PayPal payment. Please try again.",
+        [
+          {
+            text: "Retry",
+            onPress: () => createPayPalOrder(),
+          },
+          {
+            text: "Cancel",
+            onPress: () => router.back(),
+          },
+        ]
+      );
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+          >
+            <ChevronLeft size={24} color={Colors.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>PayPal Payment</Text>
+          <View style={styles.backButton} />
+        </View>
+
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.darkGold} />
+          <Text style={styles.loadingText}>Preparing PayPal payment...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (isCapturing) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.backButton} />
+          <Text style={styles.headerTitle}>Processing Payment</Text>
+          <View style={styles.backButton} />
+        </View>
+
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.darkGold} />
+          <Text style={styles.loadingText}>Capturing your payment...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!orderCreated || !approvalUrl) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+          >
+            <ChevronLeft size={24} color={Colors.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>PayPal Payment</Text>
+          <View style={styles.backButton} />
+        </View>
+
+        <ScrollView
+          style={styles.errorContainer}
+          contentContainerStyle={styles.errorContent}
+        >
+          <Text style={styles.errorTitle}>Unable to Initialize Payment</Text>
+          <Text style={styles.errorText}>
+            We could not set up your PayPal payment. Please try again.
+          </Text>
+
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={createPayPalOrder}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => router.back()}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+        >
+          <ChevronLeft size={24} color={Colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>PayPal Payment</Text>
+        <View style={styles.backButton} />
+      </View>
+
+      <WebView
+        source={{ uri: approvalUrl }}
+        onNavigationStateChange={handlePayPalApproval}
+        startInLoadingState
+        renderLoading={() => (
+          <View style={styles.webviewLoading}>
+            <ActivityIndicator size="large" color={Colors.darkGold} />
+          </View>
+        )}
+        onError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent;
+          console.error("WebView error:", nativeEvent);
+          Alert.alert(
+            "Loading Error",
+            "Failed to load PayPal payment page. Please try again.",
+            [
+              {
+                text: "Retry",
+                onPress: createPayPalOrder,
+              },
+              {
+                text: "Cancel",
+                onPress: () => router.back(),
+              },
+            ]
+          );
+        }}
+        style={styles.webview}
+      />
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.deepDarkGray,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: Colors.secondary,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600" as const,
+    color: Colors.textPrimary,
+    flex: 1,
+    textAlign: "center",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: Colors.textSecondary,
+    textAlign: "center",
   },
   webview: {
-    height: 500,
-    width: "100%",
+    flex: 1,
   },
-  btn: {
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    backgroundColor: "#61E786",
-    justifyContent: "center",
+  webviewLoading: {
+    flex: 1,
     alignItems: "center",
-    alignContent: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.cardBg,
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: Colors.deepDarkGray,
+  },
+  errorContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.textPrimary,
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  errorText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: "center",
+    marginBottom: 32,
+    lineHeight: 20,
+  },
+  retryButton: {
+    backgroundColor: Colors.darkGold,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 8,
+    marginBottom: 12,
+    minWidth: 200,
+    alignItems: "center",
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.darkBg,
+  },
+  cancelButton: {
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    minWidth: 200,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.textPrimary,
   },
 });

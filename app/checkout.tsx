@@ -640,7 +640,11 @@ export default function CheckoutScreen() {
               </View>
             )}
             {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
-              <PayPalPaymentScreen />
+              <PayPalPaymentScreen
+                orderId={orderId ? orderId : pendingOrderId}
+                amount={getTotalPrice()}
+                productType={productType}
+              />
             )}
             <View style={styles.orderSummary}>
               <Text style={styles.summaryTitle}>Order Summary</Text>
