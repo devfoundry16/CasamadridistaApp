@@ -91,6 +91,7 @@ export default function PayPalPaymentScreen(props: any) {
       const approvalLink = links?.find((link: any) => link.rel === "approve");
 
       console.log("PayPal approval link:", approvalLink);
+      console.log("Order created with ID:", id);
 
       if (approvalLink?.href) {
         setApprovalUrl(approvalLink.href);
@@ -101,7 +102,6 @@ export default function PayPalPaymentScreen(props: any) {
 
       setLoading(false);
     } catch (error: any) {
-      console.error("PayPal Order Creation Error:", error);
       setLoading(false);
       Alert.alert(
         "Payment Error",
@@ -126,17 +126,18 @@ export default function PayPalPaymentScreen(props: any) {
   const handlePayPalApproval = async (navState: any) => {
     try {
       const url = navState.url;
-
+      console.log("Navigated to URL:", url);
       // Check if this is the return URL with PayPal order ID and payer ID
       if (
-        url.includes("paypal.com") ||
+        url.includes("example") ||
         url.includes("returnUrl") ||
         url.includes("orderID")
       ) {
         // Extract orderID and payerID from URL or callback data
         const orderIDMatch = url.match(/orderID=([^&]*)/);
-        const payerIDMatch = url.match(/payerID=([^&]*)/);
+        const payerIDMatch = url.match(/PayerID=([^&]*)/);
 
+        console.log(orderIDMatch, payerIDMatch);
         if (orderIDMatch) {
           const extractedOrderId = orderIDMatch[1];
 
@@ -147,8 +148,11 @@ export default function PayPalPaymentScreen(props: any) {
       }
 
       return true; // Continue loading
-    } catch (error) {
-      console.error("Error handling PayPal approval:", error);
+    } catch (error: any) {
+      Alert.alert(
+        "Error handling PayPal approval:",
+        error.message || "An error occurred"
+      );
       return true;
     }
   };
@@ -171,6 +175,8 @@ export default function PayPalPaymentScreen(props: any) {
       });
 
       const { status } = response.data;
+
+      console.log("PayPal capture response status:", status);
 
       if (status === "COMPLETED") {
         // Update the order with PayPal payment details

@@ -1,5 +1,5 @@
 import HeaderStack from "@/components/HeaderStack";
-import PayPalPaymentScreen from "@/components/PayPalPaymentScreen";
+import PayPalPaymentScreen from "@/app/PayPalTestScreen";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
 import { useFlintopWallet } from "@/hooks/useFlintopWallet";
@@ -270,79 +270,6 @@ export default function CheckoutScreen() {
 
     const id = orderId ? orderId : Number(pendingOrderId);
 
-    // Wallet payment branch
-    if (paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET) {
-      setLoading(true);
-      withDrawFundsFromWallet(
-        id,
-        productType === CHECKOUT_PRODUCT_TYPE.WALLET
-          ? "Wallet Top Up"
-          : productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION
-            ? "Order Subscription"
-            : "Order Standard Product"
-      )
-        .then(async (res) => {
-          // Update order with wallet payment info
-          await updateOrder(id, {
-            payment_method: CHECKOUT_PAYMENT_METHOD.WALLET,
-            payment_method_title: "Wallet",
-            set_paid: true,
-            status: OrderStatus.PROCESSING,
-            meta_data: [
-              {
-                key: "_wallet_response",
-                value: res,
-              },
-            ],
-          });
-
-          if (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION) {
-            await createSubscription(id);
-          }
-          clearCart();
-          router.dismissAll();
-          setLoading(false);
-          router.navigate("/account/wallet");
-          Alert.alert(
-            `Payment Successful. Current wallet balance: $${res.new_balance}`
-          );
-        })
-        .catch((err: any) => {
-          const resp = err?.response || err?.data || null;
-          if (
-            resp &&
-            (resp.code === "insufficient_funds" || resp.status === 400)
-          ) {
-            const current =
-              resp.current_balance ?? resp.current_balance ?? "N/A";
-            const requested =
-              resp.requested_amount ?? resp.requested_amount ?? "N/A";
-            Alert.alert(
-              "Insufficient funds",
-              `${resp.message || err.message}\nCurrent balance: $${current}\nRequested amount: $${requested}`
-            );
-            router.dismissAll();
-            setLoading(false);
-            router.navigate("/account/wallet");
-          } else {
-            setLoading(false);
-            Alert.alert(
-              "Payment Failed",
-              err.message || "There was an issue with your payment."
-            );
-          }
-        });
-      return;
-    }
-
-    if (paymentMethod !== CHECKOUT_PAYMENT_METHOD.STRIPE) {
-      Alert.alert(
-        "Payment Method",
-        `${paymentMethod} payment flow is not implemented in the app.`
-      );
-      return;
-    }
-
     const nameParts = name ? name.trim().split(" ") : ["", ""];
     const firstName = nameParts.shift() || "";
     const lastName = nameParts.join(" ") || "";
@@ -359,11 +286,7 @@ export default function CheckoutScreen() {
       postcode: postcode,
     } as any;
 
-    payViaStripe(
-      orderId ? orderId : Number(pendingOrderId),
-      getTotalPrice(),
-      billingPayload
-    )
+    payViaStripe(id, getTotalPrice(), billingPayload)
       .then((res) => {
         setLoading(true);
         updateCustomer({
@@ -417,6 +340,80 @@ export default function CheckoutScreen() {
       });
   };
 
+  const walletPay = () => {
+    if (!orderId && !pendingOrderId) return;
+
+    const id = orderId ? orderId : Number(pendingOrderId);
+
+    setLoading(true);
+    withDrawFundsFromWallet(
+      id,
+      productType === CHECKOUT_PRODUCT_TYPE.WALLET
+        ? "Wallet Top Up"
+        : productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION
+          ? "Order Subscription"
+          : "Order Standard Product"
+    )
+      .then(async (res) => {
+        // Update order with wallet payment info
+        await updateOrder(id, {
+          payment_method: CHECKOUT_PAYMENT_METHOD.WALLET,
+          payment_method_title: "Wallet",
+          set_paid: true,
+          status: OrderStatus.PROCESSING,
+          meta_data: [
+            {
+              key: "_wallet_response",
+              value: res,
+            },
+          ],
+        });
+
+        if (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION) {
+          await createSubscription(id);
+        }
+        clearCart();
+        router.dismissAll();
+        setLoading(false);
+        router.navigate("/account/wallet");
+        Alert.alert(
+          `Payment Successful. Current wallet balance: $${res.new_balance}`
+        );
+      })
+      .catch((err: any) => {
+        const resp = err?.response || err?.data || null;
+        if (
+          resp &&
+          (resp.code === "insufficient_funds" || resp.status === 400)
+        ) {
+          const current = resp.current_balance ?? resp.current_balance ?? "N/A";
+          const requested =
+            resp.requested_amount ?? resp.requested_amount ?? "N/A";
+          Alert.alert(
+            "Insufficient funds",
+            `${resp.message || err.message}\nCurrent balance: $${current}\nRequested amount: $${requested}`
+          );
+          router.dismissAll();
+          setLoading(false);
+          router.navigate("/account/wallet");
+        } else {
+          setLoading(false);
+          Alert.alert(
+            "Payment Failed",
+            err.message || "There was an issue with your payment."
+          );
+        }
+      });
+  };
+
+  const paypalPay = () => {
+    if (!orderId && !pendingOrderId) return;
+
+    const id = orderId ? orderId : Number(pendingOrderId);
+
+    router.navigate("/PayPalTestScreen");
+  };
+
   const handlePayment = async () => {
     if (!name || !email || !address1 || !city) {
       Alert.alert(
@@ -439,7 +436,13 @@ export default function CheckoutScreen() {
     } else {
       // continue payment
       try {
-        stripePay();
+        if (paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL) {
+          paypalPay();
+        } else if (paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE) {
+          stripePay();
+        } else {
+          walletPay();
+        }
       } catch (error: any) {
         Alert.alert(
           "Payment Failed",
@@ -650,30 +653,28 @@ export default function CheckoutScreen() {
                 </Text>
               </View>
             </View>
-            {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
+            {/* {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
               <PayPalPaymentScreen
-                orderId={orderId ? orderId : pendingOrderId}
-                amount={getTotalPrice()}
-                productType={productType}
+              // orderId={orderId ? orderId : pendingOrderId}
+              // amount={getTotalPrice()}
+              // productType={productType}
               />
-            )}
+            )} */}
           </View>
         </ScrollView>
 
-        {paymentMethod !== CHECKOUT_PAYMENT_METHOD.PAYPAL && (
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.payButton}
-              onPress={handlePayment}
-              activeOpacity={0.8}
-            >
-              <CheckCircle size={20} color={Colors.darkBg} />
-              <Text style={styles.payButtonText}>
-                {status ? "Continue Payment" : "Place an Order"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.payButton}
+            onPress={handlePayment}
+            activeOpacity={0.8}
+          >
+            <CheckCircle size={20} color={Colors.darkBg} />
+            <Text style={styles.payButtonText}>
+              {status ? "Continue Payment" : "Place an Order"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </>
   );

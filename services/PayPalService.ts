@@ -113,7 +113,7 @@ class PayPalService {
           {
             amount: {
               currency_code: data.currency || "USD",
-              value: (data.amount / 100).toFixed(2), // Convert cents to dollars
+              value: data.amount.toFixed(2), // Convert cents to dollars
             },
             description: data.orderDescription || "Order payment",
           },
