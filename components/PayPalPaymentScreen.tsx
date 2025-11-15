@@ -90,6 +90,8 @@ export default function PayPalPaymentScreen(props: any) {
       // Find the approval link
       const approvalLink = links?.find((link: any) => link.rel === "approve");
 
+      console.log("PayPal approval link:", approvalLink);
+
       if (approvalLink?.href) {
         setApprovalUrl(approvalLink.href);
         setOrderCreated(true);
@@ -407,6 +409,7 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
+    height: 500,
   },
   webviewLoading: {
     flex: 1,

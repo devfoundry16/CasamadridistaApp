@@ -10,7 +10,7 @@ class ApiService {
   private baseUrl: string = DEFAULT_BASE_URL;
   private readonly AUTH_TOKEN_KEY = "jwt_token";
   private readonly USER_ID_KEY = "user_id";
-  private readonly USER_KEY = "user";
+  private readonly USER_KEY = "user_data";
   private readonly GiveWP_API_KEY = "give_wp_api_key";
   private readonly GiveWP_SECRET_KEY = "give_wp_secret_key";
   private readonly GiveWP_TOKEN = "give_wp_token";

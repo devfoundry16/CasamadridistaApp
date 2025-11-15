@@ -639,13 +639,6 @@ export default function CheckoutScreen() {
                 </View>
               </View>
             )}
-            {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
-              <PayPalPaymentScreen
-                orderId={orderId ? orderId : pendingOrderId}
-                amount={getTotalPrice()}
-                productType={productType}
-              />
-            )}
             <View style={styles.orderSummary}>
               <Text style={styles.summaryTitle}>Order Summary</Text>
               <View>{getSummary()}</View>
@@ -657,21 +650,30 @@ export default function CheckoutScreen() {
                 </Text>
               </View>
             </View>
+            {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
+              <PayPalPaymentScreen
+                orderId={orderId ? orderId : pendingOrderId}
+                amount={getTotalPrice()}
+                productType={productType}
+              />
+            )}
           </View>
         </ScrollView>
 
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.payButton}
-            onPress={handlePayment}
-            activeOpacity={0.8}
-          >
-            <CheckCircle size={20} color={Colors.darkBg} />
-            <Text style={styles.payButtonText}>
-              {status ? "Continue Payment" : "Place an Order"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {paymentMethod !== CHECKOUT_PAYMENT_METHOD.PAYPAL && (
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={styles.payButton}
+              onPress={handlePayment}
+              activeOpacity={0.8}
+            >
+              <CheckCircle size={20} color={Colors.darkBg} />
+              <Text style={styles.payButtonText}>
+                {status ? "Continue Payment" : "Place an Order"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </>
   );
