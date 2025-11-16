@@ -137,7 +137,7 @@ const PayPalPaymentScreen = () => {
         )
         .then((response) => {
           router.navigate(
-            `/checkout?payment_status=success&pendingOrderId=${orderId}&productType=${productType}`
+            `/checkout?payment_status=success&pendingOrderId=${orderId}&productType=${productType}&amount=${amount}`
           );
           //setShouldShowWebviewLoading(true);
         })

@@ -69,7 +69,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
           router.dismissAll();
           setLoading(false);
           router.navigate(
-            `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.WALLET}&amount=${numericAmount}`
+            `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.WALLET}&amount=${numericAmount}&payment_method=${selectedMethod}`
           );
         })
         .catch((error) => {

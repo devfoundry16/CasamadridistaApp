@@ -28,8 +28,13 @@ import { updateAddress } from "@/store/thunks/userThunks";
 import { Spinner } from "@/components/Spinner";
 
 export default function CheckoutScreen() {
-  const { productType, amount, pendingOrderId, payment_status } =
-    useLocalSearchParams(); //payment_status for payment status specifically paypal
+  const {
+    productType,
+    amount,
+    pendingOrderId,
+    payment_status,
+    payment_method,
+  } = useLocalSearchParams(); //payment_status for payment status specifically paypal
   const { items, totalPrice, clearCart } = useCart();
   const { user, updateCustomer } = useUser();
   const router = useRouter();
@@ -189,6 +194,7 @@ export default function CheckoutScreen() {
       await createSubscription(id);
     else if (productType === CHECKOUT_PRODUCT_TYPE.WALLET)
       await addFundsToWallet(id, status_txt);
+    console.log(productType);
     clearCart();
     router.dismissAll();
     setLoading(false);
@@ -263,7 +269,9 @@ export default function CheckoutScreen() {
       await addFunds(
         Number(amount),
         order_id,
-        CHECKOUT_PAYMENT_METHOD.STRIPE,
+        payment_method === CHECKOUT_PAYMENT_METHOD.STRIPE
+          ? CHECKOUT_PAYMENT_METHOD.STRIPE
+          : CHECKOUT_PAYMENT_METHOD.PAYPAL,
         description
       );
       setLoading(false);
