@@ -1,9 +1,10 @@
 import axios, { AxiosInstance } from "axios";
+import { development } from "@/config/environment";
 class ApiService {
   private api: AxiosInstance;
   constructor() {
     this.api = axios.create({
-      baseURL: "http://localhost:3000/api/match",
+      baseURL: `${development.DEFAULT_BACKEND_API_URL}match`,
       headers: { Accept: "application/json" },
     });
   }

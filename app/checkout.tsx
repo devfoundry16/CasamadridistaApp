@@ -414,7 +414,7 @@ export default function CheckoutScreen() {
     const id = orderId ? orderId : Number(pendingOrderId);
     console.log("navigating to paypal with order id:", id);
     router.navigate(
-      `/PayPalTestScreen?amount=${getTotalPrice()}&orderId=${id}&productType=${productType}`
+      `/PayPalScreen?amount=${getTotalPrice()}&orderId=${id}&productType=${productType}`
     );
   };
 

@@ -10,7 +10,7 @@ import Colors from "@/constants/colors";
 
 const PayPalPaymentScreen = () => {
   const router = useRouter();
-  const { amount, orderId } = useLocalSearchParams();
+  const { amount, orderId, productType } = useLocalSearchParams();
   const [isWebViewLoading, SetIsWebViewLoading] = useState(false);
   const [paypalUrl, setPaypalUrl] = useState("");
   const [accessToken, setAccessToken] = useState("");
@@ -44,6 +44,7 @@ const PayPalPaymentScreen = () => {
     }
   };
   const putPayload = async () => {
+    SetIsWebViewLoading(true);
     const dataDetail = {
       intent: "sale",
       payer: {
@@ -79,14 +80,16 @@ const PayPalPaymentScreen = () => {
           const approvalUrl = links.find(
             (data: any) => data.rel === "approval_url"
           ).href;
-          console.log("response", approvalUrl);
+          SetIsWebViewLoading(false);
           setPaypalUrl(approvalUrl);
         })
         .catch((err) => {
           console.log({ ...err });
+          SetIsWebViewLoading(false);
         });
     } catch (err) {
       console.log(err);
+      SetIsWebViewLoading(false);
     }
   };
 
@@ -133,9 +136,8 @@ const PayPalPaymentScreen = () => {
           }
         )
         .then((response) => {
-          console.log("*");
           router.navigate(
-            `/checkout?payment_status=success&pendingOrderId=${orderId}`
+            `/checkout?payment_status=success&pendingOrderId=${orderId}&productType=${productType}`
           );
           //setShouldShowWebviewLoading(true);
         })
@@ -169,17 +171,6 @@ const PayPalPaymentScreen = () => {
             onLoadStart={onWebviewLoadStart}
             onLoadEnd={() => SetIsWebViewLoading(false)}
           />
-        </View>
-      ) : null}
-      {isWebViewLoading ? (
-        <View
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#ffffff",
-          }}
-        >
-          <ActivityIndicator size="small" color="#A02AE0" />
         </View>
       ) : null}
     </>

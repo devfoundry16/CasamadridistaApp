@@ -2,7 +2,7 @@ import { useUser } from "@/hooks/useUser";
 import { PaymentSheet, useStripe } from "@stripe/stripe-react-native";
 import { useRef } from "react";
 import { useCart } from "./useCart";
-
+import { development } from "@/config/environment";
 export const useStripePay = () => {
   const { totalPrice } = useCart();
   const { user } = useUser();
@@ -12,7 +12,7 @@ export const useStripePay = () => {
   const orderIdRef = useRef<number>(0);
   /* Stripe */
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const API_URL = "http://localhost:3000/api/stripe";
+  const API_URL = `${development.DEFAULT_BACKEND_API_URL}stripe`;
 
   const handlePayment = async (
     orderId: number,

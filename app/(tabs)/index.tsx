@@ -16,6 +16,7 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Dimensions,
   Pressable,
   ScrollView,
@@ -111,8 +112,8 @@ export default function HomeScreen() {
       } else {
         setLiveMatch(undefined);
       }
-    } catch (error) {
-      console.error("Error fetching live match data:", error);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to fetch live match data");
     }
   }, [isLive]);
 
@@ -128,8 +129,8 @@ export default function HomeScreen() {
           setAwayTeamLastMatches(data);
         });
       });
-    } catch (error) {
-      console.error("[App] Failed to load initial data:", error);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to load initial data");
     }
   }, []);
 

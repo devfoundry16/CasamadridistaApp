@@ -149,10 +149,7 @@ export default function AccountScreen() {
         >
           <Crown size={24} color={Colors.accent} />
           <View style={styles.menuItemContent}>
-            <Text style={styles.menuItemText}>My Subscription</Text>
-            <Text style={styles.menuItemValue}>
-              {user.subscription?.plan || "No active subscription"}
-            </Text>
+            <Text style={styles.menuItemText}>Subscription</Text>
           </View>
         </TouchableOpacity>
 
@@ -166,7 +163,7 @@ export default function AccountScreen() {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.menuItem}
           onPress={() => router.push("../account/payment-methods" as any)}
         >
@@ -174,7 +171,7 @@ export default function AccountScreen() {
           <View style={styles.menuItemContent}>
             <Text style={styles.menuItemText}>Payment methods</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           style={styles.menuItem}

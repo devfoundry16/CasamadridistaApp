@@ -1,10 +1,18 @@
+import { Platform } from "react-native";
+
+const API_BASE_URL = Platform.select({
+  ios: "http://localhost:3000/api/",
+  android: "http://192.168.110.111:3000/api/", // Android Emulator
+  // android: 'http://10.0.3.2:3000', // Genymotion
+});
+
 const development = {
   AUTH_USERNAME: "iworqs",
   AUTH_PASSWORD: "P8u4 vcXa 7FrR mWXP eVla jstg",
   WOO_USERNAME: "ck_5761f8ce313356e07555cf14a8c2099ab27d7942",
   WOO_PASSWORD: "cs_72d03b9110f7f1e3592f5c4a77cbd7c42b176075",
   DEFAULT_BASE_URL: "https://casamadridista.com/wp-json/",
-  DEFAULT_BACKEND_API_URL: "http://localhost:3000/api/",
+  DEFAULT_BACKEND_API_URL: API_BASE_URL,
   API_BASE_URL_KEY: "api_base_url_key",
   STRIPE_PUBLISHABLE_KEY:
     "pk_test_51SJbX1LKFkodhXbkhZyhK8koyJDiF3i0xhq2A3hdXj5DnZasByx2N8aCVp2GJZDLEFMm7EJiwYQOPJqKdA7ShN5j00IvGbHo3c",
