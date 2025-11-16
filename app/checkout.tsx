@@ -1,5 +1,4 @@
 import HeaderStack from "@/components/HeaderStack";
-import PayPalPaymentScreen from "@/app/PayPalTestScreen";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
 import { useFlintopWallet } from "@/hooks/useFlintopWallet";
@@ -29,7 +28,8 @@ import { updateAddress } from "@/store/thunks/userThunks";
 import { Spinner } from "@/components/Spinner";
 
 export default function CheckoutScreen() {
-  const { productType, amount, pendingOrderId } = useLocalSearchParams();
+  const { productType, amount, pendingOrderId, payment_status } =
+    useLocalSearchParams(); //payment_status for payment status specifically paypal
   const { items, totalPrice, clearCart } = useCart();
   const { user, updateCustomer } = useUser();
   const router = useRouter();
@@ -71,7 +71,18 @@ export default function CheckoutScreen() {
   };
 
   useEffect(() => {
-    loadSummaryItems();
+    if (payment_status === "success" && pendingOrderId) {
+      updateOrder(Number(pendingOrderId), {
+        payment_method: CHECKOUT_PAYMENT_METHOD.PAYPAL,
+        payment_method_title: "Paypal",
+        set_paid: true,
+        status: OrderStatus.PROCESSING,
+      }).then(() => {
+        handleSuccess(Number(pendingOrderId), "PayPal Payment");
+      });
+    } else {
+      loadSummaryItems();
+    }
   }, []);
 
   const getTotalPrice = (): number => {
@@ -173,6 +184,21 @@ export default function CheckoutScreen() {
     };
   };
 
+  const handleSuccess = async (id: number, status_txt: string) => {
+    if (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION)
+      await createSubscription(id);
+    else if (productType === CHECKOUT_PRODUCT_TYPE.WALLET)
+      await addFundsToWallet(id, status_txt);
+    clearCart();
+    router.dismissAll();
+    setLoading(false);
+    router.navigate("/account");
+    Alert.alert(
+      "Payment Successful",
+      "Your payment was processed successfully!"
+    );
+  };
+
   const placeOrder = (payload: any) => {
     setLoading(true);
     addOrder(payload)
@@ -242,6 +268,7 @@ export default function CheckoutScreen() {
       );
       setLoading(false);
     } catch (error: any) {
+      Alert.alert("Add Funds Failed", error.message || "Add Funds Error");
       setLoading(false);
     }
   };
@@ -261,6 +288,7 @@ export default function CheckoutScreen() {
       setLoading(false);
       return resp;
     } catch (error: any) {
+      Alert.alert("Withdrawal Failed", error.message || "Withdraw Funds Error");
       setLoading(false);
     }
   };
@@ -299,7 +327,7 @@ export default function CheckoutScreen() {
         }).then((data) => {
           console.log("======meta data in checkout==========");
         });
-        updateOrder(orderId ? orderId : Number(pendingOrderId), {
+        updateOrder(id, {
           payment_method: CHECKOUT_PAYMENT_METHOD.STRIPE,
           payment_method_title: "Credit/Debit Card",
           set_paid: true,
@@ -315,23 +343,7 @@ export default function CheckoutScreen() {
             },
           ],
         }).then(async () => {
-          if (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION)
-            await createSubscription(
-              orderId ? orderId : Number(pendingOrderId)
-            );
-          else if (productType === CHECKOUT_PRODUCT_TYPE.WALLET)
-            await addFundsToWallet(
-              orderId ? orderId : Number(pendingOrderId),
-              "Wallet Top Up"
-            );
-          clearCart();
-          router.dismissAll();
-          setLoading(false);
-          router.navigate("/account");
-          Alert.alert(
-            "Payment Successful",
-            "Your payment was processed successfully!"
-          );
+          await handleSuccess(id, "Stripe Payment");
         });
       })
       .catch((error) => {
@@ -368,17 +380,7 @@ export default function CheckoutScreen() {
             },
           ],
         });
-
-        if (productType === CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION) {
-          await createSubscription(id);
-        }
-        clearCart();
-        router.dismissAll();
-        setLoading(false);
-        router.navigate("/account/wallet");
-        Alert.alert(
-          `Payment Successful. Current wallet balance: $${res.new_balance}`
-        );
+        await handleSuccess(id, "Wallet Payment");
       })
       .catch((err: any) => {
         const resp = err?.response || err?.data || null;
@@ -410,8 +412,10 @@ export default function CheckoutScreen() {
     if (!orderId && !pendingOrderId) return;
 
     const id = orderId ? orderId : Number(pendingOrderId);
-
-    router.navigate("/PayPalTestScreen");
+    console.log("navigating to paypal with order id:", id);
+    router.navigate(
+      `/PayPalTestScreen?amount=${getTotalPrice()}&orderId=${id}&productType=${productType}`
+    );
   };
 
   const handlePayment = async () => {

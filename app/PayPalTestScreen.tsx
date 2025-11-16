@@ -1,22 +1,49 @@
-import React, { useState } from "react";
-import {
-  Text,
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { WebView } from "react-native-webview";
 import { development } from "@/config/environment";
 import axios from "axios";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import HeaderStack from "@/components/HeaderStack";
+import { Spinner } from "@/components/Spinner";
+import Colors from "@/constants/colors";
 
 const PayPalPaymentScreen = () => {
+  const router = useRouter();
+  const { amount, orderId } = useLocalSearchParams();
   const [isWebViewLoading, SetIsWebViewLoading] = useState(false);
   const [paypalUrl, setPaypalUrl] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [shouldShowWebViewLoading, setShouldShowWebviewLoading] =
     useState(true);
-  const buyBook = async () => {
+  const apiBaseUrl =
+    development.PAYPAL_MODE === "sandbox"
+      ? "https://api-m.sandbox.paypal.com"
+      : "https://api-m.paypal.com";
+
+  const getAccessToken = async () => {
+    try {
+      const response = await axios.post(
+        `${apiBaseUrl}/v1/oauth2/token`,
+        "grant_type=client_credentials",
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          auth: {
+            username: development.PAYPAL_CLIENT_ID || "",
+            password: development.PAYPAL_CLIENT_SECRET || "",
+          },
+        }
+      );
+
+      return response.data.access_token;
+    } catch (error) {
+      console.error("Error fetching PayPal access token:", error);
+      throw error;
+    }
+  };
+  const putPayload = async () => {
     const dataDetail = {
       intent: "sale",
       payer: {
@@ -26,15 +53,7 @@ const PayPalPaymentScreen = () => {
         {
           amount: {
             currency: "USD",
-            total: "26",
-            details: {
-              shipping: "6",
-              subtotal: "20",
-              shipping_discount: "0",
-              insurance: "0",
-              handling_fee: "0",
-              tax: "0",
-            },
+            total: amount,
           },
         },
       ],
@@ -44,54 +63,36 @@ const PayPalPaymentScreen = () => {
       },
     };
 
-    const url = `https://api-m.sandbox.paypal.com/v1/oauth2/token`;
-
-    const data = "grant_type=client_credentials";
-
-    const auth = {
-      username: development.PAYPAL_CLIENT_ID, //"your_paypal-app-client-ID",
-      password: development.PAYPAL_CLIENT_SECRET, //"your-paypal-app-secret-ID
-    };
-
-    const token = btoa(`${auth.username}:${auth.password}`);
-    // Authorise with seller app information (clientId and secret key)
-    axios
-      .post(url, data, {
-        headers: {
-          Authorization: `Basic ${token}`,
-        },
-      })
-      .then((response) => {
-        setAccessToken(response.data.access_token);
-
-        //Resquest payal payment (It will load login page payment detail on the way)
-        axios
-          .post(
-            `https://api-m.sandbox.paypal.com/v1/payments/payment`,
-            JSON.stringify(dataDetail),
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${response.data.access_token}`,
-              },
-            }
-          )
-          .then((response) => {
-            const { id, links } = response.data;
-            const approvalUrl = links.find(
-              (data: any) => data.rel === "approval_url"
-            ).href;
-            console.log("response", approvalUrl);
-            setPaypalUrl(approvalUrl);
-          })
-          .catch((err) => {
-            console.log({ ...err });
-          });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    try {
+      const token = await getAccessToken();
+      setAccessToken(token);
+      //Resquest payal payment (It will load login page payment detail on the way)
+      axios
+        .post(`${apiBaseUrl}/v1/payments/payment`, JSON.stringify(dataDetail), {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          const { links } = response.data;
+          const approvalUrl = links.find(
+            (data: any) => data.rel === "approval_url"
+          ).href;
+          console.log("response", approvalUrl);
+          setPaypalUrl(approvalUrl);
+        })
+        .catch((err) => {
+          console.log({ ...err });
+        });
+    } catch (err) {
+      console.log(err);
+    }
   };
+
+  useEffect(() => {
+    putPayload();
+  }, []);
 
   /*---End Paypal checkout section---*/
 
@@ -122,7 +123,7 @@ const PayPalPaymentScreen = () => {
 
       axios
         .post(
-          `https://api-m.sandbox.paypal.com/v1/payments/payment/${paymentId}/execute`,
+          `${apiBaseUrl}/v1/payments/payment/${paymentId}/execute`,
           { payer_id: PayerID },
           {
             headers: {
@@ -132,6 +133,10 @@ const PayPalPaymentScreen = () => {
           }
         )
         .then((response) => {
+          console.log("*");
+          router.navigate(
+            `/checkout?payment_status=success&pendingOrderId=${orderId}`
+          );
           //setShouldShowWebviewLoading(true);
         })
         .catch((err) => {
@@ -141,27 +146,18 @@ const PayPalPaymentScreen = () => {
     }
   };
 
-  return (
-    <React.Fragment>
-      <View style={styles.container}>
-        <Text>Paypal in React Native</Text>
-        <TouchableOpacity
-          activeOpacity={0.5}
-          onPress={buyBook}
-          style={styles.btn}
-        >
-          <Text
-            style={{
-              fontSize: 22,
-              fontWeight: "400",
-              textAlign: "center",
-              color: "#ffffff",
-            }}
-          >
-            BUY NOW
-          </Text>
-        </TouchableOpacity>
+  if (isWebViewLoading) {
+    return (
+      <View style={styles.spinnerContainer}>
+        <HeaderStack title="Checkout" />
+        <Spinner content="Loading" />
       </View>
+    );
+  }
+
+  return (
+    <>
+      <HeaderStack title="PayPal Payment" />
       {paypalUrl ? (
         <View style={styles.webview}>
           <WebView
@@ -186,7 +182,7 @@ const PayPalPaymentScreen = () => {
           <ActivityIndicator size="small" color="#A02AE0" />
         </View>
       ) : null}
-    </React.Fragment>
+    </>
   );
 };
 
@@ -197,7 +193,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   webview: {
-    height: 500,
+    height: "100%",
     width: "100%",
   },
   btn: {
@@ -208,5 +204,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     alignContent: "center",
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.deepDarkGray,
   },
 });
