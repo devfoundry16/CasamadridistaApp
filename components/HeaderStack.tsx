@@ -13,6 +13,7 @@ const HeaderStack = ({ title }: { title: string }) => {
     <Stack.Screen
       options={{
         headerTitle: title,
+        headerTitleAlign: "center",
         headerStyle: {
           backgroundColor: Colors.secondary,
         },

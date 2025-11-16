@@ -43,7 +43,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
-          headerTitle: "Casa Madridista",
+          headerTitle: "Casamadridista",
+          headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
         }}
       />
@@ -52,6 +53,7 @@ export default function TabLayout() {
         options={{
           title: "Penalty",
           headerTitle: "Penalty Game",
+          headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
             <Gamepad2 size={size} color={color} />
           ),
@@ -62,6 +64,7 @@ export default function TabLayout() {
         options={{
           title: "Formation",
           headerTitle: "Formation Builder",
+          headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => <Layout size={size} color={color} />,
         }}
       />
@@ -70,6 +73,7 @@ export default function TabLayout() {
         options={{
           title: "Team",
           headerTitle: "Ream Madrid Team",
+          headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => <Team size={size} color={color} />,
         }}
       />
@@ -78,6 +82,7 @@ export default function TabLayout() {
         options={{
           title: "Shop",
           headerTitle: "Shop",
+          headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
             <ShoppingBag size={size} color={color} />
           ),
@@ -88,6 +93,7 @@ export default function TabLayout() {
         options={{
           title: "Donation",
           headerTitle: "Donation",
+          headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => <Gift size={size} color={color} />,
         }}
       />
@@ -96,6 +102,7 @@ export default function TabLayout() {
         options={{
           title: "Account",
           headerTitle: "My Account",
+          headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
             <UserCircle size={size} color={color} />
           ),
