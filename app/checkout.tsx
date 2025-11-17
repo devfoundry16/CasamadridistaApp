@@ -194,7 +194,7 @@ export default function CheckoutScreen() {
       await createSubscription(id);
     else if (productType === CHECKOUT_PRODUCT_TYPE.WALLET)
       await addFundsToWallet(id, status_txt);
-    console.log(productType);
+
     clearCart();
     router.dismissAll();
     setLoading(false);
@@ -250,7 +250,6 @@ export default function CheckoutScreen() {
   };
 
   const createSubscription = async (order_id: number) => {
-    console.log("subscription order id: ", order_id);
     setLoading(true);
     createSubscriptionOrder(order_id)
       .then(() => {

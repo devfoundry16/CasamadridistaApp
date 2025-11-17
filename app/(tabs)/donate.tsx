@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GiveWPService } from "@/services/Donation/GiveWPService";
 import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
 import { CampaignDetail } from "@/types/campaigns/campaigns";
@@ -11,16 +11,17 @@ export default function DonateScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [campaignsList, setCampaignsList] = useState<CampaignDetail[]>([]);
-  const loadCampaignsList = async () => {
+
+  const loadCampaignsList = useCallback(async () => {
     setLoading(true);
     const res = await GiveWPService.getCampaignsList();
     console.log("========Campaign List=========");
     setCampaignsList(res);
     setLoading(false);
-  };
+  }, []);
   useEffect(() => {
     loadCampaignsList();
-  }, []);
+  }, [loadCampaignsList]);
 
   if (loading) {
     return (

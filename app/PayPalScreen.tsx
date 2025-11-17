@@ -39,7 +39,7 @@ const PayPalPaymentScreen = () => {
 
       return response.data.access_token;
     } catch (error) {
-      console.error("Error fetching PayPal access token:", error);
+      Alert.alert("Error", "Failed to get PayPal access token");
       throw error;
     }
   };
@@ -84,11 +84,11 @@ const PayPalPaymentScreen = () => {
           setPaypalUrl(approvalUrl);
         })
         .catch((err) => {
-          console.log({ ...err });
+          Alert.alert("Error", "Failed to initiate PayPal payment");
           SetIsWebViewLoading(false);
         });
     } catch (err) {
-      console.log(err);
+      Alert.alert("Error", "Failed to initiate PayPal payment");
       SetIsWebViewLoading(false);
     }
   };
@@ -106,12 +106,13 @@ const PayPalPaymentScreen = () => {
   };
 
   const _onNavigationStateChange = (webViewState: any) => {
-    console.log("webViewState", webViewState);
-
     //When the webViewState.title is empty this mean it's in process loading the first paypal page so there is no paypal's loading icon
     //We show our loading icon then. After that we don't want to show our icon we need to set setShouldShowWebviewLoading to limit it
 
-    if (webViewState.url.includes("https://example.com/")) {
+    if (
+      webViewState.url.includes("https://example.com/") &&
+      webViewState.title !== ""
+    ) {
       //   setPaypalUrl("");
       const paymentIDMatch = webViewState.url.match(/paymentId=([^&]*)/);
       const payerIDMatch = webViewState.url.match(/PayerID=([^&]*)/);
@@ -120,8 +121,6 @@ const PayPalPaymentScreen = () => {
       if (paymentIDMatch && payerIDMatch) {
         paymentId = paymentIDMatch[1];
         PayerID = payerIDMatch[1];
-        console.log("paymentId", paymentId);
-        console.log("PayerID", PayerID);
       }
 
       axios
@@ -136,14 +135,19 @@ const PayPalPaymentScreen = () => {
           }
         )
         .then((response) => {
-          router.navigate(
-            `/checkout?payment_status=success&pendingOrderId=${orderId}&productType=${productType}&amount=${amount}`
-          );
+          if (productType === "donation") {
+            router.replace(
+              `/campaign/${orderId}?payment_status=success&productType=${productType}&amount=${amount}`
+            );
+          } else {
+            router.replace(
+              `/checkout?payment_status=success&pendingOrderId=${orderId}&productType=${productType}&amount=${amount}`
+            );
+          }
           //setShouldShowWebviewLoading(true);
         })
         .catch((err) => {
           setShouldShowWebviewLoading(true);
-          console.log("error:", { ...err });
         });
     }
   };
@@ -151,7 +155,7 @@ const PayPalPaymentScreen = () => {
   if (isWebViewLoading) {
     return (
       <View style={styles.spinnerContainer}>
-        <HeaderStack title="Checkout" />
+        <HeaderStack title="PayPal" />
         <Spinner content="Loading" />
       </View>
     );

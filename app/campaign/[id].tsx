@@ -1,5 +1,5 @@
-import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ import { useStripePay } from "@/hooks/useStripePay";
 import { useUser } from "@/hooks/useUser";
 
 export default function CampaignDetailScreen() {
-  const { id } = useLocalSearchParams();
+  const { id, amount, productType, payment_status } = useLocalSearchParams();
   const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
@@ -36,19 +36,23 @@ export default function CampaignDetailScreen() {
     paymentMethod: CHECKOUT_PAYMENT_METHOD.STRIPE,
   });
 
+  const loadCampaign = useCallback(async () => {
+    try {
+      const data = await GiveWPService.getCampaignById(Number(id));
+      setCampaign(data);
+    } catch (error) {
+      console.error("Failed to load campaign:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const loadCampaign = async () => {
-      try {
-        const data = await GiveWPService.getCampaignById(Number(id));
-        setCampaign(data);
-      } catch (error) {
-        console.error("Failed to load campaign:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadCampaign();
-  }, [id]);
+    if (payment_status === "success" && productType === "donation") {
+      handleSuccess();
+    }
+  }, [loadCampaign]);
 
   const handleStripePay = () => {
     payViaStripe(0, donationData.amount, user?.billing)
@@ -80,7 +84,6 @@ export default function CampaignDetailScreen() {
           donorId: 2,
           gatewayId: "stripe_payment_element",
         };
-        console.log(donation_data);
         GiveWPService.giveDonation(donation_data).then((res) => {
           console.log(res);
           Alert.alert("Donate sucessfully");
@@ -91,7 +94,40 @@ export default function CampaignDetailScreen() {
       });
   };
 
-  const handlePayPalPay = () => {};
+  const handlePayPalPay = () => {
+    router.dismissAll();
+    router.navigate(
+      `/PayPalScreen?amount=${donationData.amount}&productType=donation&payment_status=success&orderId=${id}`
+    );
+  };
+
+  const handleSuccess = () => {
+    // const donation_data: Donation = {
+    const donation_data: Donation = {
+      formId: 52470,
+      firstName: donationData.firstName ?? "",
+      lastName: donationData.lastName ?? "",
+      email: donationData.email ?? "",
+      type: donationData.frequency === "one-time" ? "single" : "recurring",
+      mode: "live",
+      amount: {
+        amount: Number(amount),
+        amountInMinorUnits: Number(amount) * 100,
+        currency: "USD",
+      },
+      campaignId: Number(id),
+      donorId: 2,
+      gatewayId: "paypal_standard",
+    };
+    GiveWPService.giveDonation(donation_data)
+      .then((res) => {
+        console.log(res);
+        Alert.alert("Donate sucessfully");
+      })
+      .catch((err) => {
+        Alert.alert(err.message);
+      });
+  };
 
   const handlePayment = () => {
     if (donationData.paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE)

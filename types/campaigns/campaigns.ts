@@ -25,7 +25,7 @@ export interface Donation {
     currency: string; //"USD";
     amountInMinorUnits: number; //"25000";
   };
-  gatewayTransactionId: string;
+  gatewayTransactionId?: string;
   email: string; //"petrenkoviacheslav52@gmail.com";
   campaignId: number; //3;
   donorId: number; //1;
