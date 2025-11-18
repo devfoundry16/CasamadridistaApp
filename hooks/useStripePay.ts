@@ -34,7 +34,6 @@ export const useStripePay = () => {
     // set a ref immediately so confirmHandler (called by Stripe) can read the up-to-date id
     orderIdRef.current = orderId;
     const effectiveBilling = billing || billingAddress;
-    console.log("====stripe id in pay with stripe=====", user?.stripe_id);
     const body = {
       amount: walletAmount ? walletAmount : totalPrice,
       orderId: orderId,

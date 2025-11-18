@@ -100,7 +100,6 @@ export const useFlintopWallet = (): UseFlintopWalletReturn => {
     ) => {
       try {
         setError(null);
-        console.log(paymentMethod);
         await FlintopWalletService.addFunds({
           amount,
           order_id,

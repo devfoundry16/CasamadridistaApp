@@ -56,7 +56,6 @@ export const addToCart = createAsyncThunk(
         body.variation
       );
 
-      console.log("Successfully Added, remaining item:", data.items.length);
       dispatch(setCartItems(data.items || []));
       return data.items;
     } catch (error: any) {
@@ -82,7 +81,6 @@ export const removeFromCart = createAsyncThunk(
       }
 
       const data = await CartService.removeItemInCart(key);
-      console.log("Successfully Removed, remaining item:", data.items.length);
       dispatch(setCartItems(data.items || []));
       dispatch(setLoading(false));
       return data.items;
@@ -111,7 +109,6 @@ export const updateQuantity = createAsyncThunk(
         data = await CartService.removeItemInCart(key);
       }
 
-      console.log("Successfully Updated, remaining item:", data.items.length);
       dispatch(setCartItems(data.items || []));
       return data.items;
     } catch (error: any) {

@@ -95,7 +95,6 @@ class ApiService {
       const response = await this.api.post(`/donations`, donation_data);
       return response.data;
     } catch (error: any) {
-      console.log(error.message);
       throw new Error(error || "An error occurred");
     }
   }

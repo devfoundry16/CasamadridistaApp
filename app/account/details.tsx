@@ -41,7 +41,6 @@ export default function AccountDetailsScreen() {
     if (formData.oldPassword !== "") {
       try {
         const isValid = await checkPassword(formData.oldPassword);
-        console.log(isValid);
         if (formData.password !== formData.confirmPassword) {
           Alert.alert("Error", "Confirm password is incorrect");
           return;

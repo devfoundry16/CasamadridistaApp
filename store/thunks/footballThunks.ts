@@ -23,32 +23,23 @@ export const loadAppData = createAsyncThunk(
   "football/loadAppData",
   async (_, { dispatch }) => {
     try {
-      console.log("---------Redux Football: Loading App Data---------");
-
       const playersString = await AsyncStorage.getItem("players");
       if (playersString) {
         const savedPlayersList: PlayerWithTeam[] = JSON.parse(playersString);
-        console.log("saved players list:", savedPlayersList.length);
-        const teamIDs = savedPlayersList.map((players) => players.team.id);
-        console.log("loaded teamIds:", teamIDs);
         dispatch(setPlayersList(savedPlayersList));
       }
 
       const coachString = await AsyncStorage.getItem("coaches");
       if (coachString) {
         const coachList: CoachWithTeam[] = JSON.parse(coachString);
-        console.log("loaded coaches:", coachList.length);
         dispatch(setCoachList(coachList));
       }
 
       const teamString = await AsyncStorage.getItem("teams");
       if (teamString) {
         const teamList: TeamInfo[] = JSON.parse(teamString);
-        console.log("loaded teams:", teamList.length);
         dispatch(setTeamInfoList(teamList));
       }
-
-      console.log("[Redux Football] Data loaded");
     } catch (error) {
       console.error("[Redux Football] Failed to load data:", error);
       throw error;
@@ -65,7 +56,6 @@ export const fetchProfileData = createAsyncThunk(
       const state = getState() as RootState;
       const { teamInfoList, coachList, playersList } = state.football;
 
-      console.log("Redux Football: Current Team InfoList", teamInfoList.length);
       const profile = await SportsInfoService.fetchProfile(id);
 
       const index = teamInfoList.findIndex((p) => p.team.id === id);
@@ -137,8 +127,6 @@ export const fetchProfileData = createAsyncThunk(
         AsyncStorage.setItem("teams", JSON.stringify(newTeamInfoList)),
         AsyncStorage.setItem("coaches", JSON.stringify(newCoachList)),
       ]);
-
-      console.log("Redux Football: teaminfo list updated");
     } catch (error) {
       dispatch(setLoading(false));
       //console.error("[Redux Football] Failed to fetch profile data:", error);

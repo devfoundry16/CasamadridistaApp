@@ -65,7 +65,6 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
       resetForm();
       addToCart(product as Product)
         .then((data) => {
-          console.log("Funds amount:", numericAmount);
           router.dismissAll();
           setLoading(false);
           router.navigate(

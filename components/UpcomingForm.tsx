@@ -72,10 +72,6 @@ export default function UpcomingForm({
       }
     };
     if (!live) {
-      console.log(
-        "Calculating time left for match on ",
-        nextMatch?.fixture.date
-      );
       calculateTimeLeft();
       const timer = setInterval(calculateTimeLeft, 1000);
       return () => clearInterval(timer);

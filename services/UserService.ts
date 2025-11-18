@@ -19,13 +19,11 @@ class ApiService {
     if (savedUrl) {
       this.baseUrl = savedUrl;
     }
-    console.log("Initialized with base URL:", this.baseUrl);
   }
 
   async setBaseUrl(url: string) {
     this.baseUrl = url;
     await AsyncStorage.setItem(API_BASE_URL_KEY, url);
-    console.log("[WordPress] Base URL updated to:", url);
   }
 
   getBaseUrl(): string {
@@ -104,7 +102,6 @@ class ApiService {
     }
 
     const url = `${this.baseUrl}${endpoint}`;
-    console.log("[WordPress] Fetching:", url);
 
     const response = await fetch(url, {
       ...options,
@@ -163,7 +160,6 @@ class ApiService {
 
     this.storeUserData(userData); //store user data
 
-    console.log("[WordPress] Login successful:", data.user_display_name);
     return userData;
   }
 
@@ -173,7 +169,6 @@ class ApiService {
       body: JSON.stringify(userData),
     });
     //set give wp api key
-    console.log("[WordPress] Register successful:");
     return response;
   }
   async update(userData: Partial<User>): Promise<any> {
@@ -182,7 +177,6 @@ class ApiService {
       body: JSON.stringify(userData),
     });
 
-    console.log("[WordPress] Update successful:");
     return response;
   }
   async updateCustomer(data: any): Promise<any> {
@@ -192,7 +186,6 @@ class ApiService {
       method: "PUT",
       body: JSON.stringify(body),
     });
-    console.log("[WordPress] Update Customer successful");
     return response;
   }
   async updateAddress(addressData: Address): Promise<any> {
@@ -205,7 +198,6 @@ class ApiService {
       method: "PUT",
       body: JSON.stringify(body),
     });
-    console.log("[WordPress] Update Address successful");
     return response;
   }
   async getAddress(): Promise<any> {
@@ -219,7 +211,6 @@ class ApiService {
   async logout() {
     await AsyncStorage.removeItem("jwt_token");
     await AsyncStorage.removeItem("user_data");
-    console.log("[WordPress] Logged out");
   }
   async getUser() {
     const [id, token] = await Promise.all([

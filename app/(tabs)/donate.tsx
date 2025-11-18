@@ -15,7 +15,6 @@ export default function DonateScreen() {
   const loadCampaignsList = useCallback(async () => {
     setLoading(true);
     const res = await GiveWPService.getCampaignsList();
-    console.log("========Campaign List=========");
     setCampaignsList(res);
     setLoading(false);
   }, []);

@@ -27,9 +27,6 @@ export default function PlayerDetailScreen() {
     const fetchData = async () => {
       // player = await SportsInfoService.fetchProfile(Number(id));
       const teamIDs = playersList.map((players) => players.team.id);
-
-      console.log("loaded players on player/[id].tsx:", teamIDs);
-      console.log("fetch player data on player/[id].tsx");
     };
     fetchData();
   }, []);

@@ -47,12 +47,9 @@ export default function TeamScreen() {
 
   useEffect(() => {
     if (players.player.length === 0) {
-      console.log("loaded players from apis");
       //fetchProfileData(id); // Default Real Madrid team ID
     }
     const teamIDs = playersList.map((players) => players.team.id);
-    console.log("loaded players on team.tsx:", teamIDs);
-    console.log("fetch profile data on team.tsx");
   }, []);
 
   const statsHtml = `

@@ -64,9 +64,7 @@ export default function CampaignDetailScreen() {
               value: res?.customer,
             },
           ],
-        }).then((data) => {
-          console.log("======meta data in checkout==========");
-        });
+        }).then((data) => {});
         const donation_data: Donation = {
           formId: 52470,
           firstName: donationData.firstName ?? "",
@@ -85,7 +83,6 @@ export default function CampaignDetailScreen() {
           gatewayId: "stripe_payment_element",
         };
         GiveWPService.giveDonation(donation_data).then((res) => {
-          console.log(res);
           Alert.alert("Donate sucessfully");
         });
       })
@@ -121,7 +118,6 @@ export default function CampaignDetailScreen() {
     };
     GiveWPService.giveDonation(donation_data)
       .then((res) => {
-        console.log(res);
         Alert.alert("Donate sucessfully");
       })
       .catch((err) => {

@@ -119,7 +119,6 @@ export default function HomeScreen() {
 
   const loadInitialData = useCallback(async () => {
     try {
-      console.log("---------Home Page---------");
       if (teamInfoList.length && !isLive) fetchProfileData(RealMadridId);
       MatchService.fetchNextMatch(RealMadridId).then((result) => {
         MatchService.fetchLastMatches(result.teams.home.id).then((data) => {
@@ -135,16 +134,13 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    console.log("HomeScreen mounted - loading initial data");
     loadInitialData();
   }, [loadInitialData, isLive]);
 
   useEffect(() => {
-    console.log("Starting live match polling");
     if (isLive) {
       const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
       return () => {
-        console.log("Cleaning up live match polling");
         clearInterval(timer);
       };
     }

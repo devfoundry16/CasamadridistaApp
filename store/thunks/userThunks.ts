@@ -42,7 +42,6 @@ export const registerUser = createAsyncThunk(
     dispatch(setLoading(true));
     try {
       const response = await UserService.register(userData);
-      console.log("Registered user:", response.id);
       Alert.alert("Registration Success");
       return response;
     } catch (error: any) {
@@ -230,11 +229,9 @@ export const addPaymentMethod = createAsyncThunk(
       const exp_year = 2000 + parseInt(year, 10);
       methodWithExpiry = { ...method, exp_month, exp_year };
     }
-    console.log("=======method with expiry=========", methodWithExpiry);
     // add payment method
 
     const newMethods = [...state.user.paymentMethods, { ...methodWithExpiry }];
-    console.log("=======Payment Method========", newMethods);
     await AsyncStorage.setItem("paymentMethods", JSON.stringify(newMethods));
     dispatch(setPaymentMethods(newMethods));
     return newMethods;

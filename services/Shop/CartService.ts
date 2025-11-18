@@ -15,13 +15,11 @@ class ApiService {
     if (savedUrl) {
       this.baseUrl = savedUrl;
     }
-    console.log("Initialized with base URL:", this.baseUrl);
   }
 
   async setBaseUrl(url: string) {
     this.baseUrl = url;
     await AsyncStorage.setItem(API_BASE_URL_KEY, url);
-    console.log("[WordPress] Base URL updated to:", url);
   }
 
   getBaseUrl(): string {
@@ -44,7 +42,6 @@ class ApiService {
     }
 
     const url = `${this.baseUrl}${endpoint}`;
-    console.log("[WordPress] Fetching:", url);
 
     const response = await fetch(url, {
       ...options,

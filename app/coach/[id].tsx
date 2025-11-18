@@ -19,13 +19,6 @@ export default function PlayerDetailScreen() {
 
   const coachWithTeam = coachList.find((p) => p.player.id === coachId);
   const coach = coachWithTeam?.player;
-  useEffect(() => {
-    const fetchData = async () => {
-      // player = await SportsInfoService.fetchProfile(Number(id));
-      console.log("coachId:", coachId);
-    };
-    fetchData();
-  }, []);
 
   return (
     <>
