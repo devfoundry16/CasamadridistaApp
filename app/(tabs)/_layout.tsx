@@ -49,23 +49,30 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="penalty"
-        options={{
-          title: "Penalty",
-          headerTitle: "Penalty Game",
-          headerTitleAlign: "center",
-          tabBarIcon: ({ color, size }) => (
-            <Gamepad2 size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="create-formation"
         options={{
           title: "Formation",
           headerTitle: "Formation Builder",
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => <Layout size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="penalty"
+        options={{
+          title: "Penalty",
+          headerTitle: "Penalty Game",
+          headerTitleAlign: "center",
+          headerShown: false,
+          tabBarPosition: "right",
+          tabBarStyle: {
+            backgroundColor: Colors.primary,
+            borderLeftColor: Colors.border,
+            display: "none",
+          },
+          tabBarIcon: ({ color, size }) => (
+            <Gamepad2 size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
