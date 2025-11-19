@@ -1,15 +1,11 @@
 import HeaderMenu from "@/components/HeaderMenu";
 import Colors from "@/constants/colors";
 import { Tabs } from "expo-router";
-import {
-  Gamepad2,
-  Home,
-  Layout,
-  ShoppingBag,
-  Users as Team,
-  UserCircle,
-  Gift,
-} from "lucide-react-native";
+
+import Ionicons from "@expo/vector-icons/Ionicons";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+
 import React from "react";
 
 export default function TabLayout() {
@@ -45,7 +41,9 @@ export default function TabLayout() {
           title: "Home",
           headerTitle: "Casamadridista",
           headerTitleAlign: "center",
-          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -54,7 +52,9 @@ export default function TabLayout() {
           title: "Formation",
           headerTitle: "Formation Builder",
           headerTitleAlign: "center",
-          tabBarIcon: ({ color, size }) => <Layout size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome name="soccer-ball-o" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -65,13 +65,11 @@ export default function TabLayout() {
           headerTitleAlign: "center",
           headerShown: false,
           tabBarPosition: "right",
-          tabBarStyle: {
-            backgroundColor: Colors.primary,
-            borderLeftColor: Colors.border,
-            display: "none",
+          tabBarItemStyle: {
+            width: 30,
           },
           tabBarIcon: ({ color, size }) => (
-            <Gamepad2 size={size} color={color} />
+            <Ionicons name="game-controller" size={size + 5} color={color} />
           ),
         }}
       />
@@ -81,7 +79,9 @@ export default function TabLayout() {
           title: "Team",
           headerTitle: "Ream Madrid Team",
           headerTitleAlign: "center",
-          tabBarIcon: ({ color, size }) => <Team size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="users" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -90,8 +90,11 @@ export default function TabLayout() {
           title: "Shop",
           headerTitle: "Shop",
           headerTitleAlign: "center",
+          tabBarItemStyle: {
+            display: "none",
+          },
           tabBarIcon: ({ color, size }) => (
-            <ShoppingBag size={size} color={color} />
+            <FontAwesome5 name="shopping-bag" size={size} color={color} />
           ),
         }}
       />
@@ -101,7 +104,9 @@ export default function TabLayout() {
           title: "Donation",
           headerTitle: "Donation",
           headerTitleAlign: "center",
-          tabBarIcon: ({ color, size }) => <Gift size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome5 name="donate" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -111,7 +116,7 @@ export default function TabLayout() {
           headerTitle: "My Account",
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
-            <UserCircle size={size} color={color} />
+            <Ionicons name="person" size={size} color={color} />
           ),
         }}
       />

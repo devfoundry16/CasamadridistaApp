@@ -4,7 +4,6 @@ import { Text, TouchableOpacity } from "react-native";
 export const headerOptions = {
   headerShown: true,
   headerBackButtonDisplayMode: "minimal" as const,
-  headerTintColor: Colors.textWhite,
   headerStyle: { backgroundColor: Colors.darkGold },
   headerTitleStyle: { fontWeight: "700" as const },
 };
@@ -17,7 +16,6 @@ const HeaderStack = ({ title }: { title: string }) => {
         headerStyle: {
           backgroundColor: Colors.secondary,
         },
-        headerTintColor: Colors.textWhite,
         headerTitleStyle: {
           fontWeight: "700" as const,
         },
@@ -25,7 +23,7 @@ const HeaderStack = ({ title }: { title: string }) => {
           <TouchableOpacity onPress={() => router.back()}>
             <Text
               style={{
-                color: Colors.lightGray,
+                color: Colors.text,
                 fontSize: 16,
                 marginHorizontal: 8,
               }}

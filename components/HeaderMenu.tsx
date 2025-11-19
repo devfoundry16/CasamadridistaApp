@@ -15,6 +15,10 @@ import {
   MoreVertical,
   ShoppingCart,
 } from "lucide-react-native";
+
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+
 import { useRouter } from "expo-router";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
@@ -53,7 +57,11 @@ function HeaderMenu() {
         activeOpacity={0.7}
       >
         <View>
-          <ShoppingCart color={Colors.primary} size={24} />
+          <MaterialIcons
+            name="shopping-cart-checkout"
+            size={24}
+            color={Colors.textWhite}
+          />
           <CartBadge />
         </View>
       </TouchableOpacity>
