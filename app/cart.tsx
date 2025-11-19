@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
@@ -29,7 +28,6 @@ export default function CartScreen() {
   if (items && items.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <HeaderStack title="Cart" />
         <View style={styles.emptyContainer}>
           <ShoppingBag size={80} color={Colors.darkGold} strokeWidth={1.5} />
           <Text style={styles.emptyTitle}>Your cart is empty</Text>
@@ -106,7 +104,6 @@ export default function CartScreen() {
 
   return (
     <View style={styles.container}>
-      <HeaderStack title="Cart" />
       <FlatList
         data={items}
         renderItem={renderCartItem}

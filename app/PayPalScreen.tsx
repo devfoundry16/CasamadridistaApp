@@ -4,7 +4,6 @@ import { WebView } from "react-native-webview";
 import { development } from "@/config/environment";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 
@@ -155,7 +154,6 @@ const PayPalPaymentScreen = () => {
   if (isWebViewLoading) {
     return (
       <View style={styles.spinnerContainer}>
-        <HeaderStack title="PayPal" />
         <Spinner content="Loading" />
       </View>
     );
@@ -163,7 +161,6 @@ const PayPalPaymentScreen = () => {
 
   return (
     <>
-      <HeaderStack title="PayPal Payment" />
       {paypalUrl ? (
         <View style={styles.webview}>
           <WebView

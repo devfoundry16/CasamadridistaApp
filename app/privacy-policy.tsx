@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { Image } from "expo-image";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -6,7 +5,6 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 export default function PrivacyPolicyScreen() {
   return (
     <>
-      <HeaderStack title="About" />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.headerContent}>
           <Image
@@ -130,13 +128,9 @@ const Terms = [
     startDesc:
       "If you have any questions about this Privacy Policy or how we handle your data, please contact us at:",
     endDesc: "",
-    points: [
-      "Contact@casamadridista.com",
-      "Casa Madridista",
-    ],
+    points: ["Contact@casamadridista.com", "Casa Madridista"],
   },
 ];
-
 
 const styles = StyleSheet.create({
   container: {

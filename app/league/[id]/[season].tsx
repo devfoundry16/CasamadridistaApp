@@ -1,5 +1,4 @@
 import CustomWebView from "@/components/CustomWebView";
-import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import SportsInfoService from "@/services/Football/SportsInfoService";
@@ -69,59 +68,51 @@ const LeagueDetailScreen = () => {
     fetchTeams();
   }, []);
   if (loading) {
-    return (
-      <>
-        <HeaderStack title="League Details" />
-        <Spinner content="Loading league" />
-      </>
-    );
+    return <Spinner content="Loading league" />;
   }
   return (
-    <>
-      <HeaderStack title={league?.name} />
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View>
-          {/* Render league name */}
-          <Text style={styles.leagueName}>
-            {league?.name} {season}-{Number(season) + 1}
-          </Text>
-          {/* Render league logo */}
-          {league && (
-            <View
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Image source={{ uri: league.logo }} style={styles.leagueLogo} />
-            </View>
-          )}
-          {/* Render team logos */}
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View>
+        {/* Render league name */}
+        <Text style={styles.leagueName}>
+          {league?.name} {season}-{Number(season) + 1}
+        </Text>
+        {/* Render league logo */}
+        {league && (
           <View
             style={{
-              flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
-              flexWrap: "wrap",
-              gap: 10,
-              marginVertical: 10,
             }}
           >
-            {teams.map((team) => (
-              <View key={team.team.id} style={styles.teamView}>
-                <TouchableOpacity
-                  style={styles.teamLogo}
-                  onPress={() => router.push(`/team/${team.team.id}`)}
-                >
-                  <Image source={{ uri: team.team.logo }} style={styles.logo} />
-                </TouchableOpacity>
-              </View>
-            ))}
+            <Image source={{ uri: league.logo }} style={styles.leagueLogo} />
           </View>
+        )}
+        {/* Render team logos */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 10,
+            marginVertical: 10,
+          }}
+        >
+          {teams.map((team) => (
+            <View key={team.team.id} style={styles.teamView}>
+              <TouchableOpacity
+                style={styles.teamLogo}
+                onPress={() => router.push(`/team/${team.team.id}`)}
+              >
+                <Image source={{ uri: team.team.logo }} style={styles.logo} />
+              </TouchableOpacity>
+            </View>
+          ))}
         </View>
-        <CustomWebView size={800} title={`Standing`} statsHtml={statsHtml} />
-      </ScrollView>
-    </>
+      </View>
+      <CustomWebView size={800} title={`Standing`} statsHtml={statsHtml} />
+    </ScrollView>
   );
 };
 

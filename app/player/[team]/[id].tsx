@@ -1,5 +1,4 @@
 import CustomWebView from "@/components/CustomWebView";
-import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import countries from "@/constants/countries.json";
 import { useFootball } from "@/hooks/useFootball";
@@ -71,7 +70,6 @@ export default function PlayerDetailScreen() {
 
   return (
     <>
-      <HeaderStack title={player?.name || ""} />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Image

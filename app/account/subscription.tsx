@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useOrder } from "@/hooks/useOrder";
@@ -35,7 +34,6 @@ export default function SubscriptionScreen() {
   if (loading) {
     return (
       <View style={styles.spinnerContainer}>
-        <HeaderStack title="Subscription" />
         <Spinner content="Loading subscription" />
       </View>
     );
@@ -43,7 +41,6 @@ export default function SubscriptionScreen() {
 
   return (
     <>
-      <HeaderStack title="My Subscription" />
       <ScrollView style={styles.container}>
         {subscriptions?.length ? (
           subscriptions.map((subscription: any) => {

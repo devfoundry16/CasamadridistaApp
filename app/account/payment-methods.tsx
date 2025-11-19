@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import { development } from "@/config/environment";
 import Colors from "@/constants/colors";
 import { useUser } from "@/hooks/useUser";
@@ -87,7 +86,6 @@ export default function PaymentMethodsScreen() {
 
   return (
     <>
-      <HeaderStack title="Payment Methods" />
       <ScrollView style={styles.container}>
         <TouchableOpacity
           style={styles.addButton}

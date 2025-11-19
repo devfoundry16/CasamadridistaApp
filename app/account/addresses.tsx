@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useUser } from "@/hooks/useUser";
 import { Address } from "@/types/user/profile";
@@ -139,7 +138,6 @@ export default function AddressesScreen() {
   };
   return (
     <>
-      <HeaderStack title="Addresses" />
       <ScrollView style={styles.container}>
         <View style={styles.addressList}>
           {billingAddress && (

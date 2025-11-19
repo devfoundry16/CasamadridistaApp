@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import SportsInfoService from "@/services/Football/SportsInfoService";
@@ -27,7 +26,6 @@ const VenueDetailScreen = () => {
   if (id === "null") {
     return (
       <>
-        <HeaderStack title="Venue Details" />
         <View style={styles.container}>
           <Text style={styles.venueName}>No Venue Information</Text>
         </View>
@@ -38,7 +36,6 @@ const VenueDetailScreen = () => {
   if (loading) {
     return (
       <>
-        <HeaderStack title="Venue Details" />
         <Spinner content="Loading venue" />
       </>
     );
@@ -46,7 +43,6 @@ const VenueDetailScreen = () => {
 
   return (
     <>
-      <HeaderStack title={venue?.name} />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={{ alignItems: "center", margin: 20 }}>
           {/* Venue Name */}

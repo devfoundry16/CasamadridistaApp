@@ -2,13 +2,15 @@ import React from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { WebView } from "react-native-webview";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import Colors from "@/constants/colors";
 import { Spinner } from "@/components/Spinner";
 import { development } from "@/config/environment";
+
 export default function WebViewScreen() {
   // const currentUrl = "https://showcase.codethislab.com/games/penalty_kicks/";
   const currentUrl = `${development.DEFAULT_BACKEND_URL}/penalty`;
+  const router = useRouter();
   useFocusEffect(
     React.useCallback(() => {
       ScreenOrientation.lockAsync(
@@ -25,6 +27,9 @@ export default function WebViewScreen() {
       };
     }, [])
   );
+  const handleMessage = React.useCallback((event: any) => {
+    router.navigate("/team");
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -32,6 +37,7 @@ export default function WebViewScreen() {
         <WebView
           source={{ uri: currentUrl }}
           style={styles.webView}
+          onMessage={handleMessage}
           startInLoadingState={true}
           renderLoading={() => <Spinner content="Loading" />}
           onError={(syntheticEvent) => {

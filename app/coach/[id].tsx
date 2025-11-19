@@ -3,7 +3,6 @@ import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-import HeaderStack from "@/components/HeaderStack";
 import countries from "@/constants/countries.json";
 import { useFootball } from "@/hooks/useFootball";
 import { CountryMap } from "@/types/soccer/profile";
@@ -21,95 +20,89 @@ export default function PlayerDetailScreen() {
   const coach = coachWithTeam?.player;
 
   return (
-    <>
-      <HeaderStack title={coach?.name || ""} />
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Image
-            source={{ uri: coach?.photo }}
-            style={styles.playerPhoto}
-            contentFit="cover"
-          />
-          <Text style={styles.playerName}>{coach?.name}</Text>
-          <Text style={styles.playerPosition}>{coach?.position}</Text>
-        </View>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.header}>
+        <Image
+          source={{ uri: coach?.photo }}
+          style={styles.playerPhoto}
+          contentFit="cover"
+        />
+        <Text style={styles.playerName}>{coach?.name}</Text>
+        <Text style={styles.playerPosition}>{coach?.position}</Text>
+      </View>
 
-        <View style={styles.content}>
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Player Information</Text>
-            <View style={styles.infoCard}>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Full Name</Text>
-                <Text style={styles.infoValue}>{coach?.name}</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Age</Text>
-                <Text style={styles.infoValue}>{coach?.age}</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Nationality</Text>
-                {coach?.nationality && map[coach?.nationality] ? (
-                  <CountryFlag isoCode={map[coach?.nationality]} size={25} />
+      <View style={styles.content}>
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Player Information</Text>
+          <View style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Full Name</Text>
+              <Text style={styles.infoValue}>{coach?.name}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Age</Text>
+              <Text style={styles.infoValue}>{coach?.age}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Nationality</Text>
+              {coach?.nationality && map[coach?.nationality] ? (
+                <CountryFlag isoCode={map[coach?.nationality]} size={25} />
+              ) : null}
+            </View>
+            <View style={styles.divider} />
+            <View style={{ ...styles.infoRow }}>
+              <Text style={styles.infoLabel}>Place of Birth</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={styles.infoValue}>{coach?.birth.place} </Text>
+                {coach?.birth.country && map[coach?.birth.country] ? (
+                  <CountryFlag isoCode={map[coach?.birth.country]} size={25} />
                 ) : null}
               </View>
-              <View style={styles.divider} />
-              <View style={{ ...styles.infoRow }}>
-                <Text style={styles.infoLabel}>Place of Birth</Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={styles.infoValue}>{coach?.birth.place} </Text>
-                  {coach?.birth.country && map[coach?.birth.country] ? (
-                    <CountryFlag
-                      isoCode={map[coach?.birth.country]}
-                      size={25}
-                    />
-                  ) : null}
-                </View>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Date Of Birth</Text>
-                <Text style={styles.infoValue}>{coach?.birth.date}</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Weight</Text>
-                <Text style={styles.infoValue}>{coach?.weight}</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Height</Text>
-                <Text style={styles.infoValue}>{coach?.height}</Text>
-              </View>
             </View>
-          </View>
-
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Club</Text>
-            <View style={styles.clubCard}>
-              <Image
-                source={{
-                  uri: "https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg",
-                }}
-                style={styles.clubLogo}
-                contentFit="contain"
-              />
-              <View style={styles.clubInfo}>
-                <Text style={styles.clubName}>Real Madrid CF</Text>
-                <Text style={styles.clubSubtitle}>Los Blancos</Text>
-              </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Date Of Birth</Text>
+              <Text style={styles.infoValue}>{coach?.birth.date}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Weight</Text>
+              <Text style={styles.infoValue}>{coach?.weight}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Height</Text>
+              <Text style={styles.infoValue}>{coach?.height}</Text>
             </View>
           </View>
         </View>
-      </ScrollView>
-    </>
+
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Club</Text>
+          <View style={styles.clubCard}>
+            <Image
+              source={{
+                uri: "https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg",
+              }}
+              style={styles.clubLogo}
+              contentFit="contain"
+            />
+            <View style={styles.clubInfo}>
+              <Text style={styles.clubName}>Real Madrid CF</Text>
+              <Text style={styles.clubSubtitle}>Los Blancos</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 

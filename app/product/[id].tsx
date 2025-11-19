@@ -12,7 +12,6 @@ import {
   View,
 } from "react-native";
 
-import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import ProductService from "@/services/Shop/ProductService";
@@ -47,7 +46,6 @@ export default function ProductDetailScreen() {
   if (loading) {
     return (
       <View style={styles.spinnerContainer}>
-        <HeaderStack title="Product Details" />
         <Spinner content="Loading product" />
       </View>
     );
@@ -55,12 +53,9 @@ export default function ProductDetailScreen() {
 
   if (!product) {
     return (
-      <>
-        <HeaderStack title="No Product" />
-        <View style={styles.container}>
-          <Text style={styles.errorText}>Product not found</Text>
-        </View>
-      </>
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Product not found</Text>
+      </View>
     );
   }
 
@@ -71,7 +66,6 @@ export default function ProductDetailScreen() {
 
   return (
     <>
-      <HeaderStack title={product.name} />
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View>

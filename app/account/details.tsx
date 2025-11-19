@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useUser } from "@/hooks/useUser";
 import UserService from "@/services/UserService";
@@ -68,109 +67,106 @@ export default function AccountDetailsScreen() {
   };
 
   return (
-    <>
-      <HeaderStack title="Account Details" />
-      <ScrollView style={styles.container}>
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>First Name *</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.first_name}
-              onChangeText={(text) =>
-                setFormData({ ...formData, first_name: text })
-              }
-              placeholder="Enter your first name"
-              placeholderTextColor={Colors.darkGray}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Last Name *</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.last_name}
-              onChangeText={(text) =>
-                setFormData({ ...formData, last_name: text })
-              }
-              placeholder="Enter your last name"
-              placeholderTextColor={Colors.darkGray}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Display Name *</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.name}
-              onChangeText={(text) => setFormData({ ...formData, name: text })}
-              placeholder="Enter your display name"
-              placeholderTextColor={Colors.darkGray}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.email}
-              onChangeText={(text) => setFormData({ ...formData, email: text })}
-              placeholder="Enter your email"
-              placeholderTextColor={Colors.darkGray}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.oldPassword}
-              onChangeText={(text) =>
-                setFormData({ ...formData, oldPassword: text })
-              }
-              placeholder="Enter your current password"
-              placeholderTextColor={Colors.darkGray}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>New Password</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.password}
-              onChangeText={(text) =>
-                setFormData({ ...formData, password: text })
-              }
-              placeholder="Enter your new password"
-              placeholderTextColor={Colors.darkGray}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirm Password</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.confirmPassword}
-              onChangeText={(text) =>
-                setFormData({ ...formData, confirmPassword: text })
-              }
-              placeholder="Enter confirm password"
-              placeholderTextColor={Colors.darkGray}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-          </View>
-
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Save size={20} color={Colors.textWhite} />
-            <Text style={styles.saveButtonText}>Save Changes</Text>
-          </TouchableOpacity>
+    <ScrollView style={styles.container}>
+      <View style={styles.form}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>First Name *</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.first_name}
+            onChangeText={(text) =>
+              setFormData({ ...formData, first_name: text })
+            }
+            placeholder="Enter your first name"
+            placeholderTextColor={Colors.darkGray}
+          />
         </View>
-      </ScrollView>
-    </>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Last Name *</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.last_name}
+            onChangeText={(text) =>
+              setFormData({ ...formData, last_name: text })
+            }
+            placeholder="Enter your last name"
+            placeholderTextColor={Colors.darkGray}
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Display Name *</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.name}
+            onChangeText={(text) => setFormData({ ...formData, name: text })}
+            placeholder="Enter your display name"
+            placeholderTextColor={Colors.darkGray}
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Email Address</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.email}
+            onChangeText={(text) => setFormData({ ...formData, email: text })}
+            placeholder="Enter your email"
+            placeholderTextColor={Colors.darkGray}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.oldPassword}
+            onChangeText={(text) =>
+              setFormData({ ...formData, oldPassword: text })
+            }
+            placeholder="Enter your current password"
+            placeholderTextColor={Colors.darkGray}
+            secureTextEntry
+            autoCapitalize="none"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>New Password</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.password}
+            onChangeText={(text) =>
+              setFormData({ ...formData, password: text })
+            }
+            placeholder="Enter your new password"
+            placeholderTextColor={Colors.darkGray}
+            secureTextEntry
+            autoCapitalize="none"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Confirm Password</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.confirmPassword}
+            onChangeText={(text) =>
+              setFormData({ ...formData, confirmPassword: text })
+            }
+            placeholder="Enter confirm password"
+            placeholderTextColor={Colors.darkGray}
+            secureTextEntry
+            autoCapitalize="none"
+          />
+        </View>
+
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Save size={20} color={Colors.textWhite} />
+          <Text style={styles.saveButtonText}>Save Changes</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 

@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import HeaderStack from "@/components/HeaderStack";
+
 import { GiveWPService } from "@/services/Donation/GiveWPService";
 import { CampaignDetail, Donation } from "@/types/campaigns/campaigns";
 import Colors from "@/constants/colors";
@@ -134,7 +134,6 @@ export default function CampaignDetailScreen() {
   if (loading) {
     return (
       <>
-        <HeaderStack title="Campaign Details" />
         <View style={styles.spinnerContainer}>
           <Spinner content="Loading Campaign" />
         </View>
@@ -145,7 +144,6 @@ export default function CampaignDetailScreen() {
   if (!campaign) {
     return (
       <View style={styles.container}>
-        <HeaderStack title="Campaign Details" />
         <View style={styles.error}>
           <Text style={styles.errorText}>Campaign not found.</Text>
         </View>
@@ -376,7 +374,6 @@ export default function CampaignDetailScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <HeaderStack title="Campaign Details" />
       <View style={styles.content}>
         {campaign.image && (
           <Image source={{ uri: campaign.image }} style={styles.image} />

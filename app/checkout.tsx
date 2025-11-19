@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
 import { useFlintopWallet } from "@/hooks/useFlintopWallet";
@@ -466,228 +465,224 @@ export default function CheckoutScreen() {
   if (loading) {
     return (
       <View style={styles.spinnerContainer}>
-        <HeaderStack title="Checkout" />
         <Spinner content={status ? "Processing Payment" : "Placing Order"} />
       </View>
     );
   }
 
   return (
-    <>
-      <HeaderStack title="Checkout" />
-      <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.content}>
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <User size={20} color={Colors.darkGold} />
-                <Text style={styles.sectionTitle}>Personal Information</Text>
-              </View>
-              <TextInput
-                style={styles.input}
-                placeholder="Full Name"
-                placeholderTextColor={Colors.textSecondary}
-                value={name}
-                onChangeText={setName}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Email Address"
-                placeholderTextColor={Colors.textSecondary}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Phone Number"
-                placeholderTextColor={Colors.textSecondary}
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-              />
-              <View style={{ marginTop: 8 }} />
-              <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>
-                Billing Address
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Address line 1"
-                placeholderTextColor={Colors.textSecondary}
-                value={address1}
-                onChangeText={setAddress1}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Address line 2 (optional)"
-                placeholderTextColor={Colors.textSecondary}
-                value={address2}
-                onChangeText={setAddress2}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="City"
-                placeholderTextColor={Colors.textSecondary}
-                value={city}
-                onChangeText={setCity}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="State / Region"
-                placeholderTextColor={Colors.textSecondary}
-                value={stateField}
-                onChangeText={setStateField}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Postal Code"
-                placeholderTextColor={Colors.textSecondary}
-                value={postcode}
-                onChangeText={setPostcode}
-                keyboardType="numeric"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Country"
-                placeholderTextColor={Colors.textSecondary}
-                value={country}
-                onChangeText={setCountry}
-              />
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginTop: 8,
-                }}
-              >
-                <Switch
-                  value={updateBillingChecked}
-                  onValueChange={setUpdateBillingChecked}
-                  thumbColor={Colors.darkGold}
-                  trackColor={{ false: Colors.darkBg, true: Colors.darkGray }}
-                />
-                <Text style={{ marginLeft: 8, color: Colors.textPrimary }}>
-                  Update account billing address with this information
-                </Text>
-              </View>
+    <View style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <User size={20} color={Colors.darkGold} />
+              <Text style={styles.sectionTitle}>Personal Information</Text>
             </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Full Name"
+              placeholderTextColor={Colors.textSecondary}
+              value={name}
+              onChangeText={setName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Email Address"
+              placeholderTextColor={Colors.textSecondary}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              placeholderTextColor={Colors.textSecondary}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+            />
+            <View style={{ marginTop: 8 }} />
+            <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>
+              Billing Address
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Address line 1"
+              placeholderTextColor={Colors.textSecondary}
+              value={address1}
+              onChangeText={setAddress1}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Address line 2 (optional)"
+              placeholderTextColor={Colors.textSecondary}
+              value={address2}
+              onChangeText={setAddress2}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="City"
+              placeholderTextColor={Colors.textSecondary}
+              value={city}
+              onChangeText={setCity}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="State / Region"
+              placeholderTextColor={Colors.textSecondary}
+              value={stateField}
+              onChangeText={setStateField}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Postal Code"
+              placeholderTextColor={Colors.textSecondary}
+              value={postcode}
+              onChangeText={setPostcode}
+              keyboardType="numeric"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Country"
+              placeholderTextColor={Colors.textSecondary}
+              value={country}
+              onChangeText={setCountry}
+            />
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 8,
+              }}
+            >
+              <Switch
+                value={updateBillingChecked}
+                onValueChange={setUpdateBillingChecked}
+                thumbColor={Colors.darkGold}
+                trackColor={{ false: Colors.darkBg, true: Colors.darkGray }}
+              />
+              <Text style={{ marginLeft: 8, color: Colors.textPrimary }}>
+                Update account billing address with this information
+              </Text>
+            </View>
+          </View>
 
-            {status === true && (
-              <View style={styles.paymentMethodsContainer}>
-                <Text style={styles.summaryTitle}>Payment Method</Text>
-                <View style={styles.paymentMethods}>
+          {status === true && (
+            <View style={styles.paymentMethodsContainer}>
+              <Text style={styles.summaryTitle}>Payment Method</Text>
+              <View style={styles.paymentMethods}>
+                <TouchableOpacity
+                  style={[
+                    styles.paymentMethod,
+                    paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE &&
+                      styles.paymentMethodSelected,
+                  ]}
+                  onPress={() =>
+                    setPaymentMethod(CHECKOUT_PAYMENT_METHOD.STRIPE)
+                  }
+                >
+                  <View style={styles.radioContainer}>
+                    <View
+                      style={[
+                        styles.radio,
+                        paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE &&
+                          styles.radioSelected,
+                      ]}
+                    />
+                  </View>
+                  <Text style={styles.paymentMethodText}>
+                    Credit/Debit Card
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.paymentMethod,
+                    paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL &&
+                      styles.paymentMethodSelected,
+                  ]}
+                  onPress={() =>
+                    setPaymentMethod(CHECKOUT_PAYMENT_METHOD.PAYPAL)
+                  }
+                >
+                  <View style={styles.radioContainer}>
+                    <View
+                      style={[
+                        styles.radio,
+                        paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL &&
+                          styles.radioSelected,
+                      ]}
+                    />
+                  </View>
+                  <Text style={styles.paymentMethodText}>PayPal</Text>
+                </TouchableOpacity>
+
+                {productType !== CHECKOUT_PRODUCT_TYPE.WALLET && (
                   <TouchableOpacity
                     style={[
                       styles.paymentMethod,
-                      paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE &&
+                      paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
                         styles.paymentMethodSelected,
                     ]}
                     onPress={() =>
-                      setPaymentMethod(CHECKOUT_PAYMENT_METHOD.STRIPE)
+                      setPaymentMethod(CHECKOUT_PAYMENT_METHOD.WALLET)
                     }
                   >
                     <View style={styles.radioContainer}>
                       <View
                         style={[
                           styles.radio,
-                          paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE &&
+                          paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
                             styles.radioSelected,
                         ]}
                       />
                     </View>
                     <Text style={styles.paymentMethodText}>
-                      Credit/Debit Card
+                      Wallet{" "}
+                      {balance
+                        ? `(${balance.formatted_balance})`
+                        : "(loading...)"}
                     </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.paymentMethod,
-                      paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL &&
-                        styles.paymentMethodSelected,
-                    ]}
-                    onPress={() =>
-                      setPaymentMethod(CHECKOUT_PAYMENT_METHOD.PAYPAL)
-                    }
-                  >
-                    <View style={styles.radioContainer}>
-                      <View
-                        style={[
-                          styles.radio,
-                          paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL &&
-                            styles.radioSelected,
-                        ]}
-                      />
-                    </View>
-                    <Text style={styles.paymentMethodText}>PayPal</Text>
-                  </TouchableOpacity>
-
-                  {productType !== CHECKOUT_PRODUCT_TYPE.WALLET && (
-                    <TouchableOpacity
-                      style={[
-                        styles.paymentMethod,
-                        paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
-                          styles.paymentMethodSelected,
-                      ]}
-                      onPress={() =>
-                        setPaymentMethod(CHECKOUT_PAYMENT_METHOD.WALLET)
-                      }
-                    >
-                      <View style={styles.radioContainer}>
-                        <View
-                          style={[
-                            styles.radio,
-                            paymentMethod === CHECKOUT_PAYMENT_METHOD.WALLET &&
-                              styles.radioSelected,
-                          ]}
-                        />
-                      </View>
-                      <Text style={styles.paymentMethodText}>
-                        Wallet{" "}
-                        {balance
-                          ? `(${balance.formatted_balance})`
-                          : "(loading...)"}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-            )}
-            <View style={styles.orderSummary}>
-              <Text style={styles.summaryTitle}>Order Summary</Text>
-              <View>{getSummary()}</View>
-              <View style={styles.divider} />
-              <View style={styles.summaryItem}>
-                <Text style={styles.totalLabel}>Total</Text>
-                <Text style={styles.totalPrice}>
-                  ${getTotalPrice().toFixed(2)}
-                </Text>
+                )}
               </View>
             </View>
-            {/* {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
+          )}
+          <View style={styles.orderSummary}>
+            <Text style={styles.summaryTitle}>Order Summary</Text>
+            <View>{getSummary()}</View>
+            <View style={styles.divider} />
+            <View style={styles.summaryItem}>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalPrice}>
+                ${getTotalPrice().toFixed(2)}
+              </Text>
+            </View>
+          </View>
+          {/* {paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL && (
               <PayPalPaymentScreen
               // orderId={orderId ? orderId : pendingOrderId}
               // amount={getTotalPrice()}
               // productType={productType}
               />
             )} */}
-          </View>
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.payButton}
-            onPress={handlePayment}
-            activeOpacity={0.8}
-          >
-            <CheckCircle size={20} color={Colors.darkBg} />
-            <Text style={styles.payButtonText}>
-              {status ? "Continue Payment" : "Place an Order"}
-            </Text>
-          </TouchableOpacity>
         </View>
+      </ScrollView>
+
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.payButton}
+          onPress={handlePayment}
+          activeOpacity={0.8}
+        >
+          <CheckCircle size={20} color={Colors.darkBg} />
+          <Text style={styles.payButtonText}>
+            {status ? "Continue Payment" : "Place an Order"}
+          </Text>
+        </TouchableOpacity>
       </View>
-    </>
+    </View>
   );
 }
 

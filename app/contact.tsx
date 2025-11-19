@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import * as MailComposer from "expo-mail-composer";
 import { Link } from "expo-router";
@@ -84,7 +83,6 @@ export default function ContactScreen() {
 
   return (
     <>
-      <HeaderStack title="Contact" />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <ImageBackground
           source={{

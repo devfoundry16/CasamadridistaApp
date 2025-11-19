@@ -68,6 +68,9 @@ export default function TabLayout() {
           tabBarItemStyle: {
             width: 30,
           },
+          tabBarStyle: {
+            display: "none",
+          },
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="game-controller" size={size + 5} color={color} />
           ),
@@ -104,6 +107,7 @@ export default function TabLayout() {
           title: "Donation",
           headerTitle: "Donation",
           headerTitleAlign: "center",
+
           tabBarIcon: ({ color, size }) => (
             <FontAwesome5 name="donate" size={size} color={color} />
           ),

@@ -9,31 +9,33 @@ export const headerOptions = {
 };
 const HeaderStack = ({ title }: { title: string }) => {
   return (
-    <Stack.Screen
-      options={{
-        headerTitle: title,
-        headerTitleAlign: "center",
-        headerStyle: {
-          backgroundColor: Colors.secondary,
-        },
-        headerTitleStyle: {
-          fontWeight: "700" as const,
-        },
-        headerLeft: () => (
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text
-              style={{
-                color: Colors.text,
-                fontSize: 16,
-                marginHorizontal: 8,
-              }}
-            >
-              Back
-            </Text>
-          </TouchableOpacity>
-        ),
-      }}
-    />
+    // <Stack.Screen
+    //   options={{
+    //     headerTitle: title,
+    //     headerTitleAlign: "center",
+    //     headerStyle: {
+    //       backgroundColor: Colors.secondary,
+    //     },
+    //     headerTitleStyle: {
+    //       color: Colors.textWhite,
+    //       fontWeight: "700" as const,
+    //     },
+    //     headerLeft: () => (
+    //       <TouchableOpacity onPress={() => router.back()}>
+    //         <Text
+    //           style={{
+    //             color: Colors.text,
+    //             fontSize: 16,
+    //             marginHorizontal: 8,
+    //           }}
+    //         >
+    //           Back
+    //         </Text>
+    //       </TouchableOpacity>
+    //     ),
+    //   }}
+    // />
+    <></>
   );
 };
 

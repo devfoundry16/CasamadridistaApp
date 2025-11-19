@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import Colors from "@/constants/colors";
 import {
   MaterialTopTabNavigationEventMap,
@@ -20,7 +19,6 @@ export const MaterialTopTabs = withLayoutContext<
 export default function MembershipsLayout() {
   return (
     <>
-      <HeaderStack title="Memberships" />
       <MaterialTopTabs
         screenOptions={{
           tabBarActiveTintColor: Colors.primary,

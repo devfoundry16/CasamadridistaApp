@@ -1,4 +1,3 @@
-import HeaderStack from "@/components/HeaderStack";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useOrder } from "@/hooks/useOrder";
@@ -111,7 +110,6 @@ export default function OrdersScreen() {
   if (loading) {
     return (
       <View style={styles.spinnerContainer}>
-        <HeaderStack title="Orders" />
         <Spinner content="Loading orders" />
       </View>
     );
@@ -119,7 +117,6 @@ export default function OrdersScreen() {
 
   return (
     <>
-      <HeaderStack title="Orders" />
       <ScrollView style={styles.container}>
         {orders.length === 0 ? (
           <View style={styles.emptyState}>

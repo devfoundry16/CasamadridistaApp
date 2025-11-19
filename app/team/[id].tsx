@@ -19,7 +19,6 @@ import {
 } from "react-native";
 
 import CustomWebView from "@/components/CustomWebView";
-import HeaderStack from "@/components/HeaderStack";
 import { useFootball } from "@/hooks/useFootball";
 import CountryFlag from "react-native-country-flag";
 import { Spinner } from "@/components/Spinner";
@@ -97,7 +96,6 @@ export default function TeamDetailScreen() {
   if (isLoading) {
     return (
       <View style={styles.spinnerContainer}>
-        <HeaderStack title="Squads" />
         <Spinner content="Loading squads" />
       </View>
     );
@@ -105,7 +103,6 @@ export default function TeamDetailScreen() {
 
   return (
     <>
-      <HeaderStack title={teamInfo?.team.name || ""} />
       <ScrollView
         style={[styles.container, { backgroundColor: Colors.deepDarkGray }]}
         showsVerticalScrollIndicator={false}

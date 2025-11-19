@@ -13,16 +13,116 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider } from "react-redux";
 import { development } from "@/config/environment";
-
+import { StatusBar } from "expo-status-bar";
+import Colors from "@/constants/colors";
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
+const defaultOptions: {
+  headerShown: boolean;
+  headerStyle: { backgroundColor: string };
+  headerTitleAlign: "center";
+  animation: "default";
+} = {
+  headerShown: true,
+  headerStyle: { backgroundColor: Colors.darkGold },
+  headerTitleAlign: "center",
+  animation: "default",
+};
+
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: "Back", headerTintColor: "#000" }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <>
+      <StatusBar style="auto" />
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: true }} />
+        <Stack.Screen
+          name="account/addresses"
+          options={{
+            ...defaultOptions,
+            title: "Addresses",
+          }}
+        />
+        <Stack.Screen
+          name="account/wallet"
+          options={{
+            title: "Wallet",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="account/details"
+          options={{
+            title: "Account Details",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="account/orders"
+          options={{
+            title: "Orders",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="account/subscription"
+          options={{
+            title: "Subscription",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="about"
+          options={{
+            title: "About",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="cart"
+          options={{
+            title: "Cart",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="checkout"
+          options={{
+            title: "Checkout",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="contact"
+          options={{
+            title: "Contact",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="PayPalScreen"
+          options={{
+            title: "Paypal Payment",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="privacy-policy"
+          options={{
+            title: "Privacy Policy",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="terms-of-service"
+          options={{
+            title: "Terms of Service",
+            ...defaultOptions,
+          }}
+        />
+      </Stack>
+    </>
   );
 }
 
