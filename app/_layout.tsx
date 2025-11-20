@@ -36,7 +36,10 @@ function RootLayoutNav() {
     <>
       <StatusBar style="auto" />
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: true }} />
+        <Stack.Screen
+          name="(tabs)"
+          options={{ headerShown: false, title: "Home" }}
+        />
         <Stack.Screen
           name="account/addresses"
           options={{
@@ -118,6 +121,69 @@ function RootLayoutNav() {
           name="terms-of-service"
           options={{
             title: "Terms of Service",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="campaign/[id]"
+          options={{
+            title: "Campaign Details",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="coach/[id]"
+          options={{
+            title: "Coach Details",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="league/[id]/[season]"
+          options={{
+            title: "League Details",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="match/[id]"
+          options={{
+            title: "Match Details",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="memberships"
+          options={{
+            title: "Membership",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="player/[team]/[id]"
+          options={{
+            title: "Player Details",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="product/[id]"
+          options={{
+            title: "Product Details",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="team/[id]"
+          options={{
+            title: "Team Details",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="venue/[id]"
+          options={{
+            title: "Venue Details",
             ...defaultOptions,
           }}
         />

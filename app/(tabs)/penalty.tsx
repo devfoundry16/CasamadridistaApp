@@ -39,7 +39,7 @@ export default function WebViewScreen() {
           style={styles.webView}
           onMessage={handleMessage}
           startInLoadingState={true}
-          renderLoading={() => <Spinner content="Loading" />}
+          renderLoading={() => <></>}
           onError={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
             console.error("WebView Error:", nativeEvent);

@@ -17,21 +17,9 @@ export default function TabLayout() {
         headerShown: true,
         headerStyle: {
           backgroundColor: Colors.secondary,
+          height: 120,
         },
         headerTintColor: Colors.textWhite,
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: "600" as const,
-        },
-        tabBarStyle: {
-          backgroundColor: Colors.primary,
-          borderTopColor: Colors.border,
-          borderTopWidth: 1,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600" as const,
-        },
         headerRight: () => <HeaderMenu />,
       }}
     >

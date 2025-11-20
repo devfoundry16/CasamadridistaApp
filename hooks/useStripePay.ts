@@ -32,6 +32,7 @@ export const useStripePay = () => {
   ) => {
     // this is only for wallet top-up
     // set a ref immediately so confirmHandler (called by Stripe) can read the up-to-date id
+    console.log("user stripe id", user?.stripe_id);
     orderIdRef.current = orderId;
     const effectiveBilling = billing || billingAddress;
     const body = {
