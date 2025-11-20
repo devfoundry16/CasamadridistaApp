@@ -46,10 +46,10 @@ export default function DonateScreen() {
               }}
             >
               <View style={styles.title}>
-                <Image
+                {/* <Image
                   source={{ uri: cp.image }}
                   style={styles.campaignImage}
-                />
+                /> */}
                 <Text style={styles.campaignTitle}>{cp.title}</Text>
               </View>
               <View style={styles.progressContainer}>
