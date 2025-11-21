@@ -1,8 +1,8 @@
 import { Platform } from "react-native";
 
 const API_BASE_URL = Platform.select({
-  ios: "http://localhost:3000/api/", // iOS Simulator
-  android: "http://192.168.110.111:3000/api/", // Android Emulator
+  ios: "https://casamadridista-backend.vercel.app/api/", // iOS Simulator
+  android: "https://casamadridista-backend.vercel.app/api/", // Android Emulator
 });
 
 const development = {
