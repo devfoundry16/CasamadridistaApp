@@ -45,7 +45,6 @@ export default function HomeScreen() {
 
   const matches = [...(nextMatches ?? []), ...(lastMatches ?? [])];
   const nextMatch = nextMatches?.at(0);
-
   const [strengthSectionY, setStrengthSectionY] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);

@@ -357,8 +357,6 @@ const styles = StyleSheet.create({
 
   infoCard: {
     marginBottom: 24,
-    elevation: 3,
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -419,7 +417,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 12,
     padding: 12,
-    elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,

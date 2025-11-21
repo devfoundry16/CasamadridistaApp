@@ -241,7 +241,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     paddingTop: 0,
-    elevation: 2,
   },
   infoRow: {
     flexDirection: "row",

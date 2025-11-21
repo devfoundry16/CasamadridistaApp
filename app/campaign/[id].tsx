@@ -3,13 +3,13 @@ import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   ScrollView,
   TextInput,
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { Image } from "expo-image";
 
 import { GiveWPService } from "@/services/Donation/GiveWPService";
 import { CampaignDetail, Donation } from "@/types/campaigns/campaigns";
@@ -376,7 +376,11 @@ export default function CampaignDetailScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.content}>
         {campaign.image && (
-          <Image source={{ uri: campaign.image }} style={styles.image} />
+          <Image
+            contentFit="contain"
+            source={{ uri: campaign.image }}
+            style={styles.image}
+          />
         )}
         <Text style={styles.title}>{campaign.title}</Text>
         <Text style={styles.description}>{campaign.shortDescription}</Text>

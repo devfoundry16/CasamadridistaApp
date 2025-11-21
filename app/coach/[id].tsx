@@ -162,7 +162,6 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: "center",
     gap: 8,
-    elevation: 2,
   },
   statLabel: {
     fontSize: 12,
@@ -188,7 +187,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     paddingTop: 0,
-    elevation: 2,
   },
   infoRow: {
     flexDirection: "row",
@@ -215,7 +213,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 12,
     padding: 16,
-    elevation: 2,
   },
   clubLogo: {
     width: 60,
@@ -246,7 +243,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
     height: 400,
-    elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,

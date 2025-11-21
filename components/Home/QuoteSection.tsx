@@ -45,7 +45,7 @@ const QuoteSection = () => {
               uri: "https://casamadridista.com/wp-content/uploads/2025/09/43534535.webp",
             }}
             style={styles.adPlayerActionImage}
-            contentFit="fill"
+            contentFit="contain"
           />
           <View style={styles.adQuoteContainer}>
             <View style={styles.quoteNavigationButtons}>

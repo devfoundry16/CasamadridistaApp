@@ -3,7 +3,13 @@ import { squadPlayers } from "@/mocks/advertisement";
 import { Image } from "expo-image";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useRef, useState } from "react";
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = 280;
@@ -65,7 +71,7 @@ const SquadSection = () => {
 };
 
 const styles = StyleSheet.create({
-    adSquadSection: {
+  adSquadSection: {
     paddingVertical: 40,
     backgroundColor: "#2a2a2a",
     marginHorizontal: -16,
@@ -78,6 +84,7 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     height: 320,
     borderRadius: 16,
+    margin: "auto",
     overflow: "hidden",
     backgroundColor: "#2a2a2a",
   },
