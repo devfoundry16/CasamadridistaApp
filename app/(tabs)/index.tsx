@@ -24,7 +24,6 @@ import {
   Text,
   View,
 } from "react-native";
-
 export default function HomeScreen() {
   const router = useRouter();
   const { teamInfoList, fetchProfileData, fetchLiveMatchData, isLoading } =
@@ -148,7 +147,7 @@ export default function HomeScreen() {
   useEffect(() => {
     setHasAnimated(false);
     setShouldAnimate(false);
-  }, []);
+  }, [teamInfoList, fetchProfileData]);
 
   if (isLoading) {
     return (

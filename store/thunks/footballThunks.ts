@@ -127,12 +127,12 @@ export const fetchProfileData = createAsyncThunk(
         AsyncStorage.setItem("teams", JSON.stringify(newTeamInfoList)),
         AsyncStorage.setItem("coaches", JSON.stringify(newCoachList)),
       ]);
-    } catch (error) {
+      dispatch(setLoading(false));
+    } catch (error: any) {
+      console.log("error", error.message);
       dispatch(setLoading(false));
       //console.error("[Redux Football] Failed to fetch profile data:", error);
       throw error;
-    } finally {
-      dispatch(setLoading(false));
     }
   }
 );

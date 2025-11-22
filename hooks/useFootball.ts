@@ -15,7 +15,6 @@ export const useFootball = () => {
 
   const footballState = useSelector((state: RootState) => state.football);
   const { playersList, coachList, teamInfoList, isLoading } = footballState;
-
   const loadFootballData = useCallback(() => {
     return dispatch(loadAppData());
   }, [dispatch]);
@@ -38,7 +37,6 @@ export const useFootball = () => {
   const clearAllFootballData = useCallback(() => {
     return dispatch(clearFootballData());
   }, [dispatch]);
-
   return {
     // State
     playersList,

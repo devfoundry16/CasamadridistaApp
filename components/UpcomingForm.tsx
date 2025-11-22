@@ -163,14 +163,6 @@ export default function UpcomingForm({
           ))}
         </View>
       )}
-
-      {/* Prediction */}
-      <Text style={styles.prediction}>
-        Prediction:{" "}
-        <Text style={styles.predictionHighlight}>
-          Double chance : draw or Real Madrid
-        </Text>
-      </Text>
     </View>
   );
 }
