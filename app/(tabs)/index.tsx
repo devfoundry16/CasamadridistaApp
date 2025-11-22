@@ -237,7 +237,7 @@ export default function HomeScreen() {
         handleStrengthSectionLayout={handleStrengthSectionLayout}
       />
       <VisionSection />
-      <SquadSection />
+      {/* <SquadSection /> */}
       <QuoteSection />
     </ScrollView>
   );

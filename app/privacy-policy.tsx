@@ -54,7 +54,6 @@ const Terms = [
     points: [
       "Personal Information: Name, email address, phone number, billing address, and payment details (processed securely via Stripe or PayPal).",
       "Membership Data: Subscription tier, membership status, preferences, and engagement history.",
-      "Usage Data: IP address, browser type, device information, operating system, referral sources, and pages visited.",
     ],
   },
   {

@@ -3,12 +3,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import cartReducer from "./slices/cartSlice";
 import footballReducer from "./slices/footballSlice";
 import userReducer from "./slices/userSlice";
+import environmentReducer from "./slices/environmentSlice";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
     football: footballReducer,
     cart: cartReducer,
+    environment: environmentReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

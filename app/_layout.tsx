@@ -2,6 +2,8 @@
 import { useCart } from "@/hooks/useCart";
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
+import { useEnvironment } from "@/hooks/useEnvironment";
+import { Provider } from "react-redux";
 import { store } from "@/store/store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StripeProvider } from "@stripe/stripe-react-native";
@@ -9,9 +11,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Provider } from "react-redux";
 import { development } from "@/config/environment";
 import { StatusBar } from "expo-status-bar";
 import Colors from "@/constants/colors";
@@ -197,7 +198,7 @@ const DataInitializer = () => {
   const { loadUserData } = useUser();
   const { loadCartItems } = useCart();
   useEffect(() => {
-    AsyncStorage.clear();
+    // AsyncStorage.clear();
     initializeAppData();
     loadUserData();
     loadCartItems();
@@ -206,6 +207,25 @@ const DataInitializer = () => {
   return null;
 };
 
+function RootLayoutInner() {
+  const { loadEnvironment } = useEnvironment();
+  useEffect(() => {
+    loadEnvironment();
+  }, []);
+  return (
+    <StripeProvider
+      publishableKey={development.STRIPE_PUBLISHABLE_KEY}
+      merchantIdentifier="merchant.identifier" // required for Apple Pay
+      urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
+    >
+      <DataInitializer />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <RootLayoutNav />
+      </GestureHandlerRootView>
+    </StripeProvider>
+  );
+}
+
 export default function RootLayout() {
   useEffect(() => {
     SplashScreen.hideAsync();
@@ -213,18 +233,9 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StripeProvider
-        publishableKey={development.STRIPE_PUBLISHABLE_KEY}
-        merchantIdentifier="merchant.identifier" // required for Apple Pay
-        urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
-      >
-        <Provider store={store}>
-          <DataInitializer />
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <RootLayoutNav />
-          </GestureHandlerRootView>
-        </Provider>
-      </StripeProvider>
+      <Provider store={store}>
+        <RootLayoutInner />
+      </Provider>
     </QueryClientProvider>
   );
 }
