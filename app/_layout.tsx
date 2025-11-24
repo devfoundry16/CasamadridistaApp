@@ -198,7 +198,7 @@ const DataInitializer = () => {
   const { loadUserData } = useUser();
   const { loadCartItems } = useCart();
   useEffect(() => {
-    // AsyncStorage.clear();
+    //AsyncStorage.clear();
     initializeAppData();
     loadUserData();
     loadCartItems();
