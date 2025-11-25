@@ -197,11 +197,15 @@ const DataInitializer = () => {
   const { initializeAppData } = useFootball();
   const { loadUserData } = useUser();
   const { loadCartItems } = useCart();
+
   useEffect(() => {
     //AsyncStorage.clear();
-    initializeAppData();
-    loadUserData();
-    loadCartItems();
+    Promise.all([initializeAppData(), loadUserData(), loadCartItems()]).then(
+      () => {
+        console.log("Hide Splash Screen");
+        SplashScreen.hideAsync();
+      }
+    );
   }, []);
 
   return null;
@@ -227,10 +231,6 @@ function RootLayoutInner() {
 }
 
 export default function RootLayout() {
-  useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
