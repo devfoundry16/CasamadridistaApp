@@ -202,7 +202,6 @@ const DataInitializer = () => {
     //AsyncStorage.clear();
     Promise.all([initializeAppData(), loadUserData(), loadCartItems()]).then(
       () => {
-        console.log("Hide Splash Screen");
         SplashScreen.hideAsync();
       }
     );
