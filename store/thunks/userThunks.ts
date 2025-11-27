@@ -4,13 +4,11 @@ import { Address, PaymentMethod, User } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { Alert } from "react-native";
-import axios from "axios";
 import {
   clearUser,
   setLoading,
   setPaymentMethods,
   setUser,
-  updateUserData,
 } from "../slices/userSlice";
 import { RootState } from "../store";
 
@@ -248,5 +246,14 @@ export const deletePaymentMethod = createAsyncThunk(
     await AsyncStorage.setItem("paymentMethods", JSON.stringify(newMethods));
     dispatch(setPaymentMethods(newMethods));
     return newMethods;
+  }
+);
+
+export const deleteUser = createAsyncThunk(
+  "user/deleteUser",
+  async (id: number, { dispatch }) => {
+    await UserService.deleteUser(id);
+    await AsyncStorage.multiRemove(["user_data", "paymentMethods"]);
+    dispatch(clearUser());
   }
 );

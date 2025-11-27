@@ -12,6 +12,7 @@ import {
   updateAddress,
   updateAvatar,
   updateUser,
+  deleteUser,
   updateCustomer,
 } from "@/store/thunks/userThunks";
 import { Address, PaymentMethod, User } from "@/types/user/profile";
@@ -90,6 +91,10 @@ export const useUser = () => {
     },
     [dispatch]
   );
+  
+  const deleteUserProfile = useCallback((id: number) => {
+    return dispatch(deleteUser(id));
+  }, [dispatch]);
 
   const loadUserDataFromStorage = useCallback(() => {
     return dispatch(loadUserData());
@@ -108,6 +113,7 @@ export const useUser = () => {
     // Actions
     login,
     register,
+    deleteUser: deleteUserProfile,
     getStripeId: getCustomerStripeId,
     updateUser: updateUserProfile,
     updateAvatar: updateUserAvatar,

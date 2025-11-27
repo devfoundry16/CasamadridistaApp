@@ -267,6 +267,14 @@ class ApiService {
     return item ? item.value : "";
   }
 
+  async deleteUser(id: number): Promise<boolean | null> {
+    const response = await this.fetchWithAuth(`custom/v1/delete-user/${id}`, {
+      method: "DELETE",
+    });
+    if ( response.status === 200 ) return true;
+    return false;
+  }
+
   async uploadMedia(
     fileUri: string, // Local URI of the file, e.g., from image picker
     filename: string // e.g., 'file.jpg'

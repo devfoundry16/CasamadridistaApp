@@ -28,7 +28,7 @@ import {
 } from "react-native";
 
 export default function AccountScreen() {
-  const { user, updateAvatar, logout, isLoading } = useUser(); // Added accessToken and updateUser
+  const { user, updateAvatar, logout, isLoading, deleteUser } = useUser(); // Added accessToken and updateUser
   const [isLogin, setIsLogin] = useState(true);
 
   const handleChangePhoto = async () => {
@@ -64,21 +64,33 @@ export default function AccountScreen() {
     const result =
       source === "camera"
         ? await ImagePicker.launchCameraAsync({
-            allowsEditing: true,
-            aspect: [1, 1], // Square for avatar
-            quality: 0.5,
-          })
+          allowsEditing: true,
+          aspect: [1, 1], // Square for avatar
+          quality: 0.5,
+        })
         : await ImagePicker.launchImageLibraryAsync({
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.5,
-          });
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.5,
+        });
 
     if (result.canceled) return;
 
     const uri = result.assets[0].uri;
     const filename = uri.split("/").pop() || `photo_${Date.now()}.jpg`;
     updateAvatar(uri, filename);
+  };
+
+  const deleteAccount = async () => {
+    Alert.alert("Delete Account", "Are you sure you want to delete your account?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: () => {
+        deleteUser(user?.id as number).then(() => {
+          Alert.alert("Account Deleted", "Your account has been deleted successfully");
+          logout();
+        });
+      } },
+    ]);
   };
 
   if (!user) {
@@ -93,13 +105,13 @@ export default function AccountScreen() {
             {isLoading && <Spinner content="Setting avatar" />}
             {user.url
               ? !isLoading && (
-                  <Image source={{ uri: user.url }} style={styles.photo} />
-                )
+                <Image source={{ uri: user.url }} style={styles.photo} />
+              )
               : !isLoading && (
-                  <View style={[styles.photo, styles.photoPlaceholder]}>
-                    <User size={60} color={Colors.darkGray} />
-                  </View>
-                )}
+                <View style={[styles.photo, styles.photoPlaceholder]}>
+                  <User size={60} color={Colors.darkGray} />
+                </View>
+              )}
           </View>
           <TouchableOpacity
             style={styles.changePhotoButton}
@@ -162,7 +174,7 @@ export default function AccountScreen() {
             <Text style={styles.menuItemText}>Addresses</Text>
           </View>
         </TouchableOpacity>
-
+        
         {/* <TouchableOpacity
           style={styles.menuItem}
           onPress={() => router.push("../account/payment-methods" as any)}
@@ -180,6 +192,16 @@ export default function AccountScreen() {
           <Settings size={24} color={Colors.accent} />
           <View style={styles.menuItemContent}>
             <Text style={styles.menuItemText}>Account Details</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={deleteAccount}
+        >
+          <CreditCard size={24} color={Colors.accent} />
+          <View style={styles.menuItemContent}>
+            <Text style={styles.menuItemText}>Delete Account</Text>
           </View>
         </TouchableOpacity>
 
