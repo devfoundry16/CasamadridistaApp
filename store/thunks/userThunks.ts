@@ -39,6 +39,7 @@ export const registerUser = createAsyncThunk(
   async (userData: Omit<User, "id">, { dispatch }) => {
     dispatch(setLoading(true));
     try {
+      console.log(userData);
       const response = await UserService.register(userData);
       Alert.alert("Registration Success");
       return response;

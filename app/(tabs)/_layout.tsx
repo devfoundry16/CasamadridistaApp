@@ -81,9 +81,6 @@ export default function TabLayout() {
           title: "Shop",
           headerTitle: "Shop",
           headerTitleAlign: "center",
-          tabBarItemStyle: {
-            display: "none",
-          },
           tabBarIcon: ({ color, size }) => (
             <FontAwesome5 name="shopping-bag" size={size} color={color} />
           ),

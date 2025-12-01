@@ -199,7 +199,7 @@ const DataInitializer = () => {
   const { loadCartItems } = useCart();
 
   useEffect(() => {
-    //AsyncStorage.clear();
+    AsyncStorage.clear();
     Promise.all([initializeAppData(), loadUserData(), loadCartItems()]).then(
       () => {
         SplashScreen.hideAsync();
