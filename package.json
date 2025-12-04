@@ -8,7 +8,12 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "prebuild": "npx expo prebuild",
+    "build:android": "cd android && ./gradlew assembleRelease",
+    "build:android-debug": "cd android && ./gradlew assembleDebug",
+    "build:android-bundle": "cd android && ./gradlew bundleRelease",
+    "clean:android": "cd android && ./gradlew clean"
   },
   "dependencies": {
     "@expo/cli": "^54.0.16",
@@ -24,7 +29,7 @@
     "@stripe/stripe-react-native": "^0.50.3",
     "@tanstack/react-query": "^5.90.2",
     "axios": "^1.12.2",
-    "expo": "^54.0.25",
+    "expo": "^52.0.25",
     "expo-constants": "^18.0.10",
     "expo-dev-client": "~6.0.18",
     "expo-font": "~14.0.8",
