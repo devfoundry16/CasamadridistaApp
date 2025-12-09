@@ -13,14 +13,14 @@ export default function SubscriptionsScreen() {
             Purchases.configure({ apiKey: 'goog_DxVEuQrGUEhgNWsjcJLzfuCmblL' });
         }
         getOfferings();
+        getCustomerInfo();
     }, []);
 
     const getCustomerInfo = async () => {
         const customerInfo = await Purchases.getCustomerInfo();
-        console.log(JSON.stringify(customerInfo, null, 2));
     }
     const handleSubscribe = async (pkg: PurchasesPackage) => {
-        const customerInfo = await Purchases.purchasePackage(pkg);
+        const {customerInfo} = await Purchases.purchasePackage(pkg);
         console.log(JSON.stringify(customerInfo, null, 2));
     }
     const getOfferings = async () => {
@@ -32,14 +32,17 @@ export default function SubscriptionsScreen() {
     return (
         <View>
             <Text>Subscriptions</Text>
-            {offerings?.current?.availablePackages.map(pkg => (
-                <View key={pkg.identifier}>
-                    <View style={{ marginVertical: 10 }}>
-                        <Text>{pkg.product.title}</Text>
-                        <Text>{pkg.product.priceString}</Text>
-                        <Text>{pkg.packageType.toLocaleLowerCase()}</Text>
-                    </View>
-                    <Button title="Purchase" onPress={() => handleSubscribe(pkg)} />
+            {Object.values(offerings?.all || {}).map(offering => (
+                <View key={offering.identifier}>
+                    <Text style={{ fontWeight: 'bold' }}>{offering.identifier}</Text>
+                    {offering.availablePackages.map(pkg => (
+                        <View key={pkg.identifier}>
+                            <Text>{pkg.product.title}</Text>
+                            <Text>{pkg.product.priceString}</Text>
+                            <Text>{pkg.packageType.toLocaleLowerCase()}</Text>
+                        </View>
+                    ))}
+                    <Button title="Purchase" onPress={() => handleSubscribe(offering.availablePackages[0])} />
                 </View>
             ))}
         </View>
