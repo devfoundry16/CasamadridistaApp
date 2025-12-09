@@ -33,14 +33,14 @@ export default function SubscriptionsScreen() {
         <View>
             <Text>Subscriptions</Text>
             {offerings?.current?.availablePackages.map(pkg => (
-                <>
-                    <View key={pkg.identifier} style={{ marginVertical: 10 }}>
+                <View key={pkg.identifier}>
+                    <View style={{ marginVertical: 10 }}>
                         <Text>{pkg.product.title}</Text>
                         <Text>{pkg.product.priceString}</Text>
                         <Text>{pkg.packageType.toLocaleLowerCase()}</Text>
                     </View>
                     <Button title="Purchase" onPress={() => handleSubscribe(pkg)} />
-                </>
+                </View>
             ))}
         </View>
     )
