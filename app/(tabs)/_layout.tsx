@@ -6,9 +6,19 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
-import React from "react";
-
+import React, { useEffect } from "react";
+import Purchases, { LOG_LEVEL } from 'react-native-purchases';
+import { Platform, LogBox } from 'react-native';
+LogBox.ignoreAllLogs(true);
 export default function TabLayout() {
+  useEffect(() => {
+    Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    if (Platform.OS === 'ios') {
+        Purchases.configure({ apiKey: 'appl_gjexmEzrmHXGjAMYVpmrYt' });
+    } else if (Platform.OS === 'android') {
+        Purchases.configure({ apiKey: 'goog_DxVEuQrGUEhgNWsjcJLzfuCmblL' });
+    }
+}, []);
   return (
     <Tabs
       screenOptions={{

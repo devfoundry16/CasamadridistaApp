@@ -1,11 +1,6 @@
 import Colors from "@/constants/colors";
-import { useCart } from "@/hooks/useCart";
-import { useOrder } from "@/hooks/useOrder";
-import { useUser } from "@/hooks/useUser";
-import { CHECKOUT_PRODUCT_TYPE } from "@/types/shop/checkout";
-import { Product } from "@/types/shop/product";
 import { router } from "expo-router";
-import { Check, Crown, RefreshCcw, X } from "lucide-react-native";
+import { Check, X } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
@@ -15,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Purchases, { PurchasesOfferings, PurchasesPackage } from 'react-native-purchases';
 const packages = [
   {
     id: 1,
@@ -24,6 +20,7 @@ const packages = [
     yearlyOriginal: "60",
     product_id: 50869,
     variation_id: [50891, 50892],
+    offerIdentifier: 'offer_hala',
     features: [
       "OLicial digital membership card",
       "WhatsApp news channel access",
@@ -48,6 +45,7 @@ const packages = [
     yearlyOriginal: "180",
     product_id: 50874,
     variation_id: [50888, 50889],
+    offerIdentifier: 'offer_rey',
     features: [
       "OLicial digital membership card",
       "WhatsApp news channel access",
@@ -70,6 +68,7 @@ const packages = [
     name: "Galácticos - VIP",
     monthlyPrice: "34.9",
     yearlyPrice: "336",
+    offerIdentifier: 'offer_vip',
     yearlyOriginal: "420",
     product_id: 50879,
     variation_id: [50883, 50884],
@@ -92,171 +91,45 @@ const packages = [
 ];
 
 export default function PackagesScreen() {
-  const { addToCart, items } = useCart();
-  const { getSubscriptionOrders, updateSubscription } = useOrder();
-  const { user } = useUser();
-  const cartCount = items.length;
-  const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [billingType, setBillingType] = useState<"monthly" | "yearly">(
     "monthly"
   );
-  const [, setLoading] = useState(false);
+  const [offerings, setOfferings] = useState<PurchasesOfferings | null>(null);
+  const [activeProductIds, setActiveProductIds] = useState<string[]>([]);
 
-  const loadCurrentSubscription = useCallback(async () => {
-    if (!user?.id) return;
-    setLoading(true);
+  const getCustomerInfo = useCallback(async () => {
     try {
-      const subs = await getSubscriptionOrders(user.id);
-      const activeSub = subs?.[0]; // Get most recent subscription
-      setCurrentSubscription(activeSub);
-    } catch (error) {
-      console.error("Error loading subscription:", error);
+      const customerInfo = await Purchases.getCustomerInfo();
+      setActiveProductIds(customerInfo.activeSubscriptions || []);
+    } catch {
+      // Silent failure, we can still show default CTA
     }
-    setLoading(false);
-  }, [getSubscriptionOrders, user?.id]);
+  }, []);
 
   useEffect(() => {
-    loadCurrentSubscription();
-  }, [loadCurrentSubscription]);
-
-  const handlePackage = async (product_id: number, variation_id: number) => {
-    // Find package by product or variation id
-    const selectedPkg = packages.find(
-      (p) => p.product_id === product_id || p.variation_id.includes(product_id)
-    );
-
-    // If user currently has a subscription for this package, apply rules:
-    // - If current billing is monthly, block buying any other variation (show CURRENT PLAN)
-    // - Otherwise, allow change logic to proceed (upgrade/downgrade handled later)
-    const subscriptionProductId =
-      currentSubscription?.line_items[0]?.product_id;
-    const isSamePackage =
-      currentSubscription &&
-      selectedPkg &&
-      (selectedPkg.product_id === subscriptionProductId ||
-        selectedPkg.variation_id.includes(subscriptionProductId));
-
-    // If selecting the exact same billing cycle of the current subscription, block (can't buy same plan again)
-    if (
-      isSamePackage &&
-      ((billingType === "monthly" &&
-        currentSubscription?.billing_period === "month") ||
-        (billingType === "yearly" &&
-          currentSubscription?.billing_period !== "month"))
-    ) {
-      return;
-    }
-
-    const product = {
-      id: product_id,
-      quantity: 1,
-      attributes: [
-        {
-          id: 1,
-          name: "Billing Period",
-          slug: "pa_billing-period",
-          position: 0,
-          visible: true,
-          variation: true,
-          options: [billingType.charAt(0).toUpperCase() + billingType.slice(1)],
-        },
-      ],
-    };
-
-    // Show confirmation if this is a plan change
-    if (currentSubscription) {
-      const isUpgrade =
-        Number(
-          packages.find((p) => p.product_id === product_id)?.monthlyPrice
-        ) > Number(currentSubscription.line_items[0].price);
-      const action = isUpgrade ? "upgrade to" : "downgrade to";
-      const currentPlan = currentSubscription.line_items[0].name;
-      const newPlan = packages.find((p) => p.product_id === product_id)?.name;
-
-      Alert.alert(
-        `Confirm ${isUpgrade ? "Upgrade" : "Downgrade"}`,
-        `Are you sure you want to ${action} ${newPlan} from ${currentPlan}?`,
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "Continue",
-            onPress: () => processPlanChange(product),
-          },
-        ]
-      );
-      return;
-    }
-
-    // New subscription flow
-    if (cartCount) {
-      Alert.alert(
-        "Invalid Cart",
-        `You cannot purchase subscription with other items in the cart. Please clear your cart and try again.`
-      );
-    } else {
-      processPlanChange(product);
-    }
-  };
-
-  const processPlanChange = async (product: any) => {
+    getOfferings();
+    getCustomerInfo();
+  }, [getCustomerInfo]);
+  const handleSubscribe = async (pkg: PurchasesPackage) => {
+    console.log(pkg.product.title, pkg.packageType.toLowerCase());
     try {
-      await addToCart(product as Product);
-      // If user has an active subscription, decide behavior:
-      // - Upgrade: route to checkout to pay for the new plan immediately (swap)
-      // - Downgrade: schedule downgrade to take effect after current period ends (no immediate payment)
-      if (currentSubscription) {
-        const currentPrice = Number(currentSubscription.line_items[0].price);
-        const newPrice = Number(
-          packages.find((p) => p.product_id === product.id)?.monthlyPrice
-        );
-        const isUpgrade = newPrice > currentPrice;
-        if (isUpgrade) {
-          // Route to checkout for immediate payment; include previous subscription id so backend can swap
-          router.push(
-            `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION}&swap_from=${currentSubscription.id}`
-          );
-          return;
-        } else {
-          // Downgrade: schedule meta change on subscription to change next renewal item
-          try {
-            // Here we call updateSubscription to add metadata indicating desired next plan
-            await updateSubscription(currentSubscription.id, {
-              meta_data: [
-                {
-                  key: "scheduled_next_plan",
-                  value: { product_id: product.id },
-                },
-              ],
-            });
-            Alert.alert(
-              "Downgrade Scheduled",
-              "Your downgrade has been scheduled and will take effect after the current billing period ends."
-            );
-            return;
-          } catch (err: any) {
-            Alert.alert(
-              "Error",
-              err.message || "Failed to schedule downgrade. Please try again."
-            );
-            return;
-          }
-        }
+      const { customerInfo } = await Purchases.purchasePackage(pkg);
+      setActiveProductIds(customerInfo.activeSubscriptions || []);
+      if (typeof customerInfo.entitlements.active[pkg.product.title] !== 'undefined') {
+        Alert.alert("Success", "Subscription purchased successfully.");
       }
-
-      router.push(
-        `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.SUBSCRIPTION}`
-      );
     } catch (error: any) {
-      Alert.alert(
-        "Error",
-        error.message || "There was a problem processing your request"
-      );
+      Alert.alert("Alert", error.message || "Failed to purchase subscription. Please try again.");
+      return;
     }
-  };
-
+  }
+  const getOfferings = async () => {
+    const offerings = await Purchases.getOfferings();
+    if (offerings !== null && offerings.current?.availablePackages.length !== 0) {
+      setOfferings(offerings);
+    }
+  }
+  
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -264,25 +137,6 @@ export default function PackagesScreen() {
         <Text style={styles.subheader}>
           Join Casa Madridista and get exclusive access to Real Madrid content
         </Text>
-
-        {currentSubscription && (
-          <View style={styles.currentPlanContainer}>
-            <View style={styles.currentPlanHeader}>
-              <Crown size={24} color={Colors.darkGold} />
-              <Text style={styles.currentPlanTitle}>Current Plan</Text>
-            </View>
-            <Text style={styles.currentPlanName}>
-              {currentSubscription.line_items[0].name}
-            </Text>
-            <Text style={styles.currentPlanPeriod}>
-              {currentSubscription.billing_period === "month"
-                ? "Monthly"
-                : "Yearly"}{" "}
-              Plan
-            </Text>
-          </View>
-        )}
-
         <View style={styles.toggleContainer}>
           <TouchableOpacity
             style={[
@@ -317,157 +171,140 @@ export default function PackagesScreen() {
             </Text>
           </TouchableOpacity>
         </View>
+        {Object.values(offerings?.all || {}).map(offering => (
+          <View key={offering.identifier}>
+            {packages
+              .filter(pkg => pkg.offerIdentifier === offering.identifier)
+              .map(pkg => {
+                // Determine correct PurchasesPackage by billingType
+                const selectedPurchasePackage =
+                  offering.availablePackages.find(apkg =>
+                    billingType === "monthly"
+                      ? apkg.packageType.toLowerCase() === "monthly"
+                      : apkg.packageType.toLowerCase() === "annual" || apkg.packageType.toLowerCase() === "yearly"
+                  );
 
-        {packages.map((pkg) => {
-          const subscriptionProductId =
-            currentSubscription?.line_items[0]?.product_id;
-          const isSamePackage =
-            currentSubscription &&
-            (pkg.product_id === subscriptionProductId ||
-              pkg.variation_id.includes(subscriptionProductId));
+                const selectedProductId = selectedPurchasePackage?.product.identifier;
 
-          // Show CURRENT PLAN only when the subscription belongs to this package
-          // and the selected billingType matches the subscription's billing period.
-          // This allows showing yearly purchase option when current subscription is monthly.
-          const isCurrentShown = Boolean(
-            isSamePackage &&
-              ((billingType === "monthly" &&
-                currentSubscription?.billing_period === "month") ||
-                (billingType === "yearly" &&
-                  currentSubscription?.billing_period !== "month"))
-          );
+                // Find current active package (if any) within this offering to compare pricing
+                const currentActiveId = activeProductIds.find(id =>
+                  offering.availablePackages.some(apkg => apkg.product.identifier === id)
+                );
+                const currentActivePackage = offering.availablePackages.find(
+                  apkg => apkg.product.identifier === currentActiveId
+                );
 
-          return (
-            <View key={pkg.id}>
-              <View
-                style={
-                  pkg.badge !== "Popular"
-                    ? styles.packageNameContainer
-                    : styles.popularPackageNameContainer
-                }
-              >
-                {pkg.badge && (
-                  <View
-                    style={[
-                      styles.badge,
-                      pkg.badge === "VIP" && styles.vipBadge,
-                    ]}
-                  >
-                    <Text style={styles.badgeText}>
-                      {pkg.badge.toUpperCase()}
-                    </Text>
-                  </View>
-                )}
-                <Text style={styles.packageName}>{pkg.name}</Text>
-              </View>
-              <View
-                style={[
-                  styles.card,
-                  pkg.badge === "Popular" && styles.popularCard,
-                ]}
-              >
-                <View style={styles.priceContainer}>
-                  {billingType === "yearly" && (
-                    <Text style={styles.yearlyOriginal}>
-                      ${pkg.yearlyOriginal}
-                    </Text>
-                  )}
-                  <Text style={styles.price}>
-                    {billingType === "monthly"
-                      ? `$${pkg.monthlyPrice}`
-                      : `$${pkg.yearlyPrice}`}
-                  </Text>
-                  <Text style={styles.period}>
-                    {billingType === "monthly" ? " per month" : " per year"}
-                  </Text>
-                </View>
-                <View style={styles.featuresContainer}>
-                  {pkg.features.map((feature, index) => (
-                    <View key={index} style={styles.featureColumn}>
-                      <View key={index} style={styles.featureRow}>
-                        <Check
-                          size={20}
-                          strokeWidth={4}
-                          color={Colors.darkGold}
-                        />
-                        <Text style={styles.featureText}>{feature}</Text>
-                      </View>
-                      <View style={styles.accentLine} />
-                    </View>
-                  ))}
-                  {pkg.non_featured.map((feature, index) => (
-                    <View key={index} style={styles.featureColumn}>
-                      <View key={index} style={styles.featureRow}>
-                        <X size={20} strokeWidth={4} color={Colors.darkGold} />
-                        <Text style={styles.featureText}>{feature}</Text>
-                      </View>
-                      <View style={styles.accentLine} />
-                    </View>
-                  ))}
-                </View>
-                <TouchableOpacity
-                  style={[
-                    styles.button,
-                    pkg.badge === "Popular" && styles.popularButton,
-                    isCurrentShown && styles.currentButton,
-                  ]}
-                  onPress={() =>
-                    handlePackage(
-                      pkg.product_id,
-                      pkg.variation_id[billingType === "monthly" ? 0 : 1]
-                    )
+                const selectedPrice = selectedPurchasePackage?.product.price ?? NaN;
+                const currentPrice = currentActivePackage?.product.price ?? NaN;
+
+                // Derive CTA label based on current active subscription
+                let ctaLabel = "Subscribe";
+                if (activeProductIds.length > 0) {
+                  if (selectedProductId && activeProductIds.includes(selectedProductId)) {
+                    ctaLabel = "Current Plan";
+                  } else if (!isNaN(currentPrice) && !isNaN(selectedPrice)) {
+                    if (selectedPrice > currentPrice) ctaLabel = "Upgrade";
+                    else if (selectedPrice < currentPrice) ctaLabel = "Downgrade";
+                    else ctaLabel = "Change Plan";
+                  } else {
+                    ctaLabel = "Change Plan";
                   }
-                  disabled={isCurrentShown}
-                >
-                  {isCurrentShown ? (
-                    <Text style={[styles.buttonText, styles.currentButtonText]}>
-                      CURRENT PLAN
-                    </Text>
-                  ) : currentSubscription ? (
-                    <>
-                      <RefreshCcw
-                        size={16}
-                        color={
-                          pkg.badge === "Popular"
-                            ? Colors.primary
-                            : Colors.textWhite
-                        }
-                      />
-                      <Text
-                        style={[
-                          styles.buttonText,
-                          pkg.badge === "Popular" && styles.popularButtonText,
-                        ]}
-                      >
-                        {(() => {
-                          const selectedPrice =
-                            billingType === "monthly"
-                              ? Number(pkg.monthlyPrice)
-                              : Number(pkg.yearlyPrice);
-                          const currentPrice = Number(
-                            currentSubscription.line_items[0].price
-                          );
-                          return selectedPrice > currentPrice
-                            ? "UPGRADE"
-                            : "DOWNGRADE";
-                        })()}
-                      </Text>
-                    </>
-                  ) : (
-                    <Text
+                }
+
+                const disableCTA = !selectedPurchasePackage || ctaLabel === "Current Plan";
+
+                return (
+                  <View key={pkg.id}>
+                    <View
+                      style={
+                        pkg.badge !== "Popular"
+                          ? styles.packageNameContainer
+                          : styles.popularPackageNameContainer
+                      }
+                    >
+                      {pkg.badge && (
+                        <View
+                          style={[
+                            styles.badge,
+                            pkg.badge === "VIP" && styles.vipBadge,
+                          ]}
+                        >
+                          <Text style={styles.badgeText}>
+                            {pkg.badge.toUpperCase()}
+                          </Text>
+                        </View>
+                      )}
+                      <Text style={styles.packageName}>{pkg.name}</Text>
+                    </View>
+                    <View
                       style={[
-                        styles.buttonText,
-                        pkg.badge === "Popular" && styles.popularButtonText,
+                        styles.card,
+                        pkg.badge === "Popular" && styles.popularCard,
                       ]}
                     >
-                      BUY NOW
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
-          );
-        })}
+                      <View style={styles.priceContainer}>
+                        {billingType === "yearly" && (
+                          <Text style={styles.yearlyOriginal}>
+                            ${pkg.yearlyOriginal}
+                          </Text>
+                        )}
+                        <Text style={styles.price}>
+                          {billingType === "monthly"
+                            ? `$${pkg.monthlyPrice}`
+                            : `$${pkg.yearlyPrice}`}
+                        </Text>
+                        <Text style={styles.period}>
+                          {billingType === "monthly" ? " per month" : " per year"}
+                        </Text>
+                      </View>
+                      <View style={styles.featuresContainer}>
+                        {pkg.features.map((feature, index) => (
+                          <View key={index} style={styles.featureColumn}>
+                            <View key={index} style={styles.featureRow}>
+                              <Check
+                                size={20}
+                                strokeWidth={4}
+                                color={Colors.darkGold}
+                              />
+                              <Text style={styles.featureText}>{feature}</Text>
+                            </View>
+                            <View style={styles.accentLine} />
+                          </View>
+                        ))}
+                        {pkg.non_featured.map((feature, index) => (
+                          <View key={index} style={styles.featureColumn}>
+                            <View key={index} style={styles.featureRow}>
+                              <X size={20} strokeWidth={4} color={Colors.darkGold} />
+                              <Text style={styles.featureText}>{feature}</Text>
+                            </View>
+                            <View style={styles.accentLine} />
+                          </View>
+                        ))}
+                      </View>
+                      <TouchableOpacity
+                        disabled={disableCTA}
+                        style={[
+                          styles.button,
+                          pkg.badge === "Popular" && styles.popularButton,
+                          disableCTA && { opacity: 0.5 }
+                        ]}
+                        onPress={() => selectedPurchasePackage && !disableCTA && handleSubscribe(selectedPurchasePackage)}
+                      >
+                        <Text
+                          style={[
+                            styles.buttonText,
+                            pkg.badge === "Popular" && styles.popularButtonText
+                          ]}
+                        >
+                          {selectedPurchasePackage ? ctaLabel : "Not Available"}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                );
+              })}
+          </View>
+        ))}
       </View>
     </ScrollView>
   );
