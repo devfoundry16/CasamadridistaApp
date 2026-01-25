@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import CustomWebView from "@/components/CustomWebView";
 import QuoteSection from "@/components/Home/QuoteSection";
-import SquadSection from "@/components/Home/SquadSection";
 import StrengthSection from "@/components/Home/StrengthSection";
 import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
 import VisionSection from "@/components/Home/VisionSection";
@@ -104,16 +103,43 @@ export default function HomeScreen() {
 
   const checkLiveMatch = useCallback(async () => {
     try {
-      if (isLive) {
-        const liveMatchData = await fetchLiveMatchData(RealMadridId);
-        setLiveMatch(liveMatchData);
+      const liveMatchData = await fetchLiveMatchData(RealMadridId);
+      
+      // Check if match is actually live based on fixture status
+      if (liveMatchData && liveMatchData.fixture?.status) {
+        const status = liveMatchData.fixture.status.short;
+        // Match is live if status is: 1H, 2H, HT, ET, P, BT, LIVE, or if elapsed time exists
+        const isMatchLive = 
+          status === "1H" || 
+          status === "2H" || 
+          status === "HT" || 
+          status === "ET" || 
+          status === "P" || 
+          status === "BT" || 
+          status === "LIVE" ||
+          (liveMatchData.fixture.status.elapsed != null && liveMatchData.fixture.status.elapsed > 0);
+        
+        if (isMatchLive) {
+          setLiveMatch(liveMatchData);
+          setIsLive(true);
+        } else {
+          // Match is not live anymore
+          setLiveMatch(undefined);
+          setIsLive(false);
+        }
       } else {
+        // No live match found
         setLiveMatch(undefined);
+        setIsLive(false);
       }
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to fetch live match data");
+      // If error, don't show alert for every failed check, just log it
+      console.log("Live match check failed:", error.message);
+      // Only clear live match if we're sure there's no match
+      setLiveMatch(undefined);
+      setIsLive(false);
     }
-  }, [isLive]);
+  }, [fetchLiveMatchData, RealMadridId]);
 
   const loadInitialData = useCallback(async () => {
     try {
@@ -131,18 +157,22 @@ export default function HomeScreen() {
     }
   }, []);
 
+  // Initial check for live match on mount
+  useEffect(() => {
+    checkLiveMatch();
+  }, []);
+
   useEffect(() => {
     loadInitialData();
   }, [loadInitialData, isLive]);
 
+  // Poll for live match updates every 15 seconds
   useEffect(() => {
-    if (isLive) {
-      const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
-      return () => {
-        clearInterval(timer);
-      };
-    }
-  }, [isLive]);
+    const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
+    return () => {
+      clearInterval(timer);
+    };
+  }, [checkLiveMatch]);
 
   useEffect(() => {
     setHasAnimated(false);
@@ -197,29 +227,29 @@ export default function HomeScreen() {
                 <Text style={styles.sectionTitle}>
                   {liveMatch
                     ? liveMatch.fixture.status.long +
-                      ` ${liveMatch.fixture.status.elapsed}' Elapsed` +
+                      ` ${liveMatch.fixture.status.elapsed != null ? liveMatch.fixture.status.elapsed + "' Elapsed" : ""}` +
                       (liveMatch.fixture.status.extra != null
                         ? ` Extra Time ${liveMatch.fixture.status.extra}'`
                         : "")
                     : "Upcoming"}
                 </Text>
-                {liveMatch
-                  ? nextMatch && (
-                      <UpcomingForm
-                        setLive={setIsLive}
-                        nextMatch={liveMatch}
-                        homeTeamLastMatches={homeTeamLastMatches}
-                        awayTeamLastMatches={awayTeamLastMatches}
-                      />
-                    )
-                  : nextMatch && (
-                      <UpcomingForm
-                        setLive={setIsLive}
-                        nextMatch={nextMatch}
-                        homeTeamLastMatches={homeTeamLastMatches}
-                        awayTeamLastMatches={awayTeamLastMatches}
-                      />
-                    )}
+                {liveMatch ? (
+                  <UpcomingForm
+                    setLive={setIsLive}
+                    nextMatch={liveMatch}
+                    homeTeamLastMatches={homeTeamLastMatches}
+                    awayTeamLastMatches={awayTeamLastMatches}
+                  />
+                ) : (
+                  nextMatch && (
+                    <UpcomingForm
+                      setLive={setIsLive}
+                      nextMatch={nextMatch}
+                      homeTeamLastMatches={homeTeamLastMatches}
+                      awayTeamLastMatches={awayTeamLastMatches}
+                    />
+                  )
+                )}
               </View>
             </View>
           </View>

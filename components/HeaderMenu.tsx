@@ -13,7 +13,6 @@ import {
   Crown,
   Heart,
   MoreVertical,
-  ShoppingCart,
 } from "lucide-react-native";
 
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -51,7 +50,7 @@ function HeaderMenu() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => router.push("/cart" as any)}
         style={styles.button}
         activeOpacity={0.7}
@@ -64,7 +63,7 @@ function HeaderMenu() {
           />
           <CartBadge />
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <TouchableOpacity
         onPress={() => setMenuVisible(true)}

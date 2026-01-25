@@ -4,25 +4,28 @@
     "slug": "casamadridistaApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icons/adaptive-icon.png",
     "scheme": "casamadridistaapp",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splash-screen.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
-    },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.casamadridistaApp"
+      "bundleIdentifier": "com.anonymous.casamadridistaApp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "icon": {
+        "light": "./assets/icons/iso-light.png",
+        "dark": "./assets/icons/iso-dark.png",
+        "tinted": "./assets/icons/iso-tinted.png"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundImage": "./assets/images/icon.png",
-        "monochromeImage": "./assets/images/icon.png"
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "backgroundImage": "./assets/icons/adaptive-icon.png",
+        "monochromeImage": "./assets/icons/adaptive-icon.png"
       },
       "package": "com.anonymous.casamadridistaApp"
     },
@@ -35,9 +38,16 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-screen.png",
-          "resizeMode": "cover",
-          "backgroundColor": "#ffffff"
+          "image": "./assets/icons/splash-icon-dark.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "image": "./assets/icons/splash-icon-light.png",
+            "imageWidth": 200,
+            "resizeMode": "contain",
+            "backgroundColor": "#000000"
+          }
         }
       ],
       "expo-web-browser"
@@ -52,6 +62,12 @@
         "projectId": "ab472561-144d-41eb-8157-18cf09267313"
       }
     },
-    "owner": "petrenko52"
+    "owner": "petrenko52",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ab472561-144d-41eb-8157-18cf09267313"
+    }
   }
 }
