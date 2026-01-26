@@ -2,6 +2,7 @@ import CustomWebView from "@/components/CustomWebView";
 import Colors from "@/constants/colors";
 import countries from "@/constants/countries.json";
 import { useFootball } from "@/hooks/useFootball";
+import { useEnvironment } from "@/hooks/useEnvironment";
 import { CountryMap } from "@/types/soccer/profile";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
@@ -13,6 +14,7 @@ const map: CountryMap = countries;
 export default function PlayerDetailScreen() {
   const { team, id } = useLocalSearchParams();
   const { playersList } = useFootball();
+  const { apiSports } = useEnvironment();
 
   const teamId = Number(team);
   const playerId = Number(id);
@@ -49,7 +51,7 @@ export default function PlayerDetailScreen() {
                       <body>
                         <api-sports-widget
                           data-type="config"
-                          data-key="2efab6a210831868664529f16d897809"
+                          data-key="${apiSports.apiKey || ""}"
                           data-sport="football"
                           data-theme="grey"
                           data-show-logos="true"

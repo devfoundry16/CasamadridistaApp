@@ -1,6 +1,7 @@
 import HeaderMenu from "@/components/HeaderMenu";
 import Colors from "@/constants/colors";
 import { Tabs } from "expo-router";
+import { useEnvironment } from "@/hooks/useEnvironment";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -11,14 +12,24 @@ import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 import { Platform, LogBox } from 'react-native';
 LogBox.ignoreAllLogs(true);
 export default function TabLayout() {
+  const { revenueCat, loadEnvironment } = useEnvironment();
+
   useEffect(() => {
-    Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-    if (Platform.OS === 'ios') {
-        Purchases.configure({ apiKey: 'appl_gjexmEzrmHXGjAMYVpmrYt' });
-    } else if (Platform.OS === 'android') {
-        Purchases.configure({ apiKey: 'goog_DxVEuQrGUEhgNWsjcJLzfuCmblL' });
+    loadEnvironment();
+  }, [loadEnvironment]);
+
+  useEffect(() => {
+    if (!revenueCat.iosApiKey && !revenueCat.androidApiKey) {
+      return; // Wait for keys to be loaded
     }
-}, []);
+    
+    Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    if (Platform.OS === 'ios' && revenueCat.iosApiKey) {
+        Purchases.configure({ apiKey: revenueCat.iosApiKey });
+    } else if (Platform.OS === 'android' && revenueCat.androidApiKey) {
+        Purchases.configure({ apiKey: revenueCat.androidApiKey });
+    }
+}, [revenueCat]);
   return (
     <Tabs
       screenOptions={{

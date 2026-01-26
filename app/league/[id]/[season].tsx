@@ -1,6 +1,7 @@
 import CustomWebView from "@/components/CustomWebView";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
+import { useEnvironment } from "@/hooks/useEnvironment";
 import SportsInfoService from "@/services/Football/SportsInfoService";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ const LeagueDetailScreen = () => {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(true);
   const { id, season } = useLocalSearchParams();
+  const { apiSports } = useEnvironment();
   const [teams, setTeams] = React.useState<any[]>([]);
   const [league, setLeague] = React.useState<any>(null);
   const statsHtml = ` 
@@ -35,7 +37,7 @@ const LeagueDetailScreen = () => {
                       <body>
                         <api-sports-widget
                           data-type="config"
-                          data-key="2efab6a210831868664529f16d897809"
+                          data-key="${apiSports.apiKey || ""}"
                           data-sport="football"
                           data-theme="grey"
                           data-show-logos="true"

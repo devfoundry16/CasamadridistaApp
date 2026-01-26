@@ -27,6 +27,13 @@ export const fetchEnvironment = createAsyncThunk(
               password: response.data.woocommerce?.password || "",
             },
             payment: response.data.payment,
+            apiSports: {
+              apiKey: response.data.apiSports?.apiKey || "",
+            },
+            revenueCat: {
+              iosApiKey: response.data.revenueCat?.iosApiKey || "",
+              androidApiKey: response.data.revenueCat?.androidApiKey || "",
+            },
           })
         );
         return response.data;

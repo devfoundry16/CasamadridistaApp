@@ -2,6 +2,7 @@ import CustomWebView from "@/components/CustomWebView";
 import Colors, { altColors as colors } from "@/constants/colors";
 import countries from "@/constants/countries.json";
 import { useFootball } from "@/hooks/useFootball";
+import { useEnvironment } from "@/hooks/useEnvironment";
 import {
   Coach,
   CoachWithTeam,
@@ -26,6 +27,7 @@ export default function TeamScreen() {
   const router = useRouter();
   const { playersList, coachList, teamInfoList, fetchProfileData } =
     useFootball();
+  const { apiSports } = useEnvironment();
   const id = 541;
 
   const players = playersList.find((p) => p.team.id === id) ?? {
@@ -71,7 +73,7 @@ export default function TeamScreen() {
                       <body>
                         <api-sports-widget
                           data-type="config"
-                          data-key="2efab6a210831868664529f16d897809"
+                          data-key="${apiSports.apiKey || ""}"
                           data-sport="football"
                           data-theme="grey"
                         ></api-sports-widget>

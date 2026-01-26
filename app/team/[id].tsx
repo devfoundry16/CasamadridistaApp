@@ -20,6 +20,7 @@ import {
 
 import CustomWebView from "@/components/CustomWebView";
 import { useFootball } from "@/hooks/useFootball";
+import { useEnvironment } from "@/hooks/useEnvironment";
 import CountryFlag from "react-native-country-flag";
 import { Spinner } from "@/components/Spinner";
 const map: CountryMap = countries;
@@ -28,6 +29,7 @@ export default function TeamDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamId = Number(id);
+  const { apiSports } = useEnvironment();
 
   const { playersList, coachList, teamInfoList, fetchProfileData, isLoading } =
     useFootball();
@@ -75,7 +77,7 @@ export default function TeamDetailScreen() {
                       <body>
                         <api-sports-widget
                           data-type="config"
-                          data-key="2efab6a210831868664529f16d897809"
+                          data-key="${apiSports.apiKey || ""}"
                           data-sport="football"
                           data-theme="grey"
                           data-show-logos="true"

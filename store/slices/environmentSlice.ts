@@ -20,6 +20,13 @@ interface EnvironmentState {
       mode: "sandbox" | "live";
     };
   };
+  apiSports: {
+    apiKey: string;
+  };
+  revenueCat: {
+    iosApiKey: string;
+    androidApiKey: string;
+  };
   isLoading: boolean;
   error: string | null;
 }
@@ -42,6 +49,13 @@ const initialState: EnvironmentState = {
       clientSecret: "",
       mode: "sandbox",
     },
+  },
+  apiSports: {
+    apiKey: "",
+  },
+  revenueCat: {
+    iosApiKey: "",
+    androidApiKey: "",
   },
   isLoading: false,
   error: null,

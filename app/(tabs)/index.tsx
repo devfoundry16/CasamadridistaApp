@@ -8,6 +8,7 @@ import { Spinner } from "@/components/Spinner";
 import UpcomingForm from "@/components/UpcomingForm";
 import Colors from "@/constants/colors";
 import { useFootball } from "@/hooks/useFootball";
+import { useEnvironment } from "@/hooks/useEnvironment";
 
 import MatchService from "@/services/Football/MatchService";
 import { Match } from "@/types/soccer/match";
@@ -27,6 +28,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { teamInfoList, fetchProfileData, fetchLiveMatchData, isLoading } =
     useFootball();
+  const { apiSports } = useEnvironment();
   const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
@@ -84,7 +86,7 @@ export default function HomeScreen() {
                       <body>
                         <api-sports-widget
                           data-type="config"
-                          data-key="2efab6a210831868664529f16d897809"
+                          data-key="${apiSports.apiKey || ""}"
                           data-sport="football"
                           data-theme="grey"
                           data-show-logos="true"

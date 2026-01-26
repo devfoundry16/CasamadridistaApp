@@ -14,6 +14,13 @@ export type AppInfoResponse = {
         mode: "sandbox" | "live";
       };
     };
+    apiSports?: {
+      apiKey: string;
+    };
+    revenueCat?: {
+      iosApiKey: string;
+      androidApiKey: string;
+    };
   };
 };
 

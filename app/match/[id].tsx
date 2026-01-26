@@ -1,10 +1,12 @@
 import CustomWebView from "@/components/CustomWebView";
 import Colors from "@/constants/colors";
+import { useEnvironment } from "@/hooks/useEnvironment";
 import { useLocalSearchParams } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
 const MatchDetailScreen = () => {
   const { id } = useLocalSearchParams();
+  const { apiSports } = useEnvironment();
   const statsHtml = `
                     <!DOCTYPE html>
                     <html>
@@ -24,7 +26,7 @@ const MatchDetailScreen = () => {
                       <body>
                         <api-sports-widget
                           data-type="config"
-                          data-key="2efab6a210831868664529f16d897809"
+                          data-key="${apiSports.apiKey || ""}"
                           data-sport="football"
                           data-theme="grey"
                           data-show-logos="true"

@@ -13,6 +13,8 @@ export const useEnvironment = () => {
     auth: environment.auth,
     woocommerce: environment.woocommerce,
     payment: environment.payment,
+    apiSports: environment.apiSports,
+    revenueCat: environment.revenueCat,
     isLoading: environment.isLoading,
     error: environment.error,
     loadEnvironment,
