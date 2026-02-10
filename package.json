@@ -52,6 +52,7 @@
     "expo-web-browser": "^15.0.9",
     "lucide-react-native": "^0.556.0",
     "metro-react-native-babel-preset": "^0.77.0",
+    "nativewind": "^4.2.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "^0.81.5",
@@ -78,8 +79,11 @@
     "@babel/plugin-transform-private-methods": "^7.27.1",
     "@types/react": "~19.1.0",
     "@types/react-native-snap-carousel": "^3.8.12",
+    "babel-preset-expo": "~54.0.10",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "prettier-plugin-tailwindcss": "^0.5.11",
+    "tailwindcss": "^3.4.17",
     "typescript": "~5.9.2"
   },
   "private": true

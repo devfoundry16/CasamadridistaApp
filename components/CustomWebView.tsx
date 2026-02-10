@@ -1,6 +1,6 @@
-import Colors from "@/constants/colors";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import WebView from "react-native-webview";
+
 const CustomWebView = ({
   size = 300,
   title,
@@ -11,18 +11,19 @@ const CustomWebView = ({
   statsHtml: string;
 }) => {
   return (
-    <View style={styles.infoSection}>
-      <View style={styles.adSectionHeader}>
-      <View style={styles.adHeaderLine} />
-      <Text style={styles.adSectionTitle}>{title}</Text>
-      <View style={styles.adHeaderLine} />
+    <View className="bg-bg-medium py-4">
+      <View className="flex-row items-center justify-center mb-2.5">
+        <View className="w-[70px] h-0.5 bg-rm-gold mx-[30px]" />
+        <Text className="text-2xl font-bold text-text-primary text-center">{title}</Text>
+        <View className="w-[70px] h-0.5 bg-rm-gold mx-[30px]" />
       </View>
-      <View style={[styles.widgetContainer, {height: size, width: '100%'}]}>
+      <View className="bg-bg-medium rounded-xl overflow-hidden w-full" style={{ height: size}}>
         <WebView
           source={{
             html: statsHtml,
           }}
-          style={styles.webview}
+          className="flex-1 bg-bg-medium"
+          style={{ backgroundColor: "transparent" }}
           javaScriptEnabled={true}
           domStorageEnabled={true}
           startInLoadingState={true}
@@ -33,40 +34,3 @@ const CustomWebView = ({
   );
 };
 export default CustomWebView;
-const styles = StyleSheet.create({
-  infoSection: {
-    backgroundColor: "#2a2a2a",
-    paddingVertical: 16,
-  },
-  adSectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  adHeaderLine: {
-    width: 70,
-    height: 2,
-    backgroundColor: Colors.accent,
-    marginHorizontal: 30,
-  },
-  adSectionTitle: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    textAlign: "center",
-  },
-  widgetContainer: {
-    backgroundColor: Colors.darkGray,
-    borderRadius: 12,
-    overflow: "hidden",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  webview: {
-    backgroundColor: Colors.deepDarkGray,
-  },
-});

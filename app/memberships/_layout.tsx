@@ -21,18 +21,18 @@ export default function MembershipsLayout() {
     <>
       <MaterialTopTabs
         screenOptions={{
-          tabBarActiveTintColor: Colors.primary,
-          tabBarInactiveTintColor: Colors.deepDarkGray,
+          tabBarActiveTintColor: Colors.secondary,
+          tabBarInactiveTintColor: Colors.secondary,
           tabBarLabelStyle: {
             fontSize: 14,
             fontWeight: "600" as const,
             textTransform: "none" as const,
           },
           tabBarStyle: {
-            backgroundColor: Colors.secondary,
+            backgroundColor: Colors.primary,
           },
           tabBarIndicatorStyle: {
-            backgroundColor: Colors.primary,
+            backgroundColor: Colors.secondary,
             height: 3,
           },
         }}

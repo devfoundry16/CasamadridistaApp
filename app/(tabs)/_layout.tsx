@@ -37,7 +37,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: Colors.darkGray,
         headerShown: true,
         headerStyle: {
-          backgroundColor: Colors.secondary,
+          backgroundColor: Colors.darkGold,
           height: 120,
         },
         headerTintColor: Colors.textWhite,
@@ -48,7 +48,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
-          headerTitle: "Casamadridista",
+          headerTitle: "Casa Madridista",
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />

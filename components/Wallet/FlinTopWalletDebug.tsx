@@ -1,7 +1,7 @@
 // components/FlintopWalletDebug.tsx
 import { FlintopWalletService } from '@/services/FlintopWalletService';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { Button } from '../Button';
 
 export const FlintopWalletDebug: React.FC = () => {
@@ -31,15 +31,17 @@ export const FlintopWalletDebug: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>FlinTop Wallet Debug</Text>
+    <View className="p-4 bg-bg-light">
+      <Text className="text-lg font-bold mb-4 text-center text-text-primary">
+        FlinTop Wallet Debug
+      </Text>
       
       <Button
         title={isTesting ? "Testing..." : "Test Connection"}
         onPress={testConnection}
         disabled={isTesting}
         variant="outline"
-        style={styles.testButton}
+        style={{ marginBottom: 12 }}
       />
       
       <Button
@@ -49,9 +51,9 @@ export const FlintopWalletDebug: React.FC = () => {
         size="small"
       />
       
-      <ScrollView style={styles.debugContainer}>
+      <ScrollView className="mt-4 bg-bg-card rounded-lg p-3 max-h-[200px]">
         {debugInfo.map((info, index) => (
-          <Text key={index} style={styles.debugText}>
+          <Text key={index} className="text-xs mb-1 font-mono text-text-primary">
             {info}
           </Text>
         ))}
@@ -59,31 +61,3 @@ export const FlintopWalletDebug: React.FC = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  testButton: {
-    marginBottom: 12,
-  },
-  debugContainer: {
-    marginTop: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 12,
-    maxHeight: 200,
-  },
-  debugText: {
-    fontSize: 12,
-    fontFamily: 'monospace',
-    marginBottom: 4,
-  },
-});

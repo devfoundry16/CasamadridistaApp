@@ -2,7 +2,7 @@ import Colors from "@/constants/colors";
 import { Match } from "@/types/soccer/match";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import { Circle } from "react-native-progress";
 
 import TeamForm from "./TeamForm";
@@ -79,16 +79,16 @@ export default function UpcomingForm({
   }, [nextMatch]);
 
   return (
-    <View style={styles.container}>
+    <View className="bg-bg-medium/50 rounded-2xl p-4 items-center justify-center">
       {/* Header */}
-      <Text style={styles.leagueText}>
+      <Text className="text-text-primary text-[13px] text-center">
         {nextMatch?.league.name} {nextMatch?.league.season}-
         {nextMatch?.league.season + 1} | {nextMatch?.league.round}
       </Text>
       <TouchableOpacity
         onPress={() => router.push(`/venue/${nextMatch?.fixture.venue.id}`)}
       >
-        <Text style={styles.venueText}>
+        <Text className="text-text-primary text-[11px] text-center mb-2.5">
           {nextMatch?.fixture.venue.name} |{" "}
           {new Date(nextMatch?.fixture.date).toLocaleDateString("en-US", {
             day: "2-digit",
@@ -101,17 +101,19 @@ export default function UpcomingForm({
       </TouchableOpacity>
 
       {/* Teams */}
-      <View style={styles.teamsContainer}>
+      <View className="flex-row justify-between w-full mb-5">
         {/* Home Team */}
         <TouchableOpacity
-          style={styles.teamBox}
+          className="items-center flex-1"
           onPress={() => router.push(`/team/${nextMatch.teams.home.id}`)}
         >
           <Image
             source={{ uri: nextMatch?.teams.home.logo }}
-            style={styles.logo}
+            style={{ width: 60, height: 60 }}
+            className="mb-1"
+            resizeMode="contain"
           />
-          <Text style={styles.teamName}>{nextMatch?.teams.home.name}</Text>
+          <Text className="text-text-primary text-sm font-bold mb-1.5">{nextMatch?.teams.home.name}</Text>
           <TeamForm
             matches={homeTeamLastMatches ?? []}
             nextMatchTeamId={nextMatch?.teams.home.id}
@@ -119,26 +121,28 @@ export default function UpcomingForm({
           />
         </TouchableOpacity>
         {live && (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={styles.teamScore}>
+          <View className="flex-row items-center">
+            <Text className="text-text-primary text-2xl font-bold mx-1.5">
               {nextMatch.goals.home == null ? "0" : nextMatch.goals.home}
             </Text>
-            <Text style={styles.teamScore}>:</Text>
-            <Text style={styles.teamScore}>
+            <Text className="text-text-primary text-2xl font-bold mx-1.5">:</Text>
+            <Text className="text-text-primary text-2xl font-bold mx-1.5">
               {nextMatch.goals.away == null ? "0" : nextMatch.goals.away}
             </Text>
           </View>
         )}
         {/* Away Team */}
         <TouchableOpacity
-          style={styles.teamBox}
+          className="items-center flex-1"
           onPress={() => router.push(`/team/${nextMatch.teams.away.id}`)}
         >
           <Image
             source={{ uri: nextMatch?.teams.away.logo }}
-            style={styles.logo}
+            style={{ width: 60, height: 60 }}
+            className="mb-1"
+            resizeMode="contain"
           />
-          <Text style={styles.teamName}>{nextMatch?.teams.away.name}</Text>
+          <Text className="text-text-primary text-sm font-bold mb-1.5">{nextMatch?.teams.away.name}</Text>
           <TeamForm
             matches={awayTeamLastMatches ?? []}
             nextMatchTeamId={nextMatch?.teams.away.id}
@@ -148,7 +152,7 @@ export default function UpcomingForm({
 
       {/* Countdown */}
       {!live && (
-        <View style={styles.timerRow}>
+        <View className="flex-row justify-around items-center gap-0.5">
           {Object.entries(timeLeft).map(([label, value], i) => (
             <View key={i}>
               {((i < 3 && value != "00") || i == 3) && (
@@ -180,8 +184,8 @@ const TimeCircle = ({
 }) => {
   const progress = max > 0 ? Number(value) / max : 0;
   return (
-    <View style={styles.circleContainer}>
-      <Text style={styles.label}>{label}</Text>
+    <View className="items-center">
+      <Text className="mb-0.5 text-xs text-text-primary font-medium">{label}</Text>
       <Circle
         progress={progress}
         size={60}
@@ -191,131 +195,8 @@ const TimeCircle = ({
         borderWidth={0}
         showsText={true}
         formatText={() => value}
-        textStyle={styles.valueText}
+        textStyle={{ fontSize: 18, fontWeight: "600", color: Colors.textWhite }}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "rgba(27, 27, 27, 0.5)",
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  leagueText: {
-    color: Colors.textWhite,
-    fontSize: 13,
-    textAlign: "center",
-  },
-  venueText: {
-    color: Colors.textWhite,
-    fontSize: 11,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  teamsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginBottom: 20,
-  },
-  teamBox: {
-    alignItems: "center",
-    flex: 1,
-  },
-  logo: {
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
-    marginBottom: 4,
-  },
-  teamName: {
-    color: Colors.textWhite,
-    fontSize: 14,
-    fontWeight: "700",
-    marginBottom: 6,
-  },
-  teamScore: {
-    color: Colors.textWhite,
-    fontSize: 24,
-    fontWeight: "700",
-    marginHorizontal: 6,
-  },
-  formRow: {
-    flexDirection: "row",
-    gap: 4,
-  },
-  formBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  formText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: Colors.textWhite,
-  },
-  formWin: { backgroundColor: "#28a745" },
-  formDraw: { backgroundColor: "#facc15" },
-  formLoss: { backgroundColor: "#dc2626" },
-
-  timerCircle: {
-    borderColor: "#16a34a",
-    borderWidth: 2,
-    borderRadius: 50,
-    padding: 6,
-  },
-  timerInner: {
-    backgroundColor: "transparent",
-    borderRadius: 25,
-    width: 50,
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  timerValue: {
-    color: Colors.textWhite,
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  timerLabel: {
-    color: Colors.textWhite,
-    fontSize: 10,
-    textTransform: "uppercase",
-  },
-  prediction: {
-    color: Colors.textWhite,
-    fontSize: 12,
-    textAlign: "center",
-    marginTop: 6,
-  },
-  predictionHighlight: {
-    color: Colors.textWhite,
-    fontWeight: "600",
-  },
-  timerRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    gap: 2,
-  },
-  circleContainer: {
-    alignItems: "center",
-  },
-  valueText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: Colors.textWhite,
-  },
-  label: {
-    marginBottom: 2,
-    fontSize: 12,
-    color: Colors.textWhite,
-    fontWeight: "500",
-  },
-});

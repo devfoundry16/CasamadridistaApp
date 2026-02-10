@@ -1,4 +1,3 @@
-import Colors from "@/constants/colors";
 import { useUser } from "@/hooks/useUser";
 import UserService from "@/services/UserService";
 import { router } from "expo-router";
@@ -7,7 +6,6 @@ import React, { useState } from "react";
 import {
   Alert,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -67,148 +65,108 @@ export default function AccountDetailsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.form}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>First Name *</Text>
+    <ScrollView className="flex-1 bg-bg-medium">
+      <View className="p-6">
+        <View className="mb-5">
+          <Text className="text-sm font-semibold text-white mb-2">First Name *</Text>
           <TextInput
-            style={styles.input}
+            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
             value={formData.first_name}
             onChangeText={(text) =>
               setFormData({ ...formData, first_name: text })
             }
             placeholder="Enter your first name"
-            placeholderTextColor={Colors.darkGray}
+            placeholderTextColor="#515151"
           />
         </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Last Name *</Text>
+        <View className="mb-5">
+          <Text className="text-sm font-semibold text-white mb-2">Last Name *</Text>
           <TextInput
-            style={styles.input}
+            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
             value={formData.last_name}
             onChangeText={(text) =>
               setFormData({ ...formData, last_name: text })
             }
             placeholder="Enter your last name"
-            placeholderTextColor={Colors.darkGray}
+            placeholderTextColor="#515151"
           />
         </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Display Name *</Text>
+        <View className="mb-5">
+          <Text className="text-sm font-semibold text-white mb-2">Display Name *</Text>
           <TextInput
-            style={styles.input}
+            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
             value={formData.name}
             onChangeText={(text) => setFormData({ ...formData, name: text })}
             placeholder="Enter your display name"
-            placeholderTextColor={Colors.darkGray}
+            placeholderTextColor="#515151"
           />
         </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email Address</Text>
+        <View className="mb-5">
+          <Text className="text-sm font-semibold text-white mb-2">Email Address</Text>
           <TextInput
-            style={styles.input}
+            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
             value={formData.email}
             onChangeText={(text) => setFormData({ ...formData, email: text })}
             placeholder="Enter your email"
-            placeholderTextColor={Colors.darkGray}
+            placeholderTextColor="#515151"
             keyboardType="email-address"
             autoCapitalize="none"
           />
         </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Password</Text>
+        <View className="mb-5">
+          <Text className="text-sm font-semibold text-white mb-2">Password</Text>
           <TextInput
-            style={styles.input}
+            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
             value={formData.oldPassword}
             onChangeText={(text) =>
               setFormData({ ...formData, oldPassword: text })
             }
             placeholder="Enter your current password"
-            placeholderTextColor={Colors.darkGray}
+            placeholderTextColor="#515151"
             secureTextEntry
             autoCapitalize="none"
           />
         </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>New Password</Text>
+        <View className="mb-5">
+          <Text className="text-sm font-semibold text-white mb-2">New Password</Text>
           <TextInput
-            style={styles.input}
+            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
             value={formData.password}
             onChangeText={(text) =>
               setFormData({ ...formData, password: text })
             }
             placeholder="Enter your new password"
-            placeholderTextColor={Colors.darkGray}
+            placeholderTextColor="#515151"
             secureTextEntry
             autoCapitalize="none"
           />
         </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Confirm Password</Text>
+        <View className="mb-5">
+          <Text className="text-sm font-semibold text-white mb-2">Confirm Password</Text>
           <TextInput
-            style={styles.input}
+            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
             value={formData.confirmPassword}
             onChangeText={(text) =>
               setFormData({ ...formData, confirmPassword: text })
             }
             placeholder="Enter confirm password"
-            placeholderTextColor={Colors.darkGray}
+            placeholderTextColor="#515151"
             secureTextEntry
             autoCapitalize="none"
           />
         </View>
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Save size={20} color={Colors.textWhite} />
-          <Text style={styles.saveButtonText}>Save Changes</Text>
+        <TouchableOpacity
+          className="flex-row items-center justify-center bg-rm-gold p-4 rounded-[25px] mt-2 gap-2"
+          onPress={handleSave}
+        >
+          <Save size={20} color="#FFFFFF" />
+          <Text className="text-base font-bold text-white">Save Changes</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#2A2A2A",
-  },
-  form: {
-    padding: 24,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#3A3A3A",
-    borderWidth: 1,
-    borderColor: "#4A4A4A",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: Colors.textWhite,
-  },
-  saveButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.accent,
-    padding: 16,
-    borderRadius: 25,
-    marginTop: 8,
-    gap: 8,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-  },
-});

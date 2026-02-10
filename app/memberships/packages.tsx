@@ -1,10 +1,8 @@
-import Colors from "@/constants/colors";
 import { Check, X } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -130,42 +128,26 @@ export default function PackagesScreen() {
   }
   
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.header}>Choose Your Membership Package</Text>
-        <Text style={styles.subheader}>
+    <ScrollView className="flex-1 bg-bg-gray">
+      <View className="p-5">
+        <Text className="text-2xl font-bold text-text-primary mb-2 text-center">Choose Your Membership Package</Text>
+        <Text className="text-sm text-text-primary mb-6 text-center">
           Join Casa Madridista and get exclusive access to Real Madrid content
         </Text>
-        <View style={styles.toggleContainer}>
+        <View className="flex-row bg-rm-gold rounded-xl overflow-hidden">
           <TouchableOpacity
-            style={[
-              styles.toggleButton,
-              billingType === "monthly" && styles.toggleButtonActive,
-            ]}
+            className={`flex-1 py-3 px-4 ${billingType === "monthly" ? "bg-white" : ""}`}
             onPress={() => setBillingType("monthly")}
           >
-            <Text
-              style={[
-                styles.toggleText,
-                billingType === "monthly" && styles.toggleTextActive,
-              ]}
-            >
+            <Text className={`text-base font-semibold text-center ${billingType === "monthly" ? "text-rm-gold" : "text-white"}`}>
               Monthly
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[
-              styles.toggleButton,
-              billingType === "yearly" && styles.toggleButtonActive,
-            ]}
+            className={`flex-1 py-3 px-4 ${billingType === "yearly" ? "bg-white" : ""}`}
             onPress={() => setBillingType("yearly")}
           >
-            <Text
-              style={[
-                styles.toggleText,
-                billingType === "yearly" && styles.toggleTextActive,
-              ]}
-            >
+            <Text className={`text-base font-semibold text-center ${billingType === "yearly" ? "text-rm-gold" : "text-white"}`}>
               Yearly
             </Text>
           </TouchableOpacity>
@@ -214,87 +196,58 @@ export default function PackagesScreen() {
 
                 return (
                   <View key={pkg.id}>
-                    <View
-                      style={
-                        pkg.badge !== "Popular"
-                          ? styles.packageNameContainer
-                          : styles.popularPackageNameContainer
-                      }
-                    >
+                    <View className="mb-6">
                       {pkg.badge && (
-                        <View
-                          style={[
-                            styles.badge,
-                            pkg.badge === "VIP" && styles.vipBadge,
-                          ]}
-                        >
-                          <Text style={styles.badgeText}>
+                        <View className={`self-start px-3 py-1 rounded-full mb-2 ${pkg.badge === "VIP" ? "bg-rm-gold" : "bg-rm-gold"}`}>
+                          <Text className="text-xs font-bold text-white">
                             {pkg.badge.toUpperCase()}
                           </Text>
                         </View>
                       )}
-                      <Text style={styles.packageName}>{pkg.name}</Text>
+                      <Text className="text-xl font-bold text-white">{pkg.name}</Text>
                     </View>
-                    <View
-                      style={[
-                        styles.card,
-                        pkg.badge === "Popular" && styles.popularCard,
-                      ]}
-                    >
-                      <View style={styles.priceContainer}>
+                    <View className={`bg-bg-medium p-5 mb-4 ${pkg.badge === "Popular" ? "border-2 border-rm-gold" : ""}`}>
+                      <View className="mb-4">
                         {billingType === "yearly" && (
-                          <Text style={styles.yearlyOriginal}>
+                          <Text className="text-sm text-text-secondary line-through">
                             ${pkg.yearlyOriginal}
                           </Text>
                         )}
-                        <Text style={styles.price}>
+                        <Text className="text-2xl font-bold text-rm-gold">
                           {billingType === "monthly"
                             ? `$${pkg.monthlyPrice}`
                             : `$${pkg.yearlyPrice}`}
                         </Text>
-                        <Text style={styles.period}>
+                        <Text className="text-sm text-text-secondary">
                           {billingType === "monthly" ? " per month" : " per year"}
                         </Text>
                       </View>
-                      <View style={styles.featuresContainer}>
+                      <View className="mb-4">
                         {pkg.features.map((feature, index) => (
-                          <View key={index} style={styles.featureColumn}>
-                            <View key={index} style={styles.featureRow}>
-                              <Check
-                                size={20}
-                                strokeWidth={4}
-                                color={Colors.darkGold}
-                              />
-                              <Text style={styles.featureText}>{feature}</Text>
+                          <View key={index} className="mb-2">
+                            <View key={index} className="flex-row items-center gap-2">
+                              <Check size={20} strokeWidth={4} color="#BC9045" />
+                              <Text className="text-sm text-white flex-1">{feature}</Text>
                             </View>
-                            <View style={styles.accentLine} />
+                            <View className="h-px bg-border-default my-1" />
                           </View>
                         ))}
                         {pkg.non_featured.map((feature, index) => (
-                          <View key={index} style={styles.featureColumn}>
-                            <View key={index} style={styles.featureRow}>
-                              <X size={20} strokeWidth={4} color={Colors.darkGold} />
-                              <Text style={styles.featureText}>{feature}</Text>
+                          <View key={index} className="mb-2">
+                            <View key={index} className="flex-row items-center gap-2">
+                              <X size={20} strokeWidth={4} color="#BC9045" />
+                              <Text className="text-sm text-white flex-1">{feature}</Text>
                             </View>
-                            <View style={styles.accentLine} />
+                            <View className="h-px bg-border-default my-1" />
                           </View>
                         ))}
                       </View>
                       <TouchableOpacity
                         disabled={disableCTA}
-                        style={[
-                          styles.button,
-                          pkg.badge === "Popular" && styles.popularButton,
-                          disableCTA && { opacity: 0.5 }
-                        ]}
+                        className={`py-4 rounded-xl items-center ${pkg.badge === "Popular" ? "bg-rm-gold" : "bg-bg-light"} ${disableCTA ? "opacity-50" : ""}`}
                         onPress={() => selectedPurchasePackage && !disableCTA && handleSubscribe(selectedPurchasePackage)}
                       >
-                        <Text
-                          style={[
-                            styles.buttonText,
-                            pkg.badge === "Popular" && styles.popularButtonText
-                          ]}
-                        >
+                        <Text className={`text-base font-bold ${pkg.badge === "Popular" ? "text-white" : "text-white"}`}>
                           {selectedPurchasePackage ? ctaLabel : "Not Available"}
                         </Text>
                       </TouchableOpacity>
@@ -309,212 +262,3 @@ export default function PackagesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  currentPlanContainer: {
-    backgroundColor: Colors.cardBg,
-    marginBottom: 24,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.darkGold,
-  },
-  currentPlanHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 12,
-  },
-  currentPlanTitle: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.darkGold,
-  },
-  currentPlanName: {
-    fontSize: 20,
-    fontWeight: "700" as const,
-    color: Colors.textPrimary,
-    marginBottom: 4,
-  },
-  currentPlanPeriod: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: Colors.darkGray,
-  },
-  content: {
-    padding: 20,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.primary,
-    marginBottom: 8,
-    textAlign: "center" as const,
-  },
-  subheader: {
-    fontSize: 14,
-    color: Colors.primary,
-    marginBottom: 24,
-    textAlign: "center" as const,
-  },
-  card: {
-    backgroundColor: Colors.deepDarkGray,
-    padding: 20,
-    marginBottom: 16,
-  },
-  toggleContainer: {
-    flexDirection: "row" as const,
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    padding: 4,
-    marginBottom: 24,
-  },
-  toggleButton: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: "center" as const,
-    borderRadius: 6,
-  },
-  toggleButtonActive: {
-    backgroundColor: Colors.darkGold,
-  },
-  toggleText: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: Colors.textLight,
-  },
-  toggleTextActive: {
-    color: Colors.primary,
-  },
-  popularCard: {
-    borderColor: Colors.darkGold,
-    borderWidth: 2,
-  },
-  badge: {
-    position: "absolute" as const,
-    top: -10,
-    right: -2,
-    backgroundColor: Colors.darkGold,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  vipBadge: {
-    backgroundColor: Colors.secondary,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: "700" as const,
-    color: Colors.primary,
-  },
-  yearlyOriginal: {
-    fontSize: 14,
-    color: Colors.primary,
-    textDecorationLine: "line-through",
-    marginRight: 8,
-  },
-  savingsText: {
-    fontSize: 12,
-    color: Colors.lightGray,
-    fontWeight: "600" as const,
-    marginBottom: 12,
-  },
-  packageName: {
-    textAlignVertical: "center" as const,
-    fontSize: 22,
-    fontWeight: "700" as const,
-    color: Colors.primary,
-    textAlign: "center" as const,
-  },
-  packageNameContainer: {
-    height: 60,
-    flexDirection: "column" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    backgroundColor: Colors.lightDarkGray,
-    borderColor: Colors.primary,
-    borderWidth: 1,
-    paddingVertical: 8,
-    borderLeftWidth: 0,
-    borderRightWidth: 0,
-  },
-  popularPackageNameContainer: {
-    height: 60,
-    flexDirection: "column" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    backgroundColor: Colors.lightDarkGray,
-    borderColor: Colors.darkGold,
-    borderWidth: 2,
-    paddingVertical: 8,
-    borderBottomWidth: 0,
-  },
-  priceContainer: {
-    flexDirection: "row" as const,
-    alignItems: "baseline" as const,
-    marginBottom: 20,
-  },
-  price: {
-    fontSize: 32,
-    fontWeight: "700" as const,
-    color: Colors.primary,
-    marginRight: 8,
-  },
-  period: {
-    fontSize: 14,
-    color: Colors.primary,
-  },
-  featuresContainer: {
-    marginBottom: 20,
-  },
-  featureRow: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    marginBottom: 3,
-  },
-  featureColumn: {
-    flexDirection: "column" as const,
-    alignItems: "center" as const,
-    marginBottom: 5,
-  },
-  featureText: {
-    fontSize: 14,
-    color: Colors.textWhite,
-    marginLeft: 12,
-    flex: 1,
-  },
-  button: {
-    flexDirection: "row",
-    justifyContent: "center",
-    backgroundColor: Colors.secondary,
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: "center" as const,
-  },
-  popularButton: {
-    backgroundColor: Colors.darkGold,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-  },
-  popularButtonText: {
-    color: Colors.primary,
-  },
-  accentLine: {
-    height: 1,
-    width: "100%",
-    backgroundColor: Colors.lightGray,
-    borderRadius: 2,
-  },
-  currentButton: {
-    backgroundColor: Colors.cardBg,
-    borderColor: Colors.darkGold,
-    borderWidth: 1,
-  },
-  currentButtonText: {
-    color: Colors.darkGold,
-  },
-});

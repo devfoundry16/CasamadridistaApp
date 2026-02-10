@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, ActivityIndicator, Alert } from "react-native";
 import { WebView } from "react-native-webview";
 import { development } from "@/config/environment";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Spinner } from "@/components/Spinner";
-import Colors from "@/constants/colors";
 
 const PayPalPaymentScreen = () => {
   const router = useRouter();
@@ -153,7 +152,7 @@ const PayPalPaymentScreen = () => {
 
   if (isWebViewLoading) {
     return (
-      <View style={styles.spinnerContainer}>
+      <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content="Loading" />
       </View>
     );
@@ -162,7 +161,7 @@ const PayPalPaymentScreen = () => {
   return (
     <>
       {paypalUrl ? (
-        <View style={styles.webview}>
+        <View className="h-full w-full">
           <WebView
             source={{ uri: paypalUrl }}
             onNavigationStateChange={_onNavigationStateChange}
@@ -179,28 +178,3 @@ const PayPalPaymentScreen = () => {
 };
 
 export default PayPalPaymentScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  webview: {
-    height: "100%",
-    width: "100%",
-  },
-  btn: {
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    backgroundColor: "#61E786",
-    justifyContent: "center",
-    alignItems: "center",
-    alignContent: "center",
-  },
-  spinnerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.deepDarkGray,
-  },
-});

@@ -3,12 +3,17 @@ import { strengthStats } from "@/mocks/advertisement";
 import { Image } from "expo-image";
 import { Users } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Dimensions, StyleSheet, Text, View } from "react-native";
+import { Animated, Dimensions, Text, View } from "react-native";
 import { LayoutChangeEvent } from "react-native/Libraries/Types/CoreEventTypes";
 const { width } = Dimensions.get("window");
 
-const SquadSection = ({shouldAnimate, handleStrengthSectionLayout}: { shouldAnimate: boolean, handleStrengthSectionLayout: (event: LayoutChangeEvent) => void}) => {
-  
+const SquadSection = ({
+  shouldAnimate,
+  handleStrengthSectionLayout,
+}: {
+  shouldAnimate: boolean;
+  handleStrengthSectionLayout: (event: LayoutChangeEvent) => void;
+}) => {
   const getIcon = (iconName: string) => {
     const iconProps = { width: 156, height: 156 };
     switch (iconName) {
@@ -58,17 +63,21 @@ const SquadSection = ({shouldAnimate, handleStrengthSectionLayout}: { shouldAnim
   };
   return (
     <View
-      style={styles.adStrengthSection}
+      className="py-10 px-5 bg-bg-medium -mx-4"
       onLayout={handleStrengthSectionLayout}
     >
-      <View style={styles.adSectionHeader}>
-        <View style={styles.adHeaderLine} />
-        <Text style={styles.adSectionTitle}>Our Strength</Text>
-        <View style={styles.adHeaderLine} />
+      <View className="flex-row items-center justify-center mb-2.5">
+        <View className="w-[70px] h-0.5 bg-rm-gold mx-10" />
+        <Text className="text-2xl font-bold text-text-primary text-center">
+          Our Strength
+        </Text>
+        <View className="w-[70px] h-0.5 bg-rm-gold mx-10" />
       </View>
-      <Text style={styles.adSectionSubtitle}>Madridista spirit united</Text>
+      <Text className="text-base text-rm-gold text-center mb-7">
+        Madridista spirit united
+      </Text>
 
-      <View style={styles.adStatsContainer}>
+      <View className="flex-row flex-wrap justify-around gap-4">
         {strengthStats.map((stat, index) => (
           <AnimatedStat
             key={index}
@@ -81,63 +90,7 @@ const SquadSection = ({shouldAnimate, handleStrengthSectionLayout}: { shouldAnim
     </View>
   );
 };
-const styles = StyleSheet.create({
-  adStrengthSection: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    backgroundColor: "#2a2a2a",
-    marginHorizontal: -16,
-  },
-  adSectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  adHeaderLine: {
-    width: 70,
-    height: 2,
-    backgroundColor: Colors.accent,
-    marginHorizontal: 40,
-  },
-  adSectionTitle: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    textAlign: "center",
-  },
-  adSectionSubtitle: {
-    fontSize: 16,
-    color: Colors.accent,
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  adStatsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-around",
-    gap: 15,
-  },
-  adStatCard: {
-    width: (width - 80) / 2,
-    alignItems: "center",
-    padding: 15,
-  },
-  adIconContainer: {
-    marginBottom: 12,
-  },
-  adStatValue: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 6,
-  },
-  adStatLabel: {
-    fontSize: 14,
-    color: Colors.accent,
-    textAlign: "center",
-  },
-});
+const adStatCardWidth = (width - 80) / 2;
 
 interface AnimatedStatProps {
   stat: {
@@ -174,13 +127,16 @@ function AnimatedStat({ stat, icon, shouldAnimate }: AnimatedStatProps) {
   }, [shouldAnimate, stat.value, animatedValue]);
 
   return (
-    <View style={styles.adStatCard}>
-      <View style={styles.adIconContainer}>{React.cloneElement(icon)}</View>
-      <Text style={styles.adStatValue}>
+    <View
+      className="items-center p-4"
+      style={{ width: adStatCardWidth }}
+    >
+      <View className="mb-3">{React.cloneElement(icon)}</View>
+      <Text className="text-2xl font-bold text-text-primary mb-1.5">
         {displayValue.toLocaleString()}
         {stat.suffix}
       </Text>
-      <Text style={styles.adStatLabel}>{stat.label}</Text>
+      <Text className="text-sm text-rm-gold text-center">{stat.label}</Text>
     </View>
   );
 }

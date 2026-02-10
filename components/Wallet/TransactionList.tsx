@@ -2,7 +2,7 @@
 import { FlintopWalletTransaction } from "@/types/user/flintop-wallet";
 import { formatDate } from "@/utils/helper";
 import React from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, Text, View } from "react-native";
 
 interface TransactionListProps {
   transactions: FlintopWalletTransaction[];
@@ -30,38 +30,40 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   }: {
     item: FlintopWalletTransaction;
   }) => (
-    <View style={styles.transactionItem}>
-      <View style={styles.transactionIcon}>
-        <Text style={styles.iconText}>{getTransactionIcon(item.type)}</Text>
+    <View className="flex-row items-start py-3">
+      <View className="w-10 h-10 rounded-full bg-bg-light justify-center items-center mr-3">
+        <Text className="text-base">{getTransactionIcon(item.type)}</Text>
       </View>
 
-      <View style={styles.transactionDetails}>
-        <Text style={styles.transactionDescription} numberOfLines={2}>
+      <View className="flex-1 mr-3">
+        <Text className="text-base font-medium text-text-primary mb-1 leading-5" numberOfLines={2}>
           {item.details}
         </Text>
-        <Text style={styles.transactionDate}>{formatDate(item.date)}</Text>
+        <Text className="text-xs text-text-secondary mb-0.5">
+          {formatDate(item.date)}
+        </Text>
         {item.order_id && (
-          <Text style={styles.orderId}>Order #: {item.order_id}</Text>
+          <Text className="text-[11px] text-text-tertiary italic">
+            Order #: {item.order_id}
+          </Text>
         )}
         {item.transaction_id && (
-          <Text style={styles.orderId}>
+          <Text className="text-[11px] text-text-tertiary italic">
             Transaction #: {item.transaction_id}
           </Text>
         )}
       </View>
 
-      <View style={styles.amountContainer}>
+      <View className="items-end">
         <Text
-          style={[
-            styles.transactionAmount,
-            { color: getAmountColor(item.type) },
-          ]}
+          className="text-base font-bold mb-0.5"
+          style={{ color: getAmountColor(item.type) }}
         >
           {getAmountPrefix(item.type)}
           {currency}
           {Math.abs(item.amount).toFixed(2)}
         </Text>
-        <Text style={styles.balanceAfter}>
+        <Text className="text-[11px] text-text-secondary">
           Balance: {currency}
           {item.balance.toFixed(2)}
         </Text>
@@ -70,10 +72,12 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   );
 
   const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Text style={styles.emptyStateIcon}>💳</Text>
-      <Text style={styles.emptyStateTitle}>No Transactions Yet</Text>
-      <Text style={styles.emptyStateText}>
+    <View className="items-center py-10 px-5">
+      <Text className="text-5xl mb-4">💳</Text>
+      <Text className="text-lg font-bold text-text-secondary mb-2 text-center">
+        No Transactions Yet
+      </Text>
+      <Text className="text-sm text-text-tertiary text-center leading-5">
         Your wallet transactions will appear here once you start using your
         balance.
       </Text>
@@ -81,10 +85,12 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Recent Transactions</Text>
-        <Text style={styles.transactionCount}>
+    <View className="bg-bg-card mx-4 mb-4 rounded-xl p-4 shadow-md">
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-lg font-bold text-text-primary">
+          Recent Transactions
+        </Text>
+        <Text className="text-xs text-text-secondary bg-bg-light px-2 py-1 rounded-xl">
           {transactions.length}{" "}
           {transactions.length === 1 ? "transaction" : "transactions"}
         </Text>
@@ -99,120 +105,11 @@ export const TransactionList: React.FC<TransactionListProps> = ({
           keyExtractor={(item) => item.id.toString()}
           scrollEnabled={false}
           showsVerticalScrollIndicator={false}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={() => (
+            <View className="h-px bg-border-default my-1" />
+          )}
         />
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  transactionCount: {
-    fontSize: 12,
-    color: "#666",
-    backgroundColor: "#f5f5f5",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  transactionItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    paddingVertical: 12,
-  },
-  transactionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#f8f9fa",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  iconText: {
-    fontSize: 16,
-  },
-  transactionDetails: {
-    flex: 1,
-    marginRight: 12,
-  },
-  transactionDescription: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-    marginBottom: 4,
-    lineHeight: 20,
-  },
-  transactionDate: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 2,
-  },
-  orderId: {
-    fontSize: 11,
-    color: "#888",
-    fontStyle: "italic",
-  },
-  amountContainer: {
-    alignItems: "flex-end",
-  },
-  transactionAmount: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 2,
-  },
-  balanceAfter: {
-    fontSize: 11,
-    color: "#666",
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#f0f0f0",
-    marginVertical: 4,
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-  },
-  emptyStateIcon: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  emptyStateTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#666",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  emptyStateText: {
-    fontSize: 14,
-    color: "#888",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-});

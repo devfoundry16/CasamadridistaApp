@@ -1,4 +1,3 @@
-import Colors, { altColors as colors } from "@/constants/colors";
 import countries from "@/constants/countries.json";
 import {
   Coach,
@@ -9,10 +8,9 @@ import {
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Building2, Calendar, MapPin } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -97,7 +95,7 @@ export default function TeamDetailScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.spinnerContainer}>
+      <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content="Loading squads" />
       </View>
     );
@@ -106,71 +104,63 @@ export default function TeamDetailScreen() {
   return (
     <>
       <ScrollView
-        style={[styles.container, { backgroundColor: Colors.deepDarkGray }]}
+        className="flex-1 bg-bg-medium"
         showsVerticalScrollIndicator={false}
       >
-        <View
-          style={[
-            styles.header,
-            {
-              backgroundColor: Colors.deepDarkGray,
-              borderBottomColor: colors.border,
-              paddingTop: 12,
-            },
-          ]}
-        >
+        <View className="px-4 pb-4 pt-3 border-b border-border-default bg-bg-medium">
           <Image
             source={{
               uri: teamInfo?.team?.logo,
             }}
+            style={{ width: 120, height: 120, marginHorizontal: "auto", marginBottom: 3 }}
             contentFit="contain"
-            style={styles.headerImage}
+            className="mx-auto mb-3"
           />
-          <Text style={[styles.headerTitle, { color: colors.textWhite }]}>
+          <Text className="text-[28px] font-bold text-white mb-1 text-center">
             {teamInfo?.team?.name} Squad
           </Text>
-          <Text style={[styles.headerSubtitle, { color: colors.textWhite }]}>
+          <Text className="text-sm text-white text-center">
             2024-2025 Season
           </Text>
         </View>
-        <View style={styles.content}>
-          <View style={styles.infoCard}>
-            <View style={styles.infoColumn}>
-              <View style={styles.infoItem}>
-                <MapPin size={20} color={colors.textWhite} />
-                <Text style={styles.infoLabel}>Country</Text>
+        <View className="p-4">
+          <View className="mb-6">
+            <View className="flex-col justify-around">
+              <View className="flex-row items-center m-1.5 gap-2">
+                <MapPin size={20} color="#FFFFFF" />
+                <Text className="text-xs text-text-tertiary font-medium">Country</Text>
                 {teamInfo?.team?.country && map[teamInfo.team.country] ? (
                   <CountryFlag isoCode={map[teamInfo.team.country]} size={25} />
                 ) : null}
               </View>
-              <View style={styles.infoItem}>
-                <Calendar size={20} color={colors.textWhite} />
-                <Text style={styles.infoLabel}>Founded</Text>
-                <Text style={styles.infoValue}>{teamInfo?.team?.founded}</Text>
+              <View className="flex-row items-center m-1.5 gap-2">
+                <Calendar size={20} color="#FFFFFF" />
+                <Text className="text-xs text-text-tertiary font-medium">Founded</Text>
+                <Text className="text-base text-white font-bold">{teamInfo?.team?.founded}</Text>
               </View>
               <TouchableOpacity
-                style={styles.infoItem}
+                className="flex-row items-center m-1.5 gap-2"
                 onPress={() => {
                   if (teamInfo?.venue?.id) {
                     router.push(`/venue/${teamInfo.venue.id}`);
                   }
                 }}
               >
-                <Building2 size={20} color={colors.textWhite} />
-                <Text style={styles.infoLabel}>Stadium</Text>
-                <Text style={styles.infoValue}>{teamInfo?.venue?.name}</Text>
+                <Building2 size={20} color="#FFFFFF" />
+                <Text className="text-xs text-text-tertiary font-medium">Stadium</Text>
+                <Text className="text-base text-white font-bold">{teamInfo?.venue?.name}</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Squad</Text>
-            <View style={styles.accentLine} />
+          <View className="flex-col justify-between mb-4 mt-2">
+            <Text className="text-[22px] font-bold text-white">Squad</Text>
+            <View className="h-[1.5px] w-full bg-border-default rounded" />
           </View>
 
-          <View style={styles.positionSection}>
-            <View style={styles.positionTitleContainer}>
-              <Text style={styles.positionTitle}>GOALKEEPERS</Text>
+          <View className="mb-6">
+            <View className="bg-rm-gold pl-4">
+              <Text className="text-lg font-semibold text-white py-1.5">GOALKEEPERS</Text>
             </View>
             {goalkeepers.map((player: Player) => (
               <View key={player.id}>
@@ -180,14 +170,14 @@ export default function TeamDetailScreen() {
                     router.push(`/player/${teamId}/${player.id}` as any)
                   }
                 />
-                <View style={styles.accentLine} />
+                <View className="h-[1.5px] w-full bg-border-default rounded" />
               </View>
             ))}
           </View>
 
-          <View style={styles.positionSection}>
-            <View style={styles.positionTitleContainer}>
-              <Text style={styles.positionTitle}>DEFENDERS</Text>
+          <View className="mb-6">
+            <View className="bg-rm-gold pl-4">
+              <Text className="text-lg font-semibold text-white py-1.5">DEFENDERS</Text>
             </View>
             {defenders.map((player: Player) => (
               <View key={player.id}>
@@ -197,14 +187,14 @@ export default function TeamDetailScreen() {
                     router.push(`/player/${teamId}/${player.id}` as any)
                   }
                 />
-                <View style={styles.accentLine} />
+                <View className="h-[1.5px] w-full bg-border-default rounded" />
               </View>
             ))}
           </View>
 
-          <View style={styles.positionSection}>
-            <View style={styles.positionTitleContainer}>
-              <Text style={styles.positionTitle}>MIDFIELDERS</Text>
+          <View className="mb-6">
+            <View className="bg-rm-gold pl-4">
+              <Text className="text-lg font-semibold text-white py-1.5">MIDFIELDERS</Text>
             </View>
             {midfielders.map((player: Player) => (
               <View key={player.id}>
@@ -214,14 +204,14 @@ export default function TeamDetailScreen() {
                     router.push(`/player/${teamId}/${player.id}` as any)
                   }
                 />
-                <View style={styles.accentLine} />
+                <View className="h-[1.5px] w-full bg-border-default rounded" />
               </View>
             ))}
           </View>
 
-          <View style={styles.positionSection}>
-            <View style={styles.positionTitleContainer}>
-              <Text style={styles.positionTitle}>FORWARDS</Text>
+          <View className="mb-6">
+            <View className="bg-rm-gold pl-4">
+              <Text className="text-lg font-semibold text-white py-1.5">FORWARDS</Text>
             </View>
             {forwards.map((player: Player) => (
               <View key={player.id}>
@@ -231,13 +221,13 @@ export default function TeamDetailScreen() {
                     router.push(`/player/${teamId}/${player.id}` as any)
                   }
                 />
-                <View style={styles.accentLine} />
+                <View className="h-[1.5px] w-full bg-border-default rounded" />
               </View>
             ))}
           </View>
-          <View style={styles.positionSection}>
-            <View style={styles.positionTitleContainer}>
-              <Text style={styles.positionTitle}>COACH</Text>
+          <View className="mb-6">
+            <View className="bg-rm-gold pl-4">
+              <Text className="text-lg font-semibold text-white py-1.5">COACH</Text>
             </View>
             {coach && (
               <View>
@@ -245,7 +235,7 @@ export default function TeamDetailScreen() {
                   player={coach}
                   onPress={() => router.push(`/coach/${coach.id}` as any)}
                 />
-                <View style={styles.accentLine} />
+                <View className="h-[1.5px] w-full bg-border-default rounded" />
               </View>
             )}
           </View>
@@ -306,350 +296,26 @@ function PlayerCard({
   onPress: () => void;
 }) {
   return (
-    <TouchableOpacity style={styles.playerCard} onPress={onPress}>
-      <View style={styles.playerNumber}>
-        <Text style={styles.playerNumberText}>{player.number}</Text>
+    <TouchableOpacity className="flex-row items-center rounded-xl p-3" onPress={onPress}>
+      <View className="w-10 h-10 rounded-[20px] justify-center items-center mr-3">
+        <Text className="text-[25px] font-bold text-white">{player.number}</Text>
       </View>
       <Image
         source={{ uri: player.photo }}
-        style={styles.playerPhoto}
+        style={{ width: 60, height: 60, borderRadius: 30, marginRight: 10 }}
+        className="bg-bg-light"
         contentFit="cover"
       />
-      <View style={styles.playerInfo}>
-        <Text style={styles.playerName}>{player.name}</Text>
-        <View style={styles.playerMeta}>
+      <View className="flex-1 justify-center">
+        <Text className="text-base font-semibold text-white mb-1">{player.name}</Text>
+        <View className="flex-row items-center gap-1.5">
           {player.nationality && map[player.nationality] ? (
             <CountryFlag isoCode={map[player.nationality]} size={25} />
           ) : null}
-          <Text style={styles.playerMetaText}>Age: </Text>
-          <Text style={styles.playerMetaText}>{player.age} years</Text>
+          <Text className="text-xs font-bold text-white">Age: </Text>
+          <Text className="text-xs font-bold text-white">{player.age} years</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  spinnerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.deepDarkGray,
-  },
-  content: {
-    padding: 16,
-  },
-  headerImage: {
-    width: 120,
-    height: 120,
-    margin: "auto",
-    marginBottom: 12,
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    marginBottom: 4,
-    textAlign: "center",
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    textAlign: "center",
-  },
-  playersList: {
-    padding: 16,
-  },
-  columnWrapper: {
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-
-  infoCard: {
-    marginBottom: 24,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  infoColumn: {
-    flexDirection: "column",
-    justifyContent: "space-around",
-  },
-  infoItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    margin: 6,
-    gap: 8,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: colors.lightGray,
-    fontWeight: "500" as const,
-  },
-  infoValue: {
-    fontSize: 16,
-    color: colors.textWhite,
-    fontWeight: "700" as const,
-  },
-  sectionHeader: {
-    flexDirection: "column",
-    justifyContent: "space-between",
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "700" as const,
-    color: colors.textWhite,
-  },
-  accentLine: {
-    height: 1.5,
-    width: "100%",
-    backgroundColor: colors.lightGray,
-    borderRadius: 2,
-  },
-  positionSection: {
-    marginBottom: 24,
-  },
-  positionTitleContainer: {
-    textAlignVertical: "center",
-    backgroundColor: colors.primary,
-    paddingLeft: 16,
-  },
-  positionTitle: {
-    fontSize: 18,
-    fontWeight: "600" as const,
-    color: colors.textWhite,
-    paddingVertical: 6,
-  },
-  playerCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  playerNumber: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  playerNumberText: {
-    fontSize: 25,
-    fontWeight: "700" as const,
-    color: colors.textWhite,
-  },
-  playerPhoto: {
-    width: 60,
-    height: 60,
-    marginRight: 12,
-    backgroundColor: colors.lightGray,
-  },
-  playerCountryImage: {
-    width: 50,
-    height: 30,
-    backgroundColor: "transparent",
-    marginRight: 6,
-  },
-  playerInfo: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  playerName: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: colors.textWhite,
-    marginBottom: 4,
-  },
-  playerMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  playerMetaText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: colors.textWhite,
-  },
-  matchCard: {
-    borderColor: colors.lightGray,
-    borderWidth: 1,
-    padding: 16,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  matchHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  matchCompetition: {
-    fontSize: 12,
-    fontWeight: "700" as const,
-    color: colors.textWhite,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  matchDateTime: {
-    fontSize: 11,
-    color: colors.textWhite,
-  },
-  matchContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  teamContainer: {
-    flex: 1,
-    alignItems: "center",
-    gap: 8,
-  },
-  teamLogo: {
-    width: 40,
-    height: 40,
-  },
-  teamName: {
-    fontSize: 13,
-    fontWeight: "600" as const,
-    color: colors.textWhite,
-    textAlign: "center",
-  },
-  scoreContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 20,
-  },
-  score: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    color: colors.textWhite,
-  },
-  scoreSeparator: {
-    fontSize: 20,
-    fontWeight: "600" as const,
-    color: colors.textWhite,
-  },
-  nextMatchSection: {
-    marginBottom: 24,
-  },
-  nextMatchCard: {
-    borderRadius: 20,
-    padding: 20,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-  },
-  nextMatchHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  nextMatchCompetition: {
-    fontSize: 14,
-    fontWeight: "700" as const,
-    color: colors.accent,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  countdownContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  countdownText: {
-    fontSize: 13,
-    fontWeight: "700" as const,
-    color: colors.accent,
-  },
-  nextMatchTeams: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  nextMatchTeam: {
-    flex: 1,
-    alignItems: "center",
-    gap: 12,
-  },
-  nextMatchLogo: {
-    width: 70,
-    height: 70,
-  },
-  nextMatchTeamName: {
-    fontSize: 15,
-    fontWeight: "700" as const,
-    color: colors.textWhite,
-    textAlign: "center",
-  },
-  vsContainer: {
-    paddingHorizontal: 16,
-  },
-  vsText: {
-    fontSize: 20,
-    fontWeight: "700" as const,
-    color: colors.accent,
-    letterSpacing: 2,
-  },
-  nextMatchDetails: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.2)",
-  },
-  nextMatchDetailItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  nextMatchDetailText: {
-    fontSize: 12,
-    color: colors.textWhite,
-    fontWeight: "600" as const,
-  },
-  vsTextSmall: {
-    fontSize: 16,
-    fontWeight: "700" as const,
-    color: colors.textWhite,
-  },
-  matchStadium: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  matchStadiumText: {
-    fontSize: 11,
-    color: colors.textWhite,
-  },
-});

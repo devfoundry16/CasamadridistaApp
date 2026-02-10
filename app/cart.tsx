@@ -1,5 +1,4 @@
 import { Spinner } from "@/components/Spinner";
-import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
 import { CHECKOUT_PRODUCT_TYPE } from "@/types/shop/checkout";
 import { useRouter } from "expo-router";
@@ -7,7 +6,6 @@ import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react-native";
 import {
   FlatList,
   Image,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -19,7 +17,7 @@ export default function CartScreen() {
     useCart();
   if (loading) {
     return (
-      <View style={styles.spinnerContainer}>
+      <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content="Processing cart" />
       </View>
     );
@@ -27,19 +25,19 @@ export default function CartScreen() {
 
   if (items && items.length === 0) {
     return (
-      <View style={styles.emptyContainer}>
-        <View style={styles.emptyContainer}>
-          <ShoppingBag size={80} color={Colors.darkGold} strokeWidth={1.5} />
-          <Text style={styles.emptyTitle}>Your cart is empty</Text>
-          <Text style={styles.emptyText}>
+      <View className="flex-1 bg-bg-medium">
+        <View className="flex-1 bg-bg-medium items-center justify-center p-6">
+          <ShoppingBag size={80} color="#BC9045" strokeWidth={1.5} />
+          <Text className="text-2xl font-bold text-white mt-6 mb-2">Your cart is empty</Text>
+          <Text className="text-base text-text-secondary text-center mb-8">
             Add some luxury items to get started
           </Text>
           <TouchableOpacity
-            style={styles.shopButton}
+            className="bg-rm-gold px-8 py-4 rounded-xl"
             onPress={() => router.push("/shop" as any)}
             activeOpacity={0.8}
           >
-            <Text style={styles.shopButtonText}>Start Shopping</Text>
+            <Text className="text-base font-semibold text-white">Start Shopping</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -47,79 +45,83 @@ export default function CartScreen() {
   }
 
   const renderCartItem = ({ item }: { item: (typeof items)[0] }) => (
-    <View style={styles.cartItem}>
-      <Image source={{ uri: item.images[0].src }} style={styles.itemImage} />
-      <View style={styles.itemDetails}>
-        <Text style={styles.itemName} numberOfLines={2}>
+    <View className="flex-row bg-bg-card rounded-xl p-3 mb-3 border border-border-default">
+      <Image
+        source={{ uri: item.images[0].src }}
+        style={{ width: 80, height: 80, borderRadius: 8 }}
+        className="bg-border-default"
+      />
+      <View className="flex-1 ml-3 justify-between">
+        <Text className="text-base font-semibold text-white mb-1" numberOfLines={2}>
           {item.name}
         </Text>
         {item.variation.map((val, idx) => {
           return (
-            <Text key={idx} style={styles.itemVariation} numberOfLines={2}>
+            <Text key={idx} className="text-xs font-semibold text-text-muted mb-1" numberOfLines={2}>
               {val.attribute}: {val.value}
             </Text>
           );
         })}
-        <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+        <View className="flex-1 flex-row items-center">
           {item.prices.regular_price !== item.prices.price && (
-            <Text style={styles.itemRegularPrice}>
+            <Text className="text-sm line-through font-semibold text-white mb-2 mr-1">
               ${(Number(item.prices.regular_price) / 100).toFixed(2)}
             </Text>
           )}
-          <Text style={styles.itemPrice}>
+          <Text className="text-lg font-bold text-rm-gold mb-2">
             ${(Number(item.prices.price) / 100).toFixed(2)}
           </Text>
         </View>
-        <View style={styles.quantityContainer}>
+        <View className="flex-row items-center gap-3">
           {item.quantity_limits.editable && (
             <TouchableOpacity
-              style={styles.quantityButton}
+              className="w-7 h-7 rounded-md bg-border-default items-center justify-center"
               onPress={() => updateQuantity(item.key, item.quantity - 1)}
               activeOpacity={0.7}
             >
-              <Minus size={16} color={Colors.darkGold} />
+              <Minus size={16} color="#BC9045" />
             </TouchableOpacity>
           )}
-          <Text style={styles.quantityText}>{item.quantity}</Text>
+          <Text className="text-base font-semibold text-white min-w-6 text-center">{item.quantity}</Text>
           {item.quantity_limits.editable && (
             <TouchableOpacity
-              style={styles.quantityButton}
+              className="w-7 h-7 rounded-md bg-border-default items-center justify-center"
               onPress={() => updateQuantity(item.key, item.quantity + 1)}
               activeOpacity={0.7}
             >
-              <Plus size={16} color={Colors.darkGold} />
+              <Plus size={16} color="#BC9045" />
             </TouchableOpacity>
           )}
         </View>
       </View>
       <TouchableOpacity
-        style={styles.deleteButton}
+        className="p-2"
         onPress={() => removeFromCart(item.id)}
         activeOpacity={0.7}
       >
-        <Trash2 size={20} color={Colors.textSecondary} />
+        <Trash2 size={20} color="#A0A0A0" />
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-bg-medium">
       <FlatList
         data={items}
         renderItem={renderCartItem}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={{ padding: 16 }}
         showsVerticalScrollIndicator={false}
       />
-      <View style={styles.footer}>
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalPrice}>
+      <View className="bg-bg-medium p-4 border-t border-border-default">
+        <View className="flex-row justify-between items-center mb-4">
+          <Text className="text-lg font-semibold text-white">Total</Text>
+          <Text className="text-[28px] font-bold text-rm-gold">
             ${(Number(totalPrice) / 100).toFixed(2)}
           </Text>
         </View>
         <TouchableOpacity
-          style={styles.checkoutButton}
+          className="bg-rm-gold py-4 rounded-xl items-center"
           onPress={() =>
             router.push(
               `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.STANDARD}` as any
@@ -127,158 +129,9 @@ export default function CartScreen() {
           }
           activeOpacity={0.8}
         >
-          <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+          <Text className="text-lg font-semibold text-white">Proceed to Checkout</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  spinnerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.deepDarkGray,
-  },
-  emptyContainer: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginTop: 24,
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    textAlign: "center",
-    marginBottom: 32,
-  },
-  shopButton: {
-    backgroundColor: Colors.darkGold,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  shopButtonText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.deepDarkGray,
-  },
-  listContent: {
-    padding: 16,
-  },
-  cartItem: {
-    flexDirection: "row",
-    backgroundColor: Colors.cardBg,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  itemImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: Colors.border,
-  },
-  itemDetails: {
-    flex: 1,
-    marginLeft: 12,
-    justifyContent: "space-between",
-  },
-  itemName: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-    marginBottom: 4,
-  },
-  itemVariation: {
-    fontSize: 12,
-    fontWeight: "600" as const,
-    color: Colors.textLight,
-    marginBottom: 4,
-  },
-  itemPrice: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: Colors.darkGold,
-    marginBottom: 8,
-  },
-  itemRegularPrice: {
-    fontSize: 14,
-    textDecorationLine: "line-through",
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-    marginBottom: 8,
-    marginRight: 4,
-  },
-  quantityContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  quantityButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
-    backgroundColor: Colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  quantityText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-    minWidth: 24,
-    textAlign: "center",
-  },
-  deleteButton: {
-    padding: 8,
-  },
-  footer: {
-    backgroundColor: Colors.deepDarkGray,
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  totalContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  totalLabel: {
-    fontSize: 18,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-  },
-  totalPrice: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    color: Colors.darkGold,
-  },
-  checkoutButton: {
-    backgroundColor: Colors.darkGold,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  checkoutButtonText: {
-    fontSize: 18,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-  },
-});

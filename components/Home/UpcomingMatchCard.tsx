@@ -6,7 +6,6 @@ import React, { useRef } from "react";
 import {
   Dimensions,
   Image,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -19,36 +18,51 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
   const carouselRef = useRef<any>(null);
 
   const renderCard = (item: any) => (
-    <View style={styles.card}>
+    <View className="bg-bg-card rounded-[10px] p-3 items-center justify-center w-[90%] h-full self-center">
       <TouchableOpacity onPress={() => router.push(`/league/${item.league.id}/${item.league.season}`)}>
-        <Text style={styles.league}>
+        <Text className="text-text-primary text-base text-center">
           {item.league.name} {item.league.season}-{item.league.season + 1}
         </Text>
       </TouchableOpacity>
-      <Text style={styles.week}>{item.league.round}</Text>
+      <Text className="text-text-primary text-sm text-center mb-2">
+        {item.league.round}
+      </Text>
 
-      <TouchableOpacity style={styles.matchRow} onPress={() => router.push(`/match/${item.fixture.id}`)}>
-        <View
-          style={styles.team}
-        >
-          <Image source={{ uri: item.teams.home.logo }} style={styles.logo} />
-          <Text style={styles.teamName}>{item.teams.home.name}</Text>
+      <TouchableOpacity
+        className="flex-row items-center justify-around w-full my-2"
+        onPress={() => router.push(`/match/${item.fixture.id}`)}
+      >
+        <View className="items-center w-[30%]">
+          <Image
+            source={{ uri: item.teams.home.logo }}
+            style={{ width: 80, height: 80 }}
+            className="mb-1"
+            resizeMode="contain"
+          />
+          <Text className="text-text-primary text-sm mt-0.5">
+            {item.teams.home.name}
+          </Text>
         </View>
 
-        <Text style={styles.score}>
+        <Text className="text-white text-3xl font-bold">
           {item.fixture.status.short == "NS" ? "-" : item.goals.home}:
           {item.fixture.status.short == "NS" ? "-" : item.goals.away}
         </Text>
 
-        <View
-          style={styles.team}
-        >
-          <Image source={{ uri: item.teams.away.logo }} style={styles.logo} />
-          <Text style={styles.teamName}>{item.teams.away.name}</Text>
+        <View className="items-center w-[30%]">
+          <Image
+            source={{ uri: item.teams.away.logo }}
+            style={{ width: 80, height: 80 }}
+            className="mb-1"
+            resizeMode="contain"
+          />
+          <Text className="text-text-primary text-sm mt-0.5">
+            {item.teams.away.name}
+          </Text>
         </View>
       </TouchableOpacity>
 
-      <Text style={styles.date}>
+      <Text className="mt-2.5 bg-rm-gold text-white py-1 px-3 rounded-lg text-[13px]">
         {new Date(item.fixture.date as any).toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
@@ -61,15 +75,17 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.adSectionHeader}>
-        <View style={styles.adHeaderLine} />
-        <Text style={styles.adSectionTitle}>Upcoming Match</Text>
-        <View style={styles.adHeaderLine} />
+    <View className="bg-bg-medium py-4">
+      <View className="flex-row items-center justify-center">
+        <View className="w-[70px] h-0.5 bg-rm-gold mx-[30px]" />
+        <Text className="text-2xl font-bold text-text-primary text-center">
+          Upcoming Match
+        </Text>
+        <View className="w-[70px] h-0.5 bg-rm-gold mx-[30px]" />
       </View>
-      <View style={styles.carouselWrapper}>
+      <View className="flex-row items-center justify-center">
         <TouchableOpacity
-          style={styles.arrowButton}
+          className="w-[30px] h-[30px] rounded-full bg-bg-light items-center justify-center"
           onPress={() =>
             carouselRef.current?.scrollTo({ count: -1, animated: true })
           }
@@ -90,7 +106,7 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
         />
 
         <TouchableOpacity
-          style={styles.arrowButton}
+          className="w-[30px] h-[30px] rounded-full bg-bg-light items-center justify-center"
           onPress={() =>
             carouselRef.current?.scrollTo({ count: 1, animated: true })
           }
@@ -101,101 +117,3 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#2a2a2a",
-    paddingVertical: 16,
-  },
-  adSectionTitle: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    textAlign: "center",
-  },
-  adSectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  adHeaderLine: {
-    width: 70,
-    height: 2,
-    backgroundColor: Colors.accent,
-    marginHorizontal: 30,
-  },
-  carouselWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  arrowButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#333",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  arrowText: {
-    color: "#fff",
-    fontSize: 24,
-  },
-  card: {
-    backgroundColor: "#2f2f2f",
-    borderRadius: 10,
-    padding: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    width: "90%",
-    height: "100%",
-    alignSelf: "center",
-  },
-  league: {
-    color: Colors.textWhite,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  week: {
-    color: Colors.textWhite,
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  matchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    width: "100%",
-    marginVertical: 8,
-  },
-  team: {
-    alignItems: "center",
-    width: "30%",
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    resizeMode: "contain",
-    marginBottom: 4,
-  },
-  teamName: {
-    color: Colors.textWhite,
-    fontSize: 14,
-    marginTop: 2,
-  },
-  score: {
-    color: "#fff",
-    fontSize: 30,
-    fontWeight: "bold",
-  },
-  date: {
-    marginTop: 10,
-    backgroundColor: "#a37c4b",
-    color: "white",
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    fontSize: 13,
-  },
-});

@@ -1,5 +1,4 @@
 import { Spinner } from "@/components/Spinner";
-import Colors from "@/constants/colors";
 import { useOrder } from "@/hooks/useOrder";
 import { useUser } from "@/hooks/useUser";
 import { useCart } from "@/hooks/useCart";
@@ -17,7 +16,6 @@ import React, { useCallback, useEffect } from "react";
 import {
   Alert,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -49,26 +47,26 @@ export default function OrdersScreen() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case OrderStatus.PROCESSING:
-        return <CheckCircle size={20} color={Colors.success} />;
+        return <CheckCircle size={20} color="#10B981" />;
       case OrderStatus.PENDING:
-        return <Clock size={20} color={Colors.accent} />;
+        return <Clock size={20} color="#BC9045" />;
       case OrderStatus.CANCELLED:
-        return <XCircle size={20} color={Colors.error} />;
+        return <XCircle size={20} color="#EF4444" />;
       default:
-        return <Clock size={20} color={Colors.royalBlue} />;
+        return <Clock size={20} color="#0033A0" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case OrderStatus.PROCESSING:
-        return Colors.success;
+        return "#10B981";
       case OrderStatus.PENDING:
-        return Colors.accent;
+        return "#BC9045";
       case OrderStatus.CANCELLED:
-        return Colors.error;
+        return "#EF4444";
       default:
-        return Colors.royalBlue;
+        return "#0033A0";
     }
   };
 
@@ -109,7 +107,7 @@ export default function OrdersScreen() {
 
   if (loading) {
     return (
-      <View style={styles.spinnerContainer}>
+      <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content="Loading orders" />
       </View>
     );
@@ -117,94 +115,72 @@ export default function OrdersScreen() {
 
   return (
     <>
-      <ScrollView style={styles.container}>
+      <ScrollView className="flex-1 bg-bg-medium">
         {orders.length === 0 ? (
-          <View style={styles.emptyState}>
-            <ShoppingBag size={64} color={Colors.darkGray} />
-            <Text style={styles.emptyText}>No orders yet</Text>
-            <Text style={styles.emptySubtext}>
+          <View className="flex-1 items-center justify-center p-12 mt-24">
+            <ShoppingBag size={64} color="#515151" />
+            <Text className="text-2xl font-bold text-white mt-6 mb-2">No orders yet</Text>
+            <Text className="text-base text-text-secondary text-center">
               Your order history will appear here once you make a purchase
             </Text>
           </View>
         ) : (
-          <View style={styles.ordersList}>
+          <View className="p-6">
             {orders.map((order) => (
-              <View key={order.id} style={styles.orderCard}>
-                <View style={styles.orderHeader}>
-                  <View style={styles.orderIconContainer}>
+              <View key={order.id} className="bg-bg-light rounded-2xl p-5 mb-4 border border-border-light">
+                <View className="flex-row items-center mb-4 pb-4 border-b border-border-light">
+                  <View className="w-12 h-12 rounded-[24px] bg-bg-medium justify-center items-center mr-3">
                     <Package size={24} color={getStatusColor(order.status)} />
                   </View>
-                  <View style={styles.orderInfo}>
-                    <Text style={styles.orderId}>Order #{order.id}</Text>
-                    <Text style={styles.orderDate}>{order.created_at}</Text>
+                  <View className="flex-1">
+                    <Text className="text-base font-bold text-white mb-1">Order #{order.id}</Text>
+                    <Text className="text-sm text-text-secondary">{order.created_at}</Text>
                   </View>
                   <View
-                    style={[
-                      styles.statusBadge,
-                      { backgroundColor: getStatusColor(order.status) + "20" },
-                    ]}
+                    className="flex-row items-center px-3 py-1.5 rounded-xl gap-1.5"
+                    style={{ backgroundColor: getStatusColor(order.status) + "20" }}
                   >
                     {getStatusIcon(order.status)}
                     <Text
-                      style={[
-                        styles.statusText,
-                        { color: getStatusColor(order.status) },
-                      ]}
+                      className="text-xs font-semibold capitalize"
+                      style={{ color: getStatusColor(order.status) }}
                     >
                       {order.status}
                     </Text>
                   </View>
                 </View>
-                <View style={styles.orderBody}>
-                  <Text style={styles.itemsLabel}>Items:</Text>
+                <View className="mb-4">
+                  <Text className="text-sm font-semibold text-white mb-2">Items:</Text>
                   {order.line_items.map((item, index) => (
-                    <Text key={index} style={styles.itemText}>
+                    <Text key={index} className="text-sm text-text-secondary mb-1">
                       • {item.name}
                     </Text>
                   ))}
                 </View>
-                <View style={styles.orderFooter}>
-                  <Text style={styles.totalLabel}>Total:</Text>
+                <View className="flex-row justify-between items-center pt-4 border-t border-border-light">
+                  <Text className="text-base font-semibold text-white">Total:</Text>
                   <Text
-                    style={{
-                      ...styles.totalAmount,
-                      color: getStatusColor(order.status),
-                    }}
+                    className="text-2xl font-bold"
+                    style={{ color: getStatusColor(order.status) }}
                   >
                     ${Number(order.total).toFixed(2)}
                   </Text>
                 </View>
                 {order.status === OrderStatus.PENDING && (
-                  <View style={{ gap: 10 }}>
+                  <View className="gap-2.5 mt-3">
                     <TouchableOpacity
-                      style={[
-                        styles.statusBadge,
-                        {
-                          backgroundColor: Colors.lightGray + "20",
-                          justifyContent: "center",
-                        },
-                      ]}
+                      className="flex-row items-center justify-center px-3 py-1.5 rounded-xl bg-bg-light"
                       onPress={() => handleProcessPayment(order)}
                     >
-                      <Text
-                        style={[styles.statusText, { color: Colors.lightGray }]}
-                      >
+                      <Text className="text-xs font-semibold text-text-tertiary">
                         Process Payment
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[
-                        styles.statusBadge,
-                        {
-                          backgroundColor: Colors.lightGray + "20",
-                          justifyContent: "center",
-                        },
-                      ]}
+                      className="flex-row items-center justify-center px-3 py-1.5 rounded-xl bg-bg-light"
                       onPress={() => cancelOrder(order)}
                     >
-                      <Text
-                        style={[styles.statusText, { color: Colors.lightGray }]}
-                      >
+                      <Text className="text-xs font-semibold text-text-tertiary">
                         Cancel
                       </Text>
                     </TouchableOpacity>
@@ -218,121 +194,3 @@ export default function OrdersScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#2A2A2A",
-  },
-  spinnerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.deepDarkGray,
-  },
-  emptyState: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 48,
-    marginTop: 100,
-  },
-  emptyText: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginTop: 24,
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 16,
-    color: "#CCCCCC",
-    textAlign: "center",
-  },
-  ordersList: {
-    padding: 24,
-  },
-  orderCard: {
-    backgroundColor: "#3A3A3A",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#4A4A4A",
-  },
-  orderHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#4A4A4A",
-  },
-  orderIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#2A2A2A",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  orderInfo: {
-    flex: 1,
-  },
-  orderId: {
-    fontSize: 16,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 4,
-  },
-  orderDate: {
-    fontSize: 14,
-    color: "#CCCCCC",
-  },
-  statusBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    gap: 6,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: "600" as const,
-    textTransform: "capitalize" as const,
-  },
-  orderBody: {
-    marginBottom: 16,
-  },
-  itemsLabel: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-    marginBottom: 8,
-  },
-  itemText: {
-    fontSize: 14,
-    color: "#CCCCCC",
-    marginBottom: 4,
-  },
-  orderFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#4A4A4A",
-  },
-  totalLabel: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-  },
-  totalAmount: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.accent,
-  },
-});

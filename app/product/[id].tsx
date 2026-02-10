@@ -1,28 +1,35 @@
 import { useCart } from "@/hooks/useCart";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { ShoppingCart, Star } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   Image,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 
 import { Spinner } from "@/components/Spinner";
-import Colors from "@/constants/colors";
 import ProductService from "@/services/Shop/ProductService";
 import { Product } from "@/types/shop/product";
 import { RenderHTML } from "react-native-render-html";
 const { width } = Dimensions.get("window");
+
+const customStyles = {
+  p: {
+    color: "#FFFFFF",
+  },
+  strong: {
+    color: "#FFFFFF",
+  },
+};
+
 export default function ProductDetailScreen() {
   const [product, setProduct] = useState<Product>();
   const [loading, setLoading] = useState<boolean>(true);
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
   const { addToCart } = useCart();
   const [selectedImageIndex, setSelectedImageIndex] = React.useState<number>(0);
 
@@ -45,7 +52,7 @@ export default function ProductDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.spinnerContainer}>
+      <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content="Loading product" />
       </View>
     );
@@ -53,8 +60,8 @@ export default function ProductDetailScreen() {
 
   if (!product) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Product not found</Text>
+      <View className="flex-1 bg-bg-medium">
+        <Text className="text-white text-lg text-center mt-10">Product not found</Text>
       </View>
     );
   }
@@ -66,18 +73,20 @@ export default function ProductDetailScreen() {
 
   return (
     <>
-      <View style={styles.container}>
+      <View className="flex-1 bg-bg-medium">
         <ScrollView showsVerticalScrollIndicator={false}>
           <View>
             <Image
               source={{ uri: product.images[selectedImageIndex].src }}
-              style={styles.productImage}
+              style={{ width, height: 400 }}
+              className="bg-transparent"
+              resizeMode="contain"
             />
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              style={styles.thumbnailContainer}
-              contentContainerStyle={styles.thumbnailContent}
+              className="bg-bg-card border-t border-border-default"
+              contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 12 }}
             >
               {product.images.map((img, index) => (
                 <TouchableOpacity
@@ -87,221 +96,64 @@ export default function ProductDetailScreen() {
                 >
                   <Image
                     source={{ uri: img.src }}
-                    style={[
-                      styles.thumbnail,
-                      selectedImageIndex === index && styles.thumbnailSelected,
-                    ]}
+                    style={{ width: 80, height: 80, borderRadius: 8 }}
+                    className={`bg-border-default border-2 ${
+                      selectedImageIndex === index ? "border-rm-gold" : "border-transparent"
+                    }`}
+                    resizeMode="contain"
                   />
                 </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
 
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <Text style={styles.productName}>{product.name}</Text>
-              <Text style={styles.productPrice}>
+          <View className="p-5">
+            <View className="mb-3">
+              <Text className="text-[28px] font-bold text-white mb-2">{product.name}</Text>
+              <Text className="text-[32px] font-bold text-rm-gold">
                 ${Number(product.price).toFixed(2)}
               </Text>
             </View>
 
-            <View style={styles.ratingContainer}>
-              <Star size={18} color={Colors.darkGold} fill={Colors.darkGold} />
-              <Text style={styles.ratingText}>
+            <View className="flex-row items-center mb-6 gap-1.5">
+              <Star size={18} color="#BC9045" fill="#BC9045" />
+              <Text className="text-base text-white font-semibold">
                 {Number(product.average_rating).toFixed(1)}
               </Text>
-              <Text style={styles.reviewsText}>
+              <Text className="text-sm text-text-secondary">
                 ({product.reviews} reviews)
               </Text>
               {product.stock_quantity && (
-                <View style={styles.stockBadge}>
-                  <Text style={styles.stockText}>In Stock</Text>
+                <View className="bg-rm-gold px-3 py-1 rounded-xl ml-2">
+                  <Text className="text-xs font-semibold text-text-dark">In Stock</Text>
                 </View>
               )}
             </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Description</Text>
-              <Text style={styles.description}>
+            <View className="mb-6">
+              <Text className="text-xl font-bold text-white mb-3">Description</Text>
+              <View>
                 <RenderHTML
                   contentWidth={width}
                   source={{ html: product.description }}
                   tagsStyles={customStyles}
                 />
-              </Text>
+              </View>
             </View>
           </View>
         </ScrollView>
 
-        <View style={styles.footer}>
+        <View className="bg-bg-card p-4 border-t border-border-default">
           <TouchableOpacity
-            style={styles.addToCartButton}
+            className="bg-rm-gold py-4 rounded-xl flex-row items-center justify-center gap-2"
             onPress={handleAddToCart}
             activeOpacity={0.8}
           >
-            <ShoppingCart size={20} color={Colors.darkBg} />
-            <Text style={styles.addToCartText}>Add to Cart</Text>
+            <ShoppingCart size={20} color="#0A0A0A" />
+            <Text className="text-lg font-semibold text-bg-dark">Add to Cart</Text>
           </TouchableOpacity>
         </View>
       </View>
     </>
   );
 }
-const customStyles = {
-  p: {
-    color: Colors.textWhite,
-  },
-  strong: {
-    color: Colors.textWhite,
-  },
-};
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  spinnerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.deepDarkGray,
-  },
-  errorText: {
-    color: Colors.textPrimary,
-    fontSize: 18,
-    textAlign: "center",
-    marginTop: 40,
-  },
-  productImage: {
-    width: "100%",
-    height: 400,
-    objectFit: "contain",
-    backgroundColor: "transparent",
-  },
-  thumbnailContainer: {
-    backgroundColor: Colors.cardBg,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  thumbnailContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-  },
-  thumbnail: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: Colors.border,
-    borderWidth: 2,
-    objectFit: "contain",
-    borderColor: "transparent",
-  },
-  thumbnailSelected: {
-    borderColor: Colors.darkGold,
-  },
-  content: {
-    padding: 20,
-  },
-  header: {
-    marginBottom: 12,
-  },
-  productName: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    color: Colors.textPrimary,
-    marginBottom: 8,
-  },
-  productPrice: {
-    fontSize: 32,
-    fontWeight: "700" as const,
-    color: Colors.darkGold,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-    gap: 6,
-  },
-  ratingText: {
-    fontSize: 16,
-    color: Colors.textPrimary,
-    fontWeight: "600" as const,
-  },
-  reviewsText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  stockBadge: {
-    backgroundColor: Colors.darkGold,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginLeft: 8,
-  },
-  stockText: {
-    fontSize: 12,
-    fontWeight: "600" as const,
-    color: Colors.darkBg,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700" as const,
-    color: Colors.textPrimary,
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: Colors.textSecondary,
-  },
-  detailsGrid: {
-    gap: 16,
-  },
-  detailItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: Colors.cardBg,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: 12,
-  },
-  detailTextContainer: {
-    flex: 1,
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 4,
-  },
-  detailValue: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.textPrimary,
-  },
-  footer: {
-    backgroundColor: Colors.cardBg,
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  addToCartButton: {
-    backgroundColor: Colors.darkGold,
-    paddingVertical: 16,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  addToCartText: {
-    fontSize: 18,
-    fontWeight: "600" as const,
-    color: Colors.darkBg,
-  },
-});

@@ -1,14 +1,13 @@
 // components/TransferModal.tsx
 import React, { useState } from 'react';
 import {
-    Alert,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Modal,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface TransferModalProps {
@@ -84,26 +83,29 @@ export const TransferModal: React.FC<TransferModalProps> = ({
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
     >
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Transfer Funds</Text>
-          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>×</Text>
+      <View className="flex-1 bg-bg-medium">
+        <View className="flex-row justify-between items-center p-4 border-b border-border-default">
+          <Text className="text-lg font-bold text-text-primary">Transfer Funds</Text>
+          <TouchableOpacity
+            onPress={handleClose}
+            className="w-[30px] h-[30px] rounded-full bg-bg-light justify-center items-center"
+          >
+            <Text className="text-xl text-text-secondary">×</Text>
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.content}>
-          <View style={styles.balanceInfo}>
-            <Text style={styles.balanceLabel}>Available Balance</Text>
-            <Text style={styles.balanceAmount}>
+        <ScrollView className="flex-1 p-4">
+          <View className="bg-bg-card p-4 rounded-lg items-center mb-6">
+            <Text className="text-sm text-text-secondary mb-1">Available Balance</Text>
+            <Text className="text-xl font-bold text-text-primary">
               {currency}{currentBalance.toFixed(2)}
             </Text>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>To User ID</Text>
+          <View className="mb-5">
+            <Text className="text-base font-semibold mb-2 text-text-primary">To User ID</Text>
             <TextInput
-              style={styles.input}
+              className="border border-border-default rounded-lg p-3 text-base bg-bg-card text-text-primary"
               placeholder="Enter user ID"
               placeholderTextColor="#999"
               keyboardType="number-pad"
@@ -113,10 +115,10 @@ export const TransferModal: React.FC<TransferModalProps> = ({
             />
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>Amount</Text>
+          <View className="mb-5">
+            <Text className="text-base font-semibold mb-2 text-text-primary">Amount</Text>
             <TextInput
-              style={styles.input}
+              className="border border-border-default rounded-lg p-3 text-base bg-bg-card text-text-primary"
               placeholder="Enter amount"
               placeholderTextColor="#999"
               keyboardType="decimal-pad"
@@ -126,10 +128,10 @@ export const TransferModal: React.FC<TransferModalProps> = ({
             />
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>Description (Optional)</Text>
+          <View className="mb-5">
+            <Text className="text-base font-semibold mb-2 text-text-primary">Description (Optional)</Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              className="border border-border-default rounded-lg p-3 text-base bg-bg-card text-text-primary min-h-[80px]"
               placeholder="Add a note for this transfer"
               placeholderTextColor="#999"
               value={description}
@@ -137,18 +139,20 @@ export const TransferModal: React.FC<TransferModalProps> = ({
               multiline
               numberOfLines={3}
               editable={!loading}
+              textAlignVertical="top"
             />
           </View>
 
           <TouchableOpacity
-            style={[
-              styles.transferButton,
-              (!toUserId || !amount || loading) && styles.transferButtonDisabled,
-            ]}
+            className={`p-4 rounded-lg items-center mt-5 ${
+              !toUserId || !amount || loading
+                ? "bg-bg-gray opacity-60"
+                : "bg-rm-gold"
+            }`}
             onPress={handleTransfer}
             disabled={!toUserId || !amount || loading}
           >
-            <Text style={styles.transferButtonText}>
+            <Text className="text-white text-base font-semibold">
               {loading ? 'Processing...' : `Transfer ${currency}${amount || '0.00'}`}
             </Text>
           </TouchableOpacity>
@@ -157,91 +161,3 @@ export const TransferModal: React.FC<TransferModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  closeButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    fontSize: 20,
-    color: '#666',
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  balanceInfo: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  balanceLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  balanceAmount: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  section: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  transferButton: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  transferButtonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  transferButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

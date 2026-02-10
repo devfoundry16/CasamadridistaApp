@@ -1,11 +1,9 @@
 import ShiningText from "@/components/ShiningText";
-import Colors from "@/constants/colors";
 import React from "react";
 import {
   Dimensions,
   Image,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -29,19 +27,20 @@ const ProductCard: React.FC<ProductCardProps> = ({
   descriptionAr,
 }) => {
   return (
-    <View style={styles.productCard}>
+    <View className="rounded-lg overflow-hidden mb-5">
       <Image
         source={{ uri: image }}
-        style={styles.productImage}
+        style={{ width, height: 400 }}
+        className="bg-bg-medium"
         resizeMode="cover"
       />
-      <View style={styles.productContent}>
-        <Text style={styles.productTitle}>{title}</Text>
-        {/* <Text style={styles.productTitleAr}>{titleAr}</Text> */}
-        <Text style={styles.productDescription}>{description}</Text>
-        <Text style={styles.productDescriptionAr}>{descriptionAr}</Text>
-        <TouchableOpacity style={styles.soonButton}>
-          <Text style={styles.soonButtonText}>SOON</Text>
+      <View className="p-6 items-center">
+        <Text className="text-[22px] font-semibold text-rm-gold mb-2 text-center">{title}</Text>
+        {/* <Text className="text-xl font-semibold text-rm-gold mb-4 text-center">{titleAr}</Text> */}
+        <Text className="text-sm text-text-secondary leading-[22px] text-center mb-2">{description}</Text>
+        <Text className="text-sm text-text-secondary leading-[22px] text-center mb-6">{descriptionAr}</Text>
+        <TouchableOpacity className="bg-rm-gold px-10 py-3 rounded">
+          <Text className="text-sm font-bold text-white tracking-wider">SOON</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -75,17 +74,14 @@ export default function StoreComingSoon() {
   return (
     <>
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={[
-          styles.contentContainer,
-          { paddingBottom: insets.bottom + 40 },
-        ]}
+        className="flex-1 bg-bg-deep-dark"
+        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
       >
-        <View style={styles.header}>
+        <View className="py-10 px-5 items-center">
           <ShiningText>CasaMadridista Shop is Coming Soon!</ShiningText>
         </View>
 
-        <View style={styles.productsContainer}>
+        <View className="px-5 gap-7.5">
           {products.map((product, index) => (
             <ProductCard key={index} {...product} />
           ))}
@@ -94,84 +90,3 @@ export default function StoreComingSoon() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#1a1a1a",
-  },
-  contentContainer: {
-    paddingBottom: 40,
-  },
-  header: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    alignItems: "center",
-  },
-  mainTitle: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    textAlign: "center",
-    letterSpacing: 0.5,
-  },
-  productsContainer: {
-    paddingHorizontal: 20,
-    gap: 30,
-  },
-  productCard: {
-    borderRadius: 8,
-    overflow: "hidden",
-    marginBottom: 20,
-  },
-  productImage: {
-    width: "100%",
-    height: width > 768 ? 400 : 400,
-    backgroundColor: "#2a2a2a",
-  },
-  productContent: {
-    padding: 24,
-    alignItems: "center",
-  },
-  productTitle: {
-    fontSize: 22,
-    fontWeight: "600" as const,
-    color: Colors.accent,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  productTitleAr: {
-    fontSize: 20,
-    fontWeight: "600" as const,
-    color: Colors.accent,
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  productDescription: {
-    fontSize: 14,
-    color: "#cccccc",
-    lineHeight: 22,
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  productDescriptionAr: {
-    fontSize: 14,
-    color: "#cccccc",
-    lineHeight: 22,
-    textAlign: "center",
-    marginBottom: 24,
-    fontFamily: "System",
-  },
-  soonButton: {
-    backgroundColor: Colors.darkGold,
-    paddingHorizontal: 40,
-    paddingVertical: 12,
-    borderRadius: 4,
-  },
-  soonButtonText: {
-    fontSize: 14,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    letterSpacing: 1,
-  },
-});

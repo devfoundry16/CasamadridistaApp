@@ -1,31 +1,13 @@
 // components/TeamForm.tsx
-import Colors from "@/constants/colors";
 import { Match } from "@/types/soccer/match";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    gap: 2,
-  },
-  badge: {
-    width: 15,
-    height: 15,
-    borderRadius: 7.5,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 11,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    textAlign: 'center',
-  },
-  win: { backgroundColor: "#28a745" },
-  draw: { backgroundColor: "#f59e0b" },
-  loss: { backgroundColor: "#ef4444" },
-});
+const outcomeClassNames = {
+  win: "bg-status-success",
+  draw: "bg-status-warning",
+  loss: "bg-status-error",
+};
 
 interface TeamFormProps {
   matches: Match[];
@@ -33,7 +15,7 @@ interface TeamFormProps {
   isHome?: boolean;
 }
 
-export default function TeamForm({ matches, nextMatchTeamId, isHome }: TeamFormProps) {
+export default function TeamForm({ matches, nextMatchTeamId }: TeamFormProps) {
   const getOutcome = (match: Match) => {
     const homeGoals = match.goals.home;
     const awayGoals = match.goals.away;
@@ -41,23 +23,25 @@ export default function TeamForm({ matches, nextMatchTeamId, isHome }: TeamFormP
     const win = sameSide ? homeGoals > awayGoals : homeGoals < awayGoals;
     const draw = homeGoals === awayGoals;
     const loss = sameSide ? homeGoals < awayGoals : homeGoals > awayGoals;
-    return win ? "W" : draw ? "D" : "L";
-  };
-
-  const getBadgeStyle = (match: Match) => {
-    const result = getOutcome(match);
-    if (result === "W") return styles.win;
-    if (result === "D") return styles.draw;
-    return styles.loss;
+    return win ? "win" : draw ? "draw" : "loss";
   };
 
   return (
-    <View style={styles.container}>
-      {matches?.map((match, idx) => (
-        <View key={idx} style={[styles.badge, getBadgeStyle(match)]}>
-          <Text style={styles.text}>{getOutcome(match)}</Text>
-        </View>
-      ))}
+    <View className="flex-row gap-0.5">
+      {matches?.map((match, idx) => {
+        const outcome = getOutcome(match);
+        const displayText = outcome === "win" ? "W" : outcome === "draw" ? "D" : "L";
+        return (
+          <View
+            key={idx}
+            className={`w-[15px] h-[15px] rounded-full justify-center items-center ${outcomeClassNames[outcome]}`}
+          >
+            <Text className="text-[11px] font-bold text-text-primary text-center">
+              {displayText}
+            </Text>
+          </View>
+        );
+      })}
     </View>
   );
 }

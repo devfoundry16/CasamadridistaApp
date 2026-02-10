@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useRef, useState } from "react";
 import {
   Dimensions,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -28,31 +27,41 @@ const SquadSection = () => {
     }
   };
   return (
-    <View style={styles.adSquadSection}>
-      <View style={styles.adSectionHeader}>
-        <View style={styles.adHeaderLine} />
-        <Text style={styles.adSectionTitle}>Players Squad</Text>
-        <View style={styles.adHeaderLine} />
+    <View className="py-10 bg-bg-medium -mx-4">
+      <View className="flex-row items-center justify-center mb-2.5">
+        <View className="w-[70px] h-0.5 bg-rm-gold mx-10" />
+        <Text className="text-2xl font-bold text-text-primary text-center">
+          Players Squad
+        </Text>
+        <View className="w-[70px] h-0.5 bg-rm-gold mx-10" />
       </View>
 
-      <View style={styles.quoteNavigationButtons}>
-        <TouchableOpacity style={styles.quoteNavButton} onPress={handlePrev}>
+      <View className="flex-row items-center justify-center mt-4 gap-3">
+        <TouchableOpacity
+          className="w-9 h-9 rounded-full bg-white/15 justify-center items-center border border-rm-gold"
+          onPress={handlePrev}
+        >
           <ChevronLeft size={20} color={Colors.accent} />
         </TouchableOpacity>
         <Carousel
           ref={playerCarouseRef}
-          width={width - 140}
+          width={Dimensions.get("window").width - 140}
           height={350}
           data={squadPlayers}
           renderItem={({ item }) => (
-            <View key={item.id} style={styles.adPlayerCard}>
+            <View
+              key={item.id}
+              className="w-[280px] h-[320px] rounded-2xl overflow-hidden bg-bg-medium"
+            >
               <Image
                 source={{ uri: item.photo }}
-                style={styles.adPlayerImage}
+                style={{ width: 280, height: 320 }}
                 contentFit="cover"
               />
-              <View style={styles.adPlayerNameContainer}>
-                <Text style={styles.adPlayerName}>{item.name}</Text>
+              <View className="absolute bottom-0 left-0 right-0 bg-black/80 p-4">
+                <Text className="text-lg font-bold text-text-primary text-center">
+                  {item.name}
+                </Text>
               </View>
             </View>
           )}
@@ -62,111 +71,15 @@ const SquadSection = () => {
           autoPlayInterval={5000}
           scrollAnimationDuration={500}
         />
-        <TouchableOpacity style={styles.quoteNavButton} onPress={handleNext}>
+        <TouchableOpacity
+          className="w-9 h-9 rounded-full bg-white/15 justify-center items-center border border-rm-gold"
+          onPress={handleNext}
+        >
           <ChevronRight size={20} color={Colors.accent} />
         </TouchableOpacity>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  adSquadSection: {
-    paddingVertical: 40,
-    backgroundColor: "#2a2a2a",
-    marginHorizontal: -16,
-  },
-  adSquadHeader: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  adPlayerCard: {
-    width: CARD_WIDTH,
-    height: 320,
-    borderRadius: 16,
-    margin: "auto",
-    overflow: "hidden",
-    backgroundColor: "#2a2a2a",
-  },
-  adSectionTitle: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    textAlign: "center",
-  },
-  adPlayerImage: {
-    width: "100%",
-    height: "100%",
-  },
-  adPlayerNameContainer: {
-    position: "absolute" as const,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    padding: 16,
-  },
-  adPlayerName: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    textAlign: "center",
-  },
-  adSectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  adHeaderLine: {
-    width: 70,
-    height: 2,
-    backgroundColor: Colors.accent,
-    marginHorizontal: 40,
-  },
-  adHeadSection: {
-    height: 900,
-    width: "100%",
-    flexDirection: "column" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  adHeadBackgroundImage: {
-    width: "100%",
-    height: "100%",
-  },
-  adHeadContent: {
-    position: "absolute" as const,
-    alignItems: "center" as const,
-  },
-  adPlayerActionImage: {
-    width: "100%",
-    height: 322,
-  },
-  adQuoteContainer: {
-    flexDirection: "row",
-  },
-  adQuoteCard: {
-    padding: 16,
-    alignItems: "center",
-  },
-  quoteNavButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: Colors.accent,
-  },
-  quoteNavigationButtons: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 16,
-    gap: 12,
-  },
-});
 
 export default SquadSection;

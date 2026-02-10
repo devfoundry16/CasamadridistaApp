@@ -1,13 +1,11 @@
 // components/WooWalletScreen.tsx
 import { Button } from "@/components/Button";
-import Colors from "@/constants/colors";
 import { useFlintopWallet } from "@/hooks/useFlintopWallet";
 import React, { useState } from "react";
 import {
   Alert,
   RefreshControl,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -62,7 +60,7 @@ export const WalletScreenDetail: React.FC = () => {
 
   if (loading && !refreshing) {
     return (
-      <View style={styles.spinnerContainer}>
+      <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content="Loading wallet" />
       </View>
     );
@@ -70,43 +68,41 @@ export const WalletScreenDetail: React.FC = () => {
 
   if (error && !refreshing) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Error: {error}</Text>
+      <View className="flex-1 justify-center items-center bg-bg-medium">
+        <Text className="text-status-error text-center mb-4">Error: {error}</Text>
         <Button title="Retry" onPress={onRefresh} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-bg-medium">
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {/* Balance Card */}
-        <View style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>Wallet Balance</Text>
-          <Text style={styles.balanceAmount}>
+        <View className="bg-bg-card m-4 p-5 rounded-xl items-center shadow-md">
+          <Text className="text-base text-text-secondary mb-2">
+            Wallet Balance
+          </Text>
+          <Text className="text-3xl font-bold text-text-primary mb-1">
             {balance?.formatted_balance || "$0.00"}
           </Text>
-          <Text style={styles.balanceSubtitle}>Available Balance</Text>
+          <Text className="text-sm text-text-secondary">
+            Available Balance
+          </Text>
         </View>
 
         {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
+        <View className="flex-row px-4 mb-4 gap-3">
           <Button
             title="Add Funds"
             onPress={() => setShowAddFundsModal(true)}
             variant="primary"
-            style={styles.actionButton}
+            style={{ flex: 1, height: 32 }}
           />
-          {/* <Button
-            title="Transfer"
-            onPress={() => setShowTransferModal(true)}
-            variant="outline"
-            style={styles.actionButton}
-          /> */}
         </View>
 
         {/* Transactions */}
@@ -133,63 +129,3 @@ export const WalletScreenDetail: React.FC = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  spinnerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.deepDarkGray,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  balanceCard: {
-    backgroundColor: Colors.cardBg,
-    margin: 16,
-    padding: 20,
-    borderRadius: 12,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  balanceLabel: {
-    fontSize: 16,
-    color: Colors.lightGray,
-    marginBottom: 8,
-  },
-  balanceAmount: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: Colors.textWhite,
-    marginBottom: 4,
-  },
-  balanceSubtitle: {
-    fontSize: 14,
-    color: Colors.textLight,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    height: 32,
-  },
-  errorText: {
-    color: "red",
-    textAlign: "center",
-    marginBottom: 16,
-  },
-});

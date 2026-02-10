@@ -1,5 +1,4 @@
 import { Spinner } from "@/components/Spinner";
-import Colors from "@/constants/colors";
 import ProductService from "@/services/Shop/ProductService";
 import { Product } from "@/types/shop/product";
 import { Image } from "expo-image";
@@ -7,12 +6,14 @@ import { router } from "expo-router";
 import { Star } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
+  Dimensions,
   FlatList,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 export default function ShopScreen() {
   const [products, setProducts] = useState<Product[] | null>(null);
@@ -38,23 +39,27 @@ export default function ShopScreen() {
 
   const renderProduct = ({ item }: { item: Product }) => (
     <TouchableOpacity
-      style={styles.productCard}
+      className="w-[48%] bg-text-dark rounded-xl mb-4 border border-border-default overflow-hidden"
       onPress={() => router.push(`/product/${item.id}` as any)}
       activeOpacity={0.8}
     >
-      <Image source={{ uri: item.images[0].src }} style={styles.productImage} />
-      <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={1}>
+      <Image
+        source={{ uri: item.images[0].src }}
+        style={{ width: screenWidth * 0.48 - 24, height: 180 }}
+        className="bg-border-default"
+      />
+      <View className="p-3">
+        <Text className="text-base font-semibold text-white mb-1.5" numberOfLines={1}>
           {item.name}
         </Text>
-        <View style={styles.ratingContainer}>
-          <Star size={14} color={Colors.darkGold} fill={Colors.darkGold} />
-          <Text style={styles.ratingText}>
+        <View className="flex-row items-center mb-2 gap-1">
+          <Star size={14} color="#BC9045" fill="#BC9045" />
+          <Text className="text-[13px] text-white font-semibold">
             {Number(item.average_rating).toFixed(1)}
           </Text>
-          <Text style={styles.reviewsText}>({item.reviews ? 30 : 0})</Text>
+          <Text className="text-xs text-white">({item.reviews ? 30 : 0})</Text>
         </View>
-        <Text style={styles.productPrice}>
+        <Text className="text-lg font-bold text-rm-gold">
           ${Number(item.price).toFixed(2)}
         </Text>
       </View>
@@ -62,18 +67,19 @@ export default function ShopScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: Colors.deepDarkGray }]}>
-      <View style={styles.headerContent}>
+    <View className="flex-1 bg-bg-medium">
+      <View className="flex-col items-center justify-center">
         <Image
           source={{
             uri: "https://casamadridista.com/wp-content/uploads/2025/05/img3.png",
           }}
-          style={styles.headerImage}
+          style={{ width: screenWidth, height: 250 }}
+          className="mb-3"
           contentFit="cover"
         />
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Welcome</Text>
-          <Text style={styles.headerSubtitle}>CasaMadridista Shop</Text>
+        <View className="absolute items-center">
+          <Text className="text-4xl font-bold text-white mb-1">Welcome</Text>
+          <Text className="text-xl font-semibold text-rm-gold">CasaMadridista Shop</Text>
         </View>
       </View>
       {loading && <Spinner content="Loading Store" />}
@@ -82,97 +88,9 @@ export default function ShopScreen() {
         renderItem={renderProduct}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
-        contentContainerStyle={styles.productsList}
-        columnWrapperStyle={styles.columnWrapper}
+        contentContainerStyle={{ padding: 16 }}
+        columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 16 }}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  headerContent: {
-    flexDirection: "column" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  header: {
-    position: "absolute" as const,
-    alignItems: "center" as const,
-  },
-  headerTitle: {
-    fontSize: 36,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 4,
-  },
-  headerImage: {
-    width: "100%",
-    height: 250,
-    marginBottom: 12,
-  },
-  headerSubtitle: {
-    fontSize: 20,
-    fontWeight: "600" as const,
-    color: Colors.darkGold,
-  },
-  productsList: {
-    padding: 16,
-  },
-  columnWrapper: {
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  productCard: {
-    width: "48%",
-    backgroundColor: Colors.text,
-    borderRadius: 12,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    overflow: "hidden",
-  },
-  productImage: {
-    width: "100%",
-    height: 180,
-    backgroundColor: Colors.border,
-  },
-  productInfo: {
-    padding: 12,
-  },
-  productName: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-    marginBottom: 6,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-    gap: 4,
-  },
-  ratingText: {
-    fontSize: 13,
-    color: Colors.textWhite,
-    fontWeight: "600" as const,
-  },
-  reviewsText: {
-    fontSize: 12,
-    color: Colors.textWhite,
-  },
-  productPrice: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: Colors.darkGold,
-  },
-  addToCartButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

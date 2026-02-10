@@ -1,6 +1,5 @@
 import CustomWebView from "@/components/CustomWebView";
 import { Spinner } from "@/components/Spinner";
-import Colors from "@/constants/colors";
 import { useEnvironment } from "@/hooks/useEnvironment";
 import SportsInfoService from "@/services/Football/SportsInfoService";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -8,7 +7,6 @@ import React, { useEffect, useState } from "react";
 import {
   Image,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -70,44 +68,34 @@ const LeagueDetailScreen = () => {
     fetchTeams();
   }, []);
   if (loading) {
-    return <Spinner content="Loading league" />;
+    return (
+      <View className="flex-1 justify-center items-center bg-bg-medium">
+        <Spinner content="Loading league" />
+      </View>
+    )
   }
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView className="flex-1 bg-bg-medium" showsVerticalScrollIndicator={false}>
       <View>
         {/* Render league name */}
-        <Text style={styles.leagueName}>
+        <Text className="text-white text-2xl font-bold text-center my-2.5">
           {league?.name} {season}-{Number(season) + 1}
         </Text>
         {/* Render league logo */}
         {league && (
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Image source={{ uri: league.logo }} style={styles.leagueLogo} />
+          <View className="justify-center items-center">
+            <Image source={{ uri: league.logo }} style={{ width: 80, height: 80 }} className="mb-2.5" resizeMode="contain" />
           </View>
         )}
         {/* Render team logos */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 10,
-            marginVertical: 10,
-          }}
-        >
+        <View className="flex-row justify-center items-center flex-wrap gap-2.5 my-2.5">
           {teams.map((team) => (
-            <View key={team.team.id} style={styles.teamView}>
+            <View key={team.team.id} className="w-[50px] h-[50px] justify-center items-center">
               <TouchableOpacity
-                style={styles.teamLogo}
+                className="w-10 h-10 rounded-[20px] overflow-hidden bg-bg-light justify-center items-center"
                 onPress={() => router.push(`/team/${team.team.id}`)}
               >
-                <Image source={{ uri: team.team.logo }} style={styles.logo} />
+                <Image source={{ uri: team.team.logo }} style={{ width: 30, height: 30 }} resizeMode="contain" />
               </TouchableOpacity>
             </View>
           ))}
@@ -119,39 +107,3 @@ const LeagueDetailScreen = () => {
 };
 
 export default LeagueDetailScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  logo: { width: 30, height: 30, resizeMode: "contain" },
-  leagueLogo: {
-    width: 80,
-    height: 80,
-    resizeMode: "contain",
-    marginBottom: 10,
-  },
-  leagueName: {
-    color: Colors.textWhite,
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginVertical: 10,
-  },
-  teamView: {
-    width: 50,
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  teamLogo: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    overflow: "hidden",
-    backgroundColor: Colors.lightGray,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

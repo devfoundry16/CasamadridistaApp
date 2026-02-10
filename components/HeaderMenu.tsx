@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   TouchableOpacity,
-  StyleSheet,
   Modal,
   Pressable,
   Text,
@@ -27,8 +26,8 @@ function CartBadge() {
   if (totalItems === 0) return null;
 
   return (
-    <View style={styles.badge}>
-      <Text style={styles.badgeText}>{totalItems}</Text>
+    <View className="absolute -right-1.5 -top-1.5 bg-rm-white rounded-lg min-w-4 h-4 items-center justify-center px-1">
+      <Text className="text-rm-gold text-[10px] font-bold">{totalItems}</Text>
     </View>
   );
 }
@@ -49,28 +48,13 @@ function HeaderMenu() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* <TouchableOpacity
-        onPress={() => router.push("/cart" as any)}
-        style={styles.button}
-        activeOpacity={0.7}
-      >
-        <View>
-          <MaterialIcons
-            name="shopping-cart-checkout"
-            size={24}
-            color={Colors.textWhite}
-          />
-          <CartBadge />
-        </View>
-      </TouchableOpacity> */}
-
+    <View className="flex-row items-center mr-2">
       <TouchableOpacity
         onPress={() => setMenuVisible(true)}
-        style={styles.menuButton}
+        className="px-4 py-2"
         activeOpacity={0.7}
       >
-        <MoreVertical color={Colors.primary} size={24} />
+        <MoreVertical color={Colors.text.primary} size={24} />
       </TouchableOpacity>
 
       <Modal
@@ -80,27 +64,24 @@ function HeaderMenu() {
         onRequestClose={() => setMenuVisible(false)}
       >
         <Pressable
-          style={styles.modalOverlay}
+          className="flex-1 bg-black/50 justify-start items-end pt-16 pr-4"
           onPress={() => setMenuVisible(false)}
         >
           <View
-            style={[styles.menuContainer, { backgroundColor: Colors.primary }]}
+            className="rounded-xl min-w-[200px] shadow-lg"
+            style={{ backgroundColor: Colors.secondary }}
           >
             {menuItems.map((item, index) => {
               const Icon = item.icon;
               return (
                 <TouchableOpacity
                   key={index}
-                  style={[
-                    styles.menuItem,
-                    { borderBottomColor: Colors.border },
-                    index === menuItems.length - 1 && styles.menuItemLast,
-                  ]}
+                  className={`flex-row items-center py-4 px-4 gap-3 border-b-2 border-rm-gold`}
                   onPress={() => handleMenuItemPress(item.route)}
                   activeOpacity={0.7}
                 >
-                  <Icon color={Colors.text} size={20} />
-                  <Text style={styles.menuItemText}>{item.label}</Text>
+                  <Icon color={Colors.brand.gold} size={20} />
+                  <Text className="text-base font-medium text-rm-gold">{item.label}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -110,68 +91,5 @@ function HeaderMenu() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flexDirection: "row", alignItems: "center", marginRight: 8 },
-  button: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    marginLeft: 6,
-    borderRadius: 8,
-  },
-  menuButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-start",
-    alignItems: "flex-end",
-    paddingTop: 60,
-    paddingRight: 16,
-  },
-  menuContainer: {
-    borderRadius: 12,
-    minWidth: 200,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    gap: 12,
-    borderBottomWidth: 1,
-  },
-  menuItemLast: {
-    borderBottomWidth: 0,
-  },
-  menuItemText: {
-    fontSize: 16,
-    fontWeight: "500" as const,
-  },
-  badge: {
-    position: "absolute",
-    right: -6,
-    top: -6,
-    backgroundColor: Colors.textWhite,
-    borderRadius: 8,
-    minWidth: 16,
-    height: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 4,
-  },
-  badgeText: {
-    color: Colors.darkGold,
-    fontSize: 10,
-    fontWeight: "700" as const,
-  },
-});
 
 export default HeaderMenu;

@@ -1,14 +1,12 @@
 import { Spinner } from "@/components/Spinner";
-import Colors from "@/constants/colors";
 import { useOrder } from "@/hooks/useOrder";
 import { useUser } from "@/hooks/useUser";
 import { formatDate } from "@/utils/helper";
 import { router } from "expo-router";
-import { ArrowRight, Calendar, CreditCard, Crown } from "lucide-react-native";
+import { ArrowRight, Calendar, Crown } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -33,7 +31,7 @@ export default function SubscriptionScreen() {
 
   if (loading) {
     return (
-      <View style={styles.spinnerContainer}>
+      <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content="Loading subscription" />
       </View>
     );
@@ -41,37 +39,34 @@ export default function SubscriptionScreen() {
 
   return (
     <>
-      <ScrollView style={styles.container}>
+      <ScrollView className="flex-1 bg-bg-medium">
         {subscriptions?.length ? (
           subscriptions.map((subscription: any) => {
             return (
               <View key={subscription.id}>
-                <View style={styles.subscriptionCard}>
-                  <View style={styles.iconContainer}>
-                    <Crown size={48} color={Colors.accent} />
+                <View className="m-6 p-8 bg-bg-deep-dark rounded-[20px] items-center border-2 border-rm-gold">
+                  <View className="w-20 h-20 rounded-[40px] bg-bg-medium justify-center items-center mb-4">
+                    <Crown size={48} color="#BC9045" />
                   </View>
-                  <Text style={styles.planName}>
+                  <Text className="text-[28px] font-bold text-rm-gold mb-2 text-center">
                     {subscription.line_items[0].name}
                   </Text>
-                  {/* <Text style={styles.planType}>
-                    {subscription.line_items[0].meta_data[0].value}
-                  </Text> */}
 
-                  <View style={styles.dateContainer}>
-                    <View style={styles.dateItem}>
-                      <Calendar size={20} color={Colors.accent} />
-                      <View style={styles.dateInfo}>
-                        <Text style={styles.dateLabel}>Start Date</Text>
-                        <Text style={styles.dateValue}>
+                  <View className="w-full gap-4">
+                    <View className="flex-row items-center gap-3">
+                      <Calendar size={20} color="#BC9045" />
+                      <View className="flex-1">
+                        <Text className="text-sm text-text-secondary mb-1">Start Date</Text>
+                        <Text className="text-base font-semibold text-white">
                           {formatDate(subscription.start_date_gmt)}
                         </Text>
                       </View>
                     </View>
-                    <View style={styles.dateItem}>
-                      <Calendar size={20} color={Colors.accent} />
-                      <View style={styles.dateInfo}>
-                        <Text style={styles.dateLabel}>End Date</Text>
-                        <Text style={styles.dateValue}>
+                    <View className="flex-row items-center gap-3">
+                      <Calendar size={20} color="#BC9045" />
+                      <View className="flex-1">
+                        <Text className="text-sm text-text-secondary mb-1">End Date</Text>
+                        <Text className="text-base font-semibold text-white">
                           {subscription.next_payment_date_gmt
                             ? formatDate(subscription.next_payment_date_gmt)
                             : "N/A"}
@@ -81,39 +76,31 @@ export default function SubscriptionScreen() {
                   </View>
                 </View>
 
-                <View style={styles.actionsSection}>
-                  {/* <TouchableOpacity style={styles.actionButton}>
-                    <CreditCard size={24} color={Colors.accent} />
-                    <Text style={styles.actionButtonText}>
-                      Update Payment Method
-                    </Text>
-                    <ArrowRight size={20} color={Colors.textWhite} />
-                  </TouchableOpacity> */}
-
+                <View className="p-6 pt-0 gap-3">
                   <TouchableOpacity
-                    style={styles.actionButton}
+                    className="flex-row items-center bg-bg-light p-4 rounded-xl gap-3"
                     onPress={() => router.push("/memberships/packages")}
                   >
-                    <Crown size={24} color={Colors.accent} />
-                    <Text style={styles.actionButtonText}>Upgrade Plan</Text>
-                    <ArrowRight size={20} color={Colors.textWhite} />
+                    <Crown size={24} color="#BC9045" />
+                    <Text className="flex-1 text-base font-semibold text-white">Upgrade Plan</Text>
+                    <ArrowRight size={20} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
               </View>
             );
           })
         ) : (
-          <View style={styles.noSubscription}>
-            <Crown size={64} color={Colors.darkGray} />
-            <Text style={styles.noSubText}>No Active Subscription</Text>
-            <Text style={styles.noSubSubtext}>
+          <View className="flex-1 items-center justify-center p-12 mt-24">
+            <Crown size={64} color="#515151" />
+            <Text className="text-2xl font-bold text-white mt-6 mb-2">No Active Subscription</Text>
+            <Text className="text-base text-text-secondary text-center mb-8">
               Join Casa Madridista and enjoy exclusive benefits
             </Text>
             <TouchableOpacity
-              style={styles.subscribeButton}
+              className="bg-rm-gold px-8 py-4 rounded-[25px]"
               onPress={() => router.push("/memberships/packages")}
             >
-              <Text style={styles.subscribeButtonText}>
+              <Text className="text-base font-bold text-bg-deep-dark">
                 View Membership Plans
               </Text>
             </TouchableOpacity>
@@ -123,143 +110,3 @@ export default function SubscriptionScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#2A2A2A",
-  },
-  spinnerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.deepDarkGray,
-  },
-  subscriptionCard: {
-    margin: 24,
-    padding: 32,
-    backgroundColor: "#1A1A1A",
-    borderRadius: 20,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: Colors.accent,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#2A2A2A",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  planName: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    color: Colors.accent,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  planType: {
-    fontSize: 16,
-    color: "#CCCCCC",
-    marginBottom: 24,
-  },
-  dateContainer: {
-    width: "100%",
-    gap: 16,
-  },
-  dateItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  dateInfo: {
-    flex: 1,
-  },
-  dateLabel: {
-    fontSize: 14,
-    color: "#CCCCCC",
-    marginBottom: 4,
-  },
-  dateValue: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-  },
-  actionsSection: {
-    padding: 24,
-    paddingTop: 0,
-    gap: 12,
-  },
-  actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#3A3A3A",
-    padding: 16,
-    borderRadius: 12,
-    gap: 12,
-  },
-  actionButtonText: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-  },
-  benefitsSection: {
-    padding: 24,
-    paddingTop: 0,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 16,
-  },
-  benefitItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-    gap: 12,
-  },
-  benefitBullet: {
-    fontSize: 20,
-    color: Colors.accent,
-    fontWeight: "700" as const,
-  },
-  benefitText: {
-    fontSize: 16,
-    color: "#CCCCCC",
-  },
-  noSubscription: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 48,
-    marginTop: 100,
-  },
-  noSubText: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginTop: 24,
-    marginBottom: 8,
-  },
-  noSubSubtext: {
-    fontSize: 16,
-    color: "#CCCCCC",
-    textAlign: "center",
-    marginBottom: 32,
-  },
-  subscribeButton: {
-    backgroundColor: Colors.accent,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 25,
-  },
-  subscribeButtonText: {
-    fontSize: 16,
-    fontWeight: "700" as const,
-    color: "#1A1A1A",
-  },
-});

@@ -2,11 +2,10 @@ import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useCart } from "@/hooks/useCart";
 import { useUser } from "@/hooks/useUser";
-import * as ImagePicker from "expo-image-picker"; // New import for image picker
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import {
   Camera,
-  CreditCard,
   Crown,
   LogOut,
   MapPin,
@@ -20,7 +19,6 @@ import {
   Alert,
   Image,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -81,132 +79,115 @@ export default function AccountScreen() {
     updateAvatar(uri, filename);
   };
 
-  const deleteAccount = async () => {
-    Alert.alert("Delete Account", "Are you sure you want to delete your account?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: () => {
-        deleteUser(user?.id as number).then(() => {
-          Alert.alert("Account Deleted", "Your account has been deleted successfully");
-          logout();
-        });
-      } },
-    ]);
-  };
+  // const deleteAccount = async () => {
+  //   Alert.alert("Delete Account", "Are you sure you want to delete your account?", [
+  //     { text: "Cancel", style: "cancel" },
+  //     { text: "Delete", style: "destructive", onPress: () => {
+  //       deleteUser(user?.id as number).then(() => {
+  //         Alert.alert("Account Deleted", "Your account has been deleted successfully");
+  //         logout();
+  //       });
+  //     } },
+  //   ]);
+  // };
 
   if (!user) {
     return <AuthForm isLogin={isLogin} setIsLogin={setIsLogin} />;
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.profileSection}>
-          <View style={styles.photoContainer}>
+    <ScrollView className="flex-1 bg-bg-medium">
+      <View className="bg-bg-deep-dark p-6 items-center">
+        <View className="items-center mb-6">
+          <View className="mb-4">
             {isLoading && <Spinner content="Setting avatar" />}
             {user.url
               ? !isLoading && (
-                <Image source={{ uri: user.url }} style={styles.photo} />
+                <Image
+                  source={{ uri: user.url }}
+                  style={{ width: 120, height: 120, borderRadius: 60 }}
+                  className="border-4 border-rm-gold"
+                />
               )
               : !isLoading && (
-                <View style={[styles.photo, styles.photoPlaceholder]}>
+                <View className="w-[120px] h-[120px] rounded-full border-4 border-rm-gold bg-bg-light justify-center items-center">
                   <User size={60} color={Colors.darkGray} />
                 </View>
               )}
           </View>
           <TouchableOpacity
-            style={styles.changePhotoButton}
+            className="flex-row items-center bg-rm-gold px-5 py-2.5 rounded-[25px] gap-2"
             onPress={handleChangePhoto}
           >
             <Camera size={16} color={Colors.textWhite} />
-            <Text style={styles.changePhotoText}>Change Photo</Text>
+            <Text className="text-white text-sm font-semibold">Change Photo</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeText}>Welcome {user.name}</Text>
-          <Text style={styles.descriptionText}>
+        <View className="items-center">
+          <Text className="text-2xl font-bold text-rm-gold mb-3">Welcome {user.name}</Text>
+          <Text className="text-sm text-text-secondary text-center leading-5">
             Here you can view your membership details, manage your subscription,
             and update your profile information.
           </Text>
         </View>
       </View>
 
-      <View style={styles.dashboardSection}>
-        <Text style={styles.sectionTitle}>Dashboard</Text>
+      <View className="p-6">
+        <Text className="text-lg font-bold text-text-secondary mb-4">Dashboard</Text>
 
         <TouchableOpacity
-          style={styles.menuItem}
+          className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/wallet" as any)}
         >
-          <Wallet size={24} color={Colors.accent} />
-          <View style={styles.menuItemContent}>
-            <Text style={styles.menuItemText}>Wallet</Text>
-            {/* <Text style={styles.menuItemValue}>${wallet.toFixed(2)}</Text> */}
+          <Wallet size={24} color={Colors.textWhite} />
+          <View className="flex-1 flex-row justify-between items-center">
+            <Text className="text-base font-semibold text-text-dark">Wallet</Text>
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.menuItem}
+          className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/orders" as any)}
         >
-          <ShoppingBag size={24} color={Colors.accent} />
-          <View style={styles.menuItemContent}>
-            <Text style={styles.menuItemText}>Orders</Text>
+          <ShoppingBag size={24} color={Colors.textWhite} />
+          <View className="flex-1 flex-row justify-between items-center">
+            <Text className="text-base font-semibold text-text-dark">Orders</Text>
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.menuItem}
+          className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/subscription" as any)}
         >
-          <Crown size={24} color={Colors.accent} />
-          <View style={styles.menuItemContent}>
-            <Text style={styles.menuItemText}>Subscription</Text>
+          <Crown size={24} color={Colors.textWhite} />
+          <View className="flex-1 flex-row justify-between items-center">
+            <Text className="text-base font-semibold text-text-dark">Subscription</Text>
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.menuItem}
+          className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/addresses" as any)}
         >
-          <MapPin size={24} color={Colors.accent} />
-          <View style={styles.menuItemContent}>
-            <Text style={styles.menuItemText}>Addresses</Text>
+          <MapPin size={24} color={Colors.textWhite} />
+          <View className="flex-1 flex-row justify-between items-center">
+            <Text className="text-base font-semibold text-text-dark">Addresses</Text>
           </View>
         </TouchableOpacity>
-        
-        {/* <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => router.push("../account/payment-methods" as any)}
-        >
-          <CreditCard size={24} color={Colors.accent} />
-          <View style={styles.menuItemContent}>
-            <Text style={styles.menuItemText}>Payment methods</Text>
-          </View>
-        </TouchableOpacity> */}
 
         <TouchableOpacity
-          style={styles.menuItem}
+          className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/details" as any)}
         >
-          <Settings size={24} color={Colors.accent} />
-          <View style={styles.menuItemContent}>
-            <Text style={styles.menuItemText}>Account Details</Text>
+          <Settings size={24} color={Colors.textWhite} />
+          <View className="flex-1 flex-row justify-between items-center">
+            <Text className="text-base font-semibold text-text-dark">Account Details</Text>
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.menuItem}
-          onPress={deleteAccount}
-        >
-          <CreditCard size={24} color={Colors.accent} />
-          <View style={styles.menuItemContent}>
-            <Text style={styles.menuItemText}>Delete Account</Text>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.menuItem, styles.logoutItem]}
+          className="flex-row items-center bg-bg-light p-4 rounded-[25px] mb-3 gap-4 border border-status-error"
           onPress={() => {
             Alert.alert("Logout", "Are you sure you want to logout?", [
               { text: "Cancel", style: "cancel" },
@@ -219,17 +200,17 @@ export default function AccountScreen() {
           }}
         >
           <LogOut size={24} color={Colors.error} />
-          <View style={styles.menuItemContent}>
-            <Text style={[styles.menuItemText, styles.logoutText]}>Logout</Text>
+          <View className="flex-1 flex-row justify-between items-center">
+            <Text className="text-base font-semibold text-status-error">Logout</Text>
           </View>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.infoBox}>
-        <Text style={styles.infoText}>
-          Hello <Text style={styles.boldText}>{user.name}</Text> (not{" "}
-          <Text style={styles.boldText}>{user.name}</Text>?{" "}
-          <Text style={styles.linkText} onPress={logout}>
+      <View className="mx-6 p-5 bg-bg-light rounded-xl border border-border-light border-dashed">
+        <Text className="text-sm text-text-secondary leading-5 mb-3">
+          Hello <Text className="font-bold text-white">{user.name}</Text> (not{" "}
+          <Text className="font-bold text-white">{user.name}</Text>?{" "}
+          <Text className="text-rm-gold underline" onPress={logout}>
             Log out
           </Text>
           )
@@ -287,52 +268,59 @@ function AuthForm({
       } as any);
     }
   };
+  const handleGoogleSignIn = () => {
+    Alert.alert("Google Sign In", "Google Sign In functionality will be implemented here");
+    // TODO: Implement Google Sign In with expo-auth-session or similar
+  };
+
   return (
-    <ScrollView style={styles.authContainer}>
-      <View style={styles.authHeader}>
-        <Text style={styles.authTitle}>{isLogin ? "Login" : "Register"}</Text>
-        <Text style={styles.authSubtitle}>
+    <ScrollView className="flex-1 bg-bg-medium">
+      <View className="p-8 items-center bg-bg-deep-dark">
+        <Text className="text-[32px] font-bold text-rm-gold mb-2">
+          {isLogin ? "Login" : "Register"}
+        </Text>
+        <Text className="text-base text-text-secondary">
           {isLogin ? "Welcome back!" : "Create your account"}
         </Text>
       </View>
 
-      <View style={styles.authForm}>
+      <View className="p-6">
         {!isLogin && (
           <>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>FirstName *</Text>
+            <View className="mb-5">
+              <Text className="text-sm font-semibold text-white mb-2">FirstName *</Text>
               <TextInput
-                style={styles.input}
+                className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
                 value={firstName}
                 onChangeText={setFirstName}
                 placeholder="Enter your first name"
                 placeholderTextColor={Colors.darkGray}
               />
             </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>LastName *</Text>
+            <View className="mb-5">
+              <Text className="text-sm font-semibold text-white mb-2">LastName *</Text>
               <TextInput
-                style={styles.input}
+                className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
                 value={lastName}
                 onChangeText={setLastName}
                 placeholder="Enter your last name"
                 placeholderTextColor={Colors.darkGray}
               />
             </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Name *</Text>
+            <View className="mb-5">
+              <Text className="text-sm font-semibold text-white mb-2">Name *</Text>
               <TextInput
-                style={styles.input}
+                className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
                 value={name}
                 onChangeText={setName}
                 placeholder="Enter your name"
                 placeholderTextColor={Colors.darkGray}
               />
             </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>UserName *</Text>
+            <View className="mb-5">
+              <Text className="text-sm font-semibold text-white mb-2">UserName *</Text>
               <TextInput
-                style={styles.input}
+                className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
                 value={userName}
                 onChangeText={setUserName}
                 placeholder="Enter your username"
@@ -340,10 +328,10 @@ function AuthForm({
                 autoCapitalize="none"
               />
             </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email Address *</Text>
+            <View className="mb-5">
+              <Text className="text-sm font-semibold text-white mb-2">Email Address *</Text>
               <TextInput
-                style={styles.input}
+                className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
                 value={email}
                 onChangeText={setEmail}
                 placeholder="Enter your email"
@@ -356,10 +344,10 @@ function AuthForm({
         )}
 
         {isLogin && (
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Username or Email Address *</Text>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">Username or Email Address *</Text>
             <TextInput
-              style={styles.input}
+              className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
               value={email}
               onChangeText={setEmail}
               placeholder="Enter your username or email"
@@ -370,10 +358,10 @@ function AuthForm({
           </View>
         )}
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Password *</Text>
+        <View className="mb-5">
+          <Text className="text-sm font-semibold text-white mb-2">Password *</Text>
           <TextInput
-            style={styles.input}
+            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
             value={password}
             onChangeText={setPassword}
             placeholder="Enter your password"
@@ -384,18 +372,43 @@ function AuthForm({
 
         {isLoading && <Spinner content={isLogin ? "Sign in" : "Sign up"} />}
         {!isLoading && (
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>
-              {isLogin ? "Login" : "Register"}
-            </Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity 
+              className="bg-rm-gold p-4 rounded-[25px] items-center mt-2"
+              onPress={handleSubmit}
+            >
+              <Text className="text-base font-bold text-white">
+                {isLogin ? "Login" : "Register"}
+              </Text>
+            </TouchableOpacity>
+
+            {isLogin && (
+              <>
+                <View className="flex-row items-center my-6">
+                  <View className="flex-1 h-[1px] bg-border-light" />
+                  <Text className="mx-4 text-text-secondary text-sm">OR</Text>
+                  <View className="flex-1 h-[1px] bg-border-light" />
+                </View>
+
+                <TouchableOpacity 
+                  className="bg-white p-4 rounded-[25px] items-center flex-row justify-center gap-3 border-2 border-border-light"
+                  onPress={handleGoogleSignIn}
+                >
+                  <Text className="text-2xl">G</Text>
+                  <Text className="text-base font-bold text-text-dark">
+                    Sign in with Google
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </>
         )}
 
         <TouchableOpacity
-          style={styles.switchButton}
+          className="mt-4 items-center"
           onPress={() => setIsLogin(!isLogin)}
         >
-          <Text style={styles.switchButtonText}>
+          <Text className="text-sm text-rm-gold underline">
             {isLogin
               ? "Don't have an account? Register"
               : "Already have an account? Login"}
@@ -406,187 +419,3 @@ function AuthForm({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#2A2A2A",
-  },
-  header: {
-    backgroundColor: Colors.deepDarkGray,
-    padding: 24,
-    alignItems: "center",
-  },
-  profileSection: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  photoContainer: {
-    marginBottom: 16,
-  },
-  photo: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 3,
-    borderColor: Colors.accent,
-  },
-  photoPlaceholder: {
-    backgroundColor: "#3A3A3A",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  changePhotoButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.accent,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 25,
-    gap: 8,
-  },
-  changePhotoText: {
-    color: Colors.textWhite,
-    fontSize: 14,
-    fontWeight: "600" as const,
-  },
-  welcomeSection: {
-    alignItems: "center",
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.accent,
-    marginBottom: 12,
-  },
-  descriptionText: {
-    fontSize: 14,
-    color: "#CCCCCC",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  dashboardSection: {
-    padding: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: Colors.lightGray,
-    marginBottom: 16,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.accent,
-    padding: 16,
-    borderRadius: 25,
-    marginBottom: 12,
-    gap: 16,
-  },
-  menuItemContent: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  menuItemText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: "#1A1A1A",
-  },
-  menuItemValue: {
-    fontSize: 14,
-    color: "#4A4A4A",
-  },
-  logoutItem: {
-    backgroundColor: "#3A3A3A",
-    borderWidth: 1,
-    borderColor: Colors.error,
-  },
-  logoutText: {
-    color: Colors.error,
-  },
-  infoBox: {
-    margin: 24,
-    padding: 20,
-    backgroundColor: "#3A3A3A",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#4A4A4A",
-    borderStyle: "dashed" as const,
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#CCCCCC",
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  boldText: {
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-  },
-  linkText: {
-    color: Colors.accent,
-    textDecorationLine: "underline" as const,
-  },
-  authContainer: {
-    flex: 1,
-    backgroundColor: "#2A2A2A",
-  },
-  authHeader: {
-    padding: 32,
-    alignItems: "center",
-    backgroundColor: "#1A1A1A",
-  },
-  authTitle: {
-    fontSize: 32,
-    fontWeight: "700" as const,
-    color: Colors.accent,
-    marginBottom: 8,
-  },
-  authSubtitle: {
-    fontSize: 16,
-    color: "#CCCCCC",
-  },
-  authForm: {
-    padding: 24,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#3A3A3A",
-    borderWidth: 1,
-    borderColor: "#4A4A4A",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: Colors.textWhite,
-  },
-  submitButton: {
-    backgroundColor: Colors.accent,
-    padding: 16,
-    borderRadius: 25,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: "700" as const,
-    color: "#1A1A1A",
-  },
-  switchButton: {
-    marginTop: 16,
-    alignItems: "center",
-  },
-  switchButtonText: {
-    fontSize: 14,
-    color: Colors.accent,
-    textDecorationLine: "underline" as const,
-  },
-});

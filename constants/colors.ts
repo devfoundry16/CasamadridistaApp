@@ -1,48 +1,78 @@
-const realMadridGold = "#BC9045" as const;
-const realMadridWhite = "#FFFFFF" as const;
-const realMadridNavy = "#001F3F" as const;
-const realMadridPurple = "#8B5CF6" as const;
+/**
+ * Professional Color System for Casa Madridista
+ * Real Madrid Theme: Gold (#BC9045) and White (#FFFFFF)
+ */
+
 const Colors = {
-  primary: "#FFFFFF",
-  secondary: realMadridGold,
-  accent: realMadridGold,
+  // Brand Colors
+  brand: {
+    gold: "#BC9045",
+    white: "#FFFFFF",
+    navy: "#001F3F",
+  },
+
+  // Primary Theme Colors
+  primary: "#BC9045", // Real Madrid Gold
+  secondary: "#FFFFFF", // White
+  accent: "#BC9045", // Gold accent
+
+  // Background Colors
+  background: {
+    dark: "#0A0A0A",
+    deepDark: "#1A1A1A",
+    medium: "#2A2A2A",
+    card: "#2F2F2F",
+    light: "#3A3A3A",
+    gray: "#515151",
+  },
+
+  // Text Colors
+  text: {
+    primary: "#FFFFFF", // White text
+    secondary: "#CCCCCC",
+    tertiary: "#A0A0A0",
+    muted: "#666666",
+    dark: "#1A1A1A",
+  },
+
+  // Border Colors
+  border: {
+    default: "#3A3A3A",
+    light: "#4A4A4A",
+    medium: "#E0E0E0",
+    subtle: "#E5E7EB",
+  },
+
+  // Status Colors
+  status: {
+    success: "#10B981",
+    error: "#EF4444",
+    warning: "#F59E0B",
+    info: "#0033A0",
+  },
+
+  // UI Element Colors
+  ui: {
+    tabIconDefault: "#9CA3AF",
+    tabIconSelected: "#BC9045",
+    inputBg: "#3A3A3A",
+    buttonBg: "#BC9045",
+  },
+
+  // Legacy compatibility (to be removed after migration)
+  darkGold: "#BC9045",
   royalBlue: "#0033A0",
-  darkGold: realMadridGold,
   lightGray: "#F5F5F5",
   mediumGray: "#E0E0E0",
   darkGray: "#515151",
-  lightDarkGray: "#555",
+  lightDarkGray: "#555555",
   deepDarkGray: "#2A2A2A",
-  text: "#1A1A1A",
   textLight: "#666666",
-  textWhite: realMadridWhite,
-  textPrimary: "#ffffff",
-  textSecondary: "#a0a0a0",
-  border: "#3a3a3a",
-  success: "#4CAF50",
-  error: "#F44336",
-  darkBg: "#0a0a0a",
-  cardBg: "#2f2f2f",
-};
-const altColors = {
-  text: "#1A1A1A" as const,
-  textWhite: "#FFFFFF" as const,
-  textSecondary: "#6B7280" as const,
-  background: "#515151" as const,
-  backgroundSecondary: "#F9FAFB" as const,
-  tint: realMadridGold,
-  tabIconDefault: "#9CA3AF" as const,
-  tabIconSelected: realMadridGold,
-  border: "#E5E7EB" as const,
-  card: "#2f2f2f" as const,
-  primary: realMadridGold,
-  secondary: realMadridNavy,
-  accent: realMadridPurple,
-  success: "#10B981" as const,
-  error: "#EF4444" as const,
-  warning: "#F59E0B" as const,
-  royalBlue: "#0033A0",
-  lightGray: "#F5F5F5",
-};
-export { altColors };
+  textWhite: "#FFFFFF",
+  success: "#10B981",
+  error: "#EF4444",
+  darkBg: "#0A0A0A",
+  cardBg: "#2F2F2F",
+} as const;
+
 export default Colors;

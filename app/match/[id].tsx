@@ -1,8 +1,7 @@
 import CustomWebView from "@/components/CustomWebView";
-import Colors from "@/constants/colors";
 import { useEnvironment } from "@/hooks/useEnvironment";
 import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
 const MatchDetailScreen = () => {
   const { id } = useLocalSearchParams();
@@ -44,7 +43,7 @@ const MatchDetailScreen = () => {
                   `;
   return (
     <>
-      <View style={styles.container}>
+      <View className="flex-1 bg-bg-medium h-full">
         <CustomWebView size={800} title="Match Details" statsHtml={statsHtml} />
       </View>
     </>
@@ -52,10 +51,3 @@ const MatchDetailScreen = () => {
 };
 
 export default MatchDetailScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-});

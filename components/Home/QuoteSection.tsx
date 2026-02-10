@@ -5,13 +5,12 @@ import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useRef, useState } from "react";
 import {
   Dimensions,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
-const { width } = Dimensions.get("window");
+const { width: screenWidth } = Dimensions.get("window");
 
 const QuoteSection = () => {
   const quoteCarouselRef = useRef<any>(null);
@@ -30,49 +29,50 @@ const QuoteSection = () => {
   };
   return (
     <>
-      <View style={styles.adHeadSection}>
+      <View className="h-[900px] w-full flex-col items-center justify-center">
         <Image
           source={{
             uri: "https://casamadridista.com/wp-content/uploads/2025/05/img3.png",
           }}
-          style={styles.adHeadBackgroundImage}
+          style={{ width: screenWidth, height: 900 }}
           contentFit="cover"
         />
 
-        <View style={styles.adHeadContent}>
+        <View className="absolute items-center">
           <Image
             source={{
               uri: "https://casamadridista.com/wp-content/uploads/2025/09/43534535.webp",
             }}
-            style={styles.adPlayerActionImage}
+            style={{ width: screenWidth, height: 322 }}
             contentFit="contain"
           />
-          <View style={styles.adQuoteContainer}>
-            <View style={styles.quoteNavigationButtons}>
+          <View className="flex-row items-center justify-center mt-4 gap-3">
               <TouchableOpacity
-                style={{
-                  ...styles.quoteNavButton,
-                  borderColor: Colors.primary,
-                }}
+                className="w-9 h-9 rounded-full bg-white/15 justify-center items-center border border-rm-gold"
                 onPress={handlePrevQuote}
               >
                 <ChevronLeft size={20} color={Colors.primary} />
               </TouchableOpacity>
               <Carousel
                 ref={quoteCarouselRef}
-                width={width - 140}
+                width={screenWidth - 140}
                 height={500}
                 data={quotes}
                 renderItem={({ item }) => (
-                  <View style={styles.adQuoteCard}>
+                  <View className="p-4 items-center">
                     <Image
                       source={{ uri: item.photo }}
-                      style={styles.adHeadPhoto}
+                      style={{ width: 200, height: 200, borderRadius: 100 }}
+                      className="mb-3 border-[3px] border-rm-gold"
                       contentFit="cover"
                     />
-                    <Text style={styles.adQuote}>{item.text}</Text>
-                    <Text style={styles.adHeadName}>{item.author}</Text>
-                    <Text style={styles.adHeadTitle}>{item.role}</Text>
+                    <Text className="text-[15px] text-text-primary text-center mb-3 leading-[18px]">
+                      {item.text}
+                    </Text>
+                    <Text className="text-[15px] font-bold text-text-primary mb-1 italic">
+                      {item.author}
+                    </Text>
+                    <Text className="text-xs text-rm-gold">{item.role}</Text>
                   </View>
                 )}
                 onSnapToItem={(index) => setCurrentQuoteIndex(index)}
@@ -82,15 +82,11 @@ const QuoteSection = () => {
                 scrollAnimationDuration={500}
               />
               <TouchableOpacity
-                style={{
-                  ...styles.quoteNavButton,
-                  borderColor: Colors.primary,
-                }}
+                className="w-9 h-9 rounded-full bg-white/15 justify-center items-center border border-rm-gold"
                 onPress={handleNextQuote}
               >
                 <ChevronRight size={20} color={Colors.primary} />
               </TouchableOpacity>
-            </View>
           </View>
         </View>
       </View>
@@ -98,89 +94,3 @@ const QuoteSection = () => {
   );
 };
 export default QuoteSection;
-
-const styles = StyleSheet.create({
-  adQuoteContainer: {
-    flexDirection: "row",
-  },
-  adQuoteCard: {
-    padding: 16,
-    alignItems: "center",
-  },
-  adHeadPhoto: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    marginBottom: 12,
-    borderWidth: 3,
-    borderColor: Colors.accent,
-  },
-  adQuote: {
-    fontSize: 15,
-    color: Colors.textWhite,
-    textAlign: "center",
-    marginBottom: 12,
-    lineHeight: 18,
-  },
-  adHeadName: {
-    fontSize: 15,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 4,
-    fontStyle: "italic",
-  },
-  adHeadTitle: {
-    fontSize: 12,
-    color: Colors.accent,
-  },
-  quoteNavigationButtons: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 16,
-    gap: 12,
-  },
-  quoteNavButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: Colors.accent,
-  },
-  quoteIndicators: {
-    flexDirection: "row",
-    gap: 6,
-  },
-  quoteIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-  },
-  quoteIndicatorActive: {
-    backgroundColor: Colors.accent,
-    width: 24,
-  },
-  adHeadSection: {
-    height: 900,
-    width: "100%",
-    flexDirection: "column" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  adHeadBackgroundImage: {
-    width: "100%",
-    height: "100%",
-  },
-  adHeadContent: {
-    position: "absolute" as const,
-    alignItems: "center" as const,
-  },
-  adPlayerActionImage: {
-    width: "100%",
-    height: 322,
-  },
-});

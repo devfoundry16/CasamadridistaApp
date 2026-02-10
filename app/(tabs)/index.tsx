@@ -6,7 +6,6 @@ import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
 import VisionSection from "@/components/Home/VisionSection";
 import { Spinner } from "@/components/Spinner";
 import UpcomingForm from "@/components/UpcomingForm";
-import Colors from "@/constants/colors";
 import { useFootball } from "@/hooks/useFootball";
 import { useEnvironment } from "@/hooks/useEnvironment";
 
@@ -20,7 +19,6 @@ import {
   Dimensions,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -183,7 +181,7 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.spinnerContainer}>
+      <View className="flex-1 justify-center items-center bg-bg-deep-dark">
         <Spinner content="Loading Context" />
       </View>
     );
@@ -191,42 +189,42 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      className="flex-1 bg-bg-gray"
       showsVerticalScrollIndicator={false}
       onScroll={handleScroll}
       scrollEventThrottle={16}
     >
-      <View style={styles.header}>
+      <View className="items-center">
         <Image
           source={{
             uri: "https://casamadridista.com/wp-content/uploads/2025/09/435345345.webp",
           }}
-          style={styles.headerImage}
+          style={{
+            width: Dimensions.get("window").width,
+            height: 778,
+          }}
           contentFit="cover"
         />
-        <View style={styles.headerSection}>
-          <Text style={styles.headerTitle}>REAL MADRID OFFICIAL FAN CLUB</Text>
-          <Text style={styles.headerTagline}>
+        <View className="absolute left-0 right-0 items-center pb-[300px] pt-[10%]">
+          <Text className="text-[30px] font-black text-white mb-3.5 text-center italic">
+            REAL MADRID OFFICIAL FAN CLUB
+          </Text>
+          <Text className="text-lg text-white opacity-80 italic text-center">
             Join the largest gathering of Madridistas in the world
           </Text>
           <Pressable
-            style={[
-              styles.loginButton,
-              {
-                backgroundColor: Colors.darkGold,
-              },
-            ]}
+            className="py-3.5 px-3 rounded-xl items-center mt-6 bg-rm-gold"
             onPress={() => router.push("/memberships/royal-investor")}
           >
-            <Text style={[styles.loginButtonText, { color: Colors.textWhite }]}>
+            <Text className="text-base font-semibold text-white">
               Become a Member
             </Text>
           </Pressable>
 
-          <View style={styles.content}>
-            <View style={styles.nextMatchSection}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>
+          <View className="w-[90%] p-4">
+            <View className="mb-6">
+              <View className="flex-col items-center justify-center mb-4 mt-5">
+                <Text className="text-lg font-bold text-white mb-3.5">
                   {liveMatch
                     ? liveMatch.fixture.status.long +
                       ` ${liveMatch.fixture.status.elapsed != null ? liveMatch.fixture.status.elapsed + "' Elapsed" : ""}` +
@@ -275,88 +273,3 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.darkGray,
-  },
-  spinnerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.deepDarkGray,
-  },
-  header: {
-    alignItems: "center",
-  },
-  headerSection: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    paddingBlockEnd: 300,
-    paddingBlockStart: "10%",
-  },
-  headerImage: {
-    width: "100%",
-    height: 778,
-  },
-  headerTitle: {
-    fontSize: 30,
-    fontWeight: "900" as const,
-    color: Colors.textWhite,
-    marginBottom: 14,
-    textAlign: "center",
-    fontStyle: "italic",
-  },
-  headerSubtitle: {
-    fontSize: 20,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-    marginBottom: 4,
-  },
-  headerTagline: {
-    fontSize: 18,
-    color: Colors.textWhite,
-    opacity: 0.8,
-    fontStyle: "italic",
-    textAlign: "center",
-  },
-  content: {
-    width: "90%",
-    padding: 16,
-  },
-  sectionHeader: {
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-    marginTop: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 15,
-  },
-  accentLine: {
-    height: 3,
-    width: 40,
-    backgroundColor: Colors.accent,
-    borderRadius: 2,
-  },
-  loginButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 24,
-  },
-  loginButtonText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-  },
-  nextMatchSection: {
-    marginBottom: 24,
-  },
-});

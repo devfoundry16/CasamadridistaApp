@@ -1,41 +1,43 @@
-import Colors from "@/constants/colors";
 import { Image } from "expo-image";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Dimensions, ScrollView, Text, View } from "react-native";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 export default function PrivacyPolicyScreen() {
   return (
     <>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.headerContent}>
+      <ScrollView className="flex-1 bg-bg-medium" showsVerticalScrollIndicator={false}>
+        <View className="flex-col items-center justify-center">
           <Image
             source={{
               uri: "https://casamadridista.com/wp-content/uploads/2025/09/544564646.webp",
             }}
-            style={styles.headerImage}
+            style={{ width: screenWidth, height: 250 }}
+            className="mb-3"
             contentFit="cover"
           />
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Privacy Policy</Text>
+          <View className="absolute items-center">
+            <Text className="text-4xl font-bold text-white mb-1">Privacy Policy</Text>
           </View>
         </View>
 
-        <View style={styles.content}>
+        <View className="p-4">
           {Terms.map((term, index) => (
-            <View key={index} style={styles.section}>
-              <Text style={styles.sectionTitle}>{term.title}</Text>
+            <View key={index} className="p-5 mb-4">
+              <Text className="text-2xl font-bold text-rm-gold mb-3">{term.title}</Text>
               {term.startDesc ? (
-                <Text style={styles.sectionText}>{term.startDesc}</Text>
+                <Text className="text-base text-white leading-[22px] mb-3">{term.startDesc}</Text>
               ) : null}
-              <View style={styles.bulletList}>
+              <View className="mt-2">
                 {term.points.map((point, idx) => (
-                  <View key={idx} style={styles.bulletItem}>
-                    <View style={styles.bullet} />
-                    <Text style={styles.bulletText}>{point}</Text>
+                  <View key={idx} className="flex-row items-start mb-2">
+                    <View className="w-1.5 h-1.5 rounded-full bg-rm-gold mt-2 mr-3" />
+                    <Text className="flex-1 text-base text-white leading-[22px]">{point}</Text>
                   </View>
                 ))}
               </View>
               {term.endDesc ? (
-                <Text style={styles.sectionText}>{term.endDesc}</Text>
+                <Text className="text-base text-white leading-[22px] mb-3">{term.endDesc}</Text>
               ) : null}
             </View>
           ))}
@@ -158,80 +160,3 @@ const Terms = [
     points: ["Contact@casamadridista.com", "Casa Madridista"],
   },
 ];
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  headerContent: {
-    flexDirection: "column" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  header: {
-    position: "absolute",
-    alignItems: "center",
-  },
-  headerImage: {
-    width: "100%",
-    height: 250,
-    marginBottom: 12,
-  },
-  headerTitle: {
-    fontSize: 36,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: Colors.accent,
-  },
-  content: {
-    padding: 16,
-  },
-  section: {
-    padding: 20,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 12,
-  },
-  sectionText: {
-    fontSize: 16,
-    color: Colors.textWhite,
-    lineHeight: 22,
-    marginBottom: 12,
-  },
-  bulletList: {
-    marginTop: 8,
-  },
-  bulletItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  bullet: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.primary,
-    marginTop: 8,
-    marginRight: 12,
-  },
-  bulletText: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.textWhite,
-    lineHeight: 22,
-  },
-});

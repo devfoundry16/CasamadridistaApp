@@ -1,47 +1,22 @@
-import Colors from "@/constants/colors";
 import { Image } from "expo-image";
 import * as MailComposer from "expo-mail-composer";
 import {
-  Award,
   Check,
   ChevronDown,
   Crown,
-  TrendingUp,
-  Users,
 } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
+  Dimensions,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 
-const benefits = [
-  {
-    icon: Crown,
-    title: "Exclusive Access",
-    description: "VIP access to all club events and facilities",
-  },
-  {
-    icon: TrendingUp,
-    title: "Investment Returns",
-    description: "Share in club success and revenue growth",
-  },
-  {
-    icon: Users,
-    title: "Network",
-    description: "Connect with elite investors and club management",
-  },
-  {
-    icon: Award,
-    title: "Recognition",
-    description: "Special recognition at Santiago Bernabéu",
-  },
-];
+const { width: screenWidth } = Dimensions.get("window");
 
 const incomeRanges = [
   "Under $50,000",
@@ -131,33 +106,36 @@ export default function RoyalInvestorScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.headerContent}>
+    <ScrollView className="flex-1 bg-bg-medium">
+      <View className="flex-col items-center justify-center">
         <Image
           source={{
             uri: "https://casamadridista.com/wp-content/uploads/2025/09/4234234234.webp",
           }}
-          style={styles.heroImage}
+          style={{ width: screenWidth, height: 300 }}
+          className="mb-0"
           contentFit="cover"
         />
-        <View style={styles.heroSection}>
-          <Crown size={48} color={Colors.darkGold} />
-          <Text style={styles.title}>Royal Investor Program</Text>
-          <Text style={styles.subtitle}>
-            Join an elite group of investors supporting Real Madrid's legacy
+        <View className="absolute items-center mb-8">
+          <Crown size={48} color="#BC9045" />
+          <Text className="text-2xl font-bold text-white mt-4 mb-4 text-center">
+            Royal Investor Program
+          </Text>
+          <Text className="text-base text-white text-center px-5">
+            Join an elite group of investors supporting Real Madrid&apos;s legacy
           </Text>
         </View>
       </View>
-      <View style={styles.content}>
-        <View style={styles.section}>
-          <Text style={{ ...styles.sectionTitle, fontSize: 32 }}>
+      <View className="p-9">
+        <View className="mb-4">
+          <Text className="text-3xl font-bold text-rm-gold mb-3">
             Rare Opportunity!
           </Text>
-          <Text style={styles.sectionText}>
+          <Text className="text-[15px] text-white leading-6 mb-3">
             The rarest opportunity to join the heart of the association and its
             senior management through an exceptional contribution.
           </Text>
-          <Text style={styles.sectionText}>
+          <Text className="text-[15px] text-white leading-6 mb-3">
             We offer this unique membership to visionary individuals who believe
             in the future of CasaMadridista as a global Real Madrid community
             and wish to support its mission from a truly influential leadership
@@ -167,185 +145,201 @@ export default function RoyalInvestorScreen() {
             source={{
               uri: "https://casamadridista.com/wp-content/uploads/2025/09/34534535.webp",
             }}
-            style={{
-              width: "100%",
-              height: 208,
-              borderRadius: 12,
-              marginTop: 12,
-              marginBottom: 12,
-            }}
+            style={{ width: screenWidth, height: 208, borderRadius: 12 }}
+            className="mt-3 mb-3"
             contentFit="cover"
           />
         </View>
 
         {Benefits.map((benefit, index) => (
-          <View key={index} style={styles.section}>
-            <Text style={styles.sectionTitle}>{benefit.title}</Text>
+          <View key={index} className="mb-4">
+            <Text className="text-3xl font-bold text-rm-gold mb-3">
+              {benefit.title}
+            </Text>
             {benefit.description ? (
-              <Text style={styles.sectionText}>{benefit.description}</Text>
+              <Text className="text-[15px] text-white leading-6 mb-3">
+                {benefit.description}
+              </Text>
             ) : null}
             {benefit.items.map((item, idx) => (
-              <View key={idx} style={styles.valueItem}>
-                <Check size={20} strokeWidth={4} color={Colors.darkGold} />
-                <Text key={idx} style={styles.valueText}>
-                  <Text style={styles.valueText}>{item}</Text>
+              <View key={idx} className="flex-row items-center mb-3 gap-3">
+                <Check size={20} strokeWidth={4} color="#BC9045" />
+                <Text key={idx} className="flex-1 text-sm text-white leading-[22px]">
+                  {item}
                 </Text>
               </View>
             ))}
           </View>
         ))}
 
-        <View style={styles.formSection}>
-          <Text style={styles.formTitle}>Join Application Form</Text>
-          <Text style={styles.formDescription}>
+        <View>
+          <Text className="text-xl font-bold text-white mb-2">
+            Join Application Form
+          </Text>
+          <Text className="text-sm text-white italic mb-6">
             To join the Royal Investor Membership, please fill out the form
             Below. All applications are subject to official review, and you will
             be contacted as soon as possible.
           </Text>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Full Name *</Text>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">
+              Full Name *
+            </Text>
             <TextInput
-              style={styles.input}
+              className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
               value={formData.fullName}
               onChangeText={(text) =>
                 setFormData({ ...formData, fullName: text })
               }
               placeholder="Enter your full name"
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor="#666666"
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Age *</Text>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">
+              Age *
+            </Text>
             <TextInput
-              style={styles.input}
+              className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
               value={formData.age}
               onChangeText={(text) => setFormData({ ...formData, age: text })}
               placeholder="Enter your age"
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor="#666666"
               keyboardType="numeric"
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Phone Number *</Text>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">
+              Phone Number *
+            </Text>
             <TextInput
-              style={styles.input}
+              className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
               value={formData.phoneNumber}
               onChangeText={(text) =>
                 setFormData({ ...formData, phoneNumber: text })
               }
               placeholder="Enter your phone number"
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor="#666666"
               keyboardType="phone-pad"
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address *</Text>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">
+              Email Address *
+            </Text>
             <TextInput
-              style={styles.input}
+              className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
               value={formData.email}
               onChangeText={(text) => setFormData({ ...formData, email: text })}
               placeholder="Enter your email address"
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor="#666666"
               keyboardType="email-address"
               autoCapitalize="none"
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nationality *</Text>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">
+              Nationality *
+            </Text>
             <TextInput
-              style={styles.input}
+              className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
               value={formData.nationality}
               onChangeText={(text) =>
                 setFormData({ ...formData, nationality: text })
               }
               placeholder="Enter your nationality"
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor="#666666"
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Place of Residence *</Text>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">
+              Place of Residence *
+            </Text>
             <TextInput
-              style={styles.input}
+              className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
               value={formData.placeOfResidence}
               onChangeText={(text) =>
                 setFormData({ ...formData, placeOfResidence: text })
               }
               placeholder="Enter your place of residence"
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor="#666666"
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Annual Income *</Text>
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">
+              Annual Income *
+            </Text>
             <TouchableOpacity
-              style={styles.dropdown}
+              className="bg-bg-light rounded-lg px-4 py-3 flex-row justify-between items-center border border-border-default"
               onPress={() => setShowIncomeDropdown(!showIncomeDropdown)}
             >
               <Text
-                style={[
-                  styles.dropdownText,
-                  !formData.annualIncome && styles.dropdownPlaceholder,
-                ]}
+                className={`text-sm ${
+                  !formData.annualIncome ? "text-text-muted" : "text-text-dark"
+                }`}
               >
                 {formData.annualIncome || "Select your annual income range"}
               </Text>
-              <ChevronDown size={20} color={Colors.textLight} />
+              <ChevronDown size={20} color="#666666" />
             </TouchableOpacity>
             {showIncomeDropdown && (
-              <View style={styles.dropdownMenu}>
+              <View className="bg-bg-medium rounded-lg mt-2 border border-border-default overflow-hidden">
                 {incomeRanges.map((range, index) => (
                   <TouchableOpacity
                     key={index}
-                    style={styles.dropdownItem}
+                    className="px-4 py-3 border-b border-border-default"
                     onPress={() => {
                       setFormData({ ...formData, annualIncome: range });
                       setShowIncomeDropdown(false);
                     }}
                   >
-                    <Text style={styles.dropdownItemText}>{range}</Text>
+                    <Text className="text-sm text-white">{range}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             )}
           </View>
 
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitButtonText}>Submit Application</Text>
+          <TouchableOpacity
+            className="bg-rm-gold py-3.5 rounded-lg items-center mt-2"
+            onPress={handleSubmit}
+          >
+            <Text className="text-base font-semibold text-white">
+              Submit Application
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.headerContent}>
+      <View className="flex-col items-center justify-center">
         <Image
           source={{
             uri: "https://casamadridista.com/wp-content/uploads/2025/09/343747.webp",
           }}
-          style={styles.footerImage}
+          style={{ width: screenWidth, height: 650 }}
+          className="mb-0"
           contentFit="cover"
         />
-        <View style={styles.heroSection}>
-          <Text style={styles.footerTitle}>
-            Become one of the association's champions!
+        <View className="absolute items-center mb-8">
+          <Text className="text-2xl font-bold text-white mt-4 mb-4 text-center">
+            Become one of the association&apos;s champions!
           </Text>
-          <Text style={styles.subtitle}>
+          <Text className="text-base text-white text-center px-5">
             Your support makes a difference. Contribute to the growth of the
             official Real Madrid association, and your name and photo will shine
             on the honor board in front of thousands of Madridistas!
           </Text>
           <TouchableOpacity
-            style={{
-              ...styles.submitButton,
-              paddingHorizontal: 24,
-              marginTop: 16,
-            }}
+            className="bg-rm-gold py-3.5 rounded-lg items-center mt-4 px-6"
             onPress={handleSubmit}
           >
-            <Text style={styles.submitButtonText}>Apply Now</Text>
+            <Text className="text-base font-semibold text-white">Apply Now</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -387,231 +381,3 @@ const Benefits: {
     ],
   },
 ];
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  content: {
-    padding: 35,
-  },
-  headerContent: {
-    flexDirection: "column" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  heroImage: {
-    width: "100%",
-    height: 300,
-    marginBottom: 0,
-  },
-  footerImage: {
-    width: "100%",
-    height: 650,
-    marginBottom: 0,
-  },
-  footerTitle: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginTop: 16,
-    marginBottom: 16,
-    textAlign: "center" as const,
-  },
-  heroSection: {
-    position: "absolute" as const,
-    alignItems: "center" as const,
-    marginBottom: 32,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    color: Colors.secondary,
-    marginTop: 16,
-    marginBottom: 16,
-    textAlign: "center" as const,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.textWhite,
-    textAlign: "center" as const,
-    paddingHorizontal: 20,
-  },
-  investmentCard: {
-    backgroundColor: Colors.secondary,
-    borderRadius: 12,
-    padding: 24,
-    marginBottom: 32,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "600" as const,
-    color: Colors.accent,
-    marginBottom: 12,
-  },
-  investmentAmount: {
-    fontSize: 32,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 12,
-  },
-  investmentDescription: {
-    fontSize: 14,
-    color: Colors.textWhite,
-    lineHeight: 22,
-    opacity: 0.9,
-  },
-  benefitsSection: {
-    marginBottom: 32,
-  },
-  section: {
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  sectionTitle: {
-    fontSize: 30,
-    fontWeight: "700" as const,
-    color: Colors.darkGold,
-    marginBottom: 12,
-  },
-  sectionText: {
-    fontSize: 15,
-    color: Colors.textWhite,
-    lineHeight: 24,
-    marginBottom: 12,
-  },
-  valueItem: {
-    flexDirection: "row",
-    alignItems: "center" as const,
-    marginBottom: 12,
-    gap: 12,
-  },
-  valueText: {
-    flex: 1,
-    fontSize: 14,
-    color: Colors.textWhite,
-    lineHeight: 22,
-  },
-  valueBold: {
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-  },
-  benefitCard: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: Colors.secondary,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    marginRight: 16,
-  },
-  benefitContent: {
-    flex: 1,
-  },
-  benefitTitle: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.secondary,
-    marginBottom: 4,
-  },
-  benefitDescription: {
-    fontSize: 14,
-    color: Colors.textWhite,
-    lineHeight: 20,
-  },
-  formSection: {},
-  formTitle: {
-    fontSize: 22,
-    fontWeight: "700" as const,
-    color: Colors.secondary,
-    marginBottom: 8,
-  },
-  formDescription: {
-    fontSize: 14,
-    color: Colors.textWhite,
-    fontStyle: "italic" as const,
-    marginBottom: 24,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: Colors.secondary,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: Colors.lightGray,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: Colors.text,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  dropdown: {
-    backgroundColor: Colors.lightGray,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    alignItems: "center" as const,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  dropdownText: {
-    fontSize: 14,
-    color: Colors.text,
-  },
-  dropdownPlaceholder: {
-    color: Colors.textLight,
-  },
-  dropdownMenu: {
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    overflow: "hidden" as const,
-  },
-  dropdownItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  dropdownItemText: {
-    fontSize: 14,
-    color: Colors.text,
-  },
-  submitButton: {
-    backgroundColor: Colors.darkGold,
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: "center" as const,
-    marginTop: 8,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: Colors.textWhite,
-  },
-});

@@ -1,9 +1,7 @@
 // components/Button.tsx
-import Colors from "@/constants/colors";
 import React from "react";
 import {
   ActivityIndicator,
-  StyleSheet,
   Text,
   TextStyle,
   TouchableOpacity,
@@ -21,6 +19,32 @@ interface ButtonProps {
   textStyle?: TextStyle;
 }
 
+const variantClasses = {
+  primary: "bg-rm-gold",
+  secondary: "bg-bg-gray",
+  outline: "bg-transparent border border-rm-gold",
+  danger: "bg-status-error",
+};
+
+const variantTextClasses = {
+  primary: "text-white",
+  secondary: "text-white",
+  outline: "text-rm-gold",
+  danger: "text-white",
+};
+
+const sizeClasses = {
+  small: "px-3 py-2 min-h-8",
+  medium: "px-4 py-3 min-h-11",
+  large: "px-5 py-4 min-h-[52px]",
+};
+
+const sizeTextClasses = {
+  small: "text-sm",
+  medium: "text-base",
+  large: "text-lg",
+};
+
 export const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
@@ -31,95 +55,31 @@ export const Button: React.FC<ButtonProps> = ({
   style,
   textStyle,
 }) => {
-  const getButtonStyle = (): ViewStyle[] => {
-    const baseStyle: ViewStyle[] = [styles.button];
+  const isDisabled = disabled || loading;
+  const buttonClassName = [
+    "rounded-lg justify-center items-center flex-row",
+    variantClasses[variant],
+    sizeClasses[size],
+    isDisabled && "opacity-60",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-    // Variant styles
-    switch (variant) {
-      case "primary":
-        baseStyle.push(styles.primary);
-        break;
-      case "secondary":
-        baseStyle.push(styles.secondary);
-        break;
-      case "outline":
-        baseStyle.push(styles.outline);
-        break;
-      case "danger":
-        baseStyle.push(styles.danger);
-        break;
-    }
-
-    // Size styles
-    switch (size) {
-      case "small":
-        baseStyle.push(styles.small);
-        break;
-      case "large":
-        baseStyle.push(styles.large);
-        break;
-    }
-
-    // Disabled state
-    if (disabled || loading) {
-      baseStyle.push(styles.disabled);
-    }
-
-    // Custom style
-    if (style) {
-      baseStyle.push(style);
-    }
-
-    return baseStyle;
-  };
-
-  const getTextStyle = (): TextStyle[] => {
-    const baseStyle: TextStyle[] = [styles.text];
-
-    // Variant text styles
-    switch (variant) {
-      case "primary":
-        baseStyle.push(styles.primaryText);
-        break;
-      case "secondary":
-        baseStyle.push(styles.secondaryText);
-        break;
-      case "outline":
-        baseStyle.push(styles.outlineText);
-        break;
-      case "danger":
-        baseStyle.push(styles.dangerText);
-        break;
-    }
-
-    // Size text styles
-    switch (size) {
-      case "small":
-        baseStyle.push(styles.smallText);
-        break;
-      case "large":
-        baseStyle.push(styles.largeText);
-        break;
-    }
-
-    // Disabled text
-    if (disabled || loading) {
-      baseStyle.push(styles.disabledText);
-    }
-
-    // Custom text style
-    if (textStyle) {
-      baseStyle.push(textStyle);
-    }
-
-    return baseStyle;
-  };
+  const textClassName = [
+    "font-semibold text-center",
+    variantTextClasses[variant],
+    sizeTextClasses[size],
+    isDisabled && "opacity-70",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <TouchableOpacity
-      style={getButtonStyle()}
+      className={buttonClassName}
+      style={style}
       onPress={onPress}
-      disabled={disabled || loading}
+      disabled={isDisabled}
       activeOpacity={0.7}
     >
       {loading ? (
@@ -127,87 +87,20 @@ export const Button: React.FC<ButtonProps> = ({
           size="small"
           color={
             variant === "outline"
-              ? "#007AFF"
+              ? "#BC9045"
               : variant === "secondary"
                 ? "#666"
                 : "#fff"
           }
         />
       ) : (
-        <Text style={getTextStyle()}>{title}</Text>
+        <Text className={textClassName} style={textStyle}>
+          {title}
+        </Text>
       )}
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  primary: {
-    backgroundColor: Colors.darkGold,
-  },
-  secondary: {
-    backgroundColor: "#6c757d",
-  },
-  outline: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#007AFF",
-  },
-  danger: {
-    backgroundColor: "#dc3545",
-  },
-  small: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    minHeight: 32,
-  },
-  medium: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    minHeight: 44,
-  },
-  large: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    minHeight: 52,
-  },
-  disabled: {
-    opacity: 0.6,
-  },
-  text: {
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  primaryText: {
-    color: "#fff",
-  },
-  secondaryText: {
-    color: "#fff",
-  },
-  outlineText: {
-    color: "#007AFF",
-  },
-  dangerText: {
-    color: "#fff",
-  },
-  smallText: {
-    fontSize: 14,
-  },
-  mediumText: {
-    fontSize: 16,
-  },
-  largeText: {
-    fontSize: 18,
-  },
-  disabledText: {
-    opacity: 0.7,
-  },
-});
 
 // Convenience component variants
 export const PrimaryButton: React.FC<Omit<ButtonProps, "variant">> = (

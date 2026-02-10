@@ -11,7 +11,6 @@ import {
   Alert,
   Modal,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -28,8 +27,6 @@ interface AddFundsModalProps {
 const PAYMENT_METHODS = [
   { id: CHECKOUT_PAYMENT_METHOD.STRIPE, name: "Credit/Debit Card" },
   { id: CHECKOUT_PAYMENT_METHOD.PAYPAL, name: "PayPal" },
-  // { id: 'bank_transfer', name: 'Bank Transfer' },
-  // { id: 'crypto', name: 'Cryptocurrency' },
 ];
 
 export const AddFundsModal: React.FC<AddFundsModalProps> = ({
@@ -51,7 +48,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
   const handleWallet = async (numericAmount: number) => {
     const product = {
-      id: 52365, // Flintop Wallet Product ID
+      id: 52365,
       quantity: 1,
     };
     if (cartCount) {
@@ -116,8 +113,10 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.label}>Processing...</Text>
+      <View className="flex-1 bg-bg-medium justify-center items-center">
+        <Text className="text-base font-semibold text-text-primary mb-3">
+          Processing...
+        </Text>
       </View>
     );
   }
@@ -131,20 +130,25 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
     >
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Add Funds</Text>
-          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>×</Text>
+      <View className="flex-1 bg-bg-medium">
+        <View className="flex-row justify-between items-center p-4 border-b border-border-default">
+          <Text className="text-lg font-bold text-text-primary">Add Funds</Text>
+          <TouchableOpacity
+            onPress={handleClose}
+            className="w-[30px] h-[30px] rounded-full bg-bg-light justify-center items-center"
+          >
+            <Text className="text-xl text-text-secondary">×</Text>
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.content}>
+        <ScrollView className="flex-1 p-4">
           {/* Amount Input */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Amount</Text>
+          <View className="mb-6">
+            <Text className="text-base font-semibold mb-3 text-text-primary">
+              Amount
+            </Text>
             <TextInput
-              style={styles.amountInput}
+              className="border border-border-default rounded-lg p-3 text-base bg-bg-card text-text-primary"
               placeholder="Enter amount"
               placeholderTextColor="#999"
               keyboardType="decimal-pad"
@@ -154,75 +158,88 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
             />
 
             {/* Quick Amount Buttons */}
-            <View style={styles.quickAmountsContainer}>
-              <Text style={styles.quickAmountsLabel}>Quick Select:</Text>
-              <View style={styles.quickAmounts}>
-                {quickAmounts.map((quickAmount) => (
-                  <TouchableOpacity
-                    key={quickAmount}
-                    style={[
-                      styles.quickAmountButton,
-                      amount === quickAmount.toString() &&
-                        styles.quickAmountButtonSelected,
-                    ]}
-                    onPress={() => setAmount(quickAmount.toString())}
-                    disabled={loading}
-                  >
-                    <Text
-                      style={[
-                        styles.quickAmountText,
-                        amount === quickAmount.toString() &&
-                          styles.quickAmountTextSelected,
-                      ]}
+            <View className="mt-3">
+              <Text className="text-sm text-text-secondary mb-2">
+                Quick Select:
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {quickAmounts.map((quickAmount) => {
+                  const isSelected = amount === quickAmount.toString();
+                  return (
+                    <TouchableOpacity
+                      key={quickAmount}
+                      className={`px-4 py-2 rounded-full border ${
+                        isSelected
+                          ? "bg-rm-gold border-rm-gold"
+                          : "bg-bg-light border-border-default"
+                      }`}
+                      onPress={() => setAmount(quickAmount.toString())}
+                      disabled={loading}
                     >
-                      ${quickAmount}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <Text
+                        className={`text-sm ${
+                          isSelected
+                            ? "text-white font-semibold"
+                            : "text-text-primary"
+                        }`}
+                      >
+                        ${quickAmount}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
           </View>
 
           {/* Payment Method Selection */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Payment Method</Text>
-            <View style={styles.paymentMethods}>
-              {PAYMENT_METHODS.map((method) => (
-                <TouchableOpacity
-                  key={method.id}
-                  style={[
-                    styles.paymentMethod,
-                    selectedMethod === method.id &&
-                      styles.paymentMethodSelected,
-                  ]}
-                  onPress={() => setSelectedMethod(method.id)}
-                  disabled={loading}
-                >
-                  <View style={styles.radioContainer}>
+          <View className="mb-6">
+            <Text className="text-base font-semibold mb-3 text-text-primary">
+              Payment Method
+            </Text>
+            <View className="gap-2">
+              {PAYMENT_METHODS.map((method) => {
+                const isSelected = selectedMethod === method.id;
+                return (
+                  <TouchableOpacity
+                    key={method.id}
+                    className={`flex-row items-center p-3 rounded-lg border ${
+                      isSelected
+                        ? "border-rm-gold bg-rm-gold/20"
+                        : "border-border-default bg-bg-card"
+                    }`}
+                    onPress={() => setSelectedMethod(method.id)}
+                    disabled={loading}
+                  >
                     <View
-                      style={[
-                        styles.radio,
-                        selectedMethod === method.id && styles.radioSelected,
-                      ]}
-                    />
-                  </View>
-                  <Text style={styles.paymentMethodText}>{method.name}</Text>
-                </TouchableOpacity>
-              ))}
+                      className={`w-5 h-5 rounded-full border-2 mr-3 justify-center items-center ${
+                        isSelected ? "border-rm-gold" : "border-border-light"
+                      }`}
+                    >
+                      {isSelected && (
+                        <View className="w-2.5 h-2.5 rounded-full bg-rm-gold" />
+                      )}
+                    </View>
+                    <Text className="text-base text-text-primary">
+                      {method.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
 
           {/* Add Funds Button */}
           <TouchableOpacity
-            style={[
-              styles.addFundsButton,
-              (!amount || !selectedMethod || loading) &&
-                styles.addFundsButtonDisabled,
-            ]}
+            className={`p-4 rounded-lg items-center mt-5 ${
+              !amount || !selectedMethod || loading
+                ? "bg-bg-gray opacity-60"
+                : "bg-rm-gold"
+            }`}
             onPress={handleAddFunds}
             disabled={!amount || !selectedMethod || loading}
           >
-            <Text style={styles.addFundsButtonText}>
+            <Text className="text-white text-base font-semibold">
               {loading ? "Processing..." : `Add $${amount || "0.00"}`}
             </Text>
           </TouchableOpacity>
@@ -231,142 +248,3 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  closeButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#f0f0f0",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  closeButtonText: {
-    fontSize: 20,
-    color: "#666",
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
-    color: "#333",
-  },
-  amountInput: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
-  },
-  quickAmountsContainer: {
-    marginTop: 12,
-  },
-  quickAmountsLabel: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 8,
-  },
-  quickAmounts: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  quickAmountButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#f0f0f0",
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  quickAmountButtonSelected: {
-    backgroundColor: Colors.darkGold,
-    borderColor: Colors.darkGold,
-  },
-  quickAmountText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  quickAmountTextSelected: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  paymentMethods: {
-    gap: 8,
-  },
-  paymentMethod: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    backgroundColor: "#f9f9f9",
-  },
-  paymentMethodSelected: {
-    borderColor: Colors.darkGold,
-    backgroundColor: "#e3f2fd",
-  },
-  radioContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "#ccc",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  radio: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "transparent",
-  },
-  radioSelected: {
-    backgroundColor: Colors.darkGold,
-  },
-  paymentMethodText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  addFundsButton: {
-    backgroundColor: Colors.darkGold,
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  addFundsButtonDisabled: {
-    backgroundColor: "#ccc",
-  },
-  addFundsButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

@@ -11,11 +11,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { development } from "@/config/environment";
 import { StatusBar } from "expo-status-bar";
 import Colors from "@/constants/colors";
+import "./global.css";
+
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
@@ -23,11 +25,15 @@ const queryClient = new QueryClient();
 const defaultOptions: {
   headerShown: boolean;
   headerStyle: { backgroundColor: string };
+  headerTintColor: string;
+  headerTitleStyle: { color: string };
   headerTitleAlign: "center";
   animation: "default";
 } = {
   headerShown: true,
   headerStyle: { backgroundColor: Colors.darkGold },
+  headerTintColor: Colors.text.primary,
+  headerTitleStyle: { color: Colors.text.primary },
   headerTitleAlign: "center",
   animation: "default",
 };

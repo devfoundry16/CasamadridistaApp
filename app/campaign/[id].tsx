@@ -3,17 +3,18 @@ import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TextInput,
   TouchableOpacity,
   Alert,
+  Dimensions,
 } from "react-native";
+
+const { width: screenWidth } = Dimensions.get("window");
 import { Image } from "expo-image";
 
 import { GiveWPService } from "@/services/Donation/GiveWPService";
 import { CampaignDetail, Donation } from "@/types/campaigns/campaigns";
-import Colors from "@/constants/colors";
 import { Spinner } from "@/components/Spinner";
 import { CHECKOUT_PAYMENT_METHOD } from "@/types/shop/checkout";
 import { useStripePay } from "@/hooks/useStripePay";
@@ -134,7 +135,7 @@ export default function CampaignDetailScreen() {
   if (loading) {
     return (
       <>
-        <View style={styles.spinnerContainer}>
+        <View className="flex-1 justify-center items-center bg-bg-medium">
           <Spinner content="Loading Campaign" />
         </View>
       </>
@@ -143,9 +144,9 @@ export default function CampaignDetailScreen() {
 
   if (!campaign) {
     return (
-      <View style={styles.container}>
-        <View style={styles.error}>
-          <Text style={styles.errorText}>Campaign not found.</Text>
+      <View className="flex-1 bg-bg-medium">
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-white text-lg">Campaign not found.</Text>
         </View>
       </View>
     );
@@ -154,22 +155,21 @@ export default function CampaignDetailScreen() {
   const renderDonationForm = () => {
     if (currentStep === 1) {
       return (
-        <View style={styles.formContainer}>
-          <Text style={styles.formTitle}>
+        <View className="p-4 bg-bg-card mt-4 rounded-lg border border-border-default">
+          <Text className="text-xl font-bold text-white mb-2">
             How much would you like to donate today?
           </Text>
-          <Text style={styles.formDescription}>
+          <Text className="text-base text-text-secondary mb-4">
             All donations directly impact our organization and help us further
             our mission.
           </Text>
-          <View style={styles.amountButtons}>
+          <View className="flex-row flex-wrap mb-4">
             {[10, 25, 50, 100, 250, 500].map((amt) => (
               <TouchableOpacity
                 key={amt}
-                style={[
-                  styles.amountButton,
-                  donationData.amount === amt && styles.selectedAmount,
-                ]}
+                className={`p-2.5 m-1 rounded border ${
+                  donationData.amount === amt ? "bg-rm-gold border-border-default" : "bg-bg-medium border border-border-default"
+                }`}
                 onPress={() =>
                   setDonationData({
                     ...donationData,
@@ -178,17 +178,16 @@ export default function CampaignDetailScreen() {
                   })
                 }
               >
-                <Text style={styles.amountText}>${amt}</Text>
+                <Text className="text-white">${amt}</Text>
               </TouchableOpacity>
             ))}
             <TouchableOpacity
-              style={[
-                styles.amountButton,
-                donationData.amount ===
-                  (parseFloat(donationData.customAmount) || 0) &&
-                  donationData.customAmount !== "" &&
-                  styles.selectedAmount,
-              ]}
+              className={`p-2.5 m-1 rounded border ${
+                donationData.amount === (parseFloat(donationData.customAmount) || 0) &&
+                donationData.customAmount !== ""
+                  ? "bg-rm-gold border-border-default"
+                  : "bg-bg-medium border border-border-default"
+              }`}
               onPress={() =>
                 setDonationData({
                   ...donationData,
@@ -196,11 +195,11 @@ export default function CampaignDetailScreen() {
                 })
               }
             >
-              <Text style={styles.amountText}>Custom</Text>
+              <Text className="text-white">Custom</Text>
             </TouchableOpacity>
           </View>
           <TextInput
-            style={styles.input}
+            className="bg-bg-medium text-white p-2.5 mb-4 rounded border border-border-default"
             placeholder="Enter custom amount"
             value={donationData.customAmount}
             onChangeText={(text) =>
@@ -244,22 +243,22 @@ export default function CampaignDetailScreen() {
             </TouchableOpacity>
           </View> */}
           <TouchableOpacity
-            style={styles.primaryButton}
+            className="bg-rm-gold p-3 rounded items-center flex-1 ml-2"
             onPress={() => setCurrentStep(2)}
           >
-            <Text style={styles.buttonText}>Donate Now</Text>
+            <Text className="text-white text-base font-bold">Donate Now</Text>
           </TouchableOpacity>
         </View>
       );
     } else if (currentStep === 2) {
       return (
-        <View style={styles.formContainer}>
-          <Text style={styles.formTitle}>Donor Information</Text>
-          <Text style={styles.formDescription}>
+        <View className="p-4 bg-bg-card mt-4 rounded-lg border border-border-default">
+          <Text className="text-xl font-bold text-white mb-2">Donor Information</Text>
+          <Text className="text-base text-text-secondary mb-4">
             Please provide your contact details.
           </Text>
           <TextInput
-            style={styles.input}
+            className="bg-bg-medium text-white p-2.5 mb-4 rounded border border-border-default"
             placeholder="First Name"
             value={donationData.firstName}
             onChangeText={(text) =>
@@ -267,7 +266,7 @@ export default function CampaignDetailScreen() {
             }
           />
           <TextInput
-            style={styles.input}
+            className="bg-bg-medium text-white p-2.5 mb-4 rounded border border-border-default"
             placeholder="Last Name"
             value={donationData.lastName}
             onChangeText={(text) =>
@@ -275,7 +274,7 @@ export default function CampaignDetailScreen() {
             }
           />
           <TextInput
-            style={styles.input}
+            className="bg-bg-medium text-white p-2.5 mb-4 rounded border border-border-default"
             placeholder="Email Address"
             value={donationData.email}
             onChangeText={(text) =>
@@ -283,38 +282,38 @@ export default function CampaignDetailScreen() {
             }
             keyboardType="email-address"
           />
-          <View style={styles.buttonRow}>
+          <View className="flex-row">
             <TouchableOpacity
-              style={styles.secondaryButton}
+              className="bg-bg-medium p-3 rounded items-center flex-1 mr-2"
               onPress={() => setCurrentStep(1)}
             >
-              <Text style={styles.buttonText}>Back</Text>
+              <Text className="text-white text-base font-bold">Back</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.primaryButton}
+              className="bg-rm-gold p-3 rounded items-center flex-1 ml-2"
               onPress={() => setCurrentStep(3)}
             >
-              <Text style={styles.buttonText}>Continue</Text>
+              <Text className="text-white text-base font-bold">Continue</Text>
             </TouchableOpacity>
           </View>
         </View>
       );
     } else if (currentStep === 3) {
       return (
-        <View style={styles.formContainer}>
-          <Text style={styles.formTitle}>Payment Details</Text>
-          <Text style={styles.formDescription}>
+        <View className="p-4 bg-bg-card mt-4 rounded-lg border border-border-default">
+          <Text className="text-xl font-bold text-white mb-2">Payment Details</Text>
+          <Text className="text-base text-text-secondary mb-4">
             Review your donation and select payment method.
           </Text>
-          <View style={styles.summary}>
-            <Text style={styles.summaryText}>
+          <View className="mb-4">
+            <Text className="text-base text-white mb-1">
               Amount: ${donationData.amount}
             </Text>
-            <Text style={styles.summaryText}>
+            <Text className="text-base text-white mb-1">
               Frequency: {donationData.frequency}
             </Text>
           </View>
-          <View style={styles.paymentOptions}>
+          <View className="mb-4">
             <TouchableOpacity
               onPress={() =>
                 setDonationData({
@@ -322,16 +321,14 @@ export default function CampaignDetailScreen() {
                   paymentMethod: CHECKOUT_PAYMENT_METHOD.STRIPE,
                 })
               }
-              style={styles.radioOption}
+              className="flex-row items-center mb-2"
             >
               <View
-                style={[
-                  styles.radio,
-                  donationData.paymentMethod ===
-                    CHECKOUT_PAYMENT_METHOD.STRIPE && styles.radioSelected,
-                ]}
+                className={`w-5 h-5 rounded-full border-2 mr-2 ${
+                  donationData.paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE ? "bg-rm-gold border-text-secondary" : "border-text-secondary"
+                }`}
               />
-              <Text style={styles.radioText}>Stripe Pay</Text>
+              <Text className="text-white">Stripe Pay</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() =>
@@ -340,30 +337,28 @@ export default function CampaignDetailScreen() {
                   paymentMethod: CHECKOUT_PAYMENT_METHOD.PAYPAL,
                 })
               }
-              style={styles.radioOption}
+              className="flex-row items-center mb-2"
             >
               <View
-                style={[
-                  styles.radio,
-                  donationData.paymentMethod ===
-                    CHECKOUT_PAYMENT_METHOD.PAYPAL && styles.radioSelected,
-                ]}
+                className={`w-5 h-5 rounded-full border-2 mr-2 ${
+                  donationData.paymentMethod === CHECKOUT_PAYMENT_METHOD.PAYPAL ? "bg-rm-gold border-text-secondary" : "border-text-secondary"
+                }`}
               />
-              <Text style={styles.radioText}>PayPal Pay</Text>
+              <Text className="text-white">PayPal Pay</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.buttonRow}>
+          <View className="flex-row">
             <TouchableOpacity
-              style={styles.secondaryButton}
+              className="bg-bg-medium p-3 rounded items-center flex-1 mr-2"
               onPress={() => setCurrentStep(2)}
             >
-              <Text style={styles.buttonText}>Back</Text>
+              <Text className="text-white text-base font-bold">Back</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.primaryButton}
+              className="bg-rm-gold p-3 rounded items-center flex-1 ml-2"
               onPress={handlePayment}
             >
-              <Text style={styles.buttonText}>Donate Now</Text>
+              <Text className="text-white text-base font-bold">Donate Now</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -373,206 +368,29 @@ export default function CampaignDetailScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
+    <ScrollView className="flex-1 bg-bg-medium">
+      <View className="p-4">
         {campaign.image && (
           <Image
             contentFit="contain"
             source={{ uri: campaign.image }}
-            style={styles.image}
+            style={{ width: screenWidth, height: 350, borderRadius: 8 }}
+            className="mb-4"
           />
         )}
-        <Text style={styles.title}>{campaign.title}</Text>
-        <Text style={styles.description}>{campaign.shortDescription}</Text>
-        <View style={styles.statsContainer}>
-          <Text style={styles.goal}>
+        <Text className="text-2xl font-bold text-white mb-2">{campaign.title}</Text>
+        <Text className="text-base text-text-secondary mb-4 leading-6">{campaign.shortDescription}</Text>
+        <View className="bg-bg-card p-4 rounded-lg border border-border-default">
+          <Text className="text-lg text-white mb-2">
             Goal: {campaign.goalStats.goalFormatted.replace("&#36;", "$")}
           </Text>
-          <Text style={styles.raised}>
+          <Text className="text-lg text-rm-gold mb-2">
             Raised: {campaign.goalStats.actualFormatted.replace("&#36;", "$")}
           </Text>
-          <Text style={styles.status}>Status: {campaign.status}</Text>
+          <Text className="text-base text-text-muted">Status: {campaign.status}</Text>
         </View>
         {renderDonationForm()}
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  spinnerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.deepDarkGray,
-  },
-  content: {
-    padding: 16,
-  },
-  loading: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  error: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    color: Colors.textWhite,
-    fontSize: 18,
-  },
-  image: {
-    width: "100%",
-    height: 350,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: Colors.textWhite,
-    marginBottom: 8,
-  },
-  description: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    marginBottom: 16,
-    lineHeight: 24,
-  },
-  statsContainer: {
-    backgroundColor: Colors.cardBg,
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  goal: {
-    fontSize: 18,
-    color: Colors.textWhite,
-    marginBottom: 8,
-  },
-  raised: {
-    fontSize: 18,
-    color: Colors.accent,
-    marginBottom: 8,
-  },
-  status: {
-    fontSize: 16,
-    color: Colors.textLight,
-  },
-  formContainer: {
-    padding: 16,
-    backgroundColor: Colors.cardBg,
-    marginTop: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  formTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: Colors.textWhite,
-    marginBottom: 8,
-  },
-  formDescription: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    marginBottom: 16,
-  },
-  amountButtons: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 16,
-  },
-  amountButton: {
-    backgroundColor: Colors.deepDarkGray,
-    padding: 10,
-    margin: 4,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  selectedAmount: {
-    backgroundColor: Colors.accent,
-  },
-  amountText: {
-    color: Colors.textWhite,
-  },
-  input: {
-    backgroundColor: Colors.deepDarkGray,
-    color: Colors.textWhite,
-    padding: 10,
-    marginBottom: 16,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  frequencyContainer: {
-    marginBottom: 16,
-  },
-  frequencyLabel: {
-    fontSize: 16,
-    color: Colors.textWhite,
-    marginBottom: 8,
-  },
-  radioOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  radio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: Colors.textSecondary,
-    marginRight: 8,
-  },
-  radioSelected: {
-    backgroundColor: Colors.accent,
-  },
-  radioText: {
-    color: Colors.textWhite,
-  },
-  primaryButton: {
-    backgroundColor: Colors.accent,
-    padding: 12,
-    borderRadius: 4,
-    alignItems: "center",
-    flex: 1,
-    marginLeft: 8,
-  },
-  secondaryButton: {
-    backgroundColor: Colors.deepDarkGray,
-    padding: 12,
-    borderRadius: 4,
-    alignItems: "center",
-    flex: 1,
-    marginRight: 8,
-  },
-  buttonRow: {
-    flexDirection: "row",
-  },
-  buttonText: {
-    color: Colors.textWhite,
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  summary: {
-    marginBottom: 16,
-  },
-  summaryText: {
-    fontSize: 16,
-    color: Colors.textWhite,
-    marginBottom: 4,
-  },
-  paymentOptions: {
-    marginBottom: 16,
-  },
-});

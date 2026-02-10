@@ -1,10 +1,11 @@
 import { Spinner } from "@/components/Spinner";
-import Colors from "@/constants/colors";
 import SportsInfoService from "@/services/Football/SportsInfoService";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Dimensions, ScrollView, Text, View } from "react-native";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 const VenueDetailScreen = () => {
   const { id } = useLocalSearchParams();
@@ -26,8 +27,8 @@ const VenueDetailScreen = () => {
   if (id === "null") {
     return (
       <>
-        <View style={styles.container}>
-          <Text style={styles.venueName}>No Venue Information</Text>
+        <View className="flex-1 bg-bg-medium">
+          <Text className="text-rm-gold text-3xl font-bold text-center">No Venue Information</Text>
         </View>
       </>
     );
@@ -35,41 +36,42 @@ const VenueDetailScreen = () => {
 
   if (loading) {
     return (
-      <>
+      <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content="Loading venue" />
-      </>
+      </View>
     );
   }
 
   return (
     <>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={{ alignItems: "center", margin: 20 }}>
+      <ScrollView className="flex-1 bg-bg-medium" showsVerticalScrollIndicator={false}>
+        <View className="items-center m-5">
           {/* Venue Name */}
-          <Text style={styles.venueName}>{venue?.name}</Text>
+          <Text className="text-text-primary text-3xl font-bold mb-4 text-center">{venue?.name}</Text>
           {/* Venue Image */}
           {venue?.image && (
             <Image
               source={{ uri: venue.image }}
+              style={{ width: screenWidth - 40, height: 220 }}
               contentFit="contain"
-              style={styles.venueLogo}
+              className="mb-4"
             />
           )}
           {/* Venue City and Country */}
-          <Text style={styles.venueCountry}>
+          <Text className="text-white text-base mb-2.5">
             {venue?.city}, {venue?.country}
           </Text>
           {/* Venue Address */}
           {venue?.address && (
-            <Text style={styles.venueAddress}>Address: {venue.address}</Text>
+            <Text className="text-white text-base mb-2.5">Address: {venue.address}</Text>
           )}
           {/* Venue Capacity */}
           {venue?.capacity && (
-            <Text style={styles.venueCapacity}>Capacity: {venue.capacity}</Text>
+            <Text className="text-white text-base mb-2.5">Capacity: {venue.capacity}</Text>
           )}
           {/* Venue Surface */}
           {venue?.surface && (
-            <Text style={styles.venueSurface}>Surface: {venue.surface}</Text>
+            <Text className="text-white text-base mb-2.5">Surface: {venue.surface}</Text>
           )}
         </View>
       </ScrollView>
@@ -78,42 +80,3 @@ const VenueDetailScreen = () => {
 };
 
 export default VenueDetailScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  venueName: {
-    color: Colors.darkGold,
-    fontSize: 30,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  venueLogo: {
-    width: "100%",
-    height: "100%",
-    marginBottom: 15,
-  },
-  venueCountry: {
-    color: Colors.textWhite,
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  venueAddress: {
-    color: Colors.textWhite,
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  venueCapacity: {
-    color: Colors.textWhite,
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  venueSurface: {
-    color: Colors.textWhite,
-    fontSize: 16,
-    marginBottom: 10,
-  },
-});

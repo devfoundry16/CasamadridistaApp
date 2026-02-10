@@ -1,5 +1,4 @@
 import CustomWebView from "@/components/CustomWebView";
-import Colors from "@/constants/colors";
 import countries from "@/constants/countries.json";
 import { useFootball } from "@/hooks/useFootball";
 import { useEnvironment } from "@/hooks/useEnvironment";
@@ -7,7 +6,7 @@ import { CountryMap } from "@/types/soccer/profile";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import CountryFlag from "react-native-country-flag";
 
 const map: CountryMap = countries;
@@ -72,58 +71,53 @@ export default function PlayerDetailScreen() {
 
   return (
     <>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
+      <ScrollView className="flex-1 bg-bg-medium" showsVerticalScrollIndicator={false}>
+        <View className="pt-10 pb-10 px-5 items-center">
           <Image
             source={{ uri: player?.photo }}
-            style={styles.playerPhoto}
+            style={{ width: 140, height: 140, borderRadius: 70 }}
+            className="border-4 border-rm-gold mb-4 bg-bg-light"
             contentFit="cover"
           />
-          <Text style={styles.playerName}>{player?.name}</Text>
-          <Text style={styles.playerPosition}>{player?.position}</Text>
+          <Text className="text-[28px] font-bold text-rm-gold mb-1 text-center">{player?.name}</Text>
+          <Text className="text-base text-white opacity-90 uppercase tracking-wider">{player?.position}</Text>
         </View>
 
-        <View style={styles.content}>
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>Player Information</Text>
-            <View style={styles.infoCard}>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Full Name</Text>
-                <Text style={styles.infoValue}>{player?.name}</Text>
+        <View className="p-4">
+          <View className="mb-6">
+            <Text className="text-xl font-bold text-rm-gold mb-3 pl-1">Player Information</Text>
+            <View className="rounded-xl p-4 pt-0">
+              <View className="flex-row justify-between items-center py-3">
+                <Text className="text-sm text-white font-medium">Full Name</Text>
+                <Text className="text-sm text-white font-semibold">{player?.name}</Text>
               </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Position</Text>
-                <Text style={styles.infoValue}>{player?.position}</Text>
+              <View className="h-px bg-border-default" />
+              <View className="flex-row justify-between items-center py-3">
+                <Text className="text-sm text-white font-medium">Position</Text>
+                <Text className="text-sm text-white font-semibold">{player?.position}</Text>
               </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Number</Text>
-                <Text style={styles.infoValue}>{player?.number}</Text>
+              <View className="h-px bg-border-default" />
+              <View className="flex-row justify-between items-center py-3">
+                <Text className="text-sm text-white font-medium">Number</Text>
+                <Text className="text-sm text-white font-semibold">{player?.number}</Text>
               </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Age</Text>
-                <Text style={styles.infoValue}>{player?.age}</Text>
+              <View className="h-px bg-border-default" />
+              <View className="flex-row justify-between items-center py-3">
+                <Text className="text-sm text-white font-medium">Age</Text>
+                <Text className="text-sm text-white font-semibold">{player?.age}</Text>
               </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Nationality</Text>
+              <View className="h-px bg-border-default" />
+              <View className="flex-row justify-between items-center py-3">
+                <Text className="text-sm text-white font-medium">Nationality</Text>
                 {player?.nationality && map[player?.nationality] ? (
                   <CountryFlag isoCode={map[player?.nationality]} size={25} />
                 ) : null}
               </View>
-              <View style={styles.divider} />
-              <View style={{ ...styles.infoRow }}>
-                <Text style={styles.infoLabel}>Place of Birth</Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={styles.infoValue}>{player?.birth.place} </Text>
+              <View className="h-px bg-border-default" />
+              <View className="flex-row justify-between items-center py-3">
+                <Text className="text-sm text-white font-medium">Place of Birth</Text>
+                <View className="flex-row justify-center items-center">
+                  <Text className="text-sm text-white font-semibold">{player?.birth.place} </Text>
                   {player?.birth.country && map[player?.birth.country] ? (
                     <CountryFlag
                       isoCode={map[player?.birth.country]}
@@ -132,20 +126,20 @@ export default function PlayerDetailScreen() {
                   ) : null}
                 </View>
               </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Date Of Birth</Text>
-                <Text style={styles.infoValue}>{player?.birth.date}</Text>
+              <View className="h-px bg-border-default" />
+              <View className="flex-row justify-between items-center py-3">
+                <Text className="text-sm text-white font-medium">Date Of Birth</Text>
+                <Text className="text-sm text-white font-semibold">{player?.birth.date}</Text>
               </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Weight</Text>
-                <Text style={styles.infoValue}>{player?.weight}</Text>
+              <View className="h-px bg-border-default" />
+              <View className="flex-row justify-between items-center py-3">
+                <Text className="text-sm text-white font-medium">Weight</Text>
+                <Text className="text-sm text-white font-semibold">{player?.weight}</Text>
               </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Height</Text>
-                <Text style={styles.infoValue}>{player?.height}</Text>
+              <View className="h-px bg-border-default" />
+              <View className="flex-row justify-between items-center py-3">
+                <Text className="text-sm text-white font-medium">Height</Text>
+                <Text className="text-sm text-white font-semibold">{player?.height}</Text>
               </View>
             </View>
           </View>
@@ -160,139 +154,3 @@ export default function PlayerDetailScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  header: {
-    paddingTop: 40,
-    paddingBottom: 40,
-    paddingHorizontal: 20,
-    alignItems: "center",
-  },
-  playerPhoto: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    borderWidth: 4,
-    borderColor: Colors.primary,
-    marginBottom: 16,
-    backgroundColor: Colors.lightGray,
-  },
-  playerName: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    color: Colors.darkGold,
-    marginBottom: 4,
-    textAlign: "center",
-  },
-  playerPosition: {
-    fontSize: 16,
-    color: Colors.textWhite,
-    opacity: 0.9,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  playerCountryImage: {
-    width: 50,
-    height: 30,
-    marginLeft: 10,
-    backgroundColor: "transparent",
-  },
-  content: {
-    padding: 16,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    marginBottom: 24,
-  },
-  statCard: {
-    flex: 1,
-    minWidth: "45%",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    gap: 8,
-    elevation: 2,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: Colors.textWhite,
-    fontWeight: "500" as const,
-  },
-  statValue: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-  },
-  infoSection: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700" as const,
-    color: Colors.darkGold,
-    marginBottom: 12,
-    paddingLeft: 4,
-  },
-  infoCard: {
-    borderRadius: 12,
-    padding: 16,
-    paddingTop: 0,
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: Colors.textWhite,
-    fontWeight: "500" as const,
-  },
-  infoValue: {
-    fontSize: 14,
-    color: Colors.textWhite,
-    fontWeight: "600" as const,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-  clubCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 12,
-    padding: 16,
-    elevation: 2,
-  },
-  clubLogo: {
-    width: 60,
-    height: 60,
-    marginRight: 16,
-  },
-  clubInfo: {
-    flex: 1,
-  },
-  clubName: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 4,
-  },
-  clubSubtitle: {
-    fontSize: 14,
-    color: Colors.textWhite,
-  },
-  errorText: {
-    fontSize: 16,
-    color: Colors.textWhite,
-    textAlign: "center",
-    marginTop: 40,
-  },
-});

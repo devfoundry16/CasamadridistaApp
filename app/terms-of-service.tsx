@@ -1,33 +1,35 @@
-import Colors from "@/constants/colors";
 import { Image } from "expo-image";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Dimensions, ScrollView, Text, View } from "react-native";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 export default function TermsOfServiceScreen() {
   return (
     <>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.headerContent}>
+      <ScrollView className="flex-1 bg-bg-medium" showsVerticalScrollIndicator={false}>
+        <View className="flex-col items-center justify-center">
           <Image
             source={{
               uri: "https://casamadridista.com/wp-content/uploads/2025/09/324242342.webp",
             }}
-            style={styles.headerImage}
+            style={{ width: screenWidth, height: 250 }}
+            className="mb-3"
             contentFit="cover"
           />
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Terms of Service</Text>
+          <View className="absolute items-center">
+            <Text className="text-4xl font-bold text-white mb-1">Terms of Service</Text>
           </View>
         </View>
 
-        <View style={styles.content}>
+        <View className="p-4">
           {Terms.map((term, index) => (
-            <View key={index} style={styles.section}>
-              <Text style={styles.sectionTitle}>{term.title}</Text>
-              <View style={styles.bulletList}>
+            <View key={index} className="p-2.5 mb-4">
+              <Text className="text-2xl font-bold text-rm-gold mb-3">{term.title}</Text>
+              <View className="mt-2">
                 {term.points.map((point, idx) => (
-                  <View key={idx} style={styles.bulletItem}>
-                    <View style={styles.bullet} />
-                    <Text style={styles.bulletText}>{point}</Text>
+                  <View key={idx} className="flex-row items-start mb-2">
+                    <View className="w-1.5 h-1.5 rounded-full bg-rm-gold mt-2 mr-3" />
+                    <Text className="flex-1 text-base text-white leading-[22px]">{point}</Text>
                   </View>
                 ))}
               </View>
@@ -53,7 +55,7 @@ const Terms = [
     points: [
       "Defend the image of Real Madrid and speak positively about it when representing the membership.",
       "Do not spread false news or rumors about the club or its current or former players.",
-      "Respect the club’s history and achievements, and do not belittle any championship or former player.",
+      "Respect the club's history and achievements, and do not belittle any championship or former player.",
       "Refrain from personal attacks on players or other fans for any reason.",
       "Contribute to maintaining the reputation of the community and CasaMadridista, and act responsibly during any public communication.",
     ],
@@ -62,7 +64,7 @@ const Terms = [
     title: "3. Privacy and Confidentiality",
     points: [
       "Any exclusive content or membership information or digital tools may not be shared outside the platform.",
-      "Maintain the confidentiality of members’ data and do not use it for commercial or personal purposes without explicit permission.",
+      "Maintain the confidentiality of members' data and do not use it for commercial or personal purposes without explicit permission.",
       "Do not register other members or claim to have membership or privileges without official authorization.",
     ],
   },
@@ -106,80 +108,3 @@ const Terms = [
     ],
   },
 ];
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  headerContent: {
-    flexDirection: "column" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  header: {
-    position: "absolute",
-    alignItems: "center",
-  },
-  headerImage: {
-    width: "100%",
-    height: 250,
-    marginBottom: 12,
-  },
-  headerTitle: {
-    fontSize: 36,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: Colors.accent,
-  },
-  content: {
-    padding: 16,
-  },
-  section: {
-    padding: 10,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 12,
-  },
-  sectionText: {
-    fontSize: 16,
-    color: Colors.textWhite,
-    lineHeight: 22,
-    marginBottom: 12,
-  },
-  bulletList: {
-    marginTop: 8,
-  },
-  bulletItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  bullet: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.primary,
-    marginTop: 8,
-    marginRight: 12,
-  },
-  bulletText: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.textWhite,
-    lineHeight: 22,
-  },
-});

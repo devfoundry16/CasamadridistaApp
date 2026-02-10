@@ -7,7 +7,6 @@ import {
   Alert,
   Modal,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -24,20 +23,20 @@ function AddressView({
   handleDelete: (e: Address) => void;
 }) {
   return (
-    <View style={styles.addressCard}>
-      <View style={styles.addressHeader}>
-        <View style={styles.typeBadge}>
-          <Text style={styles.typeText}>{address.type}</Text>
+    <View className="bg-bg-light rounded-2xl p-5 my-2 border border-border-light">
+      <View className="flex-row justify-between items-center mb-3">
+        <View className="bg-rm-gold px-3 py-1.5 rounded-xl">
+          <Text className="text-xs font-bold text-text-dark capitalize">{address.type}</Text>
         </View>
-        <View style={styles.actions}>
+        <View className="flex-row gap-2">
           <TouchableOpacity
-            style={styles.actionButton}
+            className="w-9 h-9 rounded-full bg-bg-medium justify-center items-center"
             onPress={() => handleEdit(address)}
           >
-            <Edit size={18} color={Colors.accent} />
+            <Edit size={18} color={Colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.actionButton}
+            className="w-9 h-9 rounded-full bg-bg-medium justify-center items-center"
             onPress={() => handleDelete(address)}
           >
             <Trash2 size={18} color={Colors.error} />
@@ -45,19 +44,19 @@ function AddressView({
         </View>
       </View>
       {!address.first_name.length ? (
-        <Text style={{ color: Colors.textWhite }}>No Address Found</Text>
+        <Text className="text-white">No Address Found</Text>
       ) : (
         <View>
-          <Text style={styles.addressName}>
+          <Text className="text-lg font-bold text-white mb-2">
             {address.first_name} {address.last_name}
           </Text>
-          <Text style={styles.addressText}>{address.address_1}</Text>
-          <Text style={styles.addressText}>{address.address_2}</Text>
-          <Text style={styles.addressText}>
+          <Text className="text-sm text-text-secondary mb-1">{address.address_1}</Text>
+          <Text className="text-sm text-text-secondary mb-1">{address.address_2}</Text>
+          <Text className="text-sm text-text-secondary mb-1">
             {address.city}
             {address.city ? "," : ""} {address.country} {address.postcode}
           </Text>
-          <Text style={styles.addressText}>{address.phone}</Text>
+          <Text className="text-sm text-text-secondary">{address.phone}</Text>
         </View>
       )}
     </View>
@@ -138,8 +137,8 @@ export default function AddressesScreen() {
   };
   return (
     <>
-      <ScrollView style={styles.container}>
-        <View style={styles.addressList}>
+      <ScrollView className="flex-1 bg-bg-medium">
+        <View className="p-6 pt-0">
           {billingAddress && (
             <AddressView
               address={billingAddress as any}
@@ -157,51 +156,47 @@ export default function AddressesScreen() {
         </View>
 
         <Modal visible={modalVisible} animationType="slide" transparent>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Edit Address</Text>
+          <View className="flex-1 bg-black/80 justify-end">
+            <View className="bg-bg-medium rounded-t-3xl max-h-[90%]">
+              <View className="flex-row justify-between items-center p-6 border-b border-border-light">
+                <Text className="text-xl font-bold text-white">Edit Address</Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
                   <X size={24} color={Colors.textWhite} />
                 </TouchableOpacity>
               </View>
 
-              <ScrollView style={styles.form}>
-                <View style={styles.typeSelector}>
+              <ScrollView className="p-6">
+                <View className="flex-row gap-3 mb-5">
                   <TouchableOpacity
-                    style={[
-                      styles.typeOption,
-                      formData.type === "shipping" && styles.typeOptionActive,
-                    ]}
-                    // onPress={() =>
-                    //   setFormData({ ...formData, type: "shipping" })
-                    // }
+                    className={`flex-1 p-3 rounded-xl border-2 items-center ${
+                      formData.type === "shipping"
+                        ? "border-rm-gold bg-rm-gold/20"
+                        : "border-border-light"
+                    }`}
                   >
                     <Text
-                      style={[
-                        styles.typeOptionText,
-                        formData.type === "shipping" &&
-                          styles.typeOptionTextActive,
-                      ]}
+                      className={`text-base font-semibold ${
+                        formData.type === "shipping"
+                          ? "text-rm-gold"
+                          : "text-text-secondary"
+                      }`}
                     >
                       Shipping
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[
-                      styles.typeOption,
-                      formData.type === "billing" && styles.typeOptionActive,
-                    ]}
-                    // onPress={() =>
-                    //   setFormData({ ...formData, type: "billing" })
-                    // }
+                    className={`flex-1 p-3 rounded-xl border-2 items-center ${
+                      formData.type === "billing"
+                        ? "border-rm-gold bg-rm-gold/20"
+                        : "border-border-light"
+                    }`}
                   >
                     <Text
-                      style={[
-                        styles.typeOptionText,
-                        formData.type === "billing" &&
-                          styles.typeOptionTextActive,
-                      ]}
+                      className={`text-base font-semibold ${
+                        formData.type === "billing"
+                          ? "text-rm-gold"
+                          : "text-text-secondary"
+                      }`}
                     >
                       Billing
                     </Text>
@@ -209,7 +204,7 @@ export default function AddressesScreen() {
                 </View>
                 {formData.type === "billing" && (
                   <TextInput
-                    style={styles.input}
+                    className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                     value={formData.email}
                     onChangeText={(text) =>
                       setFormData({ ...formData, email: text })
@@ -220,7 +215,7 @@ export default function AddressesScreen() {
                   />
                 )}
                 <TextInput
-                  style={styles.input}
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                   value={formData.first_name}
                   onChangeText={(text) =>
                     setFormData({ ...formData, first_name: text })
@@ -229,7 +224,7 @@ export default function AddressesScreen() {
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
-                  style={styles.input}
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                   value={formData.last_name}
                   onChangeText={(text) =>
                     setFormData({ ...formData, last_name: text })
@@ -238,7 +233,7 @@ export default function AddressesScreen() {
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
-                  style={styles.input}
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                   value={formData.company}
                   onChangeText={(text) =>
                     setFormData({ ...formData, company: text })
@@ -247,7 +242,7 @@ export default function AddressesScreen() {
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
-                  style={styles.input}
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                   value={formData.address_1}
                   onChangeText={(text) =>
                     setFormData({ ...formData, address_1: text })
@@ -256,7 +251,7 @@ export default function AddressesScreen() {
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
-                  style={styles.input}
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                   value={formData.address_2}
                   onChangeText={(text) =>
                     setFormData({ ...formData, address_2: text })
@@ -265,7 +260,7 @@ export default function AddressesScreen() {
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
-                  style={styles.input}
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                   value={formData.city}
                   onChangeText={(text) =>
                     setFormData({ ...formData, city: text })
@@ -274,7 +269,7 @@ export default function AddressesScreen() {
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
-                  style={styles.input}
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                   value={formData.country}
                   onChangeText={(text) =>
                     setFormData({ ...formData, country: text })
@@ -283,7 +278,7 @@ export default function AddressesScreen() {
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
-                  style={styles.input}
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                   value={formData.state}
                   onChangeText={(text) =>
                     setFormData({ ...formData, state: text })
@@ -292,7 +287,7 @@ export default function AddressesScreen() {
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
-                  style={styles.input}
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                   value={formData.postcode}
                   onChangeText={(text) =>
                     setFormData({ ...formData, postcode: text })
@@ -301,7 +296,7 @@ export default function AddressesScreen() {
                   placeholderTextColor={Colors.textLight}
                 />
                 <TextInput
-                  style={styles.input}
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white mb-4"
                   value={formData.phone}
                   onChangeText={(text) =>
                     setFormData({ ...formData, phone: text })
@@ -312,10 +307,10 @@ export default function AddressesScreen() {
                 />
 
                 <TouchableOpacity
-                  style={styles.saveButton}
+                  className="bg-rm-gold p-4 rounded-[25px] items-center mt-2"
                   onPress={handleSave}
                 >
-                  <Text style={styles.saveButtonText}>Save Address</Text>
+                  <Text className="text-base font-bold text-white">Save Address</Text>
                 </TouchableOpacity>
               </ScrollView>
             </View>
@@ -326,163 +321,3 @@ export default function AddressesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#2A2A2A",
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.accent,
-    margin: 24,
-    padding: 16,
-    borderRadius: 25,
-    gap: 8,
-  },
-  addButtonText: {
-    fontSize: 16,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 48,
-    marginTop: 50,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: "#CCCCCC",
-    marginTop: 16,
-  },
-  addressList: {
-    padding: 24,
-    paddingTop: 0,
-  },
-  addressCard: {
-    backgroundColor: "#3A3A3A",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 8,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: "#4A4A4A",
-  },
-  addressHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  typeBadge: {
-    backgroundColor: Colors.accent,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  typeText: {
-    fontSize: 12,
-    fontWeight: "700" as const,
-    color: "#1A1A1A",
-    textTransform: "capitalize" as const,
-  },
-  actions: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#2A2A2A",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addressName: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 8,
-  },
-  addressText: {
-    fontSize: 14,
-    color: "#CCCCCC",
-    marginBottom: 4,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: "#2A2A2A",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: "90%",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: "#4A4A4A",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-  },
-  form: {
-    padding: 24,
-  },
-  typeSelector: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 20,
-  },
-  typeOption: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#4A4A4A",
-    alignItems: "center",
-  },
-  typeOptionActive: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.accent + "20",
-  },
-  typeOptionText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: "#CCCCCC",
-  },
-  typeOptionTextActive: {
-    color: Colors.accent,
-  },
-  input: {
-    backgroundColor: "#3A3A3A",
-    borderWidth: 1,
-    borderColor: "#4A4A4A",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: Colors.textWhite,
-    marginBottom: 16,
-  },
-  saveButton: {
-    backgroundColor: Colors.accent,
-    padding: 16,
-    borderRadius: 25,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-  },
-});

@@ -1,19 +1,20 @@
-import Colors from "@/constants/colors";
 import * as MailComposer from "expo-mail-composer";
 import { Link } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Dimensions,
   Image,
   ImageBackground,
   Platform,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 export default function ContactScreen() {
   const [firstName, setFirstName] = useState<string>("");
@@ -83,33 +84,33 @@ export default function ContactScreen() {
 
   return (
     <>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 bg-bg-medium" showsVerticalScrollIndicator={false}>
         <ImageBackground
           source={{
             uri: "https://casamadridista.com/wp-content/uploads/2025/05/img3.png",
           }}
-          style={styles.hero}
-          imageStyle={styles.heroImage}
+          className="h-[250px] justify-center items-center"
+          imageStyle={{ opacity: 0.3 }}
         >
-          <View style={styles.heroOverlay}>
-            <Text style={styles.heroTitle}>Contact</Text>
-            <View style={styles.breadcrumb}>
-              <Link href="/" style={styles.breadcrumbLink}>
-                <Text style={styles.breadcrumbLinkText}>Home</Text>
+          <View className="items-center">
+            <Text className="text-4xl font-bold text-white mb-3">Contact</Text>
+            <View className="flex-row items-center">
+              <Link href="/" className="no-underline">
+                <Text className="text-sm text-rm-gold">Home</Text>
               </Link>
-              <Text style={styles.breadcrumbSeparator}> / </Text>
-              <Text style={styles.breadcrumbCurrent}>Contact</Text>
+              <Text className="text-sm text-white"> / </Text>
+              <Text className="text-sm text-white">Contact</Text>
             </View>
           </View>
         </ImageBackground>
 
-        <View style={styles.content}>
-          <View style={styles.mainSection}>
-            <View style={styles.leftSection}>
-              <Text style={styles.mainTitle}>
+        <View className="p-5">
+          <View className="flex-row gap-10 flex-wrap">
+            <View className="flex-1 min-w-[300px]">
+              <Text className="text-[26px] font-bold text-white mb-4 leading-10">
                 Your Voice Matters - Contact Us
               </Text>
-              <Text style={styles.mainDescription}>
+              <Text className="text-[15px] text-text-tertiary leading-6 mb-0">
                 Have questions, suggestions, or partnership ideas? We&apos;d
                 love to hear from you! Fill out the form below and we&apos;ll
                 get back to you as soon as possible.
@@ -118,27 +119,27 @@ export default function ContactScreen() {
                 source={{
                   uri: "https://casamadridista.com/wp-content/uploads/2025/09/4353454353.webp",
                 }}
-                style={styles.teamImage}
+                style={{ width: screenWidth - 48, height: 300 }}
                 resizeMode="contain"
               />
             </View>
 
-            <View style={styles.formSection}>
-              <View style={styles.formRow}>
-                <View style={styles.formGroup}>
-                  <Text style={styles.label}>Your Name</Text>
+            <View className="flex-1 min-w-[300px] bg-bg-medium rounded-xl p-6">
+              <View className="flex-row gap-4 mb-5">
+                <View className="flex-1">
+                  <Text className="text-sm text-white mb-2 font-medium">Your Name</Text>
                   <TextInput
-                    style={styles.input}
+                    className="bg-bg-light rounded px-4 py-3 text-sm text-white border border-border-light"
                     placeholder="Your Name"
                     placeholderTextColor="#666"
                     value={firstName}
                     onChangeText={setFirstName}
                   />
                 </View>
-                <View style={styles.formGroup}>
-                  <Text style={styles.label}>Last Name</Text>
+                <View className="flex-1">
+                  <Text className="text-sm text-white mb-2 font-medium">Last Name</Text>
                   <TextInput
-                    style={styles.input}
+                    className="bg-bg-light rounded px-4 py-3 text-sm text-white border border-border-light"
                     placeholder="Last Name"
                     placeholderTextColor="#666"
                     value={lastName}
@@ -147,11 +148,11 @@ export default function ContactScreen() {
                 </View>
               </View>
 
-              <View style={styles.formRow}>
-                <View style={styles.formGroup}>
-                  <Text style={styles.label}>Phone Number</Text>
+              <View className="flex-row gap-4 mb-5">
+                <View className="flex-1">
+                  <Text className="text-sm text-white mb-2 font-medium">Phone Number</Text>
                   <TextInput
-                    style={styles.input}
+                    className="bg-bg-light rounded px-4 py-3 text-sm text-white border border-border-light"
                     placeholder="Phone Number"
                     placeholderTextColor="#666"
                     value={phone}
@@ -159,10 +160,10 @@ export default function ContactScreen() {
                     keyboardType="phone-pad"
                   />
                 </View>
-                <View style={styles.formGroup}>
-                  <Text style={styles.label}>Email</Text>
+                <View className="flex-1">
+                  <Text className="text-sm text-white mb-2 font-medium">Email</Text>
                   <TextInput
-                    style={styles.input}
+                    className="bg-bg-light rounded px-4 py-3 text-sm text-white border border-border-light"
                     placeholder="Email"
                     placeholderTextColor="#666"
                     value={email}
@@ -173,10 +174,10 @@ export default function ContactScreen() {
                 </View>
               </View>
 
-              <View style={styles.formGroupFull}>
-                <Text style={styles.label}>Comment</Text>
+              <View className="mb-6">
+                <Text className="text-sm text-white mb-2 font-medium">Comment</Text>
                 <TextInput
-                  style={[styles.input, styles.textArea]}
+                  className="bg-bg-light rounded px-4 py-3 text-sm text-white border border-border-light h-[120px] pt-3"
                   placeholder="Comment"
                   placeholderTextColor="#666"
                   value={comment}
@@ -188,11 +189,11 @@ export default function ContactScreen() {
               </View>
 
               <TouchableOpacity
-                style={styles.submitButton}
+                className="bg-rm-gold rounded-md py-3.5 px-8 items-center self-start border-2 border-rm-gold"
                 onPress={handleSubmit}
                 activeOpacity={0.8}
               >
-                <Text style={styles.submitButtonText}>Confirm</Text>
+                <Text className="text-base font-semibold text-bg-deep-dark">Confirm</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -201,128 +202,3 @@ export default function ContactScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.deepDarkGray,
-  },
-  hero: {
-    height: 250,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  heroImage: {
-    opacity: 0.3,
-  },
-  heroOverlay: {
-    alignItems: "center",
-  },
-  heroTitle: {
-    fontSize: 36,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 12,
-  },
-  breadcrumb: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  breadcrumbLink: {
-    textDecorationLine: "none",
-  },
-  breadcrumbLinkText: {
-    fontSize: 14,
-    color: Colors.accent,
-  },
-  breadcrumbSeparator: {
-    fontSize: 14,
-    color: Colors.textWhite,
-  },
-  breadcrumbCurrent: {
-    fontSize: 14,
-    color: Colors.textWhite,
-  },
-  content: {
-    padding: 20,
-  },
-  mainSection: {
-    flexDirection: "row",
-    gap: 40,
-    flexWrap: "wrap",
-  },
-  leftSection: {
-    flex: 1,
-    minWidth: 300,
-  },
-  mainTitle: {
-    fontSize: 26,
-    fontWeight: "700" as const,
-    color: Colors.textWhite,
-    marginBottom: 16,
-    lineHeight: 40,
-  },
-  mainDescription: {
-    fontSize: 15,
-    color: "#b0b0b0",
-    lineHeight: 24,
-    marginBottom: 0,
-  },
-  teamImage: {
-    width: "100%",
-    height: 300,
-  },
-  formSection: {
-    flex: 1,
-    minWidth: 300,
-    backgroundColor: "#2a2a2a",
-    borderRadius: 12,
-    padding: 24,
-  },
-  formRow: {
-    flexDirection: "row",
-    gap: 16,
-    marginBottom: 20,
-  },
-  formGroup: {
-    flex: 1,
-  },
-  formGroupFull: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    color: Colors.textWhite,
-    marginBottom: 8,
-    fontWeight: "500" as const,
-  },
-  input: {
-    backgroundColor: "#3a3a3a",
-    borderRadius: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: Colors.textWhite,
-    borderWidth: 1,
-    borderColor: "#4a4a4a",
-  },
-  textArea: {
-    height: 120,
-    paddingTop: 12,
-  },
-  submitButton: {
-    backgroundColor: Colors.accent,
-    borderRadius: 6,
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    alignItems: "center",
-    alignSelf: "flex-start",
-    borderWidth: 2,
-    borderColor: Colors.accent,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: "#1a1a1a",
-  },
-});

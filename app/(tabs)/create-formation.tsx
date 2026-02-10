@@ -2,7 +2,6 @@ import React, { useRef, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   TextInput,
@@ -221,35 +220,45 @@ export default function LineupBuilder() {
   ];
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <LinearGradient
         colors={["#0a3d2e", "#0f5740", "#0a3d2e"]}
-        style={styles.gradient}
+        style={{ flex: 1 }}
       >
         <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 },
-          ]}
+          className="flex-1"
+          contentContainerStyle={{
+            paddingVertical: 20,
+            paddingHorizontal: 16,
+            paddingTop: insets.top + 20,
+            paddingBottom: insets.bottom + 20,
+          }}
         >
-          <View style={styles.controlPanel}>
-            <Text style={styles.headerText}>LINEUP BUILDER</Text>
+          <View className="bg-black/30 rounded-2xl p-4 mb-5">
+            <Text className="text-3xl font-extrabold text-white mb-5 text-center tracking-wider">
+              LINEUP BUILDER
+            </Text>
 
-            <View style={styles.controlRow}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Formation</Text>
+            <View className="flex-row justify-between mb-4">
+              <View className="flex-1 mx-1">
+                <Text className="text-status-success text-xs font-semibold mb-2 uppercase">
+                  Formation
+                </Text>
                 <TouchableOpacity
-                  style={styles.pickerButton}
+                  className="bg-black/40 rounded-lg p-3 flex-row justify-between items-center"
                   onPress={() => setShowFormationPicker(!showFormationPicker)}
                 >
-                  <Text style={styles.pickerText}>{formation}</Text>
+                  <Text className="text-white text-base font-semibold">
+                    {formation}
+                  </Text>
                   <ChevronDown size={20} color="#fff" />
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Show Names</Text>
+              <View className="flex-1 mx-1">
+                <Text className="text-status-success text-xs font-semibold mb-2 uppercase">
+                  Show Names
+                </Text>
                 <Switch
                   value={showPlayerNames}
                   onValueChange={setShowPlayerNames}
@@ -260,29 +269,30 @@ export default function LineupBuilder() {
             </View>
 
             {showFormationPicker && (
-              <View style={styles.formationList}>
+              <View className="bg-black/50 rounded-lg mb-4 overflow-hidden">
                 {formationsList.map((f) => (
                   <TouchableOpacity
                     key={f}
-                    style={[
-                      styles.formationItem,
-                      formation === f && styles.formationItemActive,
-                    ]}
+                    className={`p-3 border-b border-white/10 ${
+                      formation === f ? "bg-status-success/20" : ""
+                    }`}
                     onPress={() => {
                       setFormation(f);
                       setShowFormationPicker(false);
                     }}
                   >
-                    <Text style={styles.formationItemText}>{f}</Text>
+                    <Text className="text-white text-base font-semibold">{f}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             )}
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Formation Title</Text>
+            <View className="flex-1 mx-1">
+              <Text className="text-status-success text-xs font-semibold mb-2 uppercase">
+                Formation Title
+              </Text>
               <TextInput
-                style={styles.textInput}
+                className="bg-black/40 rounded-lg p-3 text-white text-base"
                 value={formationTitle}
                 onChangeText={setFormationTitle}
                 placeholder="Enter formation title"
@@ -290,71 +300,178 @@ export default function LineupBuilder() {
               />
             </View>
 
-            <View style={styles.buttonRow}>
+            <View className="flex-row gap-2 mt-2">
               <TouchableOpacity
-                style={styles.resetButton}
+                className="flex-1 bg-status-error rounded-lg py-3.5 flex-row justify-center items-center"
                 onPress={resetFormation}
               >
                 <RotateCcw size={20} color="#fff" />
-                <Text style={styles.resetButtonText}>Reset</Text>
+                <Text className="text-white text-base font-bold ml-2">
+                  Reset
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.downloadButton}
+                className="flex-1 bg-status-success rounded-lg py-3.5 flex-row justify-center items-center"
                 onPress={downloadFormation}
               >
                 <Download size={20} color="#fff" />
-                <Text style={styles.downloadButtonText}>Download</Text>
+                <Text className="text-white text-base font-bold ml-2">
+                  Download
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.coachContainer}>
-            <View style={styles.coachCard}>
-              <View style={styles.coachHeader}>
-                <View style={styles.coachBadge}>
-                  <Text style={styles.coachBadgeText}>COACH</Text>
+          <View className="mb-5 px-1">
+            <View className="bg-black/40 rounded-xl border-2 border-rm-gold overflow-hidden">
+              <View className="bg-rm-gold/15 py-1.5 items-center">
+                <View className="bg-rm-gold px-3 py-1 rounded">
+                  <Text className="text-black text-xs font-extrabold tracking-wider">
+                    COACH
+                  </Text>
                 </View>
               </View>
-              <View style={styles.coachContent}>
-                <View style={styles.coachAvatarContainer}>
+              <View className="flex-row p-3 items-center">
+                <View className="mr-3">
                   <Image
                     source={{ uri: COACH_IMAGE }}
-                    style={styles.coachAvatar}
+                    style={{ width: 60, height: 60, borderRadius: 8 }}
+                    className="border-2 border-white"
                   />
                 </View>
-                <View style={styles.coachInfo}>
+                <View className="flex-1">
                   <TextInput
-                    style={styles.coachNameInput}
+                    className="text-white text-lg font-bold mb-1 p-0"
                     value={coachName}
                     onChangeText={setCoachName}
                     placeholder="Coach name"
                     placeholderTextColor="#888"
                   />
-                  <Text style={styles.coachRole}>HEAD COACH</Text>
+                  <Text className="text-rm-gold text-xs font-bold tracking-wider">
+                    HEAD COACH
+                  </Text>
                 </View>
               </View>
             </View>
           </View>
 
           <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1 }}>
-            <View style={styles.pitchContainer}>
-              <Text style={styles.formationTitleText}>{formationTitle}</Text>
-              <Text style={styles.formationSubtitle}>{formation}</Text>
+            <View className="mb-5">
+              <Text className="text-3xl font-extrabold text-rm-gold text-center mb-1 tracking-wide">
+                {formationTitle}
+              </Text>
+              <Text className="text-base font-semibold text-status-success text-center mb-3">
+                {formation}
+              </Text>
 
               <LinearGradient
                 colors={["#1a5c47", "#0f4737", "#0a3329"]}
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
-                style={styles.pitch}
+                style={{
+                  width: "100%",
+                  aspectRatio: 0.7,
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  borderWidth: 3,
+                  borderColor: "#fff",
+                }}
               >
-                <View style={styles.pitchLines}>
-                  <View style={[styles.line, styles.halfwayLine]} />
-                  <View style={styles.centerCircle} />
-                  <View style={styles.centerDot} />
-                  <View style={[styles.penaltyBox, styles.topPenaltyBox]} />
-                  <View style={[styles.penaltyBox, styles.bottomPenaltyBox]} />
-                  <View style={[styles.sixYardBox, styles.topSixYardBox]} />
-                  <View style={[styles.sixYardBox, styles.bottomSixYardBox]} />
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                  }}
+                >
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: 0,
+                      right: 0,
+                      height: 2,
+                      backgroundColor: "rgba(255,255,255,0.3)",
+                      marginTop: -1,
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      width: 100,
+                      height: 100,
+                      borderRadius: 50,
+                      borderWidth: 2,
+                      borderColor: "rgba(255,255,255,0.3)",
+                      marginLeft: -50,
+                      marginTop: -50,
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      width: 8,
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: "rgba(255,255,255,0.3)",
+                      marginLeft: -4,
+                      marginTop: -4,
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      left: "15%",
+                      right: "15%",
+                      top: 0,
+                      height: "18%",
+                      borderWidth: 2,
+                      borderTopWidth: 0,
+                      borderColor: "rgba(255,255,255,0.3)",
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      left: "15%",
+                      right: "15%",
+                      bottom: 0,
+                      height: "18%",
+                      borderWidth: 2,
+                      borderBottomWidth: 0,
+                      borderColor: "rgba(255,255,255,0.3)",
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      left: "30%",
+                      right: "30%",
+                      top: 0,
+                      height: "8%",
+                      borderWidth: 2,
+                      borderTopWidth: 0,
+                      borderColor: "rgba(255,255,255,0.3)",
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      left: "30%",
+                      right: "30%",
+                      bottom: 0,
+                      height: "8%",
+                      borderWidth: 2,
+                      borderBottomWidth: 0,
+                      borderColor: "rgba(255,255,255,0.3)",
+                    }}
+                  />
                 </View>
 
                 {formationPositions.map((slot: PositionSlot, index: number) => {
@@ -383,36 +500,44 @@ export default function LineupBuilder() {
                   return (
                     <TouchableOpacity
                       key={index}
-                      style={[
-                        styles.playerSlot,
-                        {
-                          left: `${slot.x}%`,
-                          top: `${slot.y}%`,
-                        },
-                        isSelected && styles.playerSlotSelected,
-                      ]}
+                      className="absolute items-center"
+                      style={{
+                        left: `${slot.x}%`,
+                        top: `${slot.y}%`,
+                        width: PLAYER_SIZE,
+                        height: PLAYER_SIZE,
+                        marginLeft: -PLAYER_SIZE / 2,
+                        marginTop: -PLAYER_SIZE / 2,
+                        transform: isSelected ? [{ scale: 1.2 }] : [],
+                      }}
                       onPress={handlePress}
                     >
                       {player ? (
-                        <View style={styles.playerCircle}>
+                        <View className="items-center">
                           <Image
                             source={{ uri: player.imageUrl }}
-                            style={styles.playerAvatar}
+                            style={{
+                              width: 80,
+                              height: PLAYER_SIZE * 1.2,
+                              borderRadius: 40,
+                            }}
+                            className="justify-center items-center"
                           />
                           <Animated.View
-                            style={[
-                              styles.playerNameContainer,
-                              { opacity: nameOpacity },
-                            ]}
+                            className="mt-1 bg-black/70 px-2 py-0.5 rounded"
+                            style={{ opacity: nameOpacity }}
                           >
-                            <Text style={styles.playerName} numberOfLines={1}>
+                            <Text
+                              className="text-white text-[10px] font-bold text-center"
+                              numberOfLines={1}
+                            >
                               {player.number} {player.name.toUpperCase()}
                             </Text>
                           </Animated.View>
                         </View>
                       ) : (
-                        <View style={styles.placeholderCircle}>
-                          <Text style={styles.placeholderText}>
+                        <View className="w-[80px] h-[80px] rounded-full bg-white/10 border-2 border-dashed border-white/30 justify-center items-center">
+                          <Text className="text-white/60 text-xs font-bold">
                             {slot.position}
                           </Text>
                         </View>
@@ -421,49 +546,70 @@ export default function LineupBuilder() {
                   );
                 })}
 
-                <View style={styles.watermarkLeft}>
-                  <Text style={styles.watermarkText}>LINEUP</Text>
-                  <Text style={styles.watermarkText}>BUILDER</Text>
+                <View
+                  className="absolute left-2.5 top-1/2 opacity-15"
+                  style={{ transform: [{ translateY: -30 }] }}
+                >
+                  <Text className="text-white text-sm font-extrabold tracking-wider">
+                    LINEUP
+                  </Text>
+                  <Text className="text-white text-sm font-extrabold tracking-wider">
+                    BUILDER
+                  </Text>
                 </View>
-                <View style={styles.watermarkRight}>
-                  <Text style={styles.watermarkText}>LINEUP</Text>
-                  <Text style={styles.watermarkText}>BUILDER</Text>
+                <View
+                  className="absolute right-2.5 top-1/2 opacity-15"
+                  style={{ transform: [{ translateY: -30 }] }}
+                >
+                  <Text className="text-white text-sm font-extrabold tracking-wider">
+                    LINEUP
+                  </Text>
+                  <Text className="text-white text-sm font-extrabold tracking-wider">
+                    BUILDER
+                  </Text>
                 </View>
               </LinearGradient>
             </View>
           </ViewShot>
 
-          <View style={styles.benchContainer}>
-            <Text style={styles.benchTitle}>SUBSTITUTES</Text>
-            <View style={styles.benchGrid}>
+          <View className="bg-black/30 rounded-2xl p-4 mb-5">
+            <Text className="text-xl font-bold text-status-success mb-4 text-center tracking-wider">
+              SUBSTITUTES
+            </Text>
+            <View className="flex-row flex-wrap justify-around">
               {bench.map((player, index) => {
                 const isSelected =
                   selectedType === "bench" && selectedIndex === index;
                 return (
                   <TouchableOpacity
                     key={index}
-                    style={[
-                      styles.benchSlot,
-                      isSelected && styles.benchSlotSelected,
-                    ]}
+                    className="w-[30%] mb-4 items-center"
+                    style={{
+                      transform: isSelected ? [{ scale: 1.15 }] : [],
+                    }}
                     onPress={() => player && handlePlayerPress(index, "bench")}
                   >
                     {player ? (
-                      <View style={styles.benchPlayer}>
+                      <View className="items-center">
                         <Image
                           source={{ uri: player.imageUrl }}
-                          style={styles.benchPlayerAvatar}
+                          style={{
+                            width: BENCH_PLAYER_SIZE,
+                            height: BENCH_PLAYER_SIZE * 1.2,
+                            borderRadius: BENCH_PLAYER_SIZE / 2,
+                          }}
+                          className="justify-center items-center mb-1.5"
                         />
-                        <Text style={styles.benchPlayerName}>
+                        <Text className="text-white text-xs font-semibold text-center">
                           {player.name}
                         </Text>
-                        <Text style={styles.benchPlayerPosition}>
+                        <Text className="text-text-secondary text-[10px] mt-0.5">
                           {player.position}
                         </Text>
                       </View>
                     ) : (
-                      <View style={styles.benchEmpty}>
-                        <Text style={styles.benchEmptyText}>-</Text>
+                      <View className="w-[75px] h-[75px] rounded-full bg-white/10 border-2 border-white/20 justify-center items-center">
+                        <Text className="text-white/30 text-lg">-</Text>
                       </View>
                     )}
                   </TouchableOpacity>
@@ -476,430 +622,6 @@ export default function LineupBuilder() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  gradient: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-  },
-  headerText: {
-    fontSize: 32,
-    fontWeight: "800" as const,
-    color: "#fff",
-    marginBottom: 20,
-    textAlign: "center" as const,
-    letterSpacing: 2,
-  },
-  controlPanel: {
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-  },
-  controlRow: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    marginBottom: 16,
-  },
-  inputGroup: {
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  label: {
-    color: "#10b981",
-    fontSize: 12,
-    fontWeight: "600" as const,
-    marginBottom: 8,
-    textTransform: "uppercase" as const,
-  },
-  pickerButton: {
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    borderRadius: 8,
-    padding: 12,
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    alignItems: "center" as const,
-  },
-  pickerText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600" as const,
-  },
-  formationList: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    borderRadius: 8,
-    marginBottom: 16,
-    overflow: "hidden" as const,
-  },
-  formationItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.1)",
-  },
-  formationItemActive: {
-    backgroundColor: "rgba(16, 185, 129, 0.2)",
-  },
-  formationItemText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600" as const,
-  },
-  textInput: {
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    borderRadius: 8,
-    padding: 12,
-    color: "#fff",
-    fontSize: 16,
-  },
-  buttonRow: {
-    flexDirection: "row" as const,
-    gap: 8,
-    marginTop: 8,
-  },
-  resetButton: {
-    flex: 1,
-    backgroundColor: "#ef4444",
-    borderRadius: 8,
-    padding: 14,
-    flexDirection: "row" as const,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-  },
-  resetButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700" as const,
-    marginLeft: 8,
-  },
-  downloadButton: {
-    flex: 1,
-    backgroundColor: "#10b981",
-    borderRadius: 8,
-    padding: 14,
-    flexDirection: "row" as const,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-  },
-  downloadButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700" as const,
-    marginLeft: 8,
-  },
-  pitchContainer: {
-    marginBottom: 20,
-  },
-  formationTitleText: {
-    fontSize: 28,
-    fontWeight: "800" as const,
-    color: "#f59e0b",
-    textAlign: "center" as const,
-    marginBottom: 4,
-    letterSpacing: 1,
-  },
-  formationSubtitle: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: "#10b981",
-    textAlign: "center" as const,
-    marginBottom: 12,
-  },
-  pitch: {
-    width: "100%",
-    aspectRatio: 0.7,
-    borderRadius: 16,
-    position: "relative" as const,
-    overflow: "hidden" as const,
-    borderWidth: 3,
-    borderColor: "#fff",
-  },
-  pitchLines: {
-    position: "absolute" as const,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  line: {
-    position: "absolute" as const,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-  },
-  halfwayLine: {
-    top: "50%",
-    left: 0,
-    right: 0,
-    height: 2,
-  },
-  centerCircle: {
-    position: "absolute" as const,
-    top: "50%",
-    left: "50%",
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    transform: [{ translateX: -50 }, { translateY: -50 }],
-  },
-  centerDot: {
-    position: "absolute" as const,
-    top: "50%",
-    left: "50%",
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    transform: [{ translateX: -4 }, { translateY: -4 }],
-  },
-  penaltyBox: {
-    position: "absolute" as const,
-    left: "15%",
-    right: "15%",
-    height: "18%",
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  topPenaltyBox: {
-    top: 0,
-    borderTopWidth: 0,
-  },
-  bottomPenaltyBox: {
-    bottom: 0,
-    borderBottomWidth: 0,
-  },
-  sixYardBox: {
-    position: "absolute" as const,
-    left: "30%",
-    right: "30%",
-    height: "8%",
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  topSixYardBox: {
-    top: 0,
-    borderTopWidth: 0,
-  },
-  bottomSixYardBox: {
-    bottom: 0,
-    borderBottomWidth: 0,
-  },
-  playerSlot: {
-    position: "absolute" as const,
-    width: PLAYER_SIZE,
-    height: PLAYER_SIZE,
-    marginLeft: -PLAYER_SIZE / 2,
-    marginTop: -PLAYER_SIZE / 2,
-  },
-  playerSlotSelected: {
-    transform: [{ scale: 1.2 }],
-  },
-  playerCircle: {
-    alignItems: "center" as const,
-  },
-  playerAvatar: {
-    width: PLAYER_SIZE,
-    height: PLAYER_SIZE * 1.2,
-    borderRadius: PLAYER_SIZE / 2,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-  },
-  playerNumber: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "800" as const,
-  },
-  playerNameContainer: {
-    marginTop: 4,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  playerName: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "700" as const,
-    textAlign: "center" as const,
-  },
-  placeholderCircle: {
-    width: PLAYER_SIZE,
-    height: PLAYER_SIZE,
-    borderRadius: PLAYER_SIZE / 2,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    borderStyle: "dashed" as const,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-  },
-  placeholderText: {
-    color: "rgba(255, 255, 255, 0.6)",
-    fontSize: 12,
-    fontWeight: "700" as const,
-  },
-  watermarkLeft: {
-    position: "absolute" as const,
-    left: 10,
-    top: "50%",
-    transform: [{ translateY: -30 }],
-    opacity: 0.15,
-  },
-  watermarkRight: {
-    position: "absolute" as const,
-    right: 10,
-    top: "50%",
-    transform: [{ translateY: -30 }],
-    opacity: 0.15,
-  },
-  watermarkText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "800" as const,
-    letterSpacing: 1,
-  },
-  benchContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-  },
-  benchTitle: {
-    fontSize: 20,
-    fontWeight: "700" as const,
-    color: "#10b981",
-    marginBottom: 16,
-    textAlign: "center" as const,
-    letterSpacing: 1,
-  },
-  benchGrid: {
-    flexDirection: "row" as const,
-    flexWrap: "wrap" as const,
-    justifyContent: "space-around" as const,
-  },
-  benchSlot: {
-    width: "30%",
-    marginBottom: 16,
-    alignItems: "center" as const,
-  },
-  benchSlotSelected: {
-    transform: [{ scale: 1.15 }],
-  },
-  benchPlayer: {
-    alignItems: "center" as const,
-  },
-  benchPlayerAvatar: {
-    width: BENCH_PLAYER_SIZE,
-    height: BENCH_PLAYER_SIZE * 1.2,
-    borderRadius: BENCH_PLAYER_SIZE / 2,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-    marginBottom: 6,
-  },
-  benchPlayerNumber: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700" as const,
-  },
-  benchPlayerName: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600" as const,
-    textAlign: "center" as const,
-  },
-  benchPlayerPosition: {
-    color: "#888",
-    fontSize: 10,
-    marginTop: 2,
-  },
-  benchEmpty: {
-    width: BENCH_PLAYER_SIZE,
-    height: BENCH_PLAYER_SIZE,
-    borderRadius: BENCH_PLAYER_SIZE / 2,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-  },
-  benchEmptyText: {
-    color: "rgba(255, 255, 255, 0.3)",
-    fontSize: 18,
-  },
-  coachContainer: {
-    marginBottom: 20,
-    paddingHorizontal: 4,
-  },
-  coachCard: {
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#f59e0b",
-    overflow: "hidden" as const,
-  },
-  coachHeader: {
-    backgroundColor: "rgba(245, 158, 11, 0.15)",
-    paddingVertical: 6,
-    alignItems: "center" as const,
-  },
-  coachBadge: {
-    backgroundColor: "#f59e0b",
-    paddingHorizontal: 12,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  coachBadgeText: {
-    color: "#000",
-    fontSize: 10,
-    fontWeight: "800" as const,
-    letterSpacing: 1.5,
-  },
-  coachContent: {
-    flexDirection: "row" as const,
-    padding: 12,
-    alignItems: "center" as const,
-  },
-  coachAvatarContainer: {
-    marginRight: 12,
-  },
-  coachAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  coachInitials: {
-    color: "#fff",
-    fontSize: 22,
-    fontWeight: "800" as const,
-    letterSpacing: 1,
-  },
-  coachInfo: {
-    flex: 1,
-  },
-  coachNameInput: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700" as const,
-    marginBottom: 4,
-    padding: 0,
-  },
-  coachRole: {
-    color: "#f59e0b",
-    fontSize: 11,
-    fontWeight: "700" as const,
-    letterSpacing: 1,
-  },
-});
 
 // import Colors from "@/constants/colors";
 // import { Stack } from "expo-router";
