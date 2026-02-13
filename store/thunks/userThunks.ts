@@ -1,8 +1,9 @@
 // store/thunks/userThunks.ts
-import UserService from "@/services/UserService";
-import { Address, PaymentMethod, User } from "@/types/user/profile";
+import AuthService from "@/services/AuthService";
+import { PaymentMethod } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import RNFS from "react-native-fs";
 import { Alert } from "react-native";
 import {
   clearUser,
@@ -21,7 +22,7 @@ export const loginUser = createAsyncThunk(
   ) => {
     dispatch(setLoading(true));
     try {
-      const userData = await UserService.login(email, password);
+      const userData = await AuthService.login(email, password);
       dispatch(setUser(userData));
       return userData;
     } catch (error: any) {
@@ -36,12 +37,26 @@ export const loginUser = createAsyncThunk(
 // Register thunk
 export const registerUser = createAsyncThunk(
   "user/register",
-  async (userData: Omit<User, "id">, { dispatch }) => {
+  async (
+    userData: {
+      email: string;
+      password: string;
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+    },
+    { dispatch }
+  ) => {
     dispatch(setLoading(true));
     try {
-      console.log(userData);
-      const response = await UserService.register(userData);
-      Alert.alert("Registration Success");
+      const response = await AuthService.register(
+        userData.email,
+        userData.password,
+        userData.firstName,
+        userData.lastName,
+        userData.phone
+      );
+      Alert.alert("Registration Success", "You can now login with your credentials");
       return response;
     } catch (error: any) {
       Alert.alert("Registration error", error.message);
@@ -55,15 +70,25 @@ export const registerUser = createAsyncThunk(
 // Update user thunk
 export const updateUser = createAsyncThunk(
   "user/updateUser",
-  async (updates: Partial<User>, { dispatch, getState }) => {
+  async (
+    updates: {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      avatarUrl?: string;
+    },
+    { dispatch, getState }
+  ) => {
     const state = getState() as RootState;
     if (!state.user.user) return;
 
     dispatch(setLoading(true));
     try {
-      await UserService.update(updates);
-      const updatedUser = await UserService.getUser();
-      await UserService.storeUserData(updatedUser);
+      const updatedProfile = await AuthService.updateProfile(updates);
+      const updatedUser = {
+        ...state.user.user,
+        profile: updatedProfile,
+      };
       dispatch(setUser(updatedUser));
       return updatedUser;
     } catch (error: any) {
@@ -77,15 +102,24 @@ export const updateUser = createAsyncThunk(
 
 export const updateCustomer = createAsyncThunk(
   "user/updateCustomer",
-  async (updates: Partial<User>, { dispatch, getState }) => {
+  async (
+    updates: {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+    },
+    { dispatch, getState }
+  ) => {
     const state = getState() as RootState;
     if (!state.user.user) return;
 
     dispatch(setLoading(true));
     try {
-      await UserService.updateCustomer(updates);
-      const updatedUser = await UserService.getUser();
-      await UserService.storeUserData(updatedUser);
+      const updatedProfile = await AuthService.updateProfile(updates);
+      const updatedUser = {
+        ...state.user.user,
+        profile: updatedProfile,
+      };
       dispatch(setUser(updatedUser));
       return updatedUser;
     } catch (error: any) {
@@ -109,79 +143,27 @@ export const updateAvatar = createAsyncThunk(
 
     dispatch(setLoading(true));
     try {
-      const response = await UserService.uploadMedia(imageUri, filename);
-      const updatedUser: User = {
+      const filePath = imageUri.startsWith("file://")
+        ? imageUri.replace("file://", "")
+        : imageUri;
+      const imageBase64 = await RNFS.readFile(filePath, "base64");
+      const updatedProfile = await AuthService.uploadAvatar(imageBase64, filename);
+      const updatedUser = {
         ...state.user.user,
-        url: response.source_url,
-      } as User;
+        profile: updatedProfile,
+      };
 
-      await dispatch(updateUser(updatedUser));
-      await AsyncStorage.setItem("user_data", JSON.stringify(updatedUser));
+      dispatch(setUser(updatedUser));
       return updatedUser;
     } catch (error: any) {
       console.error("Error uploading avatar:", error);
-      Alert.alert("Upload Error", "Failed to upload avatar. Please try again.");
+      Alert.alert(
+        "Upload Error",
+        error?.message || "Failed to upload avatar. Please try again."
+      );
       throw error;
     } finally {
       dispatch(setLoading(false));
-    }
-  }
-);
-
-// Update address thunk
-export const updateAddress = createAsyncThunk(
-  "user/updateAddress",
-  async (address: Address, { dispatch, getState }) => {
-    const state = getState() as RootState;
-    try {
-      const response = await UserService.updateAddress(address);
-      const updatedUser = {
-        ...state.user.user,
-        billing: response.billing,
-        shipping: response.shipping,
-      };
-      await AsyncStorage.setItem("user_data", JSON.stringify(updatedUser));
-      dispatch(setUser(updatedUser));
-      return updatedUser;
-    } catch (error: any) {
-      Alert.alert("Address Update Error", error.message);
-      throw error;
-    }
-  }
-);
-
-// Delete address thunk
-export const deleteAddress = createAsyncThunk(
-  "user/deleteAddress",
-  async (type: "shipping" | "billing", { dispatch, getState }) => {
-    const newAddress: Address = {
-      type: type,
-      email: "",
-      first_name: "",
-      last_name: "",
-      company: "",
-      address_1: "",
-      address_2: "",
-      city: "",
-      state: "",
-      country: "",
-      postcode: "",
-      phone: "",
-    };
-    const state = getState() as RootState;
-    try {
-      const response = await UserService.updateAddress(newAddress);
-      const updatedUser = {
-        ...state.user.user,
-        billing: response.billing,
-        shipping: response.shipping,
-      };
-      await AsyncStorage.setItem("user_data", JSON.stringify(updatedUser));
-      dispatch(setUser(updatedUser));
-      return updatedUser;
-    } catch (error: any) {
-      Alert.alert("Address Delete Error", error.message);
-      throw error;
     }
   }
 );
@@ -191,9 +173,9 @@ export const loadUserData = createAsyncThunk(
   "user/loadUserData",
   async (_, { dispatch }) => {
     try {
-      const userData = await AsyncStorage.getItem("user_data");
-      if (userData) {
-        dispatch(setUser(JSON.parse(userData)));
+      const user = await AuthService.getCurrentUser();
+      if (user) {
+        dispatch(setUser(user));
       }
 
       const paymentMethodsData = await AsyncStorage.getItem("paymentMethods");
@@ -210,8 +192,8 @@ export const loadUserData = createAsyncThunk(
 export const logoutUser = createAsyncThunk(
   "user/logout",
   async (_, { dispatch }) => {
-    await UserService.logout();
-    await AsyncStorage.multiRemove(["user_data", "paymentMethods"]);
+    await AuthService.logout();
+    await AsyncStorage.removeItem("paymentMethods");
     dispatch(clearUser());
   }
 );
@@ -252,9 +234,9 @@ export const deletePaymentMethod = createAsyncThunk(
 
 export const deleteUser = createAsyncThunk(
   "user/deleteUser",
-  async (id: number, { dispatch }) => {
-    await UserService.deleteUser(id);
-    await AsyncStorage.multiRemove(["user_data", "paymentMethods"]);
+  async (_: any, { dispatch }) => {
+    await AuthService.deleteAccount();
+    await AsyncStorage.removeItem("paymentMethods");
     dispatch(clearUser());
   }
 );

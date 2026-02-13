@@ -1,11 +1,4 @@
 // components/AddFundsModal.tsx
-import { useCart } from "@/hooks/useCart";
-import {
-  CHECKOUT_PAYMENT_METHOD,
-  CHECKOUT_PRODUCT_TYPE,
-} from "@/types/shop/checkout";
-import { Product } from "@/types/shop/product";
-import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -16,70 +9,35 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Colors from "@/constants/colors";
+import { useStripePay } from "@/hooks/useStripePay";
+import { useWallet } from "@/hooks/useWallet";
 import { Spinner } from "../Spinner";
+
 interface AddFundsModalProps {
   visible: boolean;
   onClose: () => void;
-  onAddFunds: (amount: number, paymentMethod: string) => Promise<void>;
+  onSuccess: () => void;
 }
-
-const PAYMENT_METHODS = [
-  { id: CHECKOUT_PAYMENT_METHOD.STRIPE, name: "Credit/Debit Card" },
-  { id: CHECKOUT_PAYMENT_METHOD.PAYPAL, name: "PayPal" },
-];
 
 export const AddFundsModal: React.FC<AddFundsModalProps> = ({
   visible,
   onClose,
-  onAddFunds,
+  onSuccess,
 }) => {
   const [amount, setAmount] = useState("");
-  const router = useRouter();
-  const [selectedMethod, setSelectedMethod] = useState<string>("");
-  const { addToCart, items } = useCart();
-  const cartCount = items.length;
   const [loading, setLoading] = useState(false);
-  const [visibility, setVisibility] = useState(visible);
+  const { payWithClientSecret } = useStripePay();
+  const { createTopUpIntent, confirmTopUp } = useWallet();
 
   useEffect(() => {
-    setVisibility(visible);
+    if (!visible) {
+      resetForm();
+    }
   }, [visible]);
 
-  const handleWallet = async (numericAmount: number) => {
-    const product = {
-      id: 52365,
-      quantity: 1,
-    };
-    if (cartCount) {
-      Alert.alert(
-        "Invalid Cart",
-        `You cannot purchase wallet with other items in the cart. Please clear your cart and try again.`
-      );
-    } else {
-      setLoading(true);
-      setVisibility(false);
-      resetForm();
-      addToCart(product as Product)
-        .then((data) => {
-          router.dismissAll();
-          setLoading(false);
-          router.navigate(
-            `/checkout?productType=${CHECKOUT_PRODUCT_TYPE.WALLET}&amount=${numericAmount}&payment_method=${selectedMethod}`
-          );
-        })
-        .catch((error) => {
-          setLoading(false);
-          Alert.alert(
-            "Error",
-            "Failed to add funds to cart. Please try again."
-          );
-        });
-    }
-  };
   const handleAddFunds = async () => {
-    if (!amount || !selectedMethod) {
-      Alert.alert("Error", "Please enter amount and select payment method");
+    if (!amount) {
+      Alert.alert("Error", "Please enter an amount");
       return;
     }
 
@@ -95,37 +53,55 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
     }
 
     try {
-      handleWallet(numericAmount);
-    } catch (error) {
-      // Error is handled in the parent component
+      setLoading(true);
+
+      // Create Stripe payment intent
+      const { clientSecret, paymentIntentId } = await createTopUpIntent(numericAmount, "usd");
+
+      // Process Stripe payment using the same intent created above
+      await payWithClientSecret(clientSecret);
+
+      // Confirm top-up after successful payment
+      await confirmTopUp(paymentIntentId, numericAmount);
+
+      setLoading(false);
+      onSuccess();
+      Alert.alert("Success", `$${numericAmount.toFixed(2)} has been added to your wallet!`);
+    } catch (error: any) {
+      setLoading(false);
+      Alert.alert("Error", error.message || "Failed to add funds. Please try again.");
     }
   };
 
   const resetForm = () => {
     setAmount("");
-    setSelectedMethod("");
   };
 
   const handleClose = () => {
-    resetForm();
-    onClose();
+    if (!loading) {
+      resetForm();
+      onClose();
+    }
   };
-
-  if (loading) {
-    return (
-      <View className="flex-1 bg-bg-medium justify-center items-center">
-        <Text className="text-base font-semibold text-text-primary mb-3">
-          Processing...
-        </Text>
-      </View>
-    );
-  }
 
   const quickAmounts = [10, 25, 50, 100, 200, 500, 1000];
 
+  if (loading) {
+    return (
+      <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+        <View className="flex-1 bg-bg-medium justify-center items-center">
+          <Spinner content="Processing payment" />
+          <Text className="text-base text-text-secondary mt-4">
+            Please wait while we process your payment...
+          </Text>
+        </View>
+      </Modal>
+    );
+  }
+
   return (
     <Modal
-      visible={visibility}
+      visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
@@ -192,52 +168,25 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
             </View>
           </View>
 
-          {/* Payment Method Selection */}
-          <View className="mb-6">
-            <Text className="text-base font-semibold mb-3 text-text-primary">
+          {/* Payment Method Info */}
+          <View className="mb-6 p-4 bg-bg-card rounded-lg">
+            <Text className="text-sm font-semibold text-text-primary mb-2">
               Payment Method
             </Text>
-            <View className="gap-2">
-              {PAYMENT_METHODS.map((method) => {
-                const isSelected = selectedMethod === method.id;
-                return (
-                  <TouchableOpacity
-                    key={method.id}
-                    className={`flex-row items-center p-3 rounded-lg border ${
-                      isSelected
-                        ? "border-rm-gold bg-rm-gold/20"
-                        : "border-border-default bg-bg-card"
-                    }`}
-                    onPress={() => setSelectedMethod(method.id)}
-                    disabled={loading}
-                  >
-                    <View
-                      className={`w-5 h-5 rounded-full border-2 mr-3 justify-center items-center ${
-                        isSelected ? "border-rm-gold" : "border-border-light"
-                      }`}
-                    >
-                      {isSelected && (
-                        <View className="w-2.5 h-2.5 rounded-full bg-rm-gold" />
-                      )}
-                    </View>
-                    <Text className="text-base text-text-primary">
-                      {method.name}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+            <Text className="text-sm text-text-secondary">
+              Payment will be processed securely via Stripe
+            </Text>
           </View>
 
           {/* Add Funds Button */}
           <TouchableOpacity
             className={`p-4 rounded-lg items-center mt-5 ${
-              !amount || !selectedMethod || loading
+              !amount || loading
                 ? "bg-bg-gray opacity-60"
                 : "bg-rm-gold"
             }`}
             onPress={handleAddFunds}
-            disabled={!amount || !selectedMethod || loading}
+            disabled={!amount || loading}
           >
             <Text className="text-white text-base font-semibold">
               {loading ? "Processing..." : `Add $${amount || "0.00"}`}

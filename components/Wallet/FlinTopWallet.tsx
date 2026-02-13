@@ -1,6 +1,6 @@
-// components/WooWalletScreen.tsx
+// components/WalletScreen.tsx
 import { Button } from "@/components/Button";
-import { useFlintopWallet } from "@/hooks/useFlintopWallet";
+import { useWallet } from "@/hooks/useWallet";
 import React, { useState } from "react";
 import {
   Alert,
@@ -16,14 +16,14 @@ import { TransferModal } from "./TransferModal";
 
 export const WalletScreenDetail: React.FC = () => {
   const {
-    balance,
+    wallet,
     transactions,
-    loading,
+    isLoading,
     error,
-    refreshBalance,
-    refreshTransactions,
+    loadWallet,
+    loadTransactions,
     transferFunds,
-  } = useFlintopWallet();
+  } = useWallet();
 
   const [refreshing, setRefreshing] = useState(false);
   const [showAddFundsModal, setShowAddFundsModal] = useState(false);
@@ -31,34 +31,31 @@ export const WalletScreenDetail: React.FC = () => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([refreshBalance(), refreshTransactions()]);
+    await Promise.all([loadWallet(), loadTransactions()]);
     setRefreshing(false);
   };
 
-  const handleAddFunds = async (amount: number, paymentMethod: string) => {
-    try {
-      setShowAddFundsModal(false);
-      Alert.alert("Success", "Funds added successfully!");
-    } catch (err) {
-      Alert.alert("Error", "Failed to add funds. Please try again.");
-    }
+  const handleAddFunds = async () => {
+    setShowAddFundsModal(false);
+    await onRefresh();
   };
 
   const handleTransfer = async (
-    toUserId: number,
+    recipientEmail: string,
     amount: number,
-    description?: string
+    message?: string
   ) => {
     try {
-      await transferFunds(toUserId, amount, description);
+      await transferFunds(recipientEmail, amount, message);
       setShowTransferModal(false);
+      await onRefresh();
       Alert.alert("Success", "Transfer completed successfully!");
-    } catch (err) {
-      Alert.alert("Error", "Failed to transfer funds. Please try again.");
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Failed to transfer funds. Please try again.");
     }
   };
 
-  if (loading && !refreshing) {
+  if (isLoading && !refreshing && !wallet) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content="Loading wallet" />
@@ -75,6 +72,9 @@ export const WalletScreenDetail: React.FC = () => {
     );
   }
 
+  const balance = wallet?.balance || 0;
+  const currency = wallet?.currency || "USD";
+
   return (
     <View className="flex-1 bg-bg-medium">
       <ScrollView
@@ -88,10 +88,10 @@ export const WalletScreenDetail: React.FC = () => {
             Wallet Balance
           </Text>
           <Text className="text-3xl font-bold text-text-primary mb-1">
-            {balance?.formatted_balance || "$0.00"}
+            ${balance.toFixed(2)}
           </Text>
           <Text className="text-sm text-text-secondary">
-            Available Balance
+            Available Balance · {currency}
           </Text>
         </View>
 
@@ -101,14 +101,20 @@ export const WalletScreenDetail: React.FC = () => {
             title="Add Funds"
             onPress={() => setShowAddFundsModal(true)}
             variant="primary"
-            style={{ flex: 1, height: 32 }}
+            style={{ flex: 1 }}
+          />
+          <Button
+            title="Transfer"
+            onPress={() => setShowTransferModal(true)}
+            variant="secondary"
+            style={{ flex: 1 }}
           />
         </View>
 
         {/* Transactions */}
         <TransactionList
           transactions={transactions}
-          currency={balance?.currency_symbol || "$"}
+          currency="$"
         />
       </ScrollView>
 
@@ -116,15 +122,15 @@ export const WalletScreenDetail: React.FC = () => {
       <AddFundsModal
         visible={showAddFundsModal}
         onClose={() => setShowAddFundsModal(false)}
-        onAddFunds={handleAddFunds}
+        onSuccess={handleAddFunds}
       />
 
       <TransferModal
         visible={showTransferModal}
         onClose={() => setShowTransferModal(false)}
         onTransfer={handleTransfer}
-        currentBalance={balance?.balance || 0}
-        currency={balance?.currency_symbol || "$"}
+        currentBalance={balance}
+        currency="$"
       />
     </View>
   );

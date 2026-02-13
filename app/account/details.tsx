@@ -1,5 +1,5 @@
 import { useUser } from "@/hooks/useUser";
-import UserService from "@/services/UserService";
+import AuthService from "@/services/AuthService";
 import { router } from "expo-router";
 import { Save } from "lucide-react-native";
 import React, { useState } from "react";
@@ -15,53 +15,51 @@ import {
 export default function AccountDetailsScreen() {
   const { user, updateUser } = useUser();
   const [formData, setFormData] = useState({
-    first_name: user?.first_name || "",
-    last_name: user?.last_name || "",
+    firstName: user?.profile?.first_name || "",
+    lastName: user?.profile?.last_name || "",
+    phone: user?.profile?.phone || "",
     email: user?.email || "",
-    name: user?.name || "",
     oldPassword: "",
     password: "",
     confirmPassword: "",
   });
-  const checkPassword = async (password: string) => {
-    const response = await UserService.validCrendential(
-      user?.username as any,
-      password
-    );
-    return response;
-  };
+
   const handleSave = async () => {
-    if (!formData.first_name || !formData.last_name || !formData.name) {
+    if (!formData.firstName || !formData.lastName) {
       Alert.alert("Error", "Please fill in all required fields");
       return;
     }
-    if (formData.oldPassword !== "") {
-      try {
-        const isValid = await checkPassword(formData.oldPassword);
+
+    try {
+      // Update profile
+      await updateUser({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+      });
+
+      // Update password if provided
+      if (formData.oldPassword && formData.password) {
         if (formData.password !== formData.confirmPassword) {
-          Alert.alert("Error", "Confirm password is incorrect");
+          Alert.alert("Error", "Passwords do not match");
           return;
-        } else {
-          if (!isValid) {
-            Alert.alert("Error", "Current Password is not correct");
-            return;
-          }
         }
-      } catch (error: any) {
-        Alert.alert("Error", error.message);
-        return;
+        
+        // Verify current password by attempting login
+        try {
+          await AuthService.validateCredentials(user?.email || "", formData.oldPassword);
+          await AuthService.changePassword(formData.password);
+        } catch (error) {
+          Alert.alert("Error", "Current password is incorrect");
+          return;
+        }
       }
+
+      router.navigate("/account");
+      Alert.alert("Success", "Profile updated successfully");
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to update profile");
     }
-    let newData = {
-      first_name: formData.first_name,
-      last_name: formData.last_name,
-      email: formData.email,
-      name: formData.name,
-    };
-    if (formData.oldPassword === "") updateUser({ id: user?.id, ...newData });
-    else updateUser({ id: user?.id, ...formData });
-    router.navigate("/account");
-    Alert.alert("Success", "Updated Successfully");
   };
 
   return (
@@ -71,9 +69,9 @@ export default function AccountDetailsScreen() {
           <Text className="text-sm font-semibold text-white mb-2">First Name *</Text>
           <TextInput
             className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-            value={formData.first_name}
+            value={formData.firstName}
             onChangeText={(text) =>
-              setFormData({ ...formData, first_name: text })
+              setFormData({ ...formData, firstName: text })
             }
             placeholder="Enter your first name"
             placeholderTextColor="#515151"
@@ -83,39 +81,40 @@ export default function AccountDetailsScreen() {
           <Text className="text-sm font-semibold text-white mb-2">Last Name *</Text>
           <TextInput
             className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-            value={formData.last_name}
+            value={formData.lastName}
             onChangeText={(text) =>
-              setFormData({ ...formData, last_name: text })
+              setFormData({ ...formData, lastName: text })
             }
             placeholder="Enter your last name"
             placeholderTextColor="#515151"
           />
         </View>
         <View className="mb-5">
-          <Text className="text-sm font-semibold text-white mb-2">Display Name *</Text>
+          <Text className="text-sm font-semibold text-white mb-2">Phone</Text>
           <TextInput
             className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-            value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
-            placeholder="Enter your display name"
+            value={formData.phone}
+            onChangeText={(text) => setFormData({ ...formData, phone: text })}
+            placeholder="Enter your phone number"
             placeholderTextColor="#515151"
+            keyboardType="phone-pad"
           />
         </View>
         <View className="mb-5">
-          <Text className="text-sm font-semibold text-white mb-2">Email Address</Text>
+          <Text className="text-sm font-semibold text-white mb-2">Email Address (Read-only)</Text>
           <TextInput
-            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
+            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-gray-400"
             value={formData.email}
-            onChangeText={(text) => setFormData({ ...formData, email: text })}
-            placeholder="Enter your email"
+            placeholder="Email cannot be changed"
             placeholderTextColor="#515151"
-            keyboardType="email-address"
-            autoCapitalize="none"
+            editable={false}
           />
         </View>
 
+        <Text className="text-lg font-bold text-white mb-4 mt-6">Change Password</Text>
+
         <View className="mb-5">
-          <Text className="text-sm font-semibold text-white mb-2">Password</Text>
+          <Text className="text-sm font-semibold text-white mb-2">Current Password</Text>
           <TextInput
             className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
             value={formData.oldPassword}
@@ -145,14 +144,14 @@ export default function AccountDetailsScreen() {
         </View>
 
         <View className="mb-5">
-          <Text className="text-sm font-semibold text-white mb-2">Confirm Password</Text>
+          <Text className="text-sm font-semibold text-white mb-2">Confirm New Password</Text>
           <TextInput
             className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
             value={formData.confirmPassword}
             onChangeText={(text) =>
               setFormData({ ...formData, confirmPassword: text })
             }
-            placeholder="Enter confirm password"
+            placeholder="Confirm your new password"
             placeholderTextColor="#515151"
             secureTextEntry
             autoCapitalize="none"

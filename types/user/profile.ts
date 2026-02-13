@@ -1,40 +1,31 @@
+// Supabase User structure
 export interface User {
-  id: number;
-  username: string;
-  first_name: string;
-  last_name: string;
-  name: string;
+  id: string;
   email: string;
-  password: string;
-  age?: string;
-  nationality?: string;
-  placeOfResidence?: string;
-  annualIncome?: string;
-  url?: string;
-  subscription?: {
-    type: string;
-    plan: string;
-    startDate: string;
-    endDate: string;
+  profile: {
+    id: string;
+    email: string;
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    avatar_url?: string;
+    stripe_customer_id?: string;
+    created_at: string;
+    updated_at: string;
   };
-  billing: Partial<Address>;
-  shipping: Partial<Address>;
-  stripe_id: string;
-  role: string[];
 }
 
 export interface Address {
-  type: "shipping" | "billing";
-  company: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  address_1: string;
-  address_2: string;
-  city: string;
-  state: string;
-  country: string;
-  postcode: string;
+  company?: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  address_1?: string;
+  address_2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postcode?: string;
   phone?: string;
 }
 
@@ -52,8 +43,7 @@ export interface PaymentMethod {
 }
 
 export interface AuthResponse {
-  token: string;
-  user_email: string;
-  user_nicename: string;
-  user_display_name: string;
+  access_token: string;
+  refresh_token: string;
+  user: User;
 }

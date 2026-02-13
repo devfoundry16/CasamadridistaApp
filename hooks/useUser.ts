@@ -1,21 +1,18 @@
 // hooks/useUser.ts
-import UserService from "@/services/UserService";
 import { AppDispatch, RootState } from "@/store/store";
 import {
   addPaymentMethod,
-  deleteAddress,
   deletePaymentMethod,
   loadUserData,
   loginUser,
   logoutUser,
   registerUser,
-  updateAddress,
   updateAvatar,
   updateUser,
   deleteUser,
   updateCustomer,
 } from "@/store/thunks/userThunks";
-import { Address, PaymentMethod, User } from "@/types/user/profile";
+import { PaymentMethod } from "@/types/user/profile";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -33,14 +30,25 @@ export const useUser = () => {
   );
 
   const register = useCallback(
-    (userData: Omit<User, "id">) => {
+    (userData: {
+      email: string;
+      password: string;
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+    }) => {
       return dispatch(registerUser(userData));
     },
     [dispatch]
   );
 
   const updateUserProfile = useCallback(
-    (updates: Partial<User>) => {
+    (updates: {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      avatarUrl?: string;
+    }) => {
       return dispatch(updateUser(updates));
     },
     [dispatch]
@@ -54,29 +62,23 @@ export const useUser = () => {
   );
 
   const updateCustomerProfile = useCallback(
-    (data: any) => {
+    (data: {
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+    }) => {
       return dispatch(updateCustomer(data));
     },
     [dispatch]
   );
 
-  const getCustomerStripeId = useCallback(() => {
-    return UserService.getStripeId();
-  }, []);
-
-  const updateUserAddress = useCallback(
-    (address: Address) => {
-      return dispatch(updateAddress(address));
-    },
-    [dispatch]
-  );
-
-  const removeAddress = useCallback(
-    (type: "shipping" | "billing") => {
-      return dispatch(deleteAddress(type));
-    },
-    [dispatch]
-  );
+  const getCustomerStripeId = useCallback(async () => {
+    // Get Stripe customer ID from user profile
+    if (user?.profile?.stripe_customer_id) {
+      return user.profile.stripe_customer_id;
+    }
+    return null;
+  }, [user]);
 
   const addPaymentMethodToUser = useCallback(
     (method: PaymentMethod) => {
@@ -92,8 +94,8 @@ export const useUser = () => {
     [dispatch]
   );
   
-  const deleteUserProfile = useCallback((id: number) => {
-    return dispatch(deleteUser(id));
+  const deleteUserProfile = useCallback(() => {
+    return dispatch(deleteUser(null as any));
   }, [dispatch]);
 
   const loadUserDataFromStorage = useCallback(() => {
@@ -118,8 +120,6 @@ export const useUser = () => {
     updateUser: updateUserProfile,
     updateAvatar: updateUserAvatar,
     updateCustomer: updateCustomerProfile,
-    updateAddress: updateUserAddress,
-    deleteAddress: removeAddress,
     addPaymentMethod: addPaymentMethodToUser,
     deletePaymentMethod: removePaymentMethod,
     loadUserData: loadUserDataFromStorage,

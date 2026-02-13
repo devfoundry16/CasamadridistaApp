@@ -1,9 +1,13 @@
 import { Platform } from "react-native";
 
-const API_BASE_URL = Platform.select({
-  ios: "https://casamadridista-backend.vercel.app/api/", // iOS Simulator
-  android: "https://casamadridista-backend.vercel.app/api/", // Android Emulator
-});
+const API_BASE_URL =
+  process.env.EXPO_PUBLIC_BACKEND_API_URL ||
+  Platform.select({
+    ios: "http://localhost:3000/api/",
+    // Android emulator must use 10.0.2.2 to reach host machine localhost.
+    android: "http://10.0.2.2:3000/api/",
+    default: "http://localhost:3000/api/",
+  });
 
 const development = {
   AUTH_USERNAME: "iworqs",

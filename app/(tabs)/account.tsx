@@ -1,6 +1,5 @@
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
-import { useCart } from "@/hooks/useCart";
 import { useUser } from "@/hooks/useUser";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
@@ -8,9 +7,7 @@ import {
   Camera,
   Crown,
   LogOut,
-  MapPin,
   Settings,
-  ShoppingBag,
   User,
   Wallet,
 } from "lucide-react-native";
@@ -26,7 +23,7 @@ import {
 } from "react-native";
 
 export default function AccountScreen() {
-  const { user, updateAvatar, logout, isLoading, deleteUser } = useUser(); // Added accessToken and updateUser
+  const { user, updateAvatar, logout, isLoading } = useUser();
   const [isLogin, setIsLogin] = useState(true);
 
   const handleChangePhoto = async () => {
@@ -79,21 +76,12 @@ export default function AccountScreen() {
     updateAvatar(uri, filename);
   };
 
-  // const deleteAccount = async () => {
-  //   Alert.alert("Delete Account", "Are you sure you want to delete your account?", [
-  //     { text: "Cancel", style: "cancel" },
-  //     { text: "Delete", style: "destructive", onPress: () => {
-  //       deleteUser(user?.id as number).then(() => {
-  //         Alert.alert("Account Deleted", "Your account has been deleted successfully");
-  //         logout();
-  //       });
-  //     } },
-  //   ]);
-  // };
-
   if (!user) {
     return <AuthForm isLogin={isLogin} setIsLogin={setIsLogin} />;
   }
+
+  const userName = user.profile?.first_name || user.email?.split('@')[0] || 'User';
+  const avatarUrl = user.profile?.avatar_url;
 
   return (
     <ScrollView className="flex-1 bg-bg-medium">
@@ -101,10 +89,10 @@ export default function AccountScreen() {
         <View className="items-center mb-6">
           <View className="mb-4">
             {isLoading && <Spinner content="Setting avatar" />}
-            {user.url
+            {avatarUrl
               ? !isLoading && (
                 <Image
-                  source={{ uri: user.url }}
+                  source={{ uri: avatarUrl }}
                   style={{ width: 120, height: 120, borderRadius: 60 }}
                   className="border-4 border-rm-gold"
                 />
@@ -125,7 +113,7 @@ export default function AccountScreen() {
         </View>
 
         <View className="items-center">
-          <Text className="text-2xl font-bold text-rm-gold mb-3">Welcome {user.name}</Text>
+          <Text className="text-2xl font-bold text-rm-gold mb-3">Welcome {userName}</Text>
           <Text className="text-sm text-text-secondary text-center leading-5">
             Here you can view your membership details, manage your subscription,
             and update your profile information.
@@ -140,27 +128,27 @@ export default function AccountScreen() {
           className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/wallet" as any)}
         >
-          <Wallet size={24} color={Colors.textWhite} />
+          <Wallet size={24} color={Colors.darkBg} />
           <View className="flex-1 flex-row justify-between items-center">
             <Text className="text-base font-semibold text-text-dark">Wallet</Text>
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/orders" as any)}
         >
-          <ShoppingBag size={24} color={Colors.textWhite} />
+          <ShoppingBag size={24} color={Colors.darkBg} />
           <View className="flex-1 flex-row justify-between items-center">
             <Text className="text-base font-semibold text-text-dark">Orders</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/subscription" as any)}
         >
-          <Crown size={24} color={Colors.textWhite} />
+          <Crown size={24} color={Colors.darkBg} />
           <View className="flex-1 flex-row justify-between items-center">
             <Text className="text-base font-semibold text-text-dark">Subscription</Text>
           </View>
@@ -168,19 +156,9 @@ export default function AccountScreen() {
 
         <TouchableOpacity
           className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
-          onPress={() => router.push("../account/addresses" as any)}
-        >
-          <MapPin size={24} color={Colors.textWhite} />
-          <View className="flex-1 flex-row justify-between items-center">
-            <Text className="text-base font-semibold text-text-dark">Addresses</Text>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/details" as any)}
         >
-          <Settings size={24} color={Colors.textWhite} />
+          <Settings size={24} color={Colors.darkBg} />
           <View className="flex-1 flex-row justify-between items-center">
             <Text className="text-base font-semibold text-text-dark">Account Details</Text>
           </View>
@@ -208,8 +186,8 @@ export default function AccountScreen() {
 
       <View className="mx-6 p-5 bg-bg-light rounded-xl border border-border-light border-dashed">
         <Text className="text-sm text-text-secondary leading-5 mb-3">
-          Hello <Text className="font-bold text-white">{user.name}</Text> (not{" "}
-          <Text className="font-bold text-white">{user.name}</Text>?{" "}
+          Hello <Text className="font-bold text-white">{userName}</Text> (not{" "}
+          <Text className="font-bold text-white">{userName}</Text>?{" "}
           <Text className="text-rm-gold underline" onPress={logout}>
             Log out
           </Text>
@@ -228,13 +206,11 @@ function AuthForm({
   setIsLogin: (value: boolean) => void;
 }) {
   const { login, register, isLoading } = useUser();
-  const { loadCartItems } = useCart();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [name, setName] = useState("");
-  const [userName, setUserName] = useState("");
+  const [phone, setPhone] = useState("");
 
   const handleSubmit = async () => {
     if (isLogin) {
@@ -242,30 +218,19 @@ function AuthForm({
         Alert.alert("Error", "Please fill in all fields");
         return;
       }
-      login(email, password).then(() => {
-        loadCartItems();
-      });
+      login(email, password);
     } else {
-      if (
-        !email ||
-        !password ||
-        !firstName ||
-        !lastName ||
-        !name ||
-        !userName
-      ) {
+      if (!email || !password || !firstName || !lastName) {
         Alert.alert("Error", "Please fill in all required fields");
         return;
       }
       await register({
-        username: userName,
-        first_name: firstName,
-        last_name: lastName,
-        name: name,
-        email: email,
-        password: password,
-        role: ["subscriber"],
-      } as any);
+        email,
+        password,
+        firstName,
+        lastName,
+        phone,
+      });
     }
   };
   const handleGoogleSignIn = () => {
@@ -288,7 +253,7 @@ function AuthForm({
         {!isLogin && (
           <>
             <View className="mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">FirstName *</Text>
+              <Text className="text-sm font-semibold text-white mb-2">First Name *</Text>
               <TextInput
                 className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
                 value={firstName}
@@ -298,7 +263,7 @@ function AuthForm({
               />
             </View>
             <View className="mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">LastName *</Text>
+              <Text className="text-sm font-semibold text-white mb-2">Last Name *</Text>
               <TextInput
                 className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
                 value={lastName}
@@ -308,24 +273,14 @@ function AuthForm({
               />
             </View>
             <View className="mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">Name *</Text>
+              <Text className="text-sm font-semibold text-white mb-2">Phone</Text>
               <TextInput
                 className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-                value={name}
-                onChangeText={setName}
-                placeholder="Enter your name"
+                value={phone}
+                onChangeText={setPhone}
+                placeholder="Enter your phone number"
                 placeholderTextColor={Colors.darkGray}
-              />
-            </View>
-            <View className="mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">UserName *</Text>
-              <TextInput
-                className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-                value={userName}
-                onChangeText={setUserName}
-                placeholder="Enter your username"
-                placeholderTextColor={Colors.darkGray}
-                autoCapitalize="none"
+                keyboardType="phone-pad"
               />
             </View>
             <View className="mb-5">
@@ -345,12 +300,12 @@ function AuthForm({
 
         {isLogin && (
           <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">Username or Email Address *</Text>
+            <Text className="text-sm font-semibold text-white mb-2">Email Address *</Text>
             <TextInput
               className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
               value={email}
               onChangeText={setEmail}
-              placeholder="Enter your username or email"
+              placeholder="Enter your email"
               placeholderTextColor={Colors.darkGray}
               keyboardType="email-address"
               autoCapitalize="none"

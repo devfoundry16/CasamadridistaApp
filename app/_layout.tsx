@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useCart } from "@/hooks/useCart";
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
 import { useEnvironment } from "@/hooks/useEnvironment";
@@ -48,13 +47,6 @@ function RootLayoutNav() {
           options={{ headerShown: false, title: "Home" }}
         />
         <Stack.Screen
-          name="account/addresses"
-          options={{
-            ...defaultOptions,
-            title: "Addresses",
-          }}
-        />
-        <Stack.Screen
           name="account/wallet"
           options={{
             title: "Wallet",
@@ -65,13 +57,6 @@ function RootLayoutNav() {
           name="account/details"
           options={{
             title: "Account Details",
-            ...defaultOptions,
-          }}
-        />
-        <Stack.Screen
-          name="account/orders"
-          options={{
-            title: "Orders",
             ...defaultOptions,
           }}
         />
@@ -90,30 +75,9 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="cart"
-          options={{
-            title: "Cart",
-            ...defaultOptions,
-          }}
-        />
-        <Stack.Screen
-          name="checkout"
-          options={{
-            title: "Checkout",
-            ...defaultOptions,
-          }}
-        />
-        <Stack.Screen
           name="contact"
           options={{
             title: "Contact",
-            ...defaultOptions,
-          }}
-        />
-        <Stack.Screen
-          name="PayPalScreen"
-          options={{
-            title: "Paypal Payment",
             ...defaultOptions,
           }}
         />
@@ -202,11 +166,9 @@ function RootLayoutNav() {
 const DataInitializer = () => {
   const { initializeAppData } = useFootball();
   const { loadUserData } = useUser();
-  const { loadCartItems } = useCart();
 
   useEffect(() => {
-    AsyncStorage.clear();
-    Promise.all([initializeAppData(), loadUserData(), loadCartItems()]).then(
+    Promise.all([initializeAppData(), loadUserData()]).then(
       () => {
         SplashScreen.hideAsync();
       }

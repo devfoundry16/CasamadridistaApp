@@ -1,11 +1,11 @@
 // components/TransactionList.tsx
-import { FlintopWalletTransaction } from "@/types/user/flintop-wallet";
+import { WalletTransaction } from "@/services/WalletService";
 import { formatDate } from "@/utils/helper";
 import React from "react";
 import { FlatList, Text, View } from "react-native";
 
 interface TransactionListProps {
-  transactions: FlintopWalletTransaction[];
+  transactions: WalletTransaction[];
   currency?: string;
 }
 
@@ -28,7 +28,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   const renderTransactionItem = ({
     item,
   }: {
-    item: FlintopWalletTransaction;
+    item: WalletTransaction;
   }) => (
     <View className="flex-row items-start py-3">
       <View className="w-10 h-10 rounded-full bg-bg-light justify-center items-center mr-3">
@@ -37,19 +37,17 @@ export const TransactionList: React.FC<TransactionListProps> = ({
 
       <View className="flex-1 mr-3">
         <Text className="text-base font-medium text-text-primary mb-1 leading-5" numberOfLines={2}>
-          {item.details}
+          {item.description || (item.type === 'credit' ? 'Wallet Top-up' : 'Payment')}
         </Text>
         <Text className="text-xs text-text-secondary mb-0.5">
-          {formatDate(item.date)}
+          {formatDate(item.created_at)}
         </Text>
-        {item.order_id && (
+        <Text className="text-[11px] text-text-tertiary italic">
+          {item.payment_method}
+        </Text>
+        {item.stripe_payment_intent_id && (
           <Text className="text-[11px] text-text-tertiary italic">
-            Order #: {item.order_id}
-          </Text>
-        )}
-        {item.transaction_id && (
-          <Text className="text-[11px] text-text-tertiary italic">
-            Transaction #: {item.transaction_id}
+            ID: {item.stripe_payment_intent_id.substring(0, 20)}...
           </Text>
         )}
       </View>
@@ -63,9 +61,8 @@ export const TransactionList: React.FC<TransactionListProps> = ({
           {currency}
           {Math.abs(item.amount).toFixed(2)}
         </Text>
-        <Text className="text-[11px] text-text-secondary">
-          Balance: {currency}
-          {item.balance.toFixed(2)}
+        <Text className="text-[11px] text-text-secondary capitalize">
+          {item.payment_method}
         </Text>
       </View>
     </View>

@@ -1,10 +1,9 @@
 import { Spinner } from "@/components/Spinner";
-import { useOrder } from "@/hooks/useOrder";
-import { useUser } from "@/hooks/useUser";
+import { useSubscription } from "@/hooks/useSubscription";
 import { formatDate } from "@/utils/helper";
 import { router } from "expo-router";
 import { ArrowRight, Calendar, Crown } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   ScrollView,
   Text,
@@ -13,23 +12,13 @@ import {
 } from "react-native";
 
 export default function SubscriptionScreen() {
-  const { getSubscriptionOrders } = useOrder();
-  const { user } = useUser();
-  const [subscriptions, setSubscriptions] = useState<any>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const loadSubscriptions = async () => {
-    setLoading(true);
-    const res = await getSubscriptionOrders(user?.id as any);
-    setSubscriptions(res);
-    setLoading(false);
-  };
+  const { subscriptions, isLoading, loadSubscriptions } = useSubscription();
 
   useEffect(() => {
     loadSubscriptions();
   }, []);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content="Loading subscription" />
@@ -41,7 +30,10 @@ export default function SubscriptionScreen() {
     <>
       <ScrollView className="flex-1 bg-bg-medium">
         {subscriptions?.length ? (
-          subscriptions.map((subscription: any) => {
+          subscriptions.map((subscription) => {
+            const statusColor = subscription.status === 'active' ? '#BC9045' : '#666';
+            const statusText = subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
+            
             return (
               <View key={subscription.id}>
                 <View className="m-6 p-8 bg-bg-deep-dark rounded-[20px] items-center border-2 border-rm-gold">
@@ -49,7 +41,10 @@ export default function SubscriptionScreen() {
                     <Crown size={48} color="#BC9045" />
                   </View>
                   <Text className="text-[28px] font-bold text-rm-gold mb-2 text-center">
-                    {subscription.line_items[0].name}
+                    {subscription.subscription_type}
+                  </Text>
+                  <Text className="text-sm text-text-secondary mb-4" style={{ color: statusColor }}>
+                    {statusText}
                   </Text>
 
                   <View className="w-full gap-4">
@@ -58,18 +53,26 @@ export default function SubscriptionScreen() {
                       <View className="flex-1">
                         <Text className="text-sm text-text-secondary mb-1">Start Date</Text>
                         <Text className="text-base font-semibold text-white">
-                          {formatDate(subscription.start_date_gmt)}
+                          {formatDate(subscription.start_date)}
                         </Text>
                       </View>
                     </View>
+                    {subscription.end_date && (
+                      <View className="flex-row items-center gap-3">
+                        <Calendar size={20} color="#BC9045" />
+                        <View className="flex-1">
+                          <Text className="text-sm text-text-secondary mb-1">End Date</Text>
+                          <Text className="text-base font-semibold text-white">
+                            {formatDate(subscription.end_date)}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
                     <View className="flex-row items-center gap-3">
-                      <Calendar size={20} color="#BC9045" />
                       <View className="flex-1">
-                        <Text className="text-sm text-text-secondary mb-1">End Date</Text>
+                        <Text className="text-sm text-text-secondary mb-1">Price</Text>
                         <Text className="text-base font-semibold text-white">
-                          {subscription.next_payment_date_gmt
-                            ? formatDate(subscription.next_payment_date_gmt)
-                            : "N/A"}
+                          {subscription.currency} {subscription.price}
                         </Text>
                       </View>
                     </View>

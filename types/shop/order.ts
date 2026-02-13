@@ -1,4 +1,3 @@
-import { Address } from "../user/profile";
 export enum OrderStatus {
   PENDING = "pending",
   PROCESSING = "processing",
@@ -27,8 +26,6 @@ export interface Order {
     }[];
   }[];
   customer_id: number;
-  billing: Partial<Address>;
-  shipping?: Partial<Address>;
   variation?: { attribute: string; value: string }[];
   meta_data?: { key: string; value: string }[];
   created_at: string;

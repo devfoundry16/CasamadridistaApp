@@ -7,30 +7,16 @@ import {
   Text,
 } from "react-native";
 import {
-  Info,
-  Mail,
   Crown,
   Heart,
+  Info,
+  Mail,
   MoreVertical,
 } from "lucide-react-native";
 
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-
 import { useRouter } from "expo-router";
 import Colors from "@/constants/colors";
-import { useCart } from "@/hooks/useCart";
-function CartBadge() {
-  const { totalItems } = useCart();
 
-  if (totalItems === 0) return null;
-
-  return (
-    <View className="absolute -right-1.5 -top-1.5 bg-rm-white rounded-lg min-w-4 h-4 items-center justify-center px-1">
-      <Text className="text-rm-gold text-[10px] font-bold">{totalItems}</Text>
-    </View>
-  );
-}
 function HeaderMenu() {
   const router = useRouter();
   const [menuVisible, setMenuVisible] = useState(false);
@@ -69,19 +55,19 @@ function HeaderMenu() {
         >
           <View
             className="rounded-xl min-w-[200px] shadow-lg"
-            style={{ backgroundColor: Colors.secondary }}
+            style={{ backgroundColor: Colors.primary }}
           >
             {menuItems.map((item, index) => {
               const Icon = item.icon;
               return (
                 <TouchableOpacity
                   key={index}
-                  className={`flex-row items-center py-4 px-4 gap-3 border-b-2 border-rm-gold`}
+                  className={`flex-row items-center py-4 px-4 gap-3 border-text-primary ${index === menuItems.length - 1 ? "border-b-0" : "border-b-2"}`}
                   onPress={() => handleMenuItemPress(item.route)}
                   activeOpacity={0.7}
                 >
-                  <Icon color={Colors.brand.gold} size={20} />
-                  <Text className="text-base font-medium text-rm-gold">{item.label}</Text>
+                  <Icon color={Colors.text.primary} size={20} />
+                  <Text className="text-base font-medium text-text-primary">{item.label}</Text>
                 </TouchableOpacity>
               );
             })}

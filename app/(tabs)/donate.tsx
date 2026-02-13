@@ -1,22 +1,27 @@
 import { useCallback, useEffect, useState } from "react";
-import { GiveWPService } from "@/services/Donation/GiveWPService";
 import { View, Text, TouchableOpacity } from "react-native";
-import { CampaignDetail } from "@/types/campaigns/campaigns";
 import { ScrollView } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
-import { parseAmount } from "@/utils/helper";
 import { Spinner } from "@/components/Spinner";
+import CampaignService, { Campaign } from "@/services/CampaignService";
+
 export default function DonateScreen() {
   const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [campaignsList, setCampaignsList] = useState<CampaignDetail[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [campaignsList, setCampaignsList] = useState<Campaign[]>([]);
 
   const loadCampaignsList = useCallback(async () => {
     setLoading(true);
-    const res = await GiveWPService.getCampaignsList();
-    setCampaignsList(res);
-    setLoading(false);
+    try {
+      const list = await CampaignService.getCampaigns();
+      setCampaignsList(list);
+    } catch {
+      setCampaignsList([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+  
   useEffect(() => {
     loadCampaignsList();
   }, [loadCampaignsList]);
@@ -59,10 +64,10 @@ export default function DonateScreen() {
               </View>
               <View className="flex-col justify-center items-center">
                 <Text className="text-base text-text-secondary mb-1">
-                  Amount Raised: ${parseAmount(cp.goalStats.actual)}
+                  Amount Raised: {cp.goalStats.actualFormatted}
                 </Text>
                 <Text className="text-base text-text-secondary mb-1">
-                  Our Goal: ${parseAmount(cp.goalStats.goal)}
+                  Our Goal: {cp.goalStats.goalFormatted}
                 </Text>
                 <Text className="text-base text-rm-gold font-semibold">Status: {cp.status}</Text>
               </View>

@@ -1,3 +1,4 @@
+import { Spinner } from "@/components/Spinner";
 import { Check, X } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -93,6 +94,7 @@ export default function PackagesScreen() {
   );
   const [offerings, setOfferings] = useState<PurchasesOfferings | null>(null);
   const [activeProductIds, setActiveProductIds] = useState<string[]>([]);
+  const [isLoadingPackages, setIsLoadingPackages] = useState(true);
 
   const getCustomerInfo = useCallback(async () => {
     try {
@@ -103,10 +105,23 @@ export default function PackagesScreen() {
     }
   }, []);
 
+  const getOfferings = useCallback(async () => {
+    try {
+      const result = await Purchases.getOfferings();
+      if (result !== null && result.current?.availablePackages.length !== 0) {
+        setOfferings(result);
+      }
+    } finally {
+      setIsLoadingPackages(false);
+    }
+  }, []);
+
   useEffect(() => {
-    getOfferings();
-    getCustomerInfo();
-  }, [getCustomerInfo]);
+    setIsLoadingPackages(true);
+    Promise.all([getOfferings(), getCustomerInfo()]).finally(() => {
+      setIsLoadingPackages(false);
+    });
+  }, [getOfferings, getCustomerInfo]);
   const handleSubscribe = async (pkg: PurchasesPackage) => {
     console.log(pkg.product.title, pkg.packageType.toLowerCase());
     try {
@@ -120,23 +135,24 @@ export default function PackagesScreen() {
       return;
     }
   }
-  const getOfferings = async () => {
-    const offerings = await Purchases.getOfferings();
-    if (offerings !== null && offerings.current?.availablePackages.length !== 0) {
-      setOfferings(offerings);
-    }
+  if (isLoadingPackages) {
+    return (
+      <View className="flex-1 bg-bg-medium justify-center items-center">
+        <Spinner content="Loading packages" />
+      </View>
+    );
   }
-  
+
   return (
-    <ScrollView className="flex-1 bg-bg-gray">
+    <ScrollView className="flex-1 bg-bg-medium">
       <View className="p-5">
         <Text className="text-2xl font-bold text-text-primary mb-2 text-center">Choose Your Membership Package</Text>
         <Text className="text-sm text-text-primary mb-6 text-center">
           Join Casa Madridista and get exclusive access to Real Madrid content
         </Text>
-        <View className="flex-row bg-rm-gold rounded-xl overflow-hidden">
+        <View className="flex-row bg-rm-gold rounded-xl overflow-hidden mb-6 p-1">
           <TouchableOpacity
-            className={`flex-1 py-3 px-4 ${billingType === "monthly" ? "bg-white" : ""}`}
+            className={`flex-1 py-3 px-4 rounded-xl ${billingType === "monthly" ? "bg-white" : ""}`}
             onPress={() => setBillingType("monthly")}
           >
             <Text className={`text-base font-semibold text-center ${billingType === "monthly" ? "text-rm-gold" : "text-white"}`}>
@@ -144,7 +160,7 @@ export default function PackagesScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className={`flex-1 py-3 px-4 ${billingType === "yearly" ? "bg-white" : ""}`}
+            className={`flex-1 py-3 px-4 rounded-xl ${billingType === "yearly" ? "bg-white" : ""}`}
             onPress={() => setBillingType("yearly")}
           >
             <Text className={`text-base font-semibold text-center ${billingType === "yearly" ? "text-rm-gold" : "text-white"}`}>
@@ -196,18 +212,19 @@ export default function PackagesScreen() {
 
                 return (
                   <View key={pkg.id}>
-                    <View className="mb-6">
-                      {pkg.badge && (
-                        <View className={`self-start px-3 py-1 rounded-full mb-2 ${pkg.badge === "VIP" ? "bg-rm-gold" : "bg-rm-gold"}`}>
-                          <Text className="text-xs font-bold text-white">
-                            {pkg.badge.toUpperCase()}
-                          </Text>
-                        </View>
-                      )}
-                      <Text className="text-xl font-bold text-white">{pkg.name}</Text>
-                    </View>
-                    <View className={`bg-bg-medium p-5 mb-4 ${pkg.badge === "Popular" ? "border-2 border-rm-gold" : ""}`}>
-                      <View className="mb-4">
+
+                    <View className={`bg-bg-card p-5 mb-4 ${pkg.badge === "Popular" ? "border-2 border-rm-gold" : ""}`}>
+                      <View className="mb-6">
+                        {pkg.badge && (
+                          <View className={`self-start px-3 py-1 rounded-full mb-2 ${pkg.badge === "VIP" ? "bg-rm-gold" : "bg-rm-gold"}`}>
+                            <Text className="text-xs font-bold text-white">
+                              {pkg.badge.toUpperCase()}
+                            </Text>
+                          </View>
+                        )}
+                        <Text className="text-xl font-bold text-white">{pkg.name}</Text>
+                      </View>
+                      <View className="mb-4 flex-row items-center gap-2">
                         {billingType === "yearly" && (
                           <Text className="text-sm text-text-secondary line-through">
                             ${pkg.yearlyOriginal}

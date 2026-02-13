@@ -12,41 +12,50 @@ import {
 
 const { width: screenWidth } = Dimensions.get("window");
 import { Image } from "expo-image";
-
-import { GiveWPService } from "@/services/Donation/GiveWPService";
-import { CampaignDetail, Donation } from "@/types/campaigns/campaigns";
+import Colors from "@/constants/colors";
 import { Spinner } from "@/components/Spinner";
 import { CHECKOUT_PAYMENT_METHOD } from "@/types/shop/checkout";
 import { useStripePay } from "@/hooks/useStripePay";
 import { useUser } from "@/hooks/useUser";
+import { useDonation } from "@/hooks/useDonation";
+import CampaignService, { Campaign } from "@/services/CampaignService";
 
 export default function CampaignDetailScreen() {
   const { id, amount, productType, payment_status } = useLocalSearchParams();
-  const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
-  const { handlePayment: payViaStripe } = useStripePay();
-  const { user, updateCustomer } = useUser();
+  const { payWithClientSecret } = useStripePay();
+  const { user } = useUser();
+  const { createDonationIntent, confirmDonation } = useDonation();
+  
   const [donationData, setDonationData] = useState({
     amount: 10,
     customAmount: "",
     frequency: "one-time",
-    firstName: user?.first_name,
-    lastName: user?.last_name,
-    email: user?.email,
+    firstName: user?.profile?.first_name || "",
+    lastName: user?.profile?.last_name || "",
+    email: user?.email || "",
     paymentMethod: CHECKOUT_PAYMENT_METHOD.STRIPE,
   });
 
   const loadCampaign = useCallback(async () => {
+    const campaignId = Array.isArray(id) ? id[0] : id;
+    if (!campaignId || typeof campaignId !== "string") {
+      setCampaign(null);
+      setLoading(false);
+      return;
+    }
     try {
-      const data = await GiveWPService.getCampaignById(Number(id));
-      setCampaign(data);
+      const data = await CampaignService.getCampaignById(campaignId);
+      setCampaign(data ?? null);
     } catch (error) {
       console.error("Failed to load campaign:", error);
+      setCampaign(null);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     loadCampaign();
@@ -55,81 +64,50 @@ export default function CampaignDetailScreen() {
     }
   }, [loadCampaign]);
 
-  const handleStripePay = () => {
-    payViaStripe(0, donationData.amount, user?.billing)
-      .then((res) => {
-        updateCustomer({
-          meta_data: [
-            {
-              key: "stripe_customer_id",
-              value: res?.customer,
-            },
-          ],
-        }).then((data) => {});
-        const donation_data: Donation = {
-          formId: 52470,
-          firstName: donationData.firstName ?? "",
-          lastName: donationData.lastName ?? "",
-          email: donationData.email ?? "",
-          type: donationData.frequency === "one-time" ? "single" : "recurring",
-          mode: "live",
-          amount: {
-            amount: donationData.amount,
-            amountInMinorUnits: donationData.amount * 100,
-            currency: "USD",
-          },
-          gatewayTransactionId: res?.paymentIntentId,
-          campaignId: Number(id),
-          donorId: 2,
-          gatewayId: "stripe_payment_element",
-        };
-        GiveWPService.giveDonation(donation_data).then((res) => {
-          Alert.alert("Donate sucessfully");
-        });
-      })
-      .catch((err) => {
-        Alert.alert(err.message);
+  const handleStripePay = async () => {
+    try {
+      // Create Stripe payment intent for donation
+      const { clientSecret, paymentIntentId } = await createDonationIntent({
+        amount: donationData.amount,
+        currency: 'usd',
+        campaignName: campaign?.title,
+        donorName: `${donationData.firstName} ${donationData.lastName}`,
+        donorEmail: donationData.email,
       });
+
+      // Process Stripe payment using the same donation intent client secret
+      await payWithClientSecret(clientSecret);
+      
+      // Confirm donation after successful payment
+      await confirmDonation({
+        paymentIntentId,
+        amount: donationData.amount,
+        campaignName: campaign?.title,
+        donorName: `${donationData.firstName} ${donationData.lastName}`,
+        donorEmail: donationData.email,
+      });
+
+      Alert.alert("Success", "Thank you for your donation!");
+      router.back();
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Donation failed");
+    }
   };
 
-  const handlePayPalPay = () => {
-    router.dismissAll();
-    router.navigate(
-      `/PayPalScreen?amount=${donationData.amount}&productType=donation&payment_status=success&orderId=${id}`
-    );
-  };
-
-  const handleSuccess = () => {
-    // const donation_data: Donation = {
-    const donation_data: Donation = {
-      formId: 52470,
-      firstName: donationData.firstName ?? "",
-      lastName: donationData.lastName ?? "",
-      email: donationData.email ?? "",
-      type: donationData.frequency === "one-time" ? "single" : "recurring",
-      mode: "live",
-      amount: {
-        amount: Number(amount),
-        amountInMinorUnits: Number(amount) * 100,
-        currency: "USD",
-      },
-      campaignId: Number(id),
-      donorId: 2,
-      gatewayId: "paypal_standard",
-    };
-    GiveWPService.giveDonation(donation_data)
-      .then((res) => {
-        Alert.alert("Donate sucessfully");
-      })
-      .catch((err) => {
-        Alert.alert(err.message);
-      });
+  const handleSuccess = async () => {
+    try {
+      // Handle PayPal success - you'll need to get the payment intent ID from PayPal flow
+      // This is a placeholder - implement according to your PayPal integration
+      Alert.alert("Success", "Thank you for your donation via PayPal!");
+      router.back();
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Donation confirmation failed");
+    }
   };
 
   const handlePayment = () => {
     if (donationData.paymentMethod === CHECKOUT_PAYMENT_METHOD.STRIPE)
       handleStripePay();
-    else handlePayPalPay();
   };
 
   if (loading) {
@@ -201,6 +179,7 @@ export default function CampaignDetailScreen() {
           <TextInput
             className="bg-bg-medium text-white p-2.5 mb-4 rounded border border-border-default"
             placeholder="Enter custom amount"
+            placeholderTextColor={Colors.text.secondary}
             value={donationData.customAmount}
             onChangeText={(text) =>
               setDonationData({
@@ -303,7 +282,7 @@ export default function CampaignDetailScreen() {
         <View className="p-4 bg-bg-card mt-4 rounded-lg border border-border-default">
           <Text className="text-xl font-bold text-white mb-2">Payment Details</Text>
           <Text className="text-base text-text-secondary mb-4">
-            Review your donation and select payment method.
+            Review your donation.
           </Text>
           <View className="mb-4">
             <Text className="text-base text-white mb-1">
@@ -330,7 +309,7 @@ export default function CampaignDetailScreen() {
               />
               <Text className="text-white">Stripe Pay</Text>
             </TouchableOpacity>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() =>
                 setDonationData({
                   ...donationData,
@@ -345,7 +324,7 @@ export default function CampaignDetailScreen() {
                 }`}
               />
               <Text className="text-white">PayPal Pay</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           <View className="flex-row">
             <TouchableOpacity
@@ -372,20 +351,19 @@ export default function CampaignDetailScreen() {
       <View className="p-4">
         {campaign.image && (
           <Image
-            contentFit="contain"
+            contentFit="cover"
             source={{ uri: campaign.image }}
-            style={{ width: screenWidth, height: 350, borderRadius: 8 }}
-            className="mb-4"
+            style={{ width: '100%', height: 200, borderRadius: 8, marginBottom: 20 }}
           />
         )}
         <Text className="text-2xl font-bold text-white mb-2">{campaign.title}</Text>
         <Text className="text-base text-text-secondary mb-4 leading-6">{campaign.shortDescription}</Text>
         <View className="bg-bg-card p-4 rounded-lg border border-border-default">
           <Text className="text-lg text-white mb-2">
-            Goal: {campaign.goalStats.goalFormatted.replace("&#36;", "$")}
+            Goal: {campaign.goalStats.goalFormatted}
           </Text>
           <Text className="text-lg text-rm-gold mb-2">
-            Raised: {campaign.goalStats.actualFormatted.replace("&#36;", "$")}
+            Raised: {campaign.goalStats.actualFormatted}
           </Text>
           <Text className="text-base text-text-muted">Status: {campaign.status}</Text>
         </View>

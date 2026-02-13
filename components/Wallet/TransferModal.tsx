@@ -13,7 +13,7 @@ import {
 interface TransferModalProps {
   visible: boolean;
   onClose: () => void;
-  onTransfer: (toUserId: number, amount: number, description?: string) => Promise<void>;
+  onTransfer: (recipientEmail: string, amount: number, message?: string) => Promise<void>;
   currentBalance: number;
   currency: string;
 }
@@ -25,27 +25,28 @@ export const TransferModal: React.FC<TransferModalProps> = ({
   currentBalance,
   currency,
 }) => {
-  const [toUserId, setToUserId] = useState('');
+  const [recipientEmail, setRecipientEmail] = useState('');
   const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleTransfer = async () => {
-    if (!toUserId || !amount) {
-      Alert.alert('Error', 'Please enter user ID and amount');
+    if (!recipientEmail || !amount) {
+      Alert.alert('Error', 'Please enter recipient email and amount');
       return;
     }
 
     const numericAmount = parseFloat(amount);
-    const numericToUserId = parseInt(toUserId, 10);
 
     if (isNaN(numericAmount) || numericAmount <= 0) {
       Alert.alert('Error', 'Please enter a valid amount');
       return;
     }
 
-    if (isNaN(numericToUserId) || numericToUserId <= 0) {
-      Alert.alert('Error', 'Please enter a valid user ID');
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(recipientEmail)) {
+      Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
 
@@ -56,7 +57,7 @@ export const TransferModal: React.FC<TransferModalProps> = ({
 
     try {
       setLoading(true);
-      await onTransfer(numericToUserId, numericAmount, description);
+      await onTransfer(recipientEmail, numericAmount, message);
       resetForm();
     } catch (error) {
       // Error is handled in the parent component
@@ -66,14 +67,16 @@ export const TransferModal: React.FC<TransferModalProps> = ({
   };
 
   const resetForm = () => {
-    setToUserId('');
+    setRecipientEmail('');
     setAmount('');
-    setDescription('');
+    setMessage('');
   };
 
   const handleClose = () => {
-    resetForm();
-    onClose();
+    if (!loading) {
+      resetForm();
+      onClose();
+    }
   };
 
   return (
@@ -103,14 +106,15 @@ export const TransferModal: React.FC<TransferModalProps> = ({
           </View>
 
           <View className="mb-5">
-            <Text className="text-base font-semibold mb-2 text-text-primary">To User ID</Text>
+            <Text className="text-base font-semibold mb-2 text-text-primary">Recipient Email</Text>
             <TextInput
               className="border border-border-default rounded-lg p-3 text-base bg-bg-card text-text-primary"
-              placeholder="Enter user ID"
+              placeholder="Enter recipient's email"
               placeholderTextColor="#999"
-              keyboardType="number-pad"
-              value={toUserId}
-              onChangeText={setToUserId}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={recipientEmail}
+              onChangeText={setRecipientEmail}
               editable={!loading}
             />
           </View>
@@ -129,13 +133,13 @@ export const TransferModal: React.FC<TransferModalProps> = ({
           </View>
 
           <View className="mb-5">
-            <Text className="text-base font-semibold mb-2 text-text-primary">Description (Optional)</Text>
+            <Text className="text-base font-semibold mb-2 text-text-primary">Message (Optional)</Text>
             <TextInput
               className="border border-border-default rounded-lg p-3 text-base bg-bg-card text-text-primary min-h-[80px]"
               placeholder="Add a note for this transfer"
               placeholderTextColor="#999"
-              value={description}
-              onChangeText={setDescription}
+              value={message}
+              onChangeText={setMessage}
               multiline
               numberOfLines={3}
               editable={!loading}
@@ -145,12 +149,12 @@ export const TransferModal: React.FC<TransferModalProps> = ({
 
           <TouchableOpacity
             className={`p-4 rounded-lg items-center mt-5 ${
-              !toUserId || !amount || loading
+              !recipientEmail || !amount || loading
                 ? "bg-bg-gray opacity-60"
                 : "bg-rm-gold"
             }`}
             onPress={handleTransfer}
-            disabled={!toUserId || !amount || loading}
+            disabled={!recipientEmail || !amount || loading}
           >
             <Text className="text-white text-base font-semibold">
               {loading ? 'Processing...' : `Transfer ${currency}${amount || '0.00'}`}
