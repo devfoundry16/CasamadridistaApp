@@ -166,6 +166,18 @@ export default function HomeScreen() {
     loadInitialData();
   }, [loadInitialData, isLive]);
 
+  // When there's a live match, fetch last 5 matches for the LIVE match's teams (not the "next" match's teams)
+  useEffect(() => {
+    if (liveMatch?.teams?.home?.id != null && liveMatch?.teams?.away?.id != null) {
+      MatchService.fetchLastMatches(liveMatch.teams.home.id).then((data) => {
+        setHomeTeamLastMatches(data);
+      });
+      MatchService.fetchLastMatches(liveMatch.teams.away.id).then((data) => {
+        setAwayTeamLastMatches(data);
+      });
+    }
+  }, [liveMatch]);
+
   // Poll for live match updates every 15 seconds
   useEffect(() => {
     const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds

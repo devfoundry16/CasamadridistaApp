@@ -11,6 +11,8 @@ import {
   User,
   Wallet,
 } from "lucide-react-native";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+
 import React, { useState } from "react";
 import {
   Alert,
@@ -288,27 +290,6 @@ function AuthForm({
           </>
         )}
 
-        {isLogin && (
-          <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">Email Address *</Text>
-            <TextInput
-              className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              placeholderTextColor={Colors.darkGray}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <TouchableOpacity
-              className="mt-2 self-end"
-              onPress={() => router.push("/auth/forgot-password")}
-            >
-              <Text className="text-sm text-rm-gold underline">Forgot password?</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
         <View className="mb-5">
           <Text className="text-sm font-semibold text-white mb-2">Password *</Text>
           <TextInput
@@ -324,7 +305,27 @@ function AuthForm({
         {isLoading && <Spinner content={isLogin ? "Sign in" : "Sign up"} />}
         {!isLoading && (
           <>
-            <TouchableOpacity 
+            {isLogin && (
+              <View className="mb-5">
+                <Text className="text-sm font-semibold text-white mb-2">Email Address *</Text>
+                <TextInput
+                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Enter your email"
+                  placeholderTextColor={Colors.darkGray}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  className="mt-2 self-end"
+                  onPress={() => router.push("/auth/forgot-password")}
+                >
+                  <Text className="text-sm text-rm-gold underline">Forgot password?</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            <TouchableOpacity
               className="bg-rm-gold p-4 rounded-[25px] items-center mt-2"
               onPress={handleSubmit}
             >
@@ -341,11 +342,11 @@ function AuthForm({
                   <View className="flex-1 h-[1px] bg-border-light" />
                 </View>
 
-                <TouchableOpacity 
+                <TouchableOpacity
                   className="bg-white p-4 rounded-[25px] items-center flex-row justify-center gap-3 border-2 border-border-light"
                   onPress={handleGoogleSignIn}
                 >
-                  <Text className="text-2xl">G</Text>
+                  <FontAwesome name="google" size={24} color={Colors.text.dark} />
                   <Text className="text-base font-bold text-text-dark">
                     Sign in with Google
                   </Text>
