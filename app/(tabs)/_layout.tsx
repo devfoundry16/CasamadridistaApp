@@ -2,10 +2,15 @@ import HeaderMenu from "@/components/HeaderMenu";
 import Colors from "@/constants/colors";
 import { Tabs } from "expo-router";
 import { useEnvironment } from "@/hooks/useEnvironment";
-
-import Ionicons from "@expo/vector-icons/Ionicons";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import {
+  Gamepad2,
+  Heart,
+  Home,
+  LayoutGrid,
+  ShoppingBag,
+  User,
+  Users,
+} from "lucide-react-native";
 
 import React, { useEffect } from "react";
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
@@ -51,7 +56,7 @@ export default function TabLayout() {
           headerTitle: "Casa Madridista",
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Home size={size} color={color} />
           ),
         }}
       />
@@ -62,7 +67,7 @@ export default function TabLayout() {
           headerTitle: "Formation Builder",
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome name="soccer-ball-o" size={size} color={color} />
+            <LayoutGrid size={size} color={color} />
           ),
         }}
       />
@@ -81,7 +86,7 @@ export default function TabLayout() {
             display: "none",
           },
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="game-controller" size={size + 5} color={color} />
+            <Gamepad2 size={size + 5} color={color} />
           ),
         }}
       />
@@ -92,7 +97,7 @@ export default function TabLayout() {
           headerTitle: "Ream Madrid Team",
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="users" size={size} color={color} />
+            <Users size={size} color={color} />
           ),
         }}
       />
@@ -106,7 +111,7 @@ export default function TabLayout() {
             display: "none",
           },
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="shopping-bag" size={size} color={color} />
+            <ShoppingBag size={size} color={color} />
           ),
         }}
       />
@@ -118,18 +123,18 @@ export default function TabLayout() {
           headerTitleAlign: "center",
 
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome5 name="donate" size={size} color={color} />
+            <Heart size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
-          title: "Account",
+          title: "Profile",
           headerTitle: "My Account",
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <User size={size} color={color} />
           ),
         }}
       />

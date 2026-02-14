@@ -6,7 +6,10 @@ import { router } from "expo-router";
 import {
   Camera,
   Crown,
+  Lock,
   LogOut,
+  Mail,
+  Phone,
   Settings,
   User,
   Wallet,
@@ -87,7 +90,7 @@ export default function AccountScreen() {
 
   return (
     <ScrollView className="flex-1 bg-bg-medium">
-      <View className="bg-bg-deep-dark p-6 items-center">
+      <View className="p-6 items-center">
         <View className="items-center mb-6">
           <View className="mb-4">
             {isLoading && <Spinner content="Setting avatar" />}
@@ -175,17 +178,6 @@ export default function AccountScreen() {
           </View>
         </TouchableOpacity>
       </View>
-
-      <View className="mx-6 p-5 bg-bg-light rounded-xl border border-border-light border-dashed">
-        <Text className="text-sm text-text-secondary leading-5 mb-3">
-          Hello <Text className="font-bold text-white">{userName}</Text> (not{" "}
-          <Text className="font-bold text-white">{userName}</Text>?{" "}
-          <Text className="text-rm-gold underline" onPress={logout}>
-            Log out
-          </Text>
-          )
-        </Text>
-      </View>
     </ScrollView>
   );
 }
@@ -232,12 +224,24 @@ function AuthForm({
 
   return (
     <ScrollView className="flex-1 bg-bg-medium">
-      <View className="p-8 items-center bg-bg-deep-dark">
-        <Text className="text-[32px] font-bold text-rm-gold mb-2">
-          {isLogin ? "Login" : "Register"}
+      <View className="p-8 pt-12 pb-10 items-center">
+        <View
+          className="rounded-[22px] overflow-hidden mb-2"
+          style={{ width: 100, height: 100 }}
+        >
+          <Image
+            source={require("@/assets/icons/splash-icon-dark.png")}
+            style={{ width: 100, height: 100 }}
+            resizeMode="cover"
+          />
+        </View>
+        <Text className="text-[28px] font-bold text-white mb-2">
+          {isLogin ? "Welcome Back" : "Create Account"}
         </Text>
-        <Text className="text-base text-text-secondary">
-          {isLogin ? "Welcome back!" : "Create your account"}
+        <Text className="text-base text-text-secondary text-center">
+          {isLogin
+            ? "Sign in to continue your Madridista journey"
+            : "Join the largest gathering of Casa Madridista"}
         </Text>
       </View>
 
@@ -246,85 +250,103 @@ function AuthForm({
           <>
             <View className="mb-5">
               <Text className="text-sm font-semibold text-white mb-2">First Name *</Text>
-              <TextInput
-                className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-                value={firstName}
-                onChangeText={setFirstName}
-                placeholder="Enter your first name"
-                placeholderTextColor={Colors.darkGray}
-              />
+              <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+                <User size={18} color={Colors.textLight} />
+                <TextInput
+                  className="flex-1 py-4 pl-3 text-base text-white"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  placeholder="Enter your first name"
+                  placeholderTextColor={Colors.textLight}
+                />
+              </View>
             </View>
             <View className="mb-5">
               <Text className="text-sm font-semibold text-white mb-2">Last Name *</Text>
-              <TextInput
-                className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-                value={lastName}
-                onChangeText={setLastName}
-                placeholder="Enter your last name"
-                placeholderTextColor={Colors.darkGray}
-              />
+              <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+                <User size={18} color={Colors.textLight} />
+                <TextInput
+                  className="flex-1 py-4 pl-3 text-base text-white"
+                  value={lastName}
+                  onChangeText={setLastName}
+                  placeholder="Enter your last name"
+                  placeholderTextColor={Colors.textLight}
+                />
+              </View>
             </View>
             <View className="mb-5">
               <Text className="text-sm font-semibold text-white mb-2">Phone</Text>
-              <TextInput
-                className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-                value={phone}
-                onChangeText={setPhone}
-                placeholder="Enter your phone number"
-                placeholderTextColor={Colors.darkGray}
-                keyboardType="phone-pad"
-              />
+              <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+                <Phone size={18} color={Colors.textLight} />
+                <TextInput
+                  className="flex-1 py-4 pl-3 text-base text-white"
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="Enter your phone number"
+                  placeholderTextColor={Colors.textLight}
+                  keyboardType="phone-pad"
+                />
+              </View>
             </View>
             <View className="mb-5">
               <Text className="text-sm font-semibold text-white mb-2">Email Address *</Text>
+              <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+                <Mail size={18} color={Colors.textLight} />
+                <TextInput
+                  className="flex-1 py-4 pl-3 text-base text-white"
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Enter your email"
+                  placeholderTextColor={Colors.textLight}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+            </View>
+          </>
+        )}
+        {isLogin && (
+          <View className="mb-5">
+            <Text className="text-sm font-semibold text-white mb-2">Email Address *</Text>
+            <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+              <Mail size={18} color={Colors.textLight} />
               <TextInput
-                className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
+                className="flex-1 py-4 pl-3 text-base text-white"
                 value={email}
                 onChangeText={setEmail}
                 placeholder="Enter your email"
-                placeholderTextColor={Colors.darkGray}
+                placeholderTextColor={Colors.textLight}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
             </View>
-          </>
+          </View>
         )}
-
         <View className="mb-5">
           <Text className="text-sm font-semibold text-white mb-2">Password *</Text>
-          <TextInput
-            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Enter your password"
-            placeholderTextColor={Colors.darkGray}
-            secureTextEntry
-          />
+          <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+            <Lock size={18} color={Colors.textLight} />
+            <TextInput
+              className="flex-1 py-4 pl-3 text-base text-white"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Enter your password"
+              placeholderTextColor={Colors.textLight}
+              secureTextEntry
+            />
+          </View>
+          {isLogin && (
+            <TouchableOpacity
+              className="mt-2 self-end"
+              onPress={() => router.push("/auth/forgot-password")}
+            >
+              <Text className="text-sm text-rm-gold underline">Forgot password?</Text>
+            </TouchableOpacity>
+          )}
         </View>
-
         {isLoading && <Spinner content={isLogin ? "Sign in" : "Sign up"} />}
         {!isLoading && (
           <>
-            {isLogin && (
-              <View className="mb-5">
-                <Text className="text-sm font-semibold text-white mb-2">Email Address *</Text>
-                <TextInput
-                  className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="Enter your email"
-                  placeholderTextColor={Colors.darkGray}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity
-                  className="mt-2 self-end"
-                  onPress={() => router.push("/auth/forgot-password")}
-                >
-                  <Text className="text-sm text-rm-gold underline">Forgot password?</Text>
-                </TouchableOpacity>
-              </View>
-            )}
             <TouchableOpacity
               className="bg-rm-gold p-4 rounded-[25px] items-center mt-2"
               onPress={handleSubmit}

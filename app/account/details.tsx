@@ -1,7 +1,8 @@
+import Colors from "@/constants/colors";
 import { useUser } from "@/hooks/useUser";
 import AuthService from "@/services/AuthService";
 import { router } from "expo-router";
-import { Save } from "lucide-react-native";
+import { Lock, Mail, Phone, Save, User } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
@@ -67,95 +68,116 @@ export default function AccountDetailsScreen() {
       <View className="p-6">
         <View className="mb-5">
           <Text className="text-sm font-semibold text-white mb-2">First Name *</Text>
-          <TextInput
-            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-            value={formData.firstName}
-            onChangeText={(text) =>
-              setFormData({ ...formData, firstName: text })
-            }
-            placeholder="Enter your first name"
-            placeholderTextColor="#515151"
-          />
+          <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+            <User size={18} color={Colors.textLight} />
+            <TextInput
+              className="flex-1 py-4 pl-3 text-base text-white"
+              value={formData.firstName}
+              onChangeText={(text) =>
+                setFormData({ ...formData, firstName: text })
+              }
+              placeholder="Enter your first name"
+              placeholderTextColor={Colors.textLight}
+            />
+          </View>
         </View>
         <View className="mb-5">
           <Text className="text-sm font-semibold text-white mb-2">Last Name *</Text>
-          <TextInput
-            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-            value={formData.lastName}
-            onChangeText={(text) =>
-              setFormData({ ...formData, lastName: text })
-            }
-            placeholder="Enter your last name"
-            placeholderTextColor="#515151"
-          />
+          <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+            <User size={18} color={Colors.textLight} />
+            <TextInput
+              className="flex-1 py-4 pl-3 text-base text-white"
+              value={formData.lastName}
+              onChangeText={(text) =>
+                setFormData({ ...formData, lastName: text })
+              }
+              placeholder="Enter your last name"
+              placeholderTextColor={Colors.textLight}
+            />
+          </View>
         </View>
         <View className="mb-5">
           <Text className="text-sm font-semibold text-white mb-2">Phone</Text>
-          <TextInput
-            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-            value={formData.phone}
-            onChangeText={(text) => setFormData({ ...formData, phone: text })}
-            placeholder="Enter your phone number"
-            placeholderTextColor="#515151"
-            keyboardType="phone-pad"
-          />
+          <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+            <Phone size={18} color={Colors.textLight} />
+            <TextInput
+              className="flex-1 py-4 pl-3 text-base text-white"
+              value={formData.phone}
+              onChangeText={(text) => setFormData({ ...formData, phone: text })}
+              placeholder="Enter your phone number"
+              placeholderTextColor={Colors.textLight}
+              keyboardType="phone-pad"
+            />
+          </View>
         </View>
         <View className="mb-5">
           <Text className="text-sm font-semibold text-white mb-2">Email Address (Read-only)</Text>
-          <TextInput
-            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-gray-400"
-            value={formData.email}
-            placeholder="Email cannot be changed"
-            placeholderTextColor="#515151"
-            editable={false}
-          />
+          <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+            <Mail size={18} color={Colors.textLight} />
+            <TextInput
+              className="flex-1 py-4 pl-3 text-base text-gray-400"
+              value={formData.email}
+              placeholder="Email cannot be changed"
+              placeholderTextColor={Colors.textLight}
+              editable={false}
+            />
+          </View>
         </View>
 
         <Text className="text-lg font-bold text-white mb-4 mt-6">Change Password</Text>
 
         <View className="mb-5">
           <Text className="text-sm font-semibold text-white mb-2">Current Password</Text>
-          <TextInput
-            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-            value={formData.oldPassword}
-            onChangeText={(text) =>
-              setFormData({ ...formData, oldPassword: text })
-            }
-            placeholder="Enter your current password"
-            placeholderTextColor="#515151"
-            secureTextEntry
-            autoCapitalize="none"
-          />
+          <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+            <Lock size={18} color={Colors.textLight} />
+            <TextInput
+              className="flex-1 py-4 pl-3 text-base text-white"
+              value={formData.oldPassword}
+              onChangeText={(text) =>
+                setFormData({ ...formData, oldPassword: text })
+              }
+              placeholder="Enter your current password"
+              placeholderTextColor={Colors.textLight}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+          </View>
         </View>
 
         <View className="mb-5">
           <Text className="text-sm font-semibold text-white mb-2">New Password</Text>
-          <TextInput
-            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-            value={formData.password}
-            onChangeText={(text) =>
-              setFormData({ ...formData, password: text })
-            }
-            placeholder="Enter your new password"
-            placeholderTextColor="#515151"
-            secureTextEntry
-            autoCapitalize="none"
-          />
+          <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+            <Lock size={18} color={Colors.textLight} />
+            <TextInput
+              className="flex-1 py-4 pl-3 text-base text-white"
+              value={formData.password}
+              onChangeText={(text) =>
+                setFormData({ ...formData, password: text })
+              }
+              placeholder="Enter your new password"
+              placeholderTextColor={Colors.textLight}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+          </View>
         </View>
 
         <View className="mb-5">
           <Text className="text-sm font-semibold text-white mb-2">Confirm New Password</Text>
-          <TextInput
-            className="bg-bg-light border border-border-light rounded-xl p-4 text-base text-white"
-            value={formData.confirmPassword}
-            onChangeText={(text) =>
-              setFormData({ ...formData, confirmPassword: text })
-            }
-            placeholder="Confirm your new password"
-            placeholderTextColor="#515151"
-            secureTextEntry
-            autoCapitalize="none"
-          />
+          <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
+            <Lock size={18} color={Colors.textLight} />
+            <TextInput
+              className="flex-1 py-4 pl-3 text-base text-white"
+              value={formData.confirmPassword}
+              onChangeText={(text) =>
+                setFormData({ ...formData, confirmPassword: text })
+              }
+              placeholder="Confirm your new password"
+              placeholderTextColor={Colors.textLight}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+          </View>
         </View>
 
         <TouchableOpacity
