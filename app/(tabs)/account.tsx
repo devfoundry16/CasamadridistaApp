@@ -300,6 +300,12 @@ function AuthForm({
               keyboardType="email-address"
               autoCapitalize="none"
             />
+            <TouchableOpacity
+              className="mt-2 self-end"
+              onPress={() => router.push("/auth/forgot-password")}
+            >
+              <Text className="text-sm text-rm-gold underline">Forgot password?</Text>
+            </TouchableOpacity>
           </View>
         )}
 

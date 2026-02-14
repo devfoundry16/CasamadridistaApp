@@ -2,6 +2,7 @@
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
 import { useEnvironment } from "@/hooks/useEnvironment";
+import { usePasswordResetDeeplink } from "@/hooks/usePasswordResetDeeplink";
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -45,6 +46,20 @@ function RootLayoutNav() {
         <Stack.Screen
           name="(tabs)"
           options={{ headerShown: false, title: "Home" }}
+        />
+        <Stack.Screen
+          name="auth/forgot-password"
+          options={{
+            title: "Forgot password",
+            ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="auth/reset-password"
+          options={{
+            title: "Set new password",
+            ...defaultOptions,
+          }}
         />
         <Stack.Screen
           name="account/wallet"
@@ -180,6 +195,7 @@ const DataInitializer = () => {
 
 function RootLayoutInner() {
   const { loadEnvironment } = useEnvironment();
+  usePasswordResetDeeplink();
   useEffect(() => {
     loadEnvironment();
   }, []);

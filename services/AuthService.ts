@@ -1,6 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API_BASE_URL } from '@/config/supabase';
+import { API_BASE_URL, supabase } from '@/config/supabase';
+
+// Deeplink for password reset. Must match app.json "scheme" (casamadridistaapp).
+// Add this exact URL (or casamadridistaapp://**) in Supabase Dashboard > Authentication > URL Configuration > Redirect URLs.
+export const PASSWORD_RESET_REDIRECT_URL = 'casamadridistaapp://auth/reset-password';
 
 export interface User {
   id: string;
@@ -198,6 +202,18 @@ class AuthServiceClass {
       return profile;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to upload avatar');
+    }
+  }
+
+  /**
+   * Send password reset email via Supabase (opens app via deeplink when user taps link)
+   */
+  async forgotPassword(email: string): Promise<void> {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: PASSWORD_RESET_REDIRECT_URL,
+    });
+    if (error) {
+      throw new Error(error.message);
     }
   }
 
