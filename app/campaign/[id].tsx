@@ -7,10 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  Dimensions,
 } from "react-native";
-
-const { width: screenWidth } = Dimensions.get("window");
 import { Image } from "expo-image";
 import Colors from "@/constants/colors";
 import { Spinner } from "@/components/Spinner";
@@ -21,7 +18,7 @@ import { useDonation } from "@/hooks/useDonation";
 import CampaignService, { Campaign } from "@/services/CampaignService";
 
 export default function CampaignDetailScreen() {
-  const { id, amount, productType, payment_status } = useLocalSearchParams();
+  const { id, productType, payment_status } = useLocalSearchParams();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
@@ -96,12 +93,10 @@ export default function CampaignDetailScreen() {
 
   const handleSuccess = async () => {
     try {
-      // Handle PayPal success - you'll need to get the payment intent ID from PayPal flow
-      // This is a placeholder - implement according to your PayPal integration
-      Alert.alert("Success", "Thank you for your donation via PayPal!");
+      Alert.alert("Success", "Thank you for your donation!");
       router.back();
     } catch (err: any) {
-      Alert.alert("Error", err.message || "Donation confirmation failed");
+      Alert.alert("Error", err.message || "Donation failed");
     }
   };
 
@@ -292,7 +287,7 @@ export default function CampaignDetailScreen() {
               Frequency: {donationData.frequency}
             </Text>
           </View>
-          <View className="mb-4">
+          {/*<View className="mb-4">
             <TouchableOpacity
               onPress={() =>
                 setDonationData({
@@ -309,7 +304,7 @@ export default function CampaignDetailScreen() {
               />
               <Text className="text-white">Stripe Pay</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity
+             <TouchableOpacity
               onPress={() =>
                 setDonationData({
                   ...donationData,
@@ -324,8 +319,8 @@ export default function CampaignDetailScreen() {
                 }`}
               />
               <Text className="text-white">PayPal Pay</Text>
-            </TouchableOpacity> */}
-          </View>
+            </TouchableOpacity> 
+          </View>*/}
           <View className="flex-row">
             <TouchableOpacity
               className="bg-bg-medium p-3 rounded items-center flex-1 mr-2"

@@ -134,16 +134,6 @@ export default function AccountScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* <TouchableOpacity
-          className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
-          onPress={() => router.push("../account/orders" as any)}
-        >
-          <ShoppingBag size={24} color={Colors.darkBg} />
-          <View className="flex-1 flex-row justify-between items-center">
-            <Text className="text-base font-semibold text-text-dark">Orders</Text>
-          </View>
-        </TouchableOpacity> */}
-
         <TouchableOpacity
           className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/subscription" as any)}

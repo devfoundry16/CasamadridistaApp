@@ -46,14 +46,9 @@ export default function DonateScreen() {
               onPress={() => {
                 // Navigate to campaign details or donation page
                 router.push(`/campaign/${cp.id}`);
-                // You can add navigation here, e.g., router.push(`/donate/${cp.id}`)
               }}
             >
               <View className="flex-row gap-2.5 justify-center items-center">
-                {/* <Image
-                  source={{ uri: cp.image }}
-                  className="w-[100px] h-[100px] rounded-[50px] mb-2"
-                /> */}
                 <Text className="text-lg font-bold text-white mb-2">{cp.title}</Text>
               </View>
               <View className="h-2 bg-border-default rounded overflow-hidden my-2">
