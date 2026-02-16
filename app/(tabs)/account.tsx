@@ -127,8 +127,6 @@ export default function AccountScreen() {
       </View>
 
       <View className="p-6">
-        <Text className="text-lg font-bold text-text-secondary mb-4">Dashboard</Text>
-
         <TouchableOpacity
           className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/wallet" as any)}
@@ -155,7 +153,7 @@ export default function AccountScreen() {
         >
           <Settings size={24} color={Colors.darkBg} />
           <View className="flex-1 flex-row justify-between items-center">
-            <Text className="text-base font-semibold text-text-dark">Account Details</Text>
+            <Text className="text-base font-semibold text-text-dark">Edit Profile</Text>
           </View>
         </TouchableOpacity>
 
@@ -189,7 +187,7 @@ function AuthForm({
   isLogin: boolean;
   setIsLogin: (value: boolean) => void;
 }) {
-  const { login, register, isLoading } = useUser();
+  const { login, register, signInWithGoogle, isLoading } = useUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -218,8 +216,7 @@ function AuthForm({
     }
   };
   const handleGoogleSignIn = () => {
-    Alert.alert("Google Sign In", "Google Sign In functionality will be implemented here");
-    // TODO: Implement Google Sign In with expo-auth-session or similar
+    signInWithGoogle();
   };
 
   return (

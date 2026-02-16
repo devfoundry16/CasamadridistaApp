@@ -5,6 +5,7 @@ import {
   deletePaymentMethod,
   loadUserData,
   loginUser,
+  loginWithGoogle,
   logoutUser,
   registerUser,
   updateAvatar,
@@ -41,6 +42,10 @@ export const useUser = () => {
     },
     [dispatch]
   );
+
+  const signInWithGoogle = useCallback(() => {
+    return dispatch(loginWithGoogle());
+  }, [dispatch]);
 
   const updateUserProfile = useCallback(
     (updates: {
@@ -115,6 +120,7 @@ export const useUser = () => {
     // Actions
     login,
     register,
+    signInWithGoogle,
     deleteUser: deleteUserProfile,
     getStripeId: getCustomerStripeId,
     updateUser: updateUserProfile,

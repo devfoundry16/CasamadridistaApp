@@ -6,6 +6,9 @@ import { API_BASE_URL, supabase } from '@/config/supabase';
 // Add this exact URL (or casamadridistaapp://**) in Supabase Dashboard > Authentication > URL Configuration > Redirect URLs.
 export const PASSWORD_RESET_REDIRECT_URL = 'casamadridistaapp://auth/reset-password';
 
+// Deeplink for OAuth (e.g. Google). In Supabase Dashboard add exactly: casamadridistaapp://auth/callback (or casamadridistaapp://**).
+export const OAUTH_CALLBACK_REDIRECT_URL = 'casamadridistaapp://auth/callback';
+
 export interface User {
   id: string;
   email: string;
@@ -206,6 +209,29 @@ class AuthServiceClass {
   }
 
   /**
+   * Start Google sign-in. Returns the OAuth URL to open in browser; after redirect, useAuthCallbackDeeplink will complete login.
+   */
+  async signInWithGoogle(): Promise<string> {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: OAUTH_CALLBACK_REDIRECT_URL,
+        skipBrowserRedirect: true,
+      },
+    });
+    if (error) throw new Error(error.message);
+    if (!data?.url) throw new Error('No OAuth URL returned');
+    return data.url;
+  }
+
+  /**
+   * Store OAuth session after callback (used by useAuthCallbackDeeplink). Public so the hook can persist tokens and user.
+   */
+  async storeOAuthSession(accessToken: string, refreshToken: string, user: User): Promise<void> {
+    await this.storeAuthData(accessToken, refreshToken, user);
+  }
+
+  /**
    * Send password reset email via Supabase (opens app via deeplink when user taps link)
    */
   async forgotPassword(email: string): Promise<void> {
@@ -283,7 +309,7 @@ class AuthServiceClass {
     try {
       await this.login(email, password);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

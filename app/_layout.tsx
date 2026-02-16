@@ -2,6 +2,7 @@
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
 import { useEnvironment } from "@/hooks/useEnvironment";
+import { useAuthCallbackDeeplink } from "@/hooks/useAuthCallbackDeeplink";
 import { usePasswordResetDeeplink } from "@/hooks/usePasswordResetDeeplink";
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
@@ -59,6 +60,14 @@ function RootLayoutNav() {
           options={{
             title: "Set new password",
             ...defaultOptions,
+          }}
+        />
+        <Stack.Screen
+          name="auth/callback"
+          options={{
+            ...defaultOptions,
+            title: "Signing in",
+            headerShown: false,
           }}
         />
         <Stack.Screen
@@ -196,6 +205,7 @@ const DataInitializer = () => {
 function RootLayoutInner() {
   const { loadEnvironment } = useEnvironment();
   usePasswordResetDeeplink();
+  useAuthCallbackDeeplink();
   useEffect(() => {
     loadEnvironment();
   }, []);

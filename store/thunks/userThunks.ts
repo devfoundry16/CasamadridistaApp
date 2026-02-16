@@ -3,6 +3,7 @@ import AuthService from "@/services/AuthService";
 import { PaymentMethod } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import * as WebBrowser from "expo-web-browser";
 import RNFS from "react-native-fs";
 import { Alert } from "react-native";
 import {
@@ -27,6 +28,23 @@ export const loginUser = createAsyncThunk(
       return userData;
     } catch (error: any) {
       Alert.alert("Login error", error.message);
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+);
+
+// Google sign-in: opens OAuth URL in browser; completion is handled by useAuthCallbackDeeplink.
+export const loginWithGoogle = createAsyncThunk(
+  "user/loginWithGoogle",
+  async (_, { dispatch }) => {
+    dispatch(setLoading(true));
+    try {
+      const url = await AuthService.signInWithGoogle();
+      await WebBrowser.openBrowserAsync(url);
+    } catch (error: any) {
+      Alert.alert("Google Sign In", error?.message ?? "Failed to start Google sign-in");
       throw error;
     } finally {
       dispatch(setLoading(false));

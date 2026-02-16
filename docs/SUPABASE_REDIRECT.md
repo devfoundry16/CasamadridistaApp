@@ -1,15 +1,22 @@
-# Supabase redirect for password reset (deeplink)
+# Supabase redirect URLs (deeplinks)
 
-For **forgot password** to open the app when the user taps the email link, Supabase must redirect to the app's deeplink instead of a website.
+The app uses custom URL schemes so Supabase can redirect back into the app after **password reset** and **Google sign-in**.
 
-## Fix: "Link doesn't open the app"
+## Required redirect URLs
 
-1. **Add the app URL to Supabase**
-   - Open [Supabase Dashboard](https://supabase.com/dashboard) → your project.
-   - Go to **Authentication** → **URL Configuration**.
-   - Under **Redirect URLs**, add:
-     - `casamadridistaapp://auth/reset-password`
-   - Or use a wildcard: `casamadridistaapp://**`
+1. Open [Supabase Dashboard](https://supabase.com/dashboard) → select your project.
+2. Go to **Authentication** (left sidebar) → **URL Configuration**.
+3. In **Redirect URLs** (not “Site URL”), click **Add URL** and add **one** of:
+   - `casamadridistaapp://auth/callback` (for OAuth) and `casamadridistaapp://auth/reset-password` (for password reset), or
+   - A single wildcard: `casamadridistaapp://**`
+4. Click **Save**.
+
+If you see **"Invalid casamadridistaapp://auth/callback"**, the redirect URL is missing or wrong: add the exact value above to **Redirect URLs** and save again.
+
+## Password reset: "Link doesn't open the app"
+
+1. **Add the app URL to Supabase** (see above).
+   - Include `casamadridistaapp://auth/reset-password` (or `casamadridistaapp://**`).
    - Save.
 
 2. **Request a new reset email**
@@ -22,3 +29,7 @@ For **forgot password** to open the app when the user taps the email link, Supab
    - The system will open the app so you can set a new password.
 
 If the deeplink is not in the Redirect URLs list, Supabase ignores it and uses the **Site URL** (e.g. `http://localhost:3000`), so the link never opens the app.
+
+## Google sign-in
+
+For "Sign in with Google", the same redirect list is used. After the user signs in with Google in the browser, Supabase redirects to `casamadridistaapp://auth/callback#access_token=...&refresh_token=...`, which opens the app and completes login. Ensure `casamadridistaapp://auth/callback` (or `casamadridistaapp://**`) is in **Redirect URLs**, and that **Google** is enabled under **Authentication → Providers** in the Supabase dashboard.
