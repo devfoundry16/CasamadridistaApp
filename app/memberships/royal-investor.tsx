@@ -1,5 +1,5 @@
+import { sendRoyalInvestorEmail } from "@/services/EmailService";
 import { Image } from "expo-image";
-import * as MailComposer from "expo-mail-composer";
 import {
   Check,
   ChevronDown,
@@ -39,41 +39,7 @@ export default function RoyalInvestorScreen() {
   });
   const [showIncomeDropdown, setShowIncomeDropdown] = useState(false);
 
-  const sendEmail = async () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      Alert.alert("Invalid Email", "Please enter a valid email address.");
-      return;
-    }
-
-    const isAvailable = await MailComposer.isAvailableAsync();
-    if (!isAvailable) {
-      Alert.alert(
-        "Email Not Available",
-        "Email service is not available on this device."
-      );
-      return;
-    }
-
-    const subject = "Contact Form Submission";
-    const body =
-      `Name: ${formData.fullName}\n` +
-      `Age: ${formData.age}\n` +
-      `Phone: ${formData.phoneNumber}\n\n` +
-      `Email:\n${formData.email}` +
-      `Nationality: ${formData.nationality}\n\n` +
-      `Place of Residence:\n${formData.placeOfResidence}` +
-      `Annual Income: ${formData.annualIncome}\n\n`;
-
-    const result = MailComposer.composeAsync({
-      recipients: ["alifayad03@gmail.com"],
-      subject: subject,
-      body: body,
-    });
-
-    return result;
-  };
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (
       !formData.fullName ||
       !formData.age ||
@@ -86,23 +52,47 @@ export default function RoyalInvestorScreen() {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
-    sendEmail().then((res) => {
-      if (res?.status === "sent") {
-        Alert.alert(
-          "Success",
-          "Your application has been submitted. Our team will contact you shortly."
-        );
-        setFormData({
-          fullName: "",
-          age: "",
-          phoneNumber: "",
-          email: "",
-          nationality: "",
-          placeOfResidence: "",
-          annualIncome: "",
-        });
-      }
-    });
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+
+    try {
+      await sendRoyalInvestorEmail({
+        fullName: formData.fullName.trim(),
+        age: formData.age.trim(),
+        phoneNumber: formData.phoneNumber.trim(),
+        email: formData.email.trim(),
+        nationality: formData.nationality.trim(),
+        placeOfResidence: formData.placeOfResidence.trim(),
+        annualIncome: formData.annualIncome.trim(),
+      });
+      Alert.alert(
+        "Success",
+        "Your application has been submitted. Our team will contact you shortly."
+      );
+      setFormData({
+        fullName: "",
+        age: "",
+        phoneNumber: "",
+        email: "",
+        nationality: "",
+        placeOfResidence: "",
+        annualIncome: "",
+      });
+    } catch (error: unknown) {
+      console.error("Error submitting application:", error);
+      const message =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { error?: string } } }).response?.data?.error
+          : null;
+      Alert.alert(
+        "Error",
+        message || "Failed to submit application. Please try again."
+      );
+    }
   };
 
   return (

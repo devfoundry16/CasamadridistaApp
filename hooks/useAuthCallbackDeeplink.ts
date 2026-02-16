@@ -96,7 +96,6 @@ export function useAuthCallbackDeeplink() {
     const handleUrl = async (url: string | null) => {
       if (!url || handled.current) return;
       try {
-        console.log("handleUrl", url);
         const didHandle = await tryHandleAuthCallbackUrl(url);
         if (didHandle) handled.current = true;
       } catch (err) {

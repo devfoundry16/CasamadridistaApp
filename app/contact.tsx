@@ -1,4 +1,4 @@
-import * as MailComposer from "expo-mail-composer";
+import { sendContactEmail } from "@/services/EmailService";
 import { Link } from "expo-router";
 import { useState } from "react";
 import {
@@ -6,7 +6,6 @@ import {
   Dimensions,
   Image,
   ImageBackground,
-  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -39,46 +38,29 @@ export default function ContactScreen() {
     }
 
     try {
-      const isAvailable = await MailComposer.isAvailableAsync();
-
-      if (!isAvailable && Platform.OS === "web") {
-        const subject = encodeURIComponent("Contact Form Submission");
-        const body = encodeURIComponent(
-          `Name: ${firstName} ${lastName}\n` +
-            `Email: ${email}\n` +
-            `Phone: ${phone}\n\n` +
-            `Message:\n${comment}`
-        );
-        const mailtoLink = `mailto:petrenkoviacheslav52@gmail.com?subject=${subject}&body=${body}`;
-        window.open(mailtoLink, "_blank");
-        return;
-      }
-
-      if (!isAvailable) {
-        Alert.alert(
-          "Email Not Available",
-          "Email service is not available on this device."
-        );
-        return;
-      }
-
-      const result = await MailComposer.composeAsync({
-        recipients: ["petrenkoviacheslav52@gmail.com"],
-        subject: "Contact Form Submission",
-        body: `Name: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}\n\nMessage:\n${comment}`,
+      await sendContactEmail({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        comment: comment.trim(),
       });
-
-      if (result.status === "sent") {
-        Alert.alert("Success", "Your message has been sent successfully!");
-        setFirstName("");
-        setLastName("");
-        setPhone("");
-        setEmail("");
-        setComment("");
-      }
-    } catch (error) {
+      Alert.alert("Success", "Your message has been sent successfully!");
+      setFirstName("");
+      setLastName("");
+      setPhone("");
+      setEmail("");
+      setComment("");
+    } catch (error: unknown) {
       console.error("Error sending email:", error);
-      Alert.alert("Error", "Failed to send email. Please try again.");
+      const message =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { error?: string } } }).response?.data?.error
+          : null;
+      Alert.alert(
+        "Error",
+        message || "Failed to send email. Please try again."
+      );
     }
   };
 
