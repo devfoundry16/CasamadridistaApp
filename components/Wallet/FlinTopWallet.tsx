@@ -13,8 +13,10 @@ import { Spinner } from "../Spinner";
 import { AddFundsModal } from "./AddFundsModal";
 import { TransactionList } from "./TransactionList";
 import { TransferModal } from "./TransferModal";
+import { useTranslation } from "react-i18next";
 
 export const WalletScreenDetail: React.FC = () => {
+  const { t } = useTranslation();
   const {
     wallet,
     transactions,
@@ -49,16 +51,16 @@ export const WalletScreenDetail: React.FC = () => {
       await transferFunds(recipientEmail, amount, message);
       setShowTransferModal(false);
       await onRefresh();
-      Alert.alert("Success", "Transfer completed successfully!");
+      Alert.alert(t("common.success"), t("wallet.transferCompleted"));
     } catch (err: any) {
-      Alert.alert("Error", err.message || "Failed to transfer funds. Please try again.");
+      Alert.alert(t("common.error"), err.message || t("wallet.transferFailed"));
     }
   };
 
   if (isLoading && !refreshing && !wallet) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium">
-        <Spinner content="Loading wallet" />
+        <Spinner content={t("wallet.loadingWallet")} />
       </View>
     );
   }
@@ -66,8 +68,8 @@ export const WalletScreenDetail: React.FC = () => {
   if (error && !refreshing) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium">
-        <Text className="text-status-error text-center mb-4">Error: {error}</Text>
-        <Button title="Retry" onPress={onRefresh} />
+        <Text className="text-status-error text-center mb-4">{t("common.error")}: {error}</Text>
+        <Button title={t("wallet.retry")} onPress={onRefresh} />
       </View>
     );
   }
@@ -85,26 +87,26 @@ export const WalletScreenDetail: React.FC = () => {
         {/* Balance Card */}
         <View className="bg-bg-card m-4 p-5 rounded-xl items-center shadow-md">
           <Text className="text-base text-text-secondary mb-2">
-            Wallet Balance
+            {t("wallet.balance")}
           </Text>
           <Text className="text-3xl font-bold text-text-primary mb-1">
             ${balance.toFixed(2)}
           </Text>
           <Text className="text-sm text-text-secondary">
-            Available Balance · {currency}
+            {t("wallet.availableBalance")} · {currency}
           </Text>
         </View>
 
         {/* Action Buttons */}
         <View className="flex-row px-4 mb-4 gap-3">
           <Button
-            title="Add Funds"
+            title={t("wallet.addFunds")}
             onPress={() => setShowAddFundsModal(true)}
             variant="primary"
             style={{ flex: 1 }}
           />
           <Button
-            title="Transfer"
+            title={t("wallet.transfer")}
             onPress={() => setShowTransferModal(true)}
             variant="secondary"
             style={{ flex: 1 }}

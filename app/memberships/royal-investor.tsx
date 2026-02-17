@@ -6,6 +6,7 @@ import {
   Crown,
 } from "lucide-react-native";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Dimensions,
@@ -18,16 +19,14 @@ import {
 
 const { width: screenWidth } = Dimensions.get("window");
 
-const incomeRanges = [
-  "Under $50,000",
-  "$50,000 - $100,000",
-  "$100,000 - $250,000",
-  "$250,000 - $500,000",
-  "$500,000 - $1,000,000",
-  "Over $1,000,000",
-];
-
 export default function RoyalInvestorScreen() {
+  const { t } = useTranslation();
+  const incomeRanges = t("royalInvestor.incomeRanges", { returnObjects: true }) as string[];
+  const benefits = t("royalInvestor.benefits", { returnObjects: true }) as {
+    title: string;
+    description: string;
+    items: string[];
+  }[];
   const [formData, setFormData] = useState({
     fullName: "",
     age: "",
@@ -49,13 +48,13 @@ export default function RoyalInvestorScreen() {
       !formData.placeOfResidence ||
       !formData.annualIncome
     ) {
-      Alert.alert("Error", "Please fill in all fields");
+      Alert.alert(t("common.error"), t("membership.pleaseFillAllFields"));
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      Alert.alert(t("alerts.invalidEmail"), t("membership.invalidEmail"));
       return;
     }
 
@@ -70,8 +69,8 @@ export default function RoyalInvestorScreen() {
         annualIncome: formData.annualIncome.trim(),
       });
       Alert.alert(
-        "Success",
-        "Your application has been submitted. Our team will contact you shortly."
+        t("common.success"),
+        t("royalInvestor.submittedSuccess")
       );
       setFormData({
         fullName: "",
@@ -89,8 +88,8 @@ export default function RoyalInvestorScreen() {
           ? (error as { response?: { data?: { error?: string } } }).response?.data?.error
           : null;
       Alert.alert(
-        "Error",
-        message || "Failed to submit application. Please try again."
+        t("common.error"),
+        message || t("royalInvestor.submitFailed")
       );
     }
   };
@@ -109,27 +108,23 @@ export default function RoyalInvestorScreen() {
         <View className="absolute items-center mb-8">
           <Crown size={48} color="#BC9045" />
           <Text className="text-2xl font-bold text-white mt-4 mb-4 text-center">
-            Royal Investor Program
+            {t("royalInvestor.programTitle")}
           </Text>
           <Text className="text-base text-white text-center px-5">
-            Join an elite group of investors supporting Real Madrid&apos;s legacy
+            {t("royalInvestor.programSubtitle")}
           </Text>
         </View>
       </View>
       <View className="p-9">
         <View className="mb-4">
           <Text className="text-3xl font-bold text-rm-gold mb-3">
-            Rare Opportunity!
+            {t("royalInvestor.rareOpportunityTitle")}
           </Text>
           <Text className="text-[15px] text-white leading-6 mb-3">
-            The rarest opportunity to join the heart of the association and its
-            senior management through an exceptional contribution.
+            {t("royalInvestor.rareOpportunityParagraph1")}
           </Text>
           <Text className="text-[15px] text-white leading-6 mb-3">
-            We offer this unique membership to visionary individuals who believe
-            in the future of CasaMadridista as a global Real Madrid community
-            and wish to support its mission from a truly influential leadership
-            position.
+            {t("royalInvestor.rareOpportunityParagraph2")}
           </Text>
           <Image
             source={{
@@ -141,7 +136,7 @@ export default function RoyalInvestorScreen() {
           />
         </View>
 
-        {Benefits.map((benefit, index) => (
+        {benefits.map((benefit, index) => (
           <View key={index} className="mb-4">
             <Text className="text-3xl font-bold text-rm-gold mb-3">
               {benefit.title}
@@ -164,17 +159,15 @@ export default function RoyalInvestorScreen() {
 
         <View>
           <Text className="text-xl font-bold text-white mb-2">
-            Join Application Form
+            {t("royalInvestor.applicationTitle")}
           </Text>
           <Text className="text-sm text-white italic mb-6">
-            To join the Royal Investor Membership, please fill out the form
-            Below. All applications are subject to official review, and you will
-            be contacted as soon as possible.
+            {t("royalInvestor.applicationSubtitle")}
           </Text>
 
           <View className="mb-5">
             <Text className="text-sm font-semibold text-white mb-2">
-              Full Name *
+              {t("player.fullName")} *
             </Text>
             <TextInput
               className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
@@ -182,20 +175,20 @@ export default function RoyalInvestorScreen() {
               onChangeText={(text) =>
                 setFormData({ ...formData, fullName: text })
               }
-              placeholder="Enter your full name"
+              placeholder={t("royalInvestor.placeholderFullName")}
               placeholderTextColor="#666666"
             />
           </View>
 
           <View className="mb-5">
             <Text className="text-sm font-semibold text-white mb-2">
-              Age *
+              {t("player.age")} *
             </Text>
             <TextInput
               className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
               value={formData.age}
               onChangeText={(text) => setFormData({ ...formData, age: text })}
-              placeholder="Enter your age"
+              placeholder={t("royalInvestor.placeholderAge")}
               placeholderTextColor="#666666"
               keyboardType="numeric"
             />
@@ -203,7 +196,7 @@ export default function RoyalInvestorScreen() {
 
           <View className="mb-5">
             <Text className="text-sm font-semibold text-white mb-2">
-              Phone Number *
+              {t("auth.phone")} *
             </Text>
             <TextInput
               className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
@@ -211,7 +204,7 @@ export default function RoyalInvestorScreen() {
               onChangeText={(text) =>
                 setFormData({ ...formData, phoneNumber: text })
               }
-              placeholder="Enter your phone number"
+              placeholder={t("royalInvestor.placeholderPhone")}
               placeholderTextColor="#666666"
               keyboardType="phone-pad"
             />
@@ -219,13 +212,13 @@ export default function RoyalInvestorScreen() {
 
           <View className="mb-5">
             <Text className="text-sm font-semibold text-white mb-2">
-              Email Address *
+              {t("auth.emailAddress")}
             </Text>
             <TextInput
               className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
               value={formData.email}
               onChangeText={(text) => setFormData({ ...formData, email: text })}
-              placeholder="Enter your email address"
+              placeholder={t("royalInvestor.placeholderEmail")}
               placeholderTextColor="#666666"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -234,7 +227,7 @@ export default function RoyalInvestorScreen() {
 
           <View className="mb-5">
             <Text className="text-sm font-semibold text-white mb-2">
-              Nationality *
+              {t("player.nationality")} *
             </Text>
             <TextInput
               className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
@@ -242,14 +235,14 @@ export default function RoyalInvestorScreen() {
               onChangeText={(text) =>
                 setFormData({ ...formData, nationality: text })
               }
-              placeholder="Enter your nationality"
+              placeholder={t("royalInvestor.placeholderNationality")}
               placeholderTextColor="#666666"
             />
           </View>
 
           <View className="mb-5">
             <Text className="text-sm font-semibold text-white mb-2">
-              Place of Residence *
+              {t("royalInvestor.placeOfResidence")} *
             </Text>
             <TextInput
               className="bg-bg-light rounded-lg px-4 py-3 text-sm text-white border border-border-default"
@@ -257,14 +250,14 @@ export default function RoyalInvestorScreen() {
               onChangeText={(text) =>
                 setFormData({ ...formData, placeOfResidence: text })
               }
-              placeholder="Enter your place of residence"
+              placeholder={t("royalInvestor.placeholderResidence")}
               placeholderTextColor="#666666"
             />
           </View>
 
           <View className="mb-5">
             <Text className="text-sm font-semibold text-white mb-2">
-              Annual Income *
+              {t("royalInvestor.annualIncome")} *
             </Text>
             <TouchableOpacity
               className="bg-bg-light rounded-lg px-4 py-3 flex-row justify-between items-center border border-border-default"
@@ -275,7 +268,7 @@ export default function RoyalInvestorScreen() {
                   !formData.annualIncome ? "text-text-muted" : "text-text-dark"
                 }`}
               >
-                {formData.annualIncome || "Select your annual income range"}
+                {formData.annualIncome || t("royalInvestor.selectIncomeRange")}
               </Text>
               <ChevronDown size={20} color="#666666" />
             </TouchableOpacity>
@@ -302,7 +295,7 @@ export default function RoyalInvestorScreen() {
             onPress={handleSubmit}
           >
             <Text className="text-base font-semibold text-white">
-              Submit Application
+              {t("royalInvestor.submitApplication")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -318,56 +311,19 @@ export default function RoyalInvestorScreen() {
         />
         <View className="absolute items-center mb-8">
           <Text className="text-2xl font-bold text-white mt-4 mb-4 text-center">
-            Become one of the association&apos;s champions!
+            {t("royalInvestor.becomeChampion")}
           </Text>
           <Text className="text-base text-white text-center px-5">
-            Your support makes a difference. Contribute to the growth of the
-            official Real Madrid association, and your name and photo will shine
-            on the honor board in front of thousands of Madridistas!
+            {t("royalInvestor.bottomBannerText")}
           </Text>
           <TouchableOpacity
             className="bg-rm-gold py-3.5 rounded-lg items-center mt-4 px-6"
             onPress={handleSubmit}
           >
-            <Text className="text-base font-semibold text-white">Apply Now</Text>
+            <Text className="text-base font-semibold text-white">{t("common.applyNow")}</Text>
           </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
   );
 }
-
-const Benefits: {
-  title: string;
-  description: string;
-  items: string[];
-}[] = [
-  {
-    title: "Benefits of the Royal Investor Membership",
-    description: "",
-    items: [
-      "Join the association’s senior management for 12 months",
-      "Private meeting with current or former Real Madrid players (subject to availability and coordination)",
-      "Exclusive visit to Real Madrid facilities (Valdebebas), including a VIP tour supervised by an official",
-      "Attend meetings with official club representatives (subject to feasibility and official schedules)",
-      "Official recognition on the website as a “Royal Investor” with a profile and photo",
-      "Closed attendance at official meetings and participation in major strategic decisions",
-      "Full access to all VIP membership privileges",
-      "Luxurious royal souvenir + a personalized certificate of appreciation signed by the association",
-      "Special media coverage for the investor across all our platforms",
-    ],
-  },
-  {
-    title: "Who is eligible?",
-    description:
-      "Entrepreneurs, public figures, investors, and Real Madrid fans seeking a real role in developing the largest Arabic-speaking Real Madrid community.",
-    items: [
-      "Only 3 individuals are selected annually for membership",
-      "Each application is reviewed individually",
-      "Submitting an application does not guarantee approval. The association reserves the right to reject any application for any reason",
-      "Applications are subject to strict criteria",
-      "Applications are accepted from any country or nationality",
-      "The application form at the bottom of the page must be completed to submit your request",
-    ],
-  },
-];

@@ -45,7 +45,7 @@ export const loginWithGoogle = createAsyncThunk(
       const url = await AuthService.signInWithGoogle();
       await WebBrowser.openBrowserAsync(url);
     } catch (error: any) {
-      Alert.alert("Google Sign In", error?.message ?? "Failed to start Google sign-in");
+      Alert.alert(i18n.t("auth.signInWithGoogle"), error?.message ?? i18n.t("auth.failedGoogleSignIn"));
       throw error;
     } finally {
       dispatch(setLoading(false));
@@ -75,7 +75,7 @@ export const registerUser = createAsyncThunk(
         userData.lastName,
         userData.phone
       );
-      Alert.alert("Registration Success", "You can now login with your credentials");
+      Alert.alert(i18n.t("common.success"), i18n.t("auth.registrationSuccess"));
       return response;
     } catch (error: any) {
       Alert.alert(i18n.t("alerts.registrationError"), error.message);
@@ -177,8 +177,8 @@ export const updateAvatar = createAsyncThunk(
     } catch (error: any) {
       console.error("Error uploading avatar:", error);
       Alert.alert(
-        "Upload Error",
-        error?.message || "Failed to upload avatar. Please try again."
+        i18n.t("account.uploadError"),
+        error?.message || i18n.t("account.uploadAvatarFailed")
       );
       throw error;
     } finally {

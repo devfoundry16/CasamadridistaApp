@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useTranslation } from "react-i18next";
 
 interface TransferModalProps {
   visible: boolean;
@@ -25,6 +26,7 @@ export const TransferModal: React.FC<TransferModalProps> = ({
   currentBalance,
   currency,
 }) => {
+  const { t } = useTranslation();
   const [recipientEmail, setRecipientEmail] = useState('');
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
@@ -32,26 +34,26 @@ export const TransferModal: React.FC<TransferModalProps> = ({
 
   const handleTransfer = async () => {
     if (!recipientEmail || !amount) {
-      Alert.alert('Error', 'Please enter recipient email and amount');
+      Alert.alert(t("common.error"), t("wallet.transferEnterRecipientAndAmount"));
       return;
     }
 
     const numericAmount = parseFloat(amount);
 
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount');
+      Alert.alert(t("common.error"), t("wallet.transferInvalidAmount"));
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(recipientEmail)) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      Alert.alert(t("common.error"), t("membership.invalidEmail"));
       return;
     }
 
     if (numericAmount > currentBalance) {
-      Alert.alert('Error', 'Insufficient balance');
+      Alert.alert(t("common.error"), t("wallet.insufficientBalance"));
       return;
     }
 
@@ -88,7 +90,7 @@ export const TransferModal: React.FC<TransferModalProps> = ({
     >
       <View className="flex-1 bg-bg-medium">
         <View className="flex-row justify-between items-center p-4 border-b border-border-default">
-          <Text className="text-lg font-bold text-text-primary">Transfer Funds</Text>
+          <Text className="text-lg font-bold text-text-primary">{t("wallet.transferFunds")}</Text>
           <TouchableOpacity
             onPress={handleClose}
             className="w-[30px] h-[30px] rounded-full bg-bg-light justify-center items-center"
@@ -99,17 +101,17 @@ export const TransferModal: React.FC<TransferModalProps> = ({
 
         <ScrollView className="flex-1 p-4">
           <View className="bg-bg-card p-4 rounded-lg items-center mb-6">
-            <Text className="text-sm text-text-secondary mb-1">Available Balance</Text>
+            <Text className="text-sm text-text-secondary mb-1">{t("wallet.availableBalance")}</Text>
             <Text className="text-xl font-bold text-text-primary">
               {currency}{currentBalance.toFixed(2)}
             </Text>
           </View>
 
           <View className="mb-5">
-            <Text className="text-base font-semibold mb-2 text-text-primary">Recipient Email</Text>
+            <Text className="text-base font-semibold mb-2 text-text-primary">{t("wallet.recipientEmail")}</Text>
             <TextInput
               className="border border-border-default rounded-lg p-3 text-base bg-bg-card text-text-primary"
-              placeholder="Enter recipient's email"
+              placeholder={t("wallet.placeholderRecipientEmail")}
               placeholderTextColor="#999"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -120,10 +122,10 @@ export const TransferModal: React.FC<TransferModalProps> = ({
           </View>
 
           <View className="mb-5">
-            <Text className="text-base font-semibold mb-2 text-text-primary">Amount</Text>
+            <Text className="text-base font-semibold mb-2 text-text-primary">{t("wallet.amount")}</Text>
             <TextInput
               className="border border-border-default rounded-lg p-3 text-base bg-bg-card text-text-primary"
-              placeholder="Enter amount"
+              placeholder={t("wallet.placeholderAmount")}
               placeholderTextColor="#999"
               keyboardType="decimal-pad"
               value={amount}
@@ -133,10 +135,10 @@ export const TransferModal: React.FC<TransferModalProps> = ({
           </View>
 
           <View className="mb-5">
-            <Text className="text-base font-semibold mb-2 text-text-primary">Message (Optional)</Text>
+            <Text className="text-base font-semibold mb-2 text-text-primary">{t("wallet.messageOptional")}</Text>
             <TextInput
               className="border border-border-default rounded-lg p-3 text-base bg-bg-card text-text-primary min-h-[80px]"
-              placeholder="Add a note for this transfer"
+              placeholder={t("wallet.placeholderNote")}
               placeholderTextColor="#999"
               value={message}
               onChangeText={setMessage}
@@ -157,7 +159,9 @@ export const TransferModal: React.FC<TransferModalProps> = ({
             disabled={!recipientEmail || !amount || loading}
           >
             <Text className="text-white text-base font-semibold">
-              {loading ? 'Processing...' : `Transfer ${currency}${amount || '0.00'}`}
+              {loading
+                ? t("wallet.processing")
+                : t("wallet.transferCta", { amount: `${currency}${amount || "0.00"}` })}
             </Text>
           </TouchableOpacity>
         </ScrollView>

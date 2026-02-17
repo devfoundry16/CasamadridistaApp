@@ -274,7 +274,7 @@ export default function HomeScreen() {
 
       <CustomWebView
         size={700}
-        title="La Liga Standings"
+        title={t("home.laLigaStandings")}
         statsHtml={statsHtml}
       />
       <StrengthSection

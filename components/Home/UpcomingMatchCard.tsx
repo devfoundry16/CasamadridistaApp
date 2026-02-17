@@ -3,6 +3,7 @@ import { Match } from "@/types/soccer/match";
 import { useRouter } from "expo-router";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   Image,
@@ -15,7 +16,20 @@ const { width } = Dimensions.get("window");
 
 export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
   const carouselRef = useRef<any>(null);
+
+  const renderDate = (date: string) =>
+    new Date(date as any).toLocaleDateString(
+      i18n.language.startsWith("ar") ? "ar-SA" : "en-US",
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    );
 
   const renderCard = (item: any) => (
     <View className="bg-bg-card rounded-[10px] p-3 items-center justify-center w-[90%] h-full self-center">
@@ -63,13 +77,7 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
       </TouchableOpacity>
 
       <Text className="mt-2.5 bg-rm-gold text-white py-1 px-3 rounded-lg text-[13px]">
-        {new Date(item.fixture.date as any).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
+        {renderDate(item.fixture.date)}
       </Text>
     </View>
   );
@@ -79,7 +87,7 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
       <View className="flex-row items-center justify-center">
         <View className="w-[70px] h-0.5 bg-rm-gold mx-[30px]" />
         <Text className="text-2xl font-bold text-text-primary text-center">
-          Upcoming Match
+          {t("home.upcomingMatch")}
         </Text>
         <View className="w-[70px] h-0.5 bg-rm-gold mx-[30px]" />
       </View>

@@ -132,11 +132,10 @@ export default function CampaignDetailScreen() {
       return (
         <View className="p-4 bg-bg-card mt-4 rounded-lg border border-border-default">
           <Text className="text-xl font-bold text-white mb-2">
-            How much would you like to donate today?
+            {t("donate.howMuchToday")}
           </Text>
           <Text className="text-base text-text-secondary mb-4">
-            All donations directly impact our organization and help us further
-            our mission.
+            {t("donate.impactMessage")}
           </Text>
           <View className="flex-row flex-wrap mb-4">
             {[10, 25, 50, 100, 250, 500].map((amt) => (
@@ -170,7 +169,7 @@ export default function CampaignDetailScreen() {
                 })
               }
             >
-              <Text className="text-white">Custom</Text>
+              <Text className="text-white">{t("common.custom")}</Text>
             </TouchableOpacity>
           </View>
           <TextInput
@@ -222,16 +221,16 @@ export default function CampaignDetailScreen() {
             className="bg-rm-gold p-3 rounded items-center flex-1 ml-2"
             onPress={() => setCurrentStep(2)}
           >
-            <Text className="text-white text-base font-bold">Donate Now</Text>
+            <Text className="text-white text-base font-bold">{t("donate.donateNow")}</Text>
           </TouchableOpacity>
         </View>
       );
     } else if (currentStep === 2) {
       return (
         <View className="p-4 bg-bg-card mt-4 rounded-lg border border-border-default">
-          <Text className="text-xl font-bold text-white mb-2">Donor Information</Text>
+          <Text className="text-xl font-bold text-white mb-2">{t("donate.donorInfo")}</Text>
           <Text className="text-base text-text-secondary mb-4">
-            Please provide your contact details.
+            {t("donate.contactDetails")}
           </Text>
           <TextInput
             className="bg-bg-medium text-white p-2.5 mb-4 rounded border border-border-default"
@@ -263,13 +262,13 @@ export default function CampaignDetailScreen() {
               className="bg-bg-medium p-3 rounded items-center flex-1 mr-2"
               onPress={() => setCurrentStep(1)}
             >
-              <Text className="text-white text-base font-bold">Back</Text>
+              <Text className="text-white text-base font-bold">{t("common.back")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               className="bg-rm-gold p-3 rounded items-center flex-1 ml-2"
               onPress={() => setCurrentStep(3)}
             >
-              <Text className="text-white text-base font-bold">Continue</Text>
+              <Text className="text-white text-base font-bold">{t("common.continue")}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -277,16 +276,16 @@ export default function CampaignDetailScreen() {
     } else if (currentStep === 3) {
       return (
         <View className="p-4 bg-bg-card mt-4 rounded-lg border border-border-default">
-          <Text className="text-xl font-bold text-white mb-2">Payment Details</Text>
+          <Text className="text-xl font-bold text-white mb-2">{t("donate.paymentDetails")}</Text>
           <Text className="text-base text-text-secondary mb-4">
-            Review your donation.
+            {t("donate.reviewDonation")}
           </Text>
           <View className="mb-4">
             <Text className="text-base text-white mb-1">
-              Amount: ${donationData.amount}
+              {t("donate.amount")}: ${donationData.amount}
             </Text>
             <Text className="text-base text-white mb-1">
-              Frequency: {donationData.frequency}
+              {t("donate.frequency")}: {donationData.frequency}
             </Text>
           </View>
           {/*<View className="mb-4">
@@ -328,13 +327,13 @@ export default function CampaignDetailScreen() {
               className="bg-bg-medium p-3 rounded items-center flex-1 mr-2"
               onPress={() => setCurrentStep(2)}
             >
-              <Text className="text-white text-base font-bold">Back</Text>
+              <Text className="text-white text-base font-bold">{t("common.back")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               className="bg-rm-gold p-3 rounded items-center flex-1 ml-2"
               onPress={handlePayment}
             >
-              <Text className="text-white text-base font-bold">Donate Now</Text>
+              <Text className="text-white text-base font-bold">{t("donate.donateNow")}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -357,12 +356,12 @@ export default function CampaignDetailScreen() {
         <Text className="text-base text-text-secondary mb-4 leading-6">{campaign.shortDescription}</Text>
         <View className="bg-bg-card p-4 rounded-lg border border-border-default">
           <Text className="text-lg text-white mb-2">
-            Goal: {campaign.goalStats.goalFormatted}
+            {t("campaign.goal")}: {campaign.goalStats.goalFormatted}
           </Text>
           <Text className="text-lg text-rm-gold mb-2">
-            Raised: {campaign.goalStats.actualFormatted}
+            {t("campaign.raised")}: {campaign.goalStats.actualFormatted}
           </Text>
-          <Text className="text-base text-text-muted">Status: {campaign.status}</Text>
+          <Text className="text-base text-text-muted">{t("common.status")}: {campaign.status}</Text>
         </View>
         {renderDonationForm()}
       </View>

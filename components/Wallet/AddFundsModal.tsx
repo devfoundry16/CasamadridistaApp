@@ -12,6 +12,7 @@ import {
 import { useStripePay } from "@/hooks/useStripePay";
 import { useWallet } from "@/hooks/useWallet";
 import { Spinner } from "../Spinner";
+import { useTranslation } from "react-i18next";
 
 interface AddFundsModalProps {
   visible: boolean;
@@ -24,6 +25,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const { payWithClientSecret } = useStripePay();
@@ -37,18 +39,18 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
   const handleAddFunds = async () => {
     if (!amount) {
-      Alert.alert("Error", "Please enter an amount");
+      Alert.alert(t("common.error"), t("wallet.enterAmount"));
       return;
     }
 
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      Alert.alert("Error", "Please enter a valid amount");
+      Alert.alert(t("common.error"), t("wallet.invalidAmount"));
       return;
     }
 
     if (numericAmount < 1) {
-      Alert.alert("Error", "Minimum amount is $1.00");
+      Alert.alert(t("common.error"), t("wallet.minimumAmount"));
       return;
     }
 
@@ -66,10 +68,13 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
       setLoading(false);
       onSuccess();
-      Alert.alert("Success", `$${numericAmount.toFixed(2)} has been added to your wallet!`);
+      Alert.alert(
+        t("common.success"),
+        t("wallet.fundsAdded", { amount: numericAmount.toFixed(2) })
+      );
     } catch (error: any) {
       setLoading(false);
-      Alert.alert("Error", error.message || "Failed to add funds. Please try again.");
+      Alert.alert(t("common.error"), error.message || t("wallet.addFundsFailed"));
     }
   };
 
@@ -90,9 +95,9 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
     return (
       <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
         <View className="flex-1 bg-bg-medium justify-center items-center">
-          <Spinner content="Processing payment" />
+          <Spinner content={t("wallet.processingPayment")} />
           <Text className="text-base text-text-secondary mt-4">
-            Please wait while we process your payment...
+            {t("wallet.processingPaymentMessage")}
           </Text>
         </View>
       </Modal>
@@ -108,7 +113,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
     >
       <View className="flex-1 bg-bg-medium">
         <View className="flex-row justify-between items-center p-4 border-b border-border-default">
-          <Text className="text-lg font-bold text-text-primary">Add Funds</Text>
+          <Text className="text-lg font-bold text-text-primary">{t("wallet.addFunds")}</Text>
           <TouchableOpacity
             onPress={handleClose}
             className="w-[30px] h-[30px] rounded-full bg-bg-light justify-center items-center"
@@ -121,11 +126,11 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
           {/* Amount Input */}
           <View className="mb-6">
             <Text className="text-base font-semibold mb-3 text-text-primary">
-              Amount
+              {t("wallet.amount")}
             </Text>
             <TextInput
               className="border border-border-default rounded-lg p-3 text-base bg-bg-card text-text-primary"
-              placeholder="Enter amount"
+              placeholder={t("wallet.placeholderAmount")}
               placeholderTextColor="#999"
               keyboardType="decimal-pad"
               value={amount}
@@ -136,7 +141,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
             {/* Quick Amount Buttons */}
             <View className="mt-3">
               <Text className="text-sm text-text-secondary mb-2">
-                Quick Select:
+                {t("wallet.quickSelect")}
               </Text>
               <View className="flex-row flex-wrap gap-2">
                 {quickAmounts.map((quickAmount) => {
@@ -171,10 +176,10 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
           {/* Payment Method Info */}
           <View className="mb-6 p-4 bg-bg-card rounded-lg">
             <Text className="text-sm font-semibold text-text-primary mb-2">
-              Payment Method
+              {t("wallet.paymentMethod")}
             </Text>
             <Text className="text-sm text-text-secondary">
-              Payment will be processed securely via Stripe
+              {t("wallet.paymentViaStripe")}
             </Text>
           </View>
 
@@ -189,7 +194,9 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
             disabled={!amount || loading}
           >
             <Text className="text-white text-base font-semibold">
-              {loading ? "Processing..." : `Add $${amount || "0.00"}`}
+              {loading
+                ? t("wallet.processing")
+                : t("wallet.addAmountCta", { amount: amount || "0.00" })}
             </Text>
           </TouchableOpacity>
         </ScrollView>

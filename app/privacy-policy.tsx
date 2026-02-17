@@ -1,9 +1,11 @@
 import { Image } from "expo-image";
+import { useTranslation } from "react-i18next";
 import { Dimensions, ScrollView, Text, View } from "react-native";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function PrivacyPolicyScreen() {
+  const { t } = useTranslation();
   return (
     <>
       <ScrollView className="flex-1 bg-bg-medium" showsVerticalScrollIndicator={false}>
@@ -17,7 +19,7 @@ export default function PrivacyPolicyScreen() {
             contentFit="cover"
           />
           <View className="absolute items-center">
-            <Text className="text-4xl font-bold text-white mb-1">Privacy Policy</Text>
+            <Text className="text-4xl font-bold text-white mb-1">{t("nav.privacyPolicy")}</Text>
           </View>
         </View>
 

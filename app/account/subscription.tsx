@@ -53,7 +53,7 @@ export default function SubscriptionScreen() {
                     <View className="flex-row items-center gap-3">
                       <Calendar size={20} color="#BC9045" />
                       <View className="flex-1">
-                        <Text className="text-sm text-text-secondary mb-1">Start Date</Text>
+                        <Text className="text-sm text-text-secondary mb-1">{t("subscription.startDate")}</Text>
                         <Text className="text-base font-semibold text-white">
                           {formatDate(subscription.start_date)}
                         </Text>
@@ -63,7 +63,7 @@ export default function SubscriptionScreen() {
                       <View className="flex-row items-center gap-3">
                         <Calendar size={20} color="#BC9045" />
                         <View className="flex-1">
-                          <Text className="text-sm text-text-secondary mb-1">End Date</Text>
+                          <Text className="text-sm text-text-secondary mb-1">{t("subscription.endDate")}</Text>
                           <Text className="text-base font-semibold text-white">
                             {formatDate(subscription.end_date)}
                           </Text>
@@ -72,7 +72,7 @@ export default function SubscriptionScreen() {
                     )}
                     <View className="flex-row items-center gap-3">
                       <View className="flex-1">
-                        <Text className="text-sm text-text-secondary mb-1">Price</Text>
+                        <Text className="text-sm text-text-secondary mb-1">{t("subscription.price")}</Text>
                         <Text className="text-base font-semibold text-white">
                           {subscription.currency} {subscription.price}
                         </Text>
@@ -87,7 +87,7 @@ export default function SubscriptionScreen() {
                     onPress={() => router.push("/memberships/packages")}
                   >
                     <Crown size={24} color="#BC9045" />
-                    <Text className="flex-1 text-base font-semibold text-white">Upgrade Plan</Text>
+                    <Text className="flex-1 text-base font-semibold text-white">{t("subscription.upgradePlan")}</Text>
                     <ArrowRight size={20} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
@@ -97,16 +97,16 @@ export default function SubscriptionScreen() {
         ) : (
           <View className="flex-1 items-center justify-center p-12 mt-24">
             <Crown size={64} color="#515151" />
-            <Text className="text-2xl font-bold text-white mt-6 mb-2">No Active Subscription</Text>
+            <Text className="text-2xl font-bold text-white mt-6 mb-2">{t("subscription.noActive")}</Text>
             <Text className="text-base text-text-secondary text-center mb-8">
-              Join Casa Madridista and enjoy exclusive benefits
+              {t("subscription.joinBenefits")}
             </Text>
             <TouchableOpacity
               className="bg-rm-gold px-8 py-4 rounded-[25px]"
               onPress={() => router.push("/memberships/packages")}
             >
               <Text className="text-base font-bold text-bg-deep-dark">
-                View Membership Plans
+                {t("subscription.viewPlans")}
               </Text>
             </TouchableOpacity>
           </View>

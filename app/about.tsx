@@ -15,11 +15,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function AboutScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -34,25 +36,19 @@ export default function AboutScreen() {
             contentFit="cover"
           />
           <View className="absolute items-center">
-            <Text className="text-4xl font-bold text-white mb-1">About Us</Text>
-            <Text className="text-xl font-semibold text-rm-gold">بيت المدريديستا</Text>
+            <Text className="text-4xl font-bold text-white mb-1">{t("nav.aboutUs")}</Text>
+            <Text className="text-xl font-semibold text-rm-gold">{t("about.brandArabic")}</Text>
           </View>
         </View>
 
         <View className="p-4">
           <View className="p-5 mb-4">
-            <Text className="text-3xl font-bold text-rm-gold mb-3">Casa Madridista</Text>
+            <Text className="text-3xl font-bold text-rm-gold mb-3">{t("about.casaTitle")}</Text>
             <Text className="text-[15px] text-white leading-6 mb-3">
-              Casa Madridista is more than just a website it is the digital home
-              of every passionate Madridista around the world. We are an
-              official fan network, proudly uniting Real Madrid fan clubs from
-              more than 30 countries under one banner.
+              {t("about.casaParagraph1")}
             </Text>
             <Text className="text-[15px] text-white leading-6 mb-3">
-              Driven by loyalty, history, and the legacy of greatness, our
-              mission is to create a shared space for fans to connect,
-              celebrate, and participate in the Real Madrid journey wherever
-              they are in the world.
+              {t("about.casaParagraph2")}
             </Text>
             <Image
               source={{
@@ -65,14 +61,9 @@ export default function AboutScreen() {
           </View>
 
           <View className="p-5 mb-4">
-            <Text className="text-3xl font-bold text-rm-gold mb-3">Our Vision</Text>
+            <Text className="text-3xl font-bold text-rm-gold mb-3">{t("about.visionTitle")}</Text>
             <Text className="text-[15px] text-white leading-6 mb-3">
-              To unite Madridistas from all corners of the globe from every
-              culture, background, and belief and create the most vibrant,
-              trusted, and inclusive community of Real Madrid fans. We aim to
-              amplify the voice of every fan, giving them a platform to connect,
-              celebrate, and influence the official fan journey wherever they
-              are in the world.
+              {t("about.visionParagraph")}
             </Text>
             <Image
               source={{
@@ -85,46 +76,44 @@ export default function AboutScreen() {
           </View>
 
           <View className="p-5 mb-4">
-            <Text className="text-3xl font-bold text-rm-gold mb-3">What We Offer</Text>
+            <Text className="text-3xl font-bold text-rm-gold mb-3">{t("about.offerTitle")}</Text>
             <View className="flex-row items-center mb-3 gap-3">
               <Check size={20} color="#BC9045" strokeWidth={5} />
               <Text className="flex-1 text-sm text-white leading-[22px]">
-                <Text className="font-bold text-white">Verified Membership Tiers</Text>{" "}
-                that unlock exclusive content, VIP experiences, and official
-                perks.
+                <Text className="font-bold text-white">{t("about.offer1Strong")}</Text>{" "}
+                {t("about.offer1Text")}
               </Text>
             </View>
             <View className="flex-row items-center mb-3 gap-3">
               <Check size={20} color="#BC9045" strokeWidth={5} />
               <Text className="flex-1 text-sm text-white leading-[22px]">
-                <Text className="font-bold text-white">Access to Tickets & Events</Text>{" "}
-                through our club allocations and special raffles.
-              </Text>
-            </View>
-            <View className="flex-row items-center mb-3 gap-3">
-              <Check size={20} color="#BC9045" strokeWidth={5} />
-              <Text className="flex-1 text-sm text-white leading-[22px]">
-                <Text className="font-bold text-white">
-                  Interactive Fan Engagement,
-                </Text>{" "}
-                including polls, match previews, tactical discussions, and more.
+                <Text className="font-bold text-white">{t("about.offer2Strong")}</Text>{" "}
+                {t("about.offer2Text")}
               </Text>
             </View>
             <View className="flex-row items-center mb-3 gap-3">
               <Check size={20} color="#BC9045" strokeWidth={5} />
               <Text className="flex-1 text-sm text-white leading-[22px]">
                 <Text className="font-bold text-white">
-                  Private WhatsApp Channels & Live Sessions{" "}
+                  {t("about.offer3Strong")}
                 </Text>{" "}
-                with analysts and community leaders.
+                {t("about.offer3Text")}
               </Text>
             </View>
             <View className="flex-row items-center mb-3 gap-3">
               <Check size={20} color="#BC9045" strokeWidth={5} />
               <Text className="flex-1 text-sm text-white leading-[22px]">
-                <Text className="font-bold text-white">A Place at the Table - </Text>{" "}
-                VIP members can vote and take part in official fan club
-                decisions.
+                <Text className="font-bold text-white">
+                  {t("about.offer4Strong")}{" "}
+                </Text>{" "}
+                {t("about.offer4Text")}
+              </Text>
+            </View>
+            <View className="flex-row items-center mb-3 gap-3">
+              <Check size={20} color="#BC9045" strokeWidth={5} />
+              <Text className="flex-1 text-sm text-white leading-[22px]">
+                <Text className="font-bold text-white">{t("about.offer5Strong")}</Text>{" "}
+                {t("about.offer5Text")}
               </Text>
             </View>
           </View>
@@ -138,11 +127,9 @@ export default function AboutScreen() {
                   color="#BC9045"
                 />
               </View>
-              <Text className="text-3xl font-bold text-rm-gold mb-3">Why We Exist</Text>
+              <Text className="text-3xl font-bold text-rm-gold mb-3">{t("about.whyExistTitle")}</Text>
               <Text className="text-[15px] text-text-primary leading-6 text-center">
-                Real Madrid is not just a football club. It&apos;s a story. A
-                legacy. A force. We believe every fan deserves to be part of
-                that story not just as a spectator, but as a participant.
+                {t("about.whyExistText")}
               </Text>
             </View>
 
@@ -150,15 +137,13 @@ export default function AboutScreen() {
               <View className="w-[60px] h-[60px] justify-center items-center">
                 <Globe size={50} strokeWidth={1.5} color="#BC9045" />
               </View>
-              <Text className="text-3xl font-bold text-rm-gold mb-3">A Global Family</Text>
+              <Text className="text-3xl font-bold text-rm-gold mb-3">{t("about.globalFamilyTitle")}</Text>
               <Text className="text-[15px] text-text-primary leading-6 text-center">
-                Whether you&apos;re in Madrid, Morocco, Mexico, or Malaysia you
-                are part of One Madridista Family. Our strength lies in our
-                unity, and our voice becomes louder with every member who joins.
+                {t("about.globalFamilyText")}
               </Text>
             </View>
             <Text className="text-white text-lg text-center mt-2 font-medium italic">
-              Casa Madridista is your chance to live that experience fully.
+              {t("about.globalFamilyQuote")}
             </Text>
           </View>
 
@@ -171,14 +156,13 @@ export default function AboutScreen() {
               contentFit="cover"
             />
             <View className="absolute items-center">
-              <Text className="text-3xl font-bold text-rm-gold mb-3">Join Us</Text>
+              <Text className="text-3xl font-bold text-rm-gold mb-3">{t("about.joinUsTitle")}</Text>
               <View className="flex-col items-center mb-3 gap-3">
                 <Text className="text-text-secondary text-center text-[13px] mb-0">
-                  Become an official member, access exclusive content, and
-                  represent Real Madrid with pride.
+                  {t("about.joinUsText1")}
                 </Text>
                 <Text className="text-text-secondary text-center italic text-[15px] mb-0">
-                  For collaborations, media, or official inquiries
+                  {t("about.joinUsText2")}
                 </Text>
                 <Mail size={30} color="#BC9045" strokeWidth={3} />
                 <Text className="text-[15px] text-white leading-6 mb-3">
@@ -189,7 +173,7 @@ export default function AboutScreen() {
           </View>
 
           <View className="p-5 mb-4">
-            <Text className="text-3xl font-bold text-rm-gold mb-3">Legal</Text>
+            <Text className="text-3xl font-bold text-rm-gold mb-3">{t("about.legalTitle")}</Text>
             <TouchableOpacity
               className="flex-row items-center p-4 mb-3"
               onPress={() => router.push("/terms-of-service")}
@@ -198,9 +182,9 @@ export default function AboutScreen() {
                 <FileText size={35} color="#BC9045" />
               </View>
               <View className="flex-1">
-                <Text className="text-base font-bold text-white mb-1">Terms of Service</Text>
+                <Text className="text-base font-bold text-white mb-1">{t("nav.termsOfService")}</Text>
                 <Text className="text-[13px] text-white">
-                  Read our terms and conditions
+                  {t("about.termsDescription")}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -213,9 +197,9 @@ export default function AboutScreen() {
                 <Shield size={35} color="#BC9045" />
               </View>
               <View className="flex-1">
-                <Text className="text-base font-bold text-white mb-1">Privacy Policy</Text>
+                <Text className="text-base font-bold text-white mb-1">{t("nav.privacyPolicy")}</Text>
                 <Text className="text-[13px] text-white">
-                  Learn how we protect your data
+                  {t("about.privacyDescription")}
                 </Text>
               </View>
             </TouchableOpacity>

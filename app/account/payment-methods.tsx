@@ -1,6 +1,7 @@
 import { useUser } from "@/hooks/useUser";
 import { CreditCard, Plus, Trash2, X } from "lucide-react-native";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Modal,
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 
 export default function PaymentMethodsScreen() {
+  const { t } = useTranslation();
   const { paymentMethods, addPaymentMethod, deletePaymentMethod } = useUser();
   const [modalVisible, setModalVisible] = useState(false);
   const [formData, setFormData] = useState({
@@ -26,12 +28,12 @@ export default function PaymentMethodsScreen() {
   const handleSave = async () => {
     if (formData.type === "card") {
       if (!formData.number || !formData.cardHolder || !formData.expiryDate) {
-        Alert.alert("Error", "Please fill in all card details");
+        Alert.alert(t("common.error"), t("payment.fillCardDetails"));
         return;
       }
     } else {
       if (!formData.email) {
-        Alert.alert("Error", "Please enter PayPal email");
+        Alert.alert(t("common.error"), t("payment.enterPaypalEmail"));
         return;
       }
     }
@@ -52,12 +54,12 @@ export default function PaymentMethodsScreen() {
 
   const handleDelete = (id: string) => {
     Alert.alert(
-      "Delete Payment Method",
-      "Are you sure you want to delete this payment method?",
+      t("payment.deleteMethodTitle"),
+      t("payment.deleteMethodConfirm"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Delete",
+          text: t("payment.delete"),
           style: "destructive",
           onPress: () => deletePaymentMethod(id),
         },
@@ -91,13 +93,13 @@ export default function PaymentMethodsScreen() {
           }}
         >
           <Plus size={20} color="#FFFFFF" />
-          <Text className="text-base font-bold text-white">Add Payment Method</Text>
+          <Text className="text-base font-bold text-white">{t("payment.addMethod")}</Text>
         </TouchableOpacity>
 
         {paymentMethods.length === 0 ? (
           <View className="items-center justify-center p-12 mt-12">
             <CreditCard size={64} color="#515151" />
-            <Text className="text-lg text-text-secondary mt-4">No payment methods saved</Text>
+            <Text className="text-lg text-text-secondary mt-4">{t("payment.noMethods")}</Text>
           </View>
         ) : (
           <View className="p-6 pt-0">
@@ -117,12 +119,12 @@ export default function PaymentMethodsScreen() {
                           {maskCardNumber(method.number || "")}
                         </Text>
                         <Text className="text-xs text-text-muted">
-                          Expires: {method.expiryDate}
+                          {t("payment.expires")}: {method.expiryDate}
                         </Text>
                       </>
                     ) : (
                       <>
-                        <Text className="text-base font-bold text-white mb-1">PayPal</Text>
+                        <Text className="text-base font-bold text-white mb-1">{t("payment.paypal")}</Text>
                         <Text className="text-sm text-text-secondary">
                           {method.email}
                         </Text>
@@ -145,7 +147,7 @@ export default function PaymentMethodsScreen() {
           <View className="flex-1 bg-black/80 justify-end">
             <View className="bg-bg-medium rounded-t-3xl max-h-[80%]">
               <View className="flex-row justify-between items-center p-6 border-b border-border-light">
-                <Text className="text-xl font-bold text-white">Add Payment Method</Text>
+                <Text className="text-xl font-bold text-white">{t("payment.addMethod")}</Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
                   <X size={24} color="#FFFFFF" />
                 </TouchableOpacity>
@@ -164,7 +166,7 @@ export default function PaymentMethodsScreen() {
                         formData.type === "card" ? "text-rm-gold" : "text-text-secondary"
                       }`}
                     >
-                      Credit Card
+                      {t("payment.creditCard")}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -178,7 +180,7 @@ export default function PaymentMethodsScreen() {
                         formData.type === "paypal" ? "text-rm-gold" : "text-text-secondary"
                       }`}
                     >
-                      PayPal
+                      {t("payment.paypal")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -191,7 +193,7 @@ export default function PaymentMethodsScreen() {
                       onChangeText={(text) =>
                         setFormData({ ...formData, number: text })
                       }
-                      placeholder="Card Number"
+                      placeholder={t("payment.placeholderCardNumber")}
                       placeholderTextColor="#515151"
                       keyboardType="numeric"
                       maxLength={16}
@@ -202,7 +204,7 @@ export default function PaymentMethodsScreen() {
                       onChangeText={(text) =>
                         setFormData({ ...formData, cardHolder: text })
                       }
-                      placeholder="Card Holder Name"
+                      placeholder={t("payment.placeholderCardHolder")}
                       placeholderTextColor="#515151"
                     />
                     <View className="flex-row gap-3">
@@ -212,7 +214,7 @@ export default function PaymentMethodsScreen() {
                         onChangeText={(text) =>
                           setFormData({ ...formData, expiryDate: text })
                         }
-                        placeholder="MM/YY"
+                        placeholder={t("payment.placeholderExpiry")}
                         placeholderTextColor="#515151"
                         maxLength={5}
                       />
@@ -222,7 +224,7 @@ export default function PaymentMethodsScreen() {
                         onChangeText={(text) =>
                           setFormData({ ...formData, cvc: text })
                         }
-                        placeholder="CVV"
+                        placeholder={t("payment.placeholderCvv")}
                         placeholderTextColor="#515151"
                         keyboardType="numeric"
                         maxLength={3}
@@ -237,7 +239,7 @@ export default function PaymentMethodsScreen() {
                     onChangeText={(text) =>
                       setFormData({ ...formData, email: text })
                     }
-                    placeholder="PayPal Email"
+                    placeholder={t("payment.placeholderPaypalEmail")}
                     placeholderTextColor="#515151"
                     keyboardType="email-address"
                     autoCapitalize="none"
@@ -248,7 +250,7 @@ export default function PaymentMethodsScreen() {
                   className="bg-rm-gold p-4 rounded-[25px] items-center mt-2"
                   onPress={handleSave}
                 >
-                  <Text className="text-base font-bold text-white">Save Payment Method</Text>
+                  <Text className="text-base font-bold text-white">{t("payment.saveMethod")}</Text>
                 </TouchableOpacity>
               </ScrollView>
             </View>

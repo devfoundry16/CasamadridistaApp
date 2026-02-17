@@ -106,7 +106,9 @@
     "signIn": "تسجيل الدخول",
     "signUp": "إنشاء حساب",
     "placeholderPasswordMin": "6 أحرف على الأقل",
-    "placeholderConfirmNewPassword": "تأكيد كلمة المرور الجديدة"
+    "placeholderConfirmNewPassword": "تأكيد كلمة المرور الجديدة",
+    "failedGoogleSignIn": "فشل بدء تسجيل الدخول عبر Google",
+    "registrationSuccess": "يمكنك الآن تسجيل الدخول ببياناتك"
   },
   "account": {
     "changePhoto": "تغيير الصورة",
@@ -142,7 +144,9 @@
     "placeholderCurrentPassword": "أدخل كلمة المرور الحالية",
     "placeholderNewPassword": "أدخل كلمة المرور الجديدة",
     "placeholderConfirmNewPassword": "تأكيد كلمة المرور الجديدة",
-    "loadingSubscription": "جاري تحميل الاشتراك"
+    "loadingSubscription": "جاري تحميل الاشتراك",
+    "uploadError": "خطأ في الرفع",
+    "uploadAvatarFailed": "فشل رفع الصورة الشخصية. يرجى المحاولة مرة أخرى."
   },
   "contact": {
     "title": "اتصل بنا",
@@ -181,7 +185,13 @@
     "stripePay": "الدفع عبر Stripe",
     "paypalPay": "الدفع عبر PayPal",
     "back": "رجوع",
-    "loading": "جاري تحميل الحملة"
+    "loading": "جاري تحميل الحملة",
+    "howMuchToday": "كم ترغب بالتبرع اليوم؟",
+    "impactMessage": "كل تبرع يساهم مباشرة في دعم منظمتنا ومهمتنا.",
+    "contactDetails": "يرجى إدخال بيانات التواصل الخاصة بك.",
+    "reviewDonation": "راجع التبرع الخاص بك.",
+    "amount": "المبلغ",
+    "frequency": "التكرار"
   },
   "membership": {
     "choosePackage": "اختر باقة العضوية",
@@ -192,7 +202,17 @@
     "whoIsEligible": "من المؤهل؟",
     "pleaseFillAllFields": "يرجى ملء جميع الحقول",
     "invalidEmail": "يرجى إدخال بريد إلكتروني صالح.",
-    "loadingPackages": "جاري تحميل الباقات"
+    "loadingPackages": "جاري تحميل الباقات",
+    "packages": "الباقات",
+    "royalInvestor": "المستثمر الملكي",
+    "subscribe": "اشترك",
+    "currentPlan": "الخطة الحالية",
+    "upgrade": "ترقية",
+    "downgrade": "تخفيض",
+    "changePlan": "تغيير الخطة",
+    "perMonth": " شهرياً",
+    "perYear": " سنوياً",
+    "notAvailable": "غير متاح"
   },
   "venue": {
     "loading": "جاري تحميل الملعب",
@@ -202,7 +222,36 @@
     "loading": "جاري تحميل الدوري"
   },
   "team": {
-    "loadingSquads": "جاري تحميل التشكيلات"
+    "loadingSquads": "جاري تحميل التشكيلات",
+    "squad": "التشكيلة",
+    "season": "موسم {{season}}",
+    "country": "الدولة",
+    "founded": "سنة التأسيس",
+    "stadium": "الملعب",
+    "goalkeepers": "حراس المرمى",
+    "defenders": "المدافعون",
+    "midfielders": "لاعبو الوسط",
+    "forwards": "المهاجمون",
+    "coach": "المدرب",
+    "teamStats": "إحصائيات الفريق"
+  },
+  "player": {
+    "playerInformation": "معلومات اللاعب",
+    "fullName": "الاسم الكامل",
+    "position": "المركز",
+    "number": "الرقم",
+    "age": "العمر",
+    "nationality": "الجنسية",
+    "placeOfBirth": "مكان الميلاد",
+    "dateOfBirth": "تاريخ الميلاد",
+    "weight": "الوزن",
+    "height": "الطول",
+    "playerStats": "إحصائيات اللاعب",
+    "ageLabel": "العمر: ",
+    "ageYears": "{{age}} سنة",
+    "club": "النادي",
+    "realMadrid": "ريال مدريد",
+    "losBlancos": "لوس بلانكوس"
   },
   "home": {
     "halaMadrid": "هلا مدريد",
@@ -212,14 +261,24 @@
     "becomeMember": "كن عضواً",
     "upcoming": "قادمة",
     "elapsed": "منقضية",
-    "extraTime": "وقت إضافي"
+    "extraTime": "وقت إضافي",
+    "upcomingMatch": "المباراة القادمة",
+    "laLigaStandings": "ترتيب الدوري الإسباني",
+    "ourStrength": "قوتنا",
+    "madridistaSpiritUnited": "روح مدريدية موحدة",
+    "strengthUnitedMadridista": "مدريديستا متحدون",
+    "strengthPrizeInTotal": "إجمالي الجوائز",
+    "strengthDailyUpdate": "تحديث يومي",
+    "strengthMadridistaFamily": "عائلة مدريدية"
   },
   "campaign": {
     "loading": "جاري تحميل الحملة",
     "enterCustomAmount": "أدخل المبلغ",
     "firstName": "الاسم الأول",
     "lastName": "اسم العائلة",
-    "emailAddress": "البريد الإلكتروني"
+    "emailAddress": "البريد الإلكتروني",
+    "goal": "الهدف",
+    "raised": "تم جمع"
   },
   "wallet": {
     "loading": "جاري تحميل المحفظة",
@@ -228,20 +287,183 @@
     "insufficientBalance": "الرصيد غير كافٍ",
     "placeholderRecipientEmail": "بريد المستلم",
     "placeholderAmount": "المبلغ",
-    "placeholderNote": "ملاحظة لهذا التحويل"
+    "placeholderNote": "ملاحظة لهذا التحويل",
+    "transferEnterRecipientAndAmount": "يرجى إدخال بريد المستلم والمبلغ",
+    "transferInvalidAmount": "يرجى إدخال مبلغ صحيح",
+    "transferFunds": "تحويل رصيد",
+    "availableBalance": "الرصيد المتاح",
+    "recipientEmail": "بريد المستلم",
+    "amount": "المبلغ",
+    "messageOptional": "رسالة (اختياري)",
+    "processing": "جاري المعالجة...",
+    "transferCta": "تحويل {{amount}}",
+    "enterAmount": "يرجى إدخال مبلغ",
+    "invalidAmount": "يرجى إدخال مبلغ صحيح",
+    "minimumAmount": "الحد الأدنى للمبلغ هو 1.00$",
+    "fundsAdded": "تمت إضافة $ {{amount}} إلى محفظتك!",
+    "addFundsFailed": "فشل إضافة الرصيد. يرجى المحاولة مرة أخرى.",
+    "processingPaymentMessage": "يرجى الانتظار أثناء معالجة الدفع...",
+    "addFunds": "إضافة رصيد",
+    "quickSelect": "اختيار سريع:",
+    "paymentMethod": "طريقة الدفع",
+    "paymentViaStripe": "سيتم الدفع بشكل آمن عبر Stripe",
+    "addAmountCta": "إضافة ${{amount}}",
+    "transferCompleted": "تم التحويل بنجاح!",
+    "transferFailed": "فشل التحويل. يرجى المحاولة مرة أخرى.",
+    "retry": "إعادة المحاولة",
+    "balance": "رصيد المحفظة",
+    "transfer": "تحويل",
+    "transactionTopUp": "شحن المحفظة",
+    "transactionPayment": "دفعة",
+    "transactionId": "المعرف",
+    "noTransactionsTitle": "لا توجد معاملات بعد",
+    "noTransactionsBody": "ستظهر معاملات محفظتك هنا بعد أن تبدأ باستخدام رصيدك.",
+    "recentTransactions": "أحدث المعاملات",
+    "transactionSingular": "معاملة",
+    "transactionPlural": "معاملات"
   },
   "formation": {
     "placeholderFormationTitle": "عنوان التشكيلة",
-    "placeholderCoachName": "اسم المدرب"
+    "placeholderCoachName": "اسم المدرب",
+    "saved": "تم حفظ التشكيلة!",
+    "downloadFailed": "فشل تنزيل التشكيلة {{message}}",
+    "lineupBuilder": "صانع التشكيلة",
+    "formation": "الخطة",
+    "showNames": "إظهار الأسماء",
+    "formationTitle": "عنوان التشكيلة",
+    "reset": "إعادة ضبط",
+    "download": "تنزيل",
+    "coach": "المدرب",
+    "headCoach": "المدرب الرئيسي",
+    "lineup": "التشكيلة",
+    "builder": "البنّاء",
+    "substitutes": "البدلاء"
   },
   "payment": {
     "placeholderCardNumber": "رقم البطاقة",
     "placeholderCardHolder": "اسم حامل البطاقة",
     "placeholderExpiry": "شهر/سنة",
     "placeholderCvv": "CVV",
-    "placeholderPaypalEmail": "البريد الإلكتروني لـ PayPal"
+    "placeholderPaypalEmail": "البريد الإلكتروني لـ PayPal",
+    "fillCardDetails": "يرجى تعبئة جميع بيانات البطاقة",
+    "enterPaypalEmail": "يرجى إدخال بريد PayPal",
+    "deleteMethodTitle": "حذف وسيلة الدفع",
+    "deleteMethodConfirm": "هل أنت متأكد من حذف وسيلة الدفع هذه؟",
+    "delete": "حذف",
+    "addMethod": "إضافة وسيلة دفع",
+    "noMethods": "لا توجد وسائل دفع محفوظة",
+    "expires": "تنتهي",
+    "paypal": "PayPal",
+    "creditCard": "بطاقة ائتمان",
+    "saveMethod": "حفظ وسيلة الدفع"
+  },
+  "subscription": {
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية",
+    "price": "السعر",
+    "upgradePlan": "ترقية الخطة",
+    "noActive": "لا يوجد اشتراك نشط",
+    "joinBenefits": "انضم إلى كاسا مدريديسا واستمتع بالمزايا الحصرية",
+    "viewPlans": "عرض خطط العضوية"
+  },
+  "shop": {
+    "welcome": "مرحباً",
+    "title": "متجر كاسا مدريديسا",
+    "comingSoonTitle": "المتجر قريباً",
+    "comingSoonMessage": "تم نقل ميزة المتجر إلى نظام جديد.\nترقب التحديثات قريباً!",
+    "soon": "قريباً",
+    "storeComingSoonBanner": "متجر كاسا مدريديسا قادم قريباً!",
+    "product1Title": "عطر الملكة",
+    "product2Title": "صندوق مدريدستا الفاخر"
+  },
+  "vision": {
+    "title": "لديك رؤية؟ دعنا نناقشها معاً",
+    "subtitle": "أفكارك تهمنا، شاركنا بها",
+    "contactNow": "تواصل الآن"
+  },
+  "about": {
+    "brandArabic": "بيت المدريديستا",
+    "casaTitle": "كاسا مدريديسا",
+    "casaParagraph1": "كاسا مدريديسا ليست مجرد موقع، بل هي البيت الرقمي لكل مدريديستا شغوف حول العالم. نحن شبكة جماهير رسمية توحّد روابط مشجعي ريال مدريد من أكثر من 30 دولة تحت راية واحدة.",
+    "casaParagraph2": "مدفوعين بالولاء والتاريخ وإرث العظمة، تتمثل مهمتنا في إنشاء مساحة مشتركة للجماهير للتواصل والاحتفال والمشاركة في رحلة ريال مدريد أينما كانوا.",
+    "visionTitle": "رؤيتنا",
+    "visionParagraph": "توحيد المدريديستا من جميع أنحاء العالم بمختلف الثقافات والخلفيات والمعتقدات، وبناء أكثر مجتمع حيوي وموثوق وشامل لجماهير ريال مدريد. نهدف إلى تعزيز صوت كل مشجع ومنحه منصة للتواصل والاحتفال والتأثير في الرحلة الجماهيرية الرسمية أينما كان.",
+    "offerTitle": "ماذا نقدم",
+    "offer1Strong": "فئات عضوية موثقة",
+    "offer1Text": "تمنحك محتوى حصرياً وتجارب VIP ومزايا رسمية.",
+    "offer2Strong": "الوصول إلى التذاكر والفعاليات",
+    "offer2Text": "من خلال مخصصات النادي والسحوبات الخاصة.",
+    "offer3Strong": "تفاعل جماهيري تفاعلي،",
+    "offer3Text": "يشمل الاستطلاعات ومعاينات المباريات والنقاشات التكتيكية والمزيد.",
+    "offer4Strong": "قنوات واتساب خاصة وجلسات مباشرة",
+    "offer4Text": "مع المحللين وقادة المجتمع.",
+    "offer5Strong": "مكان على الطاولة -",
+    "offer5Text": "يمكن لأعضاء VIP التصويت والمشاركة في قرارات روابط المشجعين الرسمية.",
+    "whyExistTitle": "لماذا نحن موجودون",
+    "whyExistText": "ريال مدريد ليس مجرد نادٍ لكرة القدم. إنها قصة وإرث وقوة. نحن نؤمن أن كل مشجع يستحق أن يكون جزءاً من هذه القصة ليس كمشاهد فقط، بل كمشارك.",
+    "globalFamilyTitle": "عائلة عالمية",
+    "globalFamilyText": "سواء كنت في مدريد أو المغرب أو المكسيك أو ماليزيا فأنت جزء من عائلة مدريدية واحدة. قوتنا في وحدتنا، وصوتنا يصبح أقوى مع كل عضو ينضم.",
+    "globalFamilyQuote": "كاسا مدريديسا هي فرصتك لتعيش هذه التجربة بالكامل.",
+    "joinUsTitle": "انضم إلينا",
+    "joinUsText1": "كن عضواً رسمياً، واحصل على محتوى حصري، ومثّل ريال مدريد بفخر.",
+    "joinUsText2": "للتعاون أو الإعلام أو الاستفسارات الرسمية",
+    "legalTitle": "قانوني",
+    "termsDescription": "اقرأ الشروط والأحكام",
+    "privacyDescription": "تعرف كيف نحمي بياناتك"
   },
   "royalInvestor": {
+    "programTitle": "برنامج المستثمر الملكي",
+    "programSubtitle": "انضم إلى نخبة من المستثمرين الداعمين لإرث ريال مدريد",
+    "rareOpportunityTitle": "فرصة نادرة!",
+    "rareOpportunityParagraph1": "أندر فرصة للانضمام إلى قلب الجمعية وإدارتها العليا من خلال مساهمة استثنائية.",
+    "rareOpportunityParagraph2": "نقدم هذه العضوية الفريدة للأشخاص أصحاب الرؤية الذين يؤمنون بمستقبل كاسا مدريديسا كمجتمع عالمي لريال مدريد ويرغبون في دعم رسالتها من موقع قيادي مؤثر.",
+    "applicationTitle": "نموذج الانضمام",
+    "applicationSubtitle": "للانضمام إلى عضوية المستثمر الملكي، يرجى تعبئة النموذج أدناه. تخضع جميع الطلبات للمراجعة الرسمية وسيتم التواصل معك في أقرب وقت ممكن.",
+    "placeOfResidence": "مكان الإقامة",
+    "annualIncome": "الدخل السنوي",
+    "selectIncomeRange": "اختر نطاق دخلك السنوي",
+    "submitApplication": "إرسال الطلب",
+    "submittedSuccess": "تم إرسال طلبك بنجاح. سيتواصل فريقنا معك قريباً.",
+    "submitFailed": "فشل إرسال الطلب. يرجى المحاولة مرة أخرى.",
+    "becomeChampion": "كن أحد أبطال الجمعية!",
+    "bottomBannerText": "دعمك يصنع الفرق. ساهم في نمو الجمعية الرسمية لريال مدريد ليظهر اسمك وصورتك في لوحة الشرف أمام آلاف المدريديستا!",
+    "incomeRanges": [
+      "أقل من 50,000$",
+      "50,000$ - 100,000$",
+      "100,000$ - 250,000$",
+      "250,000$ - 500,000$",
+      "500,000$ - 1,000,000$",
+      "أكثر من 1,000,000$"
+    ],
+    "benefits": [
+      {
+        "title": "مزايا عضوية المستثمر الملكي",
+        "description": "",
+        "items": [
+          "الانضمام إلى الإدارة العليا للجمعية لمدة 12 شهراً",
+          "لقاء خاص مع لاعبي ريال مدريد الحاليين أو السابقين (حسب التوفر والتنسيق)",
+          "زيارة حصرية لمرافق ريال مدريد (فالديبيباس) مع جولة VIP بإشراف رسمي",
+          "حضور اجتماعات مع ممثلي النادي الرسميين (حسب الإمكانية والجداول الرسمية)",
+          "تكريم رسمي في الموقع كمستثمر ملكي مع ملف شخصي وصورة",
+          "حضور مغلق للاجتماعات الرسمية والمشاركة في القرارات الاستراتيجية الكبرى",
+          "وصول كامل لجميع مزايا عضوية VIP",
+          "هدية ملكية فاخرة + شهادة تقدير شخصية موقعة من الجمعية",
+          "تغطية إعلامية خاصة للمستثمر عبر جميع منصاتنا"
+        ]
+      },
+      {
+        "title": "من المؤهل؟",
+        "description": "رواد أعمال وشخصيات عامة ومستثمرون ومشجعو ريال مدريد الراغبون في دور حقيقي لتطوير أكبر مجتمع عربي لريال مدريد.",
+        "items": [
+          "يتم اختيار 3 أفراد فقط سنوياً للعضوية",
+          "يتم مراجعة كل طلب بشكل فردي",
+          "تقديم الطلب لا يضمن الموافقة، وتحتفظ الجمعية بحق الرفض لأي سبب",
+          "تخضع الطلبات لمعايير صارمة",
+          "تُقبل الطلبات من أي دولة أو جنسية",
+          "يجب إكمال نموذج الطلب أسفل الصفحة لإرسال طلبك"
+        ]
+      }
+    ],
     "placeholderFullName": "الاسم الكامل",
     "placeholderAge": "العمر",
     "placeholderPhone": "رقم الهاتف",

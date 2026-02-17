@@ -1,5 +1,6 @@
 import ShiningText from "@/components/ShiningText";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   Image,
@@ -26,6 +27,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   description,
   descriptionAr,
 }) => {
+  const { t } = useTranslation();
   return (
     <View className="rounded-lg overflow-hidden mb-5">
       <Image
@@ -40,7 +42,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Text className="text-sm text-text-secondary leading-[22px] text-center mb-2">{description}</Text>
         <Text className="text-sm text-text-secondary leading-[22px] text-center mb-6">{descriptionAr}</Text>
         <TouchableOpacity className="bg-rm-gold px-10 py-3 rounded">
-          <Text className="text-sm font-bold text-white tracking-wider">SOON</Text>
+          <Text className="text-sm font-bold text-white tracking-wider">{t("shop.soon")}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -48,12 +50,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
 };
 
 export default function StoreComingSoon() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const products: ProductCardProps[] = [
     {
       image: "https://casamadridista.com/wp-content/uploads/2025/08/box.png",
-      title: "Queen's perfume",
+      title: t("shop.product1Title"),
       // titleAr: 'عطر الملكة',
       description:
         "انتظر هو كاساماديريستا ورائحة العطور.. شيء غير رسمي، يشتم بوتيرة جيدة خلال الأطفال عليك.",
@@ -63,7 +66,7 @@ export default function StoreComingSoon() {
     {
       image:
         "https://casamadridista.com/wp-content/uploads/2025/08/DAEA05EB-59E7-4316-91D0-926B6F344449.png",
-      title: "Luxe Madridista Box",
+      title: t("shop.product2Title"),
       // titleAr: 'صندوق مدريديستا الفاخر',
       description: "يتوفر بيت المدريديستا.. ليس مجرد صندوق، إنه تجربة.",
       descriptionAr:
@@ -78,7 +81,7 @@ export default function StoreComingSoon() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
       >
         <View className="py-10 px-5 items-center">
-          <ShiningText>CasaMadridista Shop is Coming Soon!</ShiningText>
+          <ShiningText>{t("shop.storeComingSoonBanner")}</ShiningText>
         </View>
 
         <View className="px-5 gap-7.5">

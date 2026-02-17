@@ -28,11 +28,13 @@ import {
   SUBSTITUTES,
   COACH_IMAGE,
 } from "@/mocks/lineup-players";
+import { useTranslation } from "react-i18next";
 
 const PLAYER_SIZE = 80;
 const BENCH_PLAYER_SIZE = 75;
 
 export default function LineupBuilder() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const viewShotRef = useRef<ViewShot>(null);
   const [formation, setFormation] = useState<FormationType>("4-3-3");
@@ -200,11 +202,11 @@ export default function LineupBuilder() {
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(source.uri);
         } else {
-          Alert.alert("Success", "Formation saved!");
+          Alert.alert(t("common.success"), t("formation.saved"));
         }
       }
     } catch (error: any) {
-      Alert.alert("Error", `Failed to download formation ${error.message}`);
+      Alert.alert(t("common.error"), t("formation.downloadFailed", { message: error.message }));
     }
   };
 
@@ -236,13 +238,13 @@ export default function LineupBuilder() {
         >
           <View className="bg-black/30 rounded-2xl p-4 mb-5">
             <Text className="text-3xl font-extrabold text-white mb-5 text-center tracking-wider">
-              LINEUP BUILDER
+              {t("formation.lineupBuilder")}
             </Text>
 
             <View className="flex-row justify-between mb-4">
               <View className="flex-1 mx-1">
                 <Text className="text-status-success text-xs font-semibold mb-2 uppercase">
-                  Formation
+                  {t("formation.formation")}
                 </Text>
                 <TouchableOpacity
                   className="bg-black/40 rounded-lg p-3 flex-row justify-between items-center"
@@ -257,7 +259,7 @@ export default function LineupBuilder() {
 
               <View className="flex-1 mx-1">
                 <Text className="text-status-success text-xs font-semibold mb-2 uppercase">
-                  Show Names
+                  {t("formation.showNames")}
                 </Text>
                 <Switch
                   value={showPlayerNames}
@@ -289,13 +291,13 @@ export default function LineupBuilder() {
 
             <View className="flex-1 mx-1">
               <Text className="text-status-success text-xs font-semibold mb-2 uppercase">
-                Formation Title
+                {t("formation.formationTitle")}
               </Text>
               <TextInput
                 className="bg-black/40 rounded-lg p-3 text-white text-base"
                 value={formationTitle}
                 onChangeText={setFormationTitle}
-                placeholder="Enter formation title"
+                placeholder={t("formation.placeholderFormationTitle")}
                 placeholderTextColor="#888"
               />
             </View>
@@ -307,7 +309,7 @@ export default function LineupBuilder() {
               >
                 <RotateCcw size={20} color="#fff" />
                 <Text className="text-white text-base font-bold ml-2">
-                  Reset
+                  {t("formation.reset")}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -316,7 +318,7 @@ export default function LineupBuilder() {
               >
                 <Download size={20} color="#fff" />
                 <Text className="text-white text-base font-bold ml-2">
-                  Download
+                  {t("formation.download")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -327,7 +329,7 @@ export default function LineupBuilder() {
               <View className="bg-rm-gold/15 py-1.5 items-center">
                 <View className="bg-rm-gold px-3 py-1 rounded">
                   <Text className="text-black text-xs font-extrabold tracking-wider">
-                    COACH
+                    {t("formation.coach")}
                   </Text>
                 </View>
               </View>
@@ -344,11 +346,11 @@ export default function LineupBuilder() {
                     className="text-white text-lg font-bold mb-1 p-0"
                     value={coachName}
                     onChangeText={setCoachName}
-                    placeholder="Coach name"
+                    placeholder={t("formation.placeholderCoachName")}
                     placeholderTextColor="#888"
                   />
                   <Text className="text-rm-gold text-xs font-bold tracking-wider">
-                    HEAD COACH
+                    {t("formation.headCoach")}
                   </Text>
                 </View>
               </View>
@@ -551,10 +553,10 @@ export default function LineupBuilder() {
                   style={{ transform: [{ translateY: -30 }] }}
                 >
                   <Text className="text-white text-sm font-extrabold tracking-wider">
-                    LINEUP
+                    {t("formation.lineup")}
                   </Text>
                   <Text className="text-white text-sm font-extrabold tracking-wider">
-                    BUILDER
+                    {t("formation.builder")}
                   </Text>
                 </View>
                 <View
@@ -562,10 +564,10 @@ export default function LineupBuilder() {
                   style={{ transform: [{ translateY: -30 }] }}
                 >
                   <Text className="text-white text-sm font-extrabold tracking-wider">
-                    LINEUP
+                    {t("formation.lineup")}
                   </Text>
                   <Text className="text-white text-sm font-extrabold tracking-wider">
-                    BUILDER
+                    {t("formation.builder")}
                   </Text>
                 </View>
               </LinearGradient>
@@ -574,7 +576,7 @@ export default function LineupBuilder() {
 
           <View className="bg-black/30 rounded-2xl p-4 mb-5">
             <Text className="text-xl font-bold text-status-success mb-4 text-center tracking-wider">
-              SUBSTITUTES
+              {t("formation.substitutes")}
             </Text>
             <View className="flex-row flex-wrap justify-around">
               {bench.map((player, index) => {

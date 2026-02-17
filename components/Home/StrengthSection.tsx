@@ -3,6 +3,7 @@ import { strengthStats } from "@/mocks/advertisement";
 import { Image } from "expo-image";
 import { Users } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Animated, Dimensions, Text, View } from "react-native";
 import { LayoutChangeEvent } from "react-native/Libraries/Types/CoreEventTypes";
 const { width } = Dimensions.get("window");
@@ -14,6 +15,7 @@ const SquadSection = ({
   shouldAnimate: boolean;
   handleStrengthSectionLayout: (event: LayoutChangeEvent) => void;
 }) => {
+  const { t } = useTranslation();
   const getIcon = (iconName: string) => {
     const iconProps = { width: 156, height: 156 };
     switch (iconName) {
@@ -61,6 +63,22 @@ const SquadSection = ({
         return <Users {...iconProps} />;
     }
   };
+
+  const getLocalizedLabel = (iconName: string, fallback: string) => {
+    switch (iconName) {
+      case "users":
+        return t("home.strengthUnitedMadridista");
+      case "gift":
+        return t("home.strengthPrizeInTotal");
+      case "calendar":
+        return t("home.strengthDailyUpdate");
+      case "heart":
+        return t("home.strengthMadridistaFamily");
+      default:
+        return fallback;
+    }
+  };
+
   return (
     <View
       className="py-10 px-5 bg-bg-medium -mx-4"
@@ -69,19 +87,22 @@ const SquadSection = ({
       <View className="flex-row items-center justify-center mb-2.5">
         <View className="w-[70px] h-0.5 bg-rm-gold mx-10" />
         <Text className="text-2xl font-bold text-text-primary text-center">
-          Our Strength
+          {t("home.ourStrength")}
         </Text>
         <View className="w-[70px] h-0.5 bg-rm-gold mx-10" />
       </View>
       <Text className="text-base text-rm-gold text-center mb-7">
-        Madridista spirit united
+        {t("home.madridistaSpiritUnited")}
       </Text>
 
       <View className="flex-row flex-wrap justify-around gap-4">
         {strengthStats.map((stat, index) => (
           <AnimatedStat
             key={index}
-            stat={stat}
+            stat={{
+              ...stat,
+              label: getLocalizedLabel(stat.icon, stat.label),
+            }}
             icon={getIcon(stat.icon)}
             shouldAnimate={shouldAnimate}
           />

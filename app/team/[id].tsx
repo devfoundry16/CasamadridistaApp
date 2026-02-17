@@ -119,10 +119,10 @@ export default function TeamDetailScreen() {
             className="mx-auto mb-3"
           />
           <Text className="text-[28px] font-bold text-white mb-1 text-center">
-            {teamInfo?.team?.name} Squad
+            {teamInfo?.team?.name} {t("team.squad")}
           </Text>
           <Text className="text-sm text-white text-center">
-            2024-2025 Season
+            {t("team.season", { season: "2024-2025" })}
           </Text>
         </View>
         <View className="p-4">
@@ -130,14 +130,14 @@ export default function TeamDetailScreen() {
             <View className="flex-col justify-around">
               <View className="flex-row items-center m-1.5 gap-2">
                 <MapPin size={20} color="#FFFFFF" />
-                <Text className="text-xs text-text-tertiary font-medium">Country</Text>
+                <Text className="text-xs text-text-tertiary font-medium">{t("team.country")}</Text>
                 {teamInfo?.team?.country && map[teamInfo.team.country] ? (
                   <CountryFlag isoCode={map[teamInfo.team.country]} size={25} />
                 ) : null}
               </View>
               <View className="flex-row items-center m-1.5 gap-2">
                 <Calendar size={20} color="#FFFFFF" />
-                <Text className="text-xs text-text-tertiary font-medium">Founded</Text>
+                <Text className="text-xs text-text-tertiary font-medium">{t("team.founded")}</Text>
                 <Text className="text-base text-white font-bold">{teamInfo?.team?.founded}</Text>
               </View>
               <TouchableOpacity
@@ -149,20 +149,20 @@ export default function TeamDetailScreen() {
                 }}
               >
                 <Building2 size={20} color="#FFFFFF" />
-                <Text className="text-xs text-text-tertiary font-medium">Stadium</Text>
+                <Text className="text-xs text-text-tertiary font-medium">{t("team.stadium")}</Text>
                 <Text className="text-base text-white font-bold">{teamInfo?.venue?.name}</Text>
               </TouchableOpacity>
             </View>
           </View>
 
           <View className="flex-col justify-between mb-4 mt-2">
-            <Text className="text-[22px] font-bold text-white">Squad</Text>
+            <Text className="text-[22px] font-bold text-white">{t("team.squad")}</Text>
             <View className="h-[1.5px] w-full bg-border-default rounded" />
           </View>
 
           <View className="mb-6">
             <View className="bg-rm-gold pl-4">
-              <Text className="text-lg font-semibold text-white py-1.5">GOALKEEPERS</Text>
+              <Text className="text-lg font-semibold text-white py-1.5">{t("team.goalkeepers")}</Text>
             </View>
             {goalkeepers.map((player: Player) => (
               <View key={player.id}>
@@ -179,7 +179,7 @@ export default function TeamDetailScreen() {
 
           <View className="mb-6">
             <View className="bg-rm-gold pl-4">
-              <Text className="text-lg font-semibold text-white py-1.5">DEFENDERS</Text>
+              <Text className="text-lg font-semibold text-white py-1.5">{t("team.defenders")}</Text>
             </View>
             {defenders.map((player: Player) => (
               <View key={player.id}>
@@ -196,7 +196,7 @@ export default function TeamDetailScreen() {
 
           <View className="mb-6">
             <View className="bg-rm-gold pl-4">
-              <Text className="text-lg font-semibold text-white py-1.5">MIDFIELDERS</Text>
+              <Text className="text-lg font-semibold text-white py-1.5">{t("team.midfielders")}</Text>
             </View>
             {midfielders.map((player: Player) => (
               <View key={player.id}>
@@ -213,7 +213,7 @@ export default function TeamDetailScreen() {
 
           <View className="mb-6">
             <View className="bg-rm-gold pl-4">
-              <Text className="text-lg font-semibold text-white py-1.5">FORWARDS</Text>
+              <Text className="text-lg font-semibold text-white py-1.5">{t("team.forwards")}</Text>
             </View>
             {forwards.map((player: Player) => (
               <View key={player.id}>
@@ -229,7 +229,7 @@ export default function TeamDetailScreen() {
           </View>
           <View className="mb-6">
             <View className="bg-rm-gold pl-4">
-              <Text className="text-lg font-semibold text-white py-1.5">COACH</Text>
+              <Text className="text-lg font-semibold text-white py-1.5">{t("team.coach")}</Text>
             </View>
             {coach && (
               <View>
@@ -246,7 +246,7 @@ export default function TeamDetailScreen() {
             <Text style={styles.sectionTitle}>Latest Matches</Text>
             <View style={styles.accentLine} />
           </View> */}
-          <CustomWebView size={600} statsHtml={statsHtml} title="Team Stats" />
+          <CustomWebView size={600} statsHtml={statsHtml} title={t("team.teamStats")} />
 
           {/* {latestMatches.map((match, index) => (
             <View key={index} style={styles.matchCard}>
@@ -297,6 +297,7 @@ function PlayerCard({
   player: Player | Coach;
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <TouchableOpacity className="flex-row items-center rounded-xl p-3" onPress={onPress}>
       <View className="w-10 h-10 rounded-[20px] justify-center items-center mr-3">
@@ -314,8 +315,8 @@ function PlayerCard({
           {player.nationality && map[player.nationality] ? (
             <CountryFlag isoCode={map[player.nationality]} size={25} />
           ) : null}
-          <Text className="text-xs font-bold text-white">Age: </Text>
-          <Text className="text-xs font-bold text-white">{player.age} years</Text>
+          <Text className="text-xs font-bold text-white">{t("player.ageLabel")}</Text>
+          <Text className="text-xs font-bold text-white">{t("player.ageYears", { age: player.age })}</Text>
         </View>
       </View>
     </TouchableOpacity>

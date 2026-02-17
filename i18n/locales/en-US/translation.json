@@ -106,7 +106,9 @@
     "signIn": "Sign in",
     "signUp": "Sign up",
     "placeholderPasswordMin": "At least 6 characters",
-    "placeholderConfirmNewPassword": "Confirm your new password"
+    "placeholderConfirmNewPassword": "Confirm your new password",
+    "failedGoogleSignIn": "Failed to start Google sign-in",
+    "registrationSuccess": "You can now login with your credentials"
   },
   "account": {
     "changePhoto": "Change Photo",
@@ -142,7 +144,9 @@
     "placeholderCurrentPassword": "Enter your current password",
     "placeholderNewPassword": "Enter your new password",
     "placeholderConfirmNewPassword": "Confirm your new password",
-    "loadingSubscription": "Loading subscription"
+    "loadingSubscription": "Loading subscription",
+    "uploadError": "Upload Error",
+    "uploadAvatarFailed": "Failed to upload avatar. Please try again."
   },
   "contact": {
     "title": "Contact",
@@ -181,7 +185,13 @@
     "stripePay": "Stripe Pay",
     "paypalPay": "PayPal Pay",
     "back": "Back",
-    "loading": "Loading campaign"
+    "loading": "Loading campaign",
+    "howMuchToday": "How much would you like to donate today?",
+    "impactMessage": "All donations directly impact our organization and help us further our mission.",
+    "contactDetails": "Please provide your contact details.",
+    "reviewDonation": "Review your donation.",
+    "amount": "Amount",
+    "frequency": "Frequency"
   },
   "membership": {
     "choosePackage": "Choose Your Membership Package",
@@ -192,7 +202,17 @@
     "whoIsEligible": "Who is eligible?",
     "pleaseFillAllFields": "Please fill in all fields",
     "invalidEmail": "Please enter a valid email address.",
-    "loadingPackages": "Loading packages"
+    "loadingPackages": "Loading packages",
+    "packages": "Packages",
+    "royalInvestor": "Royal Investor",
+    "subscribe": "Subscribe",
+    "currentPlan": "Current Plan",
+    "upgrade": "Upgrade",
+    "downgrade": "Downgrade",
+    "changePlan": "Change Plan",
+    "perMonth": " per month",
+    "perYear": " per year",
+    "notAvailable": "Not Available"
   },
   "venue": {
     "loading": "Loading venue",
@@ -202,7 +222,36 @@
     "loading": "Loading league"
   },
   "team": {
-    "loadingSquads": "Loading squads"
+    "loadingSquads": "Loading squads",
+    "squad": "Squad",
+    "season": "{{season}} Season",
+    "country": "Country",
+    "founded": "Founded",
+    "stadium": "Stadium",
+    "goalkeepers": "GOALKEEPERS",
+    "defenders": "DEFENDERS",
+    "midfielders": "MIDFIELDERS",
+    "forwards": "FORWARDS",
+    "coach": "COACH",
+    "teamStats": "Team Stats"
+  },
+  "player": {
+    "playerInformation": "Player Information",
+    "fullName": "Full Name",
+    "position": "Position",
+    "number": "Number",
+    "age": "Age",
+    "nationality": "Nationality",
+    "placeOfBirth": "Place of Birth",
+    "dateOfBirth": "Date Of Birth",
+    "weight": "Weight",
+    "height": "Height",
+    "playerStats": "Player Stats",
+    "ageLabel": "Age: ",
+    "ageYears": "{{age}} years",
+    "club": "Club",
+    "realMadrid": "Real Madrid CF",
+    "losBlancos": "Los Blancos"
   },
   "home": {
     "halaMadrid": "Hala Madrid",
@@ -212,14 +261,24 @@
     "becomeMember": "Become a Member",
     "upcoming": "Upcoming",
     "elapsed": "Elapsed",
-    "extraTime": "Extra Time"
+    "extraTime": "Extra Time",
+    "upcomingMatch": "Upcoming Match",
+    "laLigaStandings": "La Liga Standings",
+    "ourStrength": "Our Strength",
+    "madridistaSpiritUnited": "Madridista spirit united",
+    "strengthUnitedMadridista": "United Madridista",
+    "strengthPrizeInTotal": "Prize in Total",
+    "strengthDailyUpdate": "Daily update",
+    "strengthMadridistaFamily": "Madridista Family"
   },
   "campaign": {
     "loading": "Loading Campaign",
     "enterCustomAmount": "Enter custom amount",
     "firstName": "First Name",
     "lastName": "Last Name",
-    "emailAddress": "Email Address"
+    "emailAddress": "Email Address",
+    "goal": "Goal",
+    "raised": "Raised"
   },
   "wallet": {
     "loading": "Loading wallet",
@@ -228,20 +287,183 @@
     "insufficientBalance": "Insufficient balance",
     "placeholderRecipientEmail": "Enter recipient's email",
     "placeholderAmount": "Enter amount",
-    "placeholderNote": "Add a note for this transfer"
+    "placeholderNote": "Add a note for this transfer",
+    "transferEnterRecipientAndAmount": "Please enter recipient email and amount",
+    "transferInvalidAmount": "Please enter a valid amount",
+    "transferFunds": "Transfer Funds",
+    "availableBalance": "Available Balance",
+    "recipientEmail": "Recipient Email",
+    "amount": "Amount",
+    "messageOptional": "Message (Optional)",
+    "processing": "Processing...",
+    "transferCta": "Transfer {{amount}}",
+    "enterAmount": "Please enter an amount",
+    "invalidAmount": "Please enter a valid amount",
+    "minimumAmount": "Minimum amount is $1.00",
+    "fundsAdded": "$ {{amount}} has been added to your wallet!",
+    "addFundsFailed": "Failed to add funds. Please try again.",
+    "processingPaymentMessage": "Please wait while we process your payment...",
+    "addFunds": "Add Funds",
+    "quickSelect": "Quick Select:",
+    "paymentMethod": "Payment Method",
+    "paymentViaStripe": "Payment will be processed securely via Stripe",
+    "addAmountCta": "Add ${{amount}}",
+    "transferCompleted": "Transfer completed successfully!",
+    "transferFailed": "Failed to transfer funds. Please try again.",
+    "retry": "Retry",
+    "balance": "Wallet Balance",
+    "transfer": "Transfer",
+    "transactionTopUp": "Wallet Top-up",
+    "transactionPayment": "Payment",
+    "transactionId": "ID",
+    "noTransactionsTitle": "No Transactions Yet",
+    "noTransactionsBody": "Your wallet transactions will appear here once you start using your balance.",
+    "recentTransactions": "Recent Transactions",
+    "transactionSingular": "transaction",
+    "transactionPlural": "transactions"
   },
   "formation": {
     "placeholderFormationTitle": "Enter formation title",
-    "placeholderCoachName": "Coach name"
+    "placeholderCoachName": "Coach name",
+    "saved": "Formation saved!",
+    "downloadFailed": "Failed to download formation {{message}}",
+    "lineupBuilder": "LINEUP BUILDER",
+    "formation": "Formation",
+    "showNames": "Show Names",
+    "formationTitle": "Formation Title",
+    "reset": "Reset",
+    "download": "Download",
+    "coach": "COACH",
+    "headCoach": "HEAD COACH",
+    "lineup": "LINEUP",
+    "builder": "BUILDER",
+    "substitutes": "SUBSTITUTES"
   },
   "payment": {
     "placeholderCardNumber": "Card Number",
     "placeholderCardHolder": "Card Holder Name",
     "placeholderExpiry": "MM/YY",
     "placeholderCvv": "CVV",
-    "placeholderPaypalEmail": "PayPal Email"
+    "placeholderPaypalEmail": "PayPal Email",
+    "fillCardDetails": "Please fill in all card details",
+    "enterPaypalEmail": "Please enter PayPal email",
+    "deleteMethodTitle": "Delete Payment Method",
+    "deleteMethodConfirm": "Are you sure you want to delete this payment method?",
+    "delete": "Delete",
+    "addMethod": "Add Payment Method",
+    "noMethods": "No payment methods saved",
+    "expires": "Expires",
+    "paypal": "PayPal",
+    "creditCard": "Credit Card",
+    "saveMethod": "Save Payment Method"
+  },
+  "subscription": {
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "price": "Price",
+    "upgradePlan": "Upgrade Plan",
+    "noActive": "No Active Subscription",
+    "joinBenefits": "Join Casa Madridista and enjoy exclusive benefits",
+    "viewPlans": "View Membership Plans"
+  },
+  "shop": {
+    "welcome": "Welcome",
+    "title": "CasaMadridista Shop",
+    "comingSoonTitle": "Shop Coming Soon",
+    "comingSoonMessage": "The shop feature has been migrated to a new system.\nCheck back soon for updates!",
+    "soon": "SOON",
+    "storeComingSoonBanner": "CasaMadridista Shop is Coming Soon!",
+    "product1Title": "Queen's perfume",
+    "product2Title": "Luxe Madridista Box"
+  },
+  "vision": {
+    "title": "Got a Vision? Let's Talk It Through",
+    "subtitle": "Your Ideas Matter Share Them with Us",
+    "contactNow": "Contact Now"
+  },
+  "about": {
+    "brandArabic": "بيت المدريديستا",
+    "casaTitle": "Casa Madridista",
+    "casaParagraph1": "Casa Madridista is more than just a website it is the digital home of every passionate Madridista around the world. We are an official fan network, proudly uniting Real Madrid fan clubs from more than 30 countries under one banner.",
+    "casaParagraph2": "Driven by loyalty, history, and the legacy of greatness, our mission is to create a shared space for fans to connect, celebrate, and participate in the Real Madrid journey wherever they are in the world.",
+    "visionTitle": "Our Vision",
+    "visionParagraph": "To unite Madridistas from all corners of the globe from every culture, background, and belief and create the most vibrant, trusted, and inclusive community of Real Madrid fans. We aim to amplify the voice of every fan, giving them a platform to connect, celebrate, and influence the official fan journey wherever they are in the world.",
+    "offerTitle": "What We Offer",
+    "offer1Strong": "Verified Membership Tiers",
+    "offer1Text": "that unlock exclusive content, VIP experiences, and official perks.",
+    "offer2Strong": "Access to Tickets & Events",
+    "offer2Text": "through our club allocations and special raffles.",
+    "offer3Strong": "Interactive Fan Engagement,",
+    "offer3Text": "including polls, match previews, tactical discussions, and more.",
+    "offer4Strong": "Private WhatsApp Channels & Live Sessions",
+    "offer4Text": "with analysts and community leaders.",
+    "offer5Strong": "A Place at the Table -",
+    "offer5Text": "VIP members can vote and take part in official fan club decisions.",
+    "whyExistTitle": "Why We Exist",
+    "whyExistText": "Real Madrid is not just a football club. It's a story. A legacy. A force. We believe every fan deserves to be part of that story not just as a spectator, but as a participant.",
+    "globalFamilyTitle": "A Global Family",
+    "globalFamilyText": "Whether you're in Madrid, Morocco, Mexico, or Malaysia you are part of One Madridista Family. Our strength lies in our unity, and our voice becomes louder with every member who joins.",
+    "globalFamilyQuote": "Casa Madridista is your chance to live that experience fully.",
+    "joinUsTitle": "Join Us",
+    "joinUsText1": "Become an official member, access exclusive content, and represent Real Madrid with pride.",
+    "joinUsText2": "For collaborations, media, or official inquiries",
+    "legalTitle": "Legal",
+    "termsDescription": "Read our terms and conditions",
+    "privacyDescription": "Learn how we protect your data"
   },
   "royalInvestor": {
+    "programTitle": "Royal Investor Program",
+    "programSubtitle": "Join an elite group of investors supporting Real Madrid's legacy",
+    "rareOpportunityTitle": "Rare Opportunity!",
+    "rareOpportunityParagraph1": "The rarest opportunity to join the heart of the association and its senior management through an exceptional contribution.",
+    "rareOpportunityParagraph2": "We offer this unique membership to visionary individuals who believe in the future of CasaMadridista as a global Real Madrid community and wish to support its mission from a truly influential leadership position.",
+    "applicationTitle": "Join Application Form",
+    "applicationSubtitle": "To join the Royal Investor Membership, please fill out the form below. All applications are subject to official review, and you will be contacted as soon as possible.",
+    "placeOfResidence": "Place of Residence",
+    "annualIncome": "Annual Income",
+    "selectIncomeRange": "Select your annual income range",
+    "submitApplication": "Submit Application",
+    "submittedSuccess": "Your application has been submitted. Our team will contact you shortly.",
+    "submitFailed": "Failed to submit application. Please try again.",
+    "becomeChampion": "Become one of the association's champions!",
+    "bottomBannerText": "Your support makes a difference. Contribute to the growth of the official Real Madrid association, and your name and photo will shine on the honor board in front of thousands of Madridistas!",
+    "incomeRanges": [
+      "Under $50,000",
+      "$50,000 - $100,000",
+      "$100,000 - $250,000",
+      "$250,000 - $500,000",
+      "$500,000 - $1,000,000",
+      "Over $1,000,000"
+    ],
+    "benefits": [
+      {
+        "title": "Benefits of the Royal Investor Membership",
+        "description": "",
+        "items": [
+          "Join the association’s senior management for 12 months",
+          "Private meeting with current or former Real Madrid players (subject to availability and coordination)",
+          "Exclusive visit to Real Madrid facilities (Valdebebas), including a VIP tour supervised by an official",
+          "Attend meetings with official club representatives (subject to feasibility and official schedules)",
+          "Official recognition on the website as a “Royal Investor” with a profile and photo",
+          "Closed attendance at official meetings and participation in major strategic decisions",
+          "Full access to all VIP membership privileges",
+          "Luxurious royal souvenir + a personalized certificate of appreciation signed by the association",
+          "Special media coverage for the investor across all our platforms"
+        ]
+      },
+      {
+        "title": "Who is eligible?",
+        "description": "Entrepreneurs, public figures, investors, and Real Madrid fans seeking a real role in developing the largest Arabic-speaking Real Madrid community.",
+        "items": [
+          "Only 3 individuals are selected annually for membership",
+          "Each application is reviewed individually",
+          "Submitting an application does not guarantee approval. The association reserves the right to reject any application for any reason",
+          "Applications are subject to strict criteria",
+          "Applications are accepted from any country or nationality",
+          "The application form at the bottom of the page must be completed to submit your request"
+        ]
+      }
+    ],
     "placeholderFullName": "Enter your full name",
     "placeholderAge": "Enter your age",
     "placeholderPhone": "Enter your phone number",

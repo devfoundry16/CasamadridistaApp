@@ -1,11 +1,13 @@
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { Dimensions, Text, TouchableOpacity, View } from "react-native";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 const VisionSection = () => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -26,16 +28,16 @@ const VisionSection = () => {
             contentFit="cover"
           />
           <Text className="text-[22px] font-bold text-text-primary text-center mb-2">
-            Got a Vision? Let&apos;s Talk It Through
+            {t("vision.title")}
           </Text>
           <Text className="text-sm text-text-primary text-center mb-5">
-            Your Ideas Matter Share Them with Us
+            {t("vision.subtitle")}
           </Text>
           <TouchableOpacity
             className="bg-rm-gold px-[30px] py-3 rounded-lg"
             onPress={() => router.push("/contact")}
           >
-            <Text className="text-sm font-bold text-text-dark">Contact Now</Text>
+            <Text className="text-sm font-bold text-text-dark">{t("vision.contactNow")}</Text>
           </TouchableOpacity>
         </View>
       </View>

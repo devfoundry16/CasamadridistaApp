@@ -6,6 +6,7 @@ import {
 } from "@react-navigation/material-top-tabs";
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
 import { withLayoutContext } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -17,6 +18,7 @@ export const MaterialTopTabs = withLayoutContext<
 >(Navigator);
 
 export default function MembershipsLayout() {
+  const { t } = useTranslation();
   return (
     <>
       <MaterialTopTabs
@@ -40,13 +42,13 @@ export default function MembershipsLayout() {
         <MaterialTopTabs.Screen
           name="packages"
           options={{
-            title: "Packages",
+            title: t("membership.packages"),
           }}
         />
         <MaterialTopTabs.Screen
           name="royal-investor"
           options={{
-            title: "Royal Investor",
+            title: t("membership.royalInvestor"),
           }}
         />
       </MaterialTopTabs>

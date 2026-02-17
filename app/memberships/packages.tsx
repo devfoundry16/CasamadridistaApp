@@ -158,7 +158,7 @@ export default function PackagesScreen() {
             onPress={() => setBillingType("monthly")}
           >
             <Text className={`text-base font-semibold text-center ${billingType === "monthly" ? "text-rm-gold" : "text-white"}`}>
-              Monthly
+              {t("membership.monthly")}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -166,7 +166,7 @@ export default function PackagesScreen() {
             onPress={() => setBillingType("yearly")}
           >
             <Text className={`text-base font-semibold text-center ${billingType === "yearly" ? "text-rm-gold" : "text-white"}`}>
-              Yearly
+              {t("membership.yearly")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -197,20 +197,20 @@ export default function PackagesScreen() {
                 const currentPrice = currentActivePackage?.product.price ?? NaN;
 
                 // Derive CTA label based on current active subscription
-                let ctaLabel = "Subscribe";
+                let ctaLabel = t("membership.subscribe");
                 if (activeProductIds.length > 0) {
                   if (selectedProductId && activeProductIds.includes(selectedProductId)) {
-                    ctaLabel = "Current Plan";
+                    ctaLabel = t("membership.currentPlan");
                   } else if (!isNaN(currentPrice) && !isNaN(selectedPrice)) {
-                    if (selectedPrice > currentPrice) ctaLabel = "Upgrade";
-                    else if (selectedPrice < currentPrice) ctaLabel = "Downgrade";
-                    else ctaLabel = "Change Plan";
+                    if (selectedPrice > currentPrice) ctaLabel = t("membership.upgrade");
+                    else if (selectedPrice < currentPrice) ctaLabel = t("membership.downgrade");
+                    else ctaLabel = t("membership.changePlan");
                   } else {
-                    ctaLabel = "Change Plan";
+                    ctaLabel = t("membership.changePlan");
                   }
                 }
 
-                const disableCTA = !selectedPurchasePackage || ctaLabel === "Current Plan";
+                const disableCTA = !selectedPurchasePackage || ctaLabel === t("membership.currentPlan");
 
                 return (
                   <View key={pkg.id}>
@@ -238,7 +238,7 @@ export default function PackagesScreen() {
                             : `$${pkg.yearlyPrice}`}
                         </Text>
                         <Text className="text-sm text-text-secondary">
-                          {billingType === "monthly" ? " per month" : " per year"}
+                          {billingType === "monthly" ? t("membership.perMonth") : t("membership.perYear")}
                         </Text>
                       </View>
                       <View className="mb-4">
@@ -267,7 +267,7 @@ export default function PackagesScreen() {
                         onPress={() => selectedPurchasePackage && !disableCTA && handleSubscribe(selectedPurchasePackage)}
                       >
                         <Text className={`text-base font-bold ${pkg.badge === "Popular" ? "text-white" : "text-white"}`}>
-                          {selectedPurchasePackage ? ctaLabel : "Not Available"}
+                          {selectedPurchasePackage ? ctaLabel : t("membership.notAvailable")}
                         </Text>
                       </TouchableOpacity>
                     </View>

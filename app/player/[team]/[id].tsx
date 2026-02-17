@@ -6,11 +6,13 @@ import { CountryMap } from "@/types/soccer/profile";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, Text, View } from "react-native";
 import CountryFlag from "react-native-country-flag";
 
 const map: CountryMap = countries;
 export default function PlayerDetailScreen() {
+  const { t } = useTranslation();
   const { team, id } = useLocalSearchParams();
   const { playersList } = useFootball();
   const { apiSports } = useEnvironment();
@@ -85,37 +87,37 @@ export default function PlayerDetailScreen() {
 
         <View className="p-4">
           <View className="mb-6">
-            <Text className="text-xl font-bold text-rm-gold mb-3 pl-1">Player Information</Text>
+            <Text className="text-xl font-bold text-rm-gold mb-3 pl-1">{t("player.playerInformation")}</Text>
             <View className="rounded-xl p-4 pt-0">
               <View className="flex-row justify-between items-center py-3">
-                <Text className="text-sm text-white font-medium">Full Name</Text>
+                <Text className="text-sm text-white font-medium">{t("player.fullName")}</Text>
                 <Text className="text-sm text-white font-semibold">{player?.name}</Text>
               </View>
               <View className="h-px bg-border-default" />
               <View className="flex-row justify-between items-center py-3">
-                <Text className="text-sm text-white font-medium">Position</Text>
+                <Text className="text-sm text-white font-medium">{t("player.position")}</Text>
                 <Text className="text-sm text-white font-semibold">{player?.position}</Text>
               </View>
               <View className="h-px bg-border-default" />
               <View className="flex-row justify-between items-center py-3">
-                <Text className="text-sm text-white font-medium">Number</Text>
+                <Text className="text-sm text-white font-medium">{t("player.number")}</Text>
                 <Text className="text-sm text-white font-semibold">{player?.number}</Text>
               </View>
               <View className="h-px bg-border-default" />
               <View className="flex-row justify-between items-center py-3">
-                <Text className="text-sm text-white font-medium">Age</Text>
+                <Text className="text-sm text-white font-medium">{t("player.age")}</Text>
                 <Text className="text-sm text-white font-semibold">{player?.age}</Text>
               </View>
               <View className="h-px bg-border-default" />
               <View className="flex-row justify-between items-center py-3">
-                <Text className="text-sm text-white font-medium">Nationality</Text>
+                <Text className="text-sm text-white font-medium">{t("player.nationality")}</Text>
                 {player?.nationality && map[player?.nationality] ? (
                   <CountryFlag isoCode={map[player?.nationality]} size={25} />
                 ) : null}
               </View>
               <View className="h-px bg-border-default" />
               <View className="flex-row justify-between items-center py-3">
-                <Text className="text-sm text-white font-medium">Place of Birth</Text>
+                <Text className="text-sm text-white font-medium">{t("player.placeOfBirth")}</Text>
                 <View className="flex-row justify-center items-center">
                   <Text className="text-sm text-white font-semibold">{player?.birth.place} </Text>
                   {player?.birth.country && map[player?.birth.country] ? (
@@ -128,17 +130,17 @@ export default function PlayerDetailScreen() {
               </View>
               <View className="h-px bg-border-default" />
               <View className="flex-row justify-between items-center py-3">
-                <Text className="text-sm text-white font-medium">Date Of Birth</Text>
+                <Text className="text-sm text-white font-medium">{t("player.dateOfBirth")}</Text>
                 <Text className="text-sm text-white font-semibold">{player?.birth.date}</Text>
               </View>
               <View className="h-px bg-border-default" />
               <View className="flex-row justify-between items-center py-3">
-                <Text className="text-sm text-white font-medium">Weight</Text>
+                <Text className="text-sm text-white font-medium">{t("player.weight")}</Text>
                 <Text className="text-sm text-white font-semibold">{player?.weight}</Text>
               </View>
               <View className="h-px bg-border-default" />
               <View className="flex-row justify-between items-center py-3">
-                <Text className="text-sm text-white font-medium">Height</Text>
+                <Text className="text-sm text-white font-medium">{t("player.height")}</Text>
                 <Text className="text-sm text-white font-semibold">{player?.height}</Text>
               </View>
             </View>
@@ -147,7 +149,7 @@ export default function PlayerDetailScreen() {
           <CustomWebView
             size={600}
             statsHtml={statsHtml}
-            title="Player Stats"
+            title={t("player.playerStats")}
           />
         </View>
       </ScrollView>

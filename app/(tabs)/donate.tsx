@@ -61,12 +61,12 @@ export default function DonateScreen() {
               </View>
               <View className="flex-col justify-center items-center">
                 <Text className="text-base text-text-secondary mb-1">
-                  Amount Raised: {cp.goalStats.actualFormatted}
+                  {t("campaign.raised")}: {cp.goalStats.actualFormatted}
                 </Text>
                 <Text className="text-base text-text-secondary mb-1">
-                  Our Goal: {cp.goalStats.goalFormatted}
+                  {t("campaign.goal")}: {cp.goalStats.goalFormatted}
                 </Text>
-                <Text className="text-base text-rm-gold font-semibold">Status: {cp.status}</Text>
+                <Text className="text-base text-rm-gold font-semibold">{t("common.status")}: {cp.status}</Text>
               </View>
             </TouchableOpacity>
           );

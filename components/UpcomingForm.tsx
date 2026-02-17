@@ -2,6 +2,7 @@ import Colors from "@/constants/colors";
 import { Match } from "@/types/soccer/match";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { Circle } from "react-native-progress";
 
@@ -25,6 +26,7 @@ export default function UpcomingForm({
   awayTeamLastMatches,
 }: UpcomingProps) {
   const router = useRouter();
+  const { i18n } = useTranslation();
   const maxValues = [365, 24, 60, 60];
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: "0",
@@ -48,6 +50,14 @@ export default function UpcomingForm({
   };
 
   const live = nextMatch.goals.home == null ? false : true;
+  const formatMatchDate = (date: string | Date) =>
+    new Date(date).toLocaleDateString(i18n.language.startsWith("ar") ? "ar-SA" : "en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   useEffect(() => {
     const calculateTimeLeft = async () => {
       const matchDateString: any = nextMatch?.fixture.date;
@@ -76,7 +86,7 @@ export default function UpcomingForm({
       const timer = setInterval(calculateTimeLeft, 1000);
       return () => clearInterval(timer);
     }
-  }, [nextMatch]);
+  }, [nextMatch, live, setLive]);
 
   return (
     <View className="bg-bg-medium/50 rounded-2xl p-4 items-center justify-center">
@@ -90,13 +100,7 @@ export default function UpcomingForm({
       >
         <Text className="text-text-primary text-[11px] text-center mb-2.5">
           {nextMatch?.fixture.venue.name} |{" "}
-          {new Date(nextMatch?.fixture.date).toLocaleDateString("en-US", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          {formatMatchDate(nextMatch?.fixture.date)}
         </Text>
       </TouchableOpacity>
 
@@ -155,7 +159,7 @@ export default function UpcomingForm({
         <View className="flex-row justify-around items-center gap-0.5">
           {Object.entries(timeLeft).map(([label, value], i) => (
             <View key={i}>
-              {((i < 3 && value != "00") || i == 3) && (
+              {((i < 3 && value !== "00") || i === 3) && (
                 <TimeCircle
                   label={label.toUpperCase()}
                   value={value}

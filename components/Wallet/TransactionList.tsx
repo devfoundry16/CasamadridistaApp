@@ -2,6 +2,7 @@
 import { WalletTransaction } from "@/services/WalletService";
 import { formatDate } from "@/utils/helper";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FlatList, Text, View } from "react-native";
 
 interface TransactionListProps {
@@ -13,6 +14,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   transactions,
   currency = "$",
 }) => {
+  const { t } = useTranslation();
   const getTransactionIcon = (type: "credit" | "debit"): string => {
     return type === "credit" ? "⬆️" : "⬇️";
   };
@@ -37,7 +39,10 @@ export const TransactionList: React.FC<TransactionListProps> = ({
 
       <View className="flex-1 mr-3">
         <Text className="text-base font-medium text-text-primary mb-1 leading-5" numberOfLines={2}>
-          {item.description || (item.type === 'credit' ? 'Wallet Top-up' : 'Payment')}
+          {item.description ||
+            (item.type === "credit"
+              ? t("wallet.transactionTopUp")
+              : t("wallet.transactionPayment"))}
         </Text>
         <Text className="text-xs text-text-secondary mb-0.5">
           {formatDate(item.created_at)}
@@ -47,7 +52,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         </Text>
         {item.stripe_payment_intent_id && (
           <Text className="text-[11px] text-text-tertiary italic">
-            ID: {item.stripe_payment_intent_id.substring(0, 20)}...
+            {t("wallet.transactionId")}: {item.stripe_payment_intent_id.substring(0, 20)}...
           </Text>
         )}
       </View>
@@ -72,11 +77,10 @@ export const TransactionList: React.FC<TransactionListProps> = ({
     <View className="items-center py-10 px-5">
       <Text className="text-5xl mb-4">💳</Text>
       <Text className="text-lg font-bold text-text-secondary mb-2 text-center">
-        No Transactions Yet
+        {t("wallet.noTransactionsTitle")}
       </Text>
       <Text className="text-sm text-text-tertiary text-center leading-5">
-        Your wallet transactions will appear here once you start using your
-        balance.
+        {t("wallet.noTransactionsBody")}
       </Text>
     </View>
   );
@@ -85,11 +89,13 @@ export const TransactionList: React.FC<TransactionListProps> = ({
     <View className="bg-bg-card mx-4 mb-4 rounded-xl p-4 shadow-md">
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-lg font-bold text-text-primary">
-          Recent Transactions
+          {t("wallet.recentTransactions")}
         </Text>
         <Text className="text-xs text-text-secondary bg-bg-light px-2 py-1 rounded-xl">
           {transactions.length}{" "}
-          {transactions.length === 1 ? "transaction" : "transactions"}
+          {transactions.length === 1
+            ? t("wallet.transactionSingular")
+            : t("wallet.transactionPlural")}
         </Text>
       </View>
 
