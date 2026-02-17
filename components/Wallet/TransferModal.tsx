@@ -1,5 +1,6 @@
 // components/TransferModal.tsx
 import { Text } from "@/components/Text";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from 'react';
 import {
   Alert,
@@ -88,7 +89,7 @@ export const TransferModal: React.FC<TransferModalProps> = ({
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
     >
-      <View className="flex-1 bg-bg-medium">
+      <SafeAreaView className="flex-1 bg-bg-medium">
         <View className="flex-row justify-between items-center p-4 border-b border-border-default">
           <Text className="text-lg font-bold text-text-primary">{t("wallet.transferFunds")}</Text>
           <TouchableOpacity
@@ -165,7 +166,7 @@ export const TransferModal: React.FC<TransferModalProps> = ({
             </Text>
           </TouchableOpacity>
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 };

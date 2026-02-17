@@ -13,6 +13,7 @@ import { useStripePay } from "@/hooks/useStripePay";
 import { useWallet } from "@/hooks/useWallet";
 import { Spinner } from "../Spinner";
 import { useTranslation } from "react-i18next";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface AddFundsModalProps {
   visible: boolean;
@@ -111,7 +112,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
     >
-      <View className="flex-1 bg-bg-medium">
+      <SafeAreaView className="flex-1 bg-bg-medium">
         <View className="flex-row justify-between items-center p-4 border-b border-border-default">
           <Text className="text-lg font-bold text-text-primary">{t("wallet.addFunds")}</Text>
           <TouchableOpacity
@@ -200,7 +201,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
             </Text>
           </TouchableOpacity>
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 };
