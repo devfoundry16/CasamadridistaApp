@@ -14,12 +14,12 @@ import { Match } from "@/types/soccer/match";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Text } from "@/components/Text";
 import {
   Alert,
   Dimensions,
   Pressable,
   ScrollView,
-  Text,
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -221,10 +221,10 @@ export default function HomeScreen() {
           contentFit="cover"
         />
         <View className="absolute left-0 right-0 items-center pb-[300px] pt-[10%]">
-          <Text className="text-[30px] font-black text-white mb-3.5 text-center italic">
+          <Text className="text-[25px] font-bold text-white mb-3.5">
             {t("home.fanClub")}
           </Text>
-          <Text className="text-lg text-white opacity-80 italic text-center">
+          <Text className="text-lg text-white opacity-80 text-center">
             {t("home.joinLargest")}
           </Text>
           <Pressable

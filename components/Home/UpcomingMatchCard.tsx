@@ -4,10 +4,10 @@ import { useRouter } from "expo-router";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { Text } from "@/components/Text";
 import {
   Dimensions,
   Image,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";

@@ -4,7 +4,8 @@ import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Dimensions, ScrollView, Text, View } from "react-native";
+import { Text } from "@/components/Text";
+import { Alert, Dimensions, ScrollView, View } from "react-native";
 
 const { width: screenWidth } = Dimensions.get("window");
 

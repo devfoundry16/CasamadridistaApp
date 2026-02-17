@@ -8,10 +8,10 @@ import {
   Shield,
   Volleyball,
 } from "lucide-react-native";
+import { Text } from "@/components/Text";
 import {
   Dimensions,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";

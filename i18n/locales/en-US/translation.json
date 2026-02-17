@@ -411,6 +411,201 @@
     "termsDescription": "Read our terms and conditions",
     "privacyDescription": "Learn how we protect your data"
   },
+  "privacyPolicy": {
+    "lastUpdated": "Last updated: February 2026",
+    "section1": {
+      "title": "1. Information We Collect",
+      "startDesc": "We may collect the following types of information:",
+      "endDesc": "",
+      "points": [
+        "Personal Information: Name, email address, phone number (optional where indicated), billing address, and payment details (processed securely via Stripe).",
+        "Membership Data: Subscription tier, membership status, preferences, and engagement history.",
+        "Wallet Data: In-app wallet balance, transaction history, add-funds and transfer activity (when you use the wallet feature).",
+        "Donation Data: When you donate to campaigns, we collect donation amount, frequency, name, email, and payment method; payment details are processed by Stripe.",
+        "Contact & Support: When you use the contact form, we collect name, email, optional phone, and your message. When you submit the Royal Investor application form, we collect full name, age, phone number, email, nationality, place of residence, and annual income. We send this information by email (via our email service provider, Resend) to respond to your inquiry or process your application.",
+        "Device Information: Device identifiers, app version, and device type (collected by third-party services for app functionality).",
+        "Photos/Media: User profile pictures and avatars (with your permission when you upload them).",
+        "Authentication Data: Login credentials and authentication tokens stored securely on your device. When you sign in with Google, we receive from Google your email, name, and optionally profile picture to create or link your account; Google's use of your data is governed by Google's privacy policy.",
+        "Language Preference: When you change the app language (e.g. English or Arabic), we store your choice locally to display the app in your preferred language."
+      ]
+    },
+    "section2": {
+      "title": "2. How We Use Your Information",
+      "startDesc": "We use your information to:",
+      "endDesc": "",
+      "points": [
+        "Provide and manage your membership and account.",
+        "Process payments, upgrades, and renewals.",
+        "Send news, updates, and exclusive member content.",
+        "Improve the functionality and user experience of our app.",
+        "Ensure the security of your data and prevent unauthorized access or fraud.",
+        "Manage subscriptions and in-app purchases.",
+        "Provide app updates and technical support."
+      ]
+    },
+    "section3": {
+      "title": "3. Sharing Your Information",
+      "startDesc": "We do not sell, rent, or trade your personal information. We only share it:",
+      "endDesc": "",
+      "points": [
+        "With trusted payment processors (Stripe) to process your transactions.",
+        "With Google when you choose Sign in with Google: Google processes your sign-in and may provide us with your email, name, and profile picture. See Google's privacy policy: https://policies.google.com/privacy",
+        "With Supabase to provide authentication, account management, and backend services. Supabase processes and stores authentication and user data on our behalf. See their privacy policy: https://supabase.com/privacy",
+        "With RevenueCat to manage subscriptions and in-app purchases. RevenueCat may collect device identifiers and purchase history. See their privacy policy: https://www.revenuecat.com/privacy",
+        "With API-Sports.io to display sports data and widgets. They may collect interaction data and IP addresses.",
+        "With Expo to provide app updates and development services. Expo may collect device identifiers and app version information. See their privacy policy: https://expo.dev/privacy",
+        "With Resend to send emails when you submit the contact form or the Royal Investor application form. Resend processes the information you provide to deliver these emails to us. See their privacy policy: https://resend.com/legal/privacy-policy",
+        "When required by law or in response to legal requests.",
+        "With third-party service providers who assist in operating our app, under strict confidentiality agreements."
+      ]
+    },
+    "section4": {
+      "title": "4. Data Security",
+      "startDesc": "We use industry-standard security measures to safeguard your personal data. All payment transactions are encrypted via Stripe. Sensitive information stored locally on your device is protected using secure storage mechanisms. All data transmitted between the app and our servers uses HTTPS encryption.",
+      "endDesc": "",
+      "points": []
+    },
+    "section5": {
+      "title": "5. Data Storage",
+      "startDesc": "We store certain user data locally on your device using secure storage to improve app performance and provide offline functionality. This includes:",
+      "endDesc": "You can clear this data by uninstalling the app or using your device's app data clearing features.",
+      "points": [
+        "Authentication tokens for secure login.",
+        "User preferences and settings (including language preference).",
+        "Cached app data for faster loading."
+      ]
+    },
+    "section6": {
+      "title": "6. Device Permissions",
+      "startDesc": "Our app may request the following permissions:",
+      "endDesc": "You can revoke these permissions at any time through your device settings. Some app features may not function properly without these permissions.",
+      "points": [
+        "Camera: Used to take photos for your profile picture (optional).",
+        "Media Library: Used to select existing photos for your profile picture (optional)."
+      ]
+    },
+    "section7": {
+      "title": "7. Your Rights",
+      "startDesc": "Depending on your location, you may have the right to:",
+      "endDesc": "To exercise these rights, please email us at: Contact@casamadridista.com. We will respond to your request within 30 days.",
+      "points": [
+        "Access, update, or delete your personal data.",
+        "Object to or restrict how your data is processed.",
+        "Withdraw consent for communications at any time.",
+        "Request a copy of your personal data.",
+        "Request deletion of your account and associated data."
+      ]
+    },
+    "section8": {
+      "title": "8. Data Retention",
+      "startDesc": "We retain your personal data for as long as your account is active or as needed to provide services. If you request account deletion, we will delete your personal data within 30 days, except where we are required to retain it for legal or regulatory purposes.",
+      "endDesc": "",
+      "points": []
+    },
+    "section9": {
+      "title": "9. Third-Party Links",
+      "startDesc": "Our app may contain links to third-party websites or services. We are not responsible for the privacy practices or content of those sites. Please review their privacy policies separately.",
+      "endDesc": "",
+      "points": []
+    },
+    "section10": {
+      "title": "10. In-App Wallet and Donations",
+      "startDesc": "When you use the in-app wallet (balance, add funds, transfers) or make donations to campaigns, we process the data needed to complete those operations. Wallet balance and transaction history are stored on our servers and linked to your account. Donation amounts and donor information may be used for campaign reporting and receipts. Payment details for wallet top-ups and donations are handled by our payment processors (Stripe) and are not stored by us.",
+      "endDesc": "",
+      "points": []
+    },
+    "section11": {
+      "title": "11. Contact and Support",
+      "startDesc": "When you submit a message through our contact form or the Royal Investor application form, we use the information you provide only to respond to your inquiry or process your application. These submissions are sent to us by email via Resend, our email delivery provider. We do not use contact form or Royal Investor form submissions for marketing unless you have given separate consent.",
+      "endDesc": "",
+      "points": []
+    },
+    "section12": {
+      "title": "12. Sign-In with Google, Supabase, and App Links",
+      "startDesc": "You can sign in with your Google account. When you do, you are redirected to Google to authenticate; after sign-in, you are returned to the app via a secure app link (deeplink). We also use secure app links to complete password reset when you tap the link in the reset email. These links may contain tokens used only to complete the sign-in or reset flow. Authentication and backend services are powered by Supabase, which processes and stores the data needed to manage your account securely.",
+      "endDesc": "",
+      "points": []
+    },
+    "section13": {
+      "title": "13. Changes to This Policy",
+      "startDesc": "We may update this Privacy Policy periodically. Any changes will be posted on this page with an updated effective date. We encourage you to review it regularly. Continued use of the app after changes constitutes acceptance of the updated policy.",
+      "endDesc": "",
+      "points": []
+    },
+    "section14": {
+      "title": "Contact Us",
+      "startDesc": "If you have any questions about this Privacy Policy, how we handle your data, or wish to exercise your rights, please contact us at:",
+      "endDesc": "",
+      "points": ["Contact@casamadridista.com", "Casa Madridista"]
+    }
+  },
+  "termsOfService": {
+    "section1": {
+      "title": "1. Commitment to Core Community Values",
+      "points": [
+        "Respect all members and refrain from any discrimination or abuse.",
+        "Do not post offensive, racist, political, or religious content on the platform or any official community activity.",
+        "Maintain the spirit of being a Madridista and a passion for the club, contributing to a positive and encouraging environment."
+      ]
+    },
+    "section2": {
+      "title": "2. Respect for the Club and Players",
+      "points": [
+        "Defend the image of Real Madrid and speak positively about it when representing the membership.",
+        "Do not spread false news or rumors about the club or its current or former players.",
+        "Respect the club's history and achievements, and do not belittle any championship or former player.",
+        "Refrain from personal attacks on players or other fans for any reason.",
+        "Contribute to maintaining the reputation of the community and CasaMadridista, and act responsibly during any public communication."
+      ]
+    },
+    "section3": {
+      "title": "3. Privacy and Confidentiality",
+      "points": [
+        "Any exclusive content or membership information or digital tools may not be shared outside the platform.",
+        "Maintain the confidentiality of members' data and do not use it for commercial or personal purposes without explicit permission.",
+        "Do not register other members or claim to have membership or privileges without official authorization."
+      ]
+    },
+    "section4": {
+      "title": "4. Participation and Engagement",
+      "points": [
+        "Actively participate in activities, polls, contests, and games according to ability.",
+        "Passive membership is not sufficient; engagement is a core responsibility of being a community member.",
+        "Support official community initiatives and contribute to making the experience inclusive and enjoyable for all members."
+      ]
+    },
+    "section5": {
+      "title": "5. Content Use and Compliance",
+      "points": [
+        "Do not exploit any exclusive content or community tools for commercial or unauthorized purposes.",
+        "Respect intellectual property rights for all content published on the website and app.",
+        "Do not use the membership or content to promote personal interests that conflict with the image of the community, CasaMadridista, or the club."
+      ]
+    },
+    "section6": {
+      "title": "6. Financial Commitment",
+      "points": [
+        "Pay the monthly or annual subscription on time for each membership tier.",
+        "Any refund or cancellation is subject to the official financial terms of the community.",
+        "Do not attempt to bypass subscription requirements or use illegal methods to access benefits."
+      ]
+    },
+    "section7": {
+      "title": "7. Penalties",
+      "points": [
+        "Any violation of the above terms may result in suspension or termination of membership without compensation.",
+        "Penalties may include revoking exclusive or community benefits, or removing access to channels or apps.",
+        "Management reserves the right to take any legal or administrative action to protect the reputation of the community, CasaMadridista, and the club, including seeking compensation for any material or moral damages."
+      ]
+    },
+    "section8": {
+      "title": "8. Acceptance of Terms",
+      "points": [
+        "By subscribing to a CasaMadridista membership, the member acknowledges having read these terms in full and agrees to comply with them.",
+        "These terms are legally binding, and any violation constitutes sufficient grounds for membership cancellation or enforcement of penalties."
+      ]
+    }
+  },
   "royalInvestor": {
     "programTitle": "Royal Investor Program",
     "programSubtitle": "Join an elite group of investors supporting Real Madrid's legacy",

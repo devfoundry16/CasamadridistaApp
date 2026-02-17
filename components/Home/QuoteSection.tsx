@@ -3,9 +3,9 @@ import { quotes } from "@/mocks/advertisement";
 import { Image } from "expo-image";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useRef, useState } from "react";
+import { Text } from "@/components/Text";
 import {
   Dimensions,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";

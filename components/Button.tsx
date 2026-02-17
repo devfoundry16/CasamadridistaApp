@@ -1,8 +1,8 @@
 // components/Button.tsx
+import { Text } from "@/components/Text";
 import React from "react";
 import {
   ActivityIndicator,
-  Text,
   TextStyle,
   TouchableOpacity,
   ViewStyle,

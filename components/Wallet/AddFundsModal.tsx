@@ -1,10 +1,10 @@
 // components/AddFundsModal.tsx
+import { Text } from "@/components/Text";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
   View,

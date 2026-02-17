@@ -2,9 +2,9 @@ import { Spinner } from "@/components/Spinner";
 import { Image } from "expo-image";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Text } from "@/components/Text";
 import {
   Dimensions,
-  Text,
   View,
 } from "react-native";
 

@@ -5,10 +5,10 @@ import { router } from "expo-router";
 import { Lock, Mail, Phone, Save, User } from "lucide-react-native";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Text } from "@/components/Text";
 import {
   Alert,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
   View,

@@ -1,7 +1,8 @@
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { ScrollView, Text, View } from "react-native";
+import { Text } from "@/components/Text";
+import { ScrollView, View } from "react-native";
 
 import countries from "@/constants/countries.json";
 import { useFootball } from "@/hooks/useFootball";

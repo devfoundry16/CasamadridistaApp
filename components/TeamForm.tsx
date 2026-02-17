@@ -1,7 +1,8 @@
 // components/TeamForm.tsx
 import { Match } from "@/types/soccer/match";
 import React from "react";
-import { Text, View } from "react-native";
+import { Text } from "@/components/Text";
+import { View } from "react-native";
 
 const outcomeClassNames = {
   win: "bg-status-success",

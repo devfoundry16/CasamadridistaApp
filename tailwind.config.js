@@ -39,6 +39,10 @@ module.exports = {
         'status-warning': '#F59E0B',
         'status-info': '#0033A0',
       },
+      fontFamily: {
+        cairo: ["Cairo_400Regular"],
+        "cairo-bold": ["Cairo_700Bold"],
+      },
     },
   },
   plugins: [],

@@ -3,7 +3,8 @@ import { Match } from "@/types/soccer/match";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Text } from "@/components/Text";
+import { Image, TouchableOpacity, View } from "react-native";
 import { Circle } from "react-native-progress";
 
 import TeamForm from "./TeamForm";

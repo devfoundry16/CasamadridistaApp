@@ -5,9 +5,9 @@ import { router } from "expo-router";
 import { ArrowRight, Calendar, Crown } from "lucide-react-native";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Text } from "@/components/Text";
 import {
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";

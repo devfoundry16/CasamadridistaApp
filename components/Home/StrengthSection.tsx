@@ -4,7 +4,8 @@ import { Image } from "expo-image";
 import { Users } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Animated, Dimensions, Text, View } from "react-native";
+import { Text } from "@/components/Text";
+import { Animated, Dimensions, View } from "react-native";
 import { LayoutChangeEvent } from "react-native/Libraries/Types/CoreEventTypes";
 const { width } = Dimensions.get("window");
 

@@ -5,10 +5,10 @@ import SportsInfoService from "@/services/Football/SportsInfoService";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Text } from "@/components/Text";
 import {
   Image,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";

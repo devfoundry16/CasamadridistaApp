@@ -2,10 +2,10 @@ import { Spinner } from "@/components/Spinner";
 import { Check, X } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Text } from "@/components/Text";
 import {
   Alert,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";

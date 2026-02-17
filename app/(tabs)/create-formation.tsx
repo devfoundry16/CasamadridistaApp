@@ -1,7 +1,7 @@
+import { Text } from "@/components/Text";
 import React, { useRef, useState } from "react";
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   TextInput,

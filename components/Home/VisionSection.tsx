@@ -1,7 +1,8 @@
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import { Text } from "@/components/Text";
+import { Dimensions, TouchableOpacity, View } from "react-native";
 
 const { width: screenWidth } = Dimensions.get("window");
 

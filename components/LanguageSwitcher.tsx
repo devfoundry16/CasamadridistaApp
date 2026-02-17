@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Modal, Pressable, Text } from "react-native";
+import { Text } from "@/components/Text";
+import { View, TouchableOpacity, Modal, Pressable } from "react-native";
 import { useTranslation } from "react-i18next";
 import CountryFlag from "react-native-country-flag";
 import Colors from "@/constants/colors";

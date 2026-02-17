@@ -1,11 +1,11 @@
 import ShiningText from "@/components/ShiningText";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Text } from "@/components/Text";
 import {
   Dimensions,
   Image,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";

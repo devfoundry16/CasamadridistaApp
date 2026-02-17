@@ -2,11 +2,11 @@
 import { Button } from "@/components/Button";
 import { useWallet } from "@/hooks/useWallet";
 import React, { useState } from "react";
+import { Text } from "@/components/Text";
 import {
   Alert,
   RefreshControl,
   ScrollView,
-  Text,
   View,
 } from "react-native";
 import { Spinner } from "../Spinner";

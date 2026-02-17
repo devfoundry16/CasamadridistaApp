@@ -20,6 +20,7 @@ import {
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
+import { Text } from "@/components/Text";
 import {
   Alert,
   I18nManager,
@@ -27,7 +28,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
   View,

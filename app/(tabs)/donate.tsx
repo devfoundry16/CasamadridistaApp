@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View, Text, TouchableOpacity } from "react-native";
+import { Text } from "@/components/Text";
+import { View, TouchableOpacity } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
 import { Spinner } from "@/components/Spinner";

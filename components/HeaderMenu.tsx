@@ -1,10 +1,10 @@
+import { Text } from "@/components/Text";
 import React, { useState } from "react";
 import {
   View,
   TouchableOpacity,
   Modal,
   Pressable,
-  Text,
 } from "react-native";
 import {
   Crown,

@@ -1,7 +1,7 @@
+import { Text } from "@/components/Text";
 import React from "react";
 import {
   ScrollView,
-  Text,
   View,
 } from "react-native";
 

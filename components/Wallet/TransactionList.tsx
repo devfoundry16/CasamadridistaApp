@@ -3,7 +3,8 @@ import { WalletTransaction } from "@/services/WalletService";
 import { formatDate } from "@/utils/helper";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FlatList, Text, View } from "react-native";
+import { Text } from "@/components/Text";
+import { FlatList, View } from "react-native";
 
 interface TransactionListProps {
   transactions: WalletTransaction[];

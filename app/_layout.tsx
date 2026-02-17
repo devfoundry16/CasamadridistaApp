@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import "@/i18n";
+import { FontProvider, useFont } from "@/contexts/FontContext";
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
 import { useEnvironment } from "@/hooks/useEnvironment";
@@ -7,15 +8,18 @@ import { useAuthCallbackDeeplink } from "@/hooks/useAuthCallbackDeeplink";
 import { usePasswordResetDeeplink } from "@/hooks/usePasswordResetDeeplink";
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  Cairo_400Regular,
+  Cairo_700Bold,
+  useFonts,
+} from "@expo-google-fonts/cairo";
 import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
-import { View } from "react-native";
-import { I18nManager } from "react-native";
+import { View, I18nManager } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { development } from "@/config/environment";
 import { StatusBar } from "expo-status-bar";
@@ -44,32 +48,38 @@ const defaultOptions: {
 
 function RootLayoutNav() {
   const { t } = useTranslation();
+  const { fontFamilyBold } = useFont();
+  const headerTitleStyle = {
+    ...defaultOptions.headerTitleStyle,
+    ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
+  };
+  const options = { ...defaultOptions, headerTitleStyle };
   return (
     <>
       <StatusBar style="auto" />
       <Stack>
         <Stack.Screen
           name="(tabs)"
-          options={{ headerShown: false, title: t("nav.home") }}
+          options={{ headerShown: false, title: t("nav.home")}}
         />
         <Stack.Screen
           name="auth/forgot-password"
           options={{
             title: t("nav.forgotPassword"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="auth/reset-password"
           options={{
             title: t("nav.setNewPassword"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="auth/callback"
           options={{
-            ...defaultOptions,
+            ...options,
             title: t("nav.signingIn"),
             headerShown: false,
           }}
@@ -78,112 +88,112 @@ function RootLayoutNav() {
           name="account/wallet"
           options={{
             title: t("nav.wallet"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="account/details"
           options={{
             title: t("nav.accountDetails"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="account/subscription"
           options={{
             title: t("nav.subscription"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="about"
           options={{
             title: t("nav.about"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="contact"
           options={{
             title: t("nav.contact"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="privacy-policy"
           options={{
             title: t("nav.privacyPolicy"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="terms-of-service"
           options={{
             title: t("nav.termsOfService"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="campaign/[id]"
           options={{
             title: t("nav.campaignDetails"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="coach/[id]"
           options={{
             title: t("nav.coachDetails"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="league/[id]/[season]"
           options={{
             title: t("nav.leagueDetails"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="match/[id]"
           options={{
             title: t("nav.matchDetails"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="memberships"
           options={{
             title: t("nav.membership"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="player/[team]/[id]"
           options={{
             title: t("nav.playerDetails"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="product/[id]"
           options={{
             title: t("nav.productDetails"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="team/[id]"
           options={{
             title: t("nav.teamDetails"),
-            ...defaultOptions,
+            ...options,
           }}
         />
         <Stack.Screen
           name="venue/[id]"
           options={{
             title: t("nav.venueDetails"),
-            ...defaultOptions,
+            ...options,
           }}
         />
       </Stack>
@@ -210,9 +220,16 @@ function RootLayoutInner() {
   const { loadEnvironment } = useEnvironment();
   usePasswordResetDeeplink();
   useAuthCallbackDeeplink();
+  const [fontsLoaded] = useFonts({
+    Cairo_400Regular,
+    Cairo_700Bold,
+  });
   useEffect(() => {
     loadEnvironment();
   }, []);
+  if (!fontsLoaded) {
+    return null;
+  }
   return (
     <StripeProvider
       publishableKey={development.STRIPE_PUBLISHABLE_KEY}
@@ -222,7 +239,9 @@ function RootLayoutInner() {
       <DataInitializer />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={{ flex: 1, direction: I18nManager.isRTL ? "rtl" : "ltr" }}>
-          <RootLayoutNav />
+          <FontProvider>
+            <RootLayoutNav />
+          </FontProvider>
         </View>
       </GestureHandlerRootView>
     </StripeProvider>

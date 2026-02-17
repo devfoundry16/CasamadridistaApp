@@ -2,13 +2,13 @@ import { sendContactEmail } from "@/services/EmailService";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Text } from "@/components/Text";
 import {
   Alert,
   Dimensions,
   Image,
   ImageBackground,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
   View,

@@ -7,7 +7,8 @@ import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, Text, View } from "react-native";
+import { Text } from "@/components/Text";
+import { ScrollView, View } from "react-native";
 import CountryFlag from "react-native-country-flag";
 
 const map: CountryMap = countries;

@@ -1,10 +1,10 @@
 // components/TransferModal.tsx
+import { Text } from "@/components/Text";
 import React, { useState } from 'react';
 import {
   Alert,
   Modal,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
   View,

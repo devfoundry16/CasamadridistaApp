@@ -1,6 +1,7 @@
 import HeaderMenu from "@/components/HeaderMenu";
 import Colors from "@/constants/colors";
 import { Tabs } from "expo-router";
+import { useFont } from "@/contexts/FontContext";
 import { useEnvironment } from "@/hooks/useEnvironment";
 import {
   Gamepad2,
@@ -19,7 +20,7 @@ LogBox.ignoreAllLogs(true);
 export default function TabLayout() {
   const { revenueCat, loadEnvironment } = useEnvironment();
   const { t } = useTranslation();
-
+  const { fontFamily } = useFont();
   useEffect(() => {
     loadEnvironment();
   }, [loadEnvironment]);
@@ -39,6 +40,9 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        tabBarLabelStyle: {
+          fontFamily: fontFamily,
+        },
         tabBarActiveTintColor: Colors.darkGold,
         tabBarInactiveTintColor: Colors.darkGray,
         headerShown: true,
@@ -55,6 +59,9 @@ export default function TabLayout() {
         options={{
           title: t("nav.home"),
           headerTitle: t("nav.appName"),
+          headerTitleStyle: {
+            fontFamily: fontFamily,
+          },
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
             <Home size={size} color={color} />
@@ -67,6 +74,9 @@ export default function TabLayout() {
           title: t("nav.formation"),
           headerTitle: t("nav.formationBuilder"),
           headerTitleAlign: "center",
+          headerTitleStyle: {
+            fontFamily: fontFamily,
+          },
           tabBarIcon: ({ color, size }) => (
             <LayoutGrid size={size} color={color} />
           ),
@@ -78,6 +88,9 @@ export default function TabLayout() {
           title: t("nav.penalty"),
           headerTitle: t("nav.penaltyGame"),
           headerTitleAlign: "center",
+          headerTitleStyle: {
+            fontFamily: fontFamily,
+          },
           headerShown: false,
           tabBarPosition: "right",
           tabBarItemStyle: {
@@ -97,6 +110,9 @@ export default function TabLayout() {
           title: t("nav.team"),
           headerTitle: t("nav.realMadridTeam"),
           headerTitleAlign: "center",
+          headerTitleStyle: {
+            fontFamily: fontFamily,
+          },
           tabBarIcon: ({ color, size }) => (
             <Users size={size} color={color} />
           ),
@@ -108,6 +124,9 @@ export default function TabLayout() {
           title: t("nav.shop"),
           headerTitle: t("nav.shop"),
           headerTitleAlign: "center",
+          headerTitleStyle: {
+            fontFamily: fontFamily,
+          },
           tabBarItemStyle: {
             display: "none",
           },
@@ -122,7 +141,9 @@ export default function TabLayout() {
           title: t("nav.donation"),
           headerTitle: t("nav.donation"),
           headerTitleAlign: "center",
-
+          headerTitleStyle: {
+            fontFamily: fontFamily,
+          },
           tabBarIcon: ({ color, size }) => (
             <Heart size={size} color={color} />
           ),
@@ -134,6 +155,9 @@ export default function TabLayout() {
           title: t("nav.profile"),
           headerTitle: t("nav.myAccount"),
           headerTitleAlign: "center",
+          headerTitleStyle: {
+            fontFamily: fontFamily,
+          },
           tabBarIcon: ({ color, size }) => (
             <User size={size} color={color} />
           ),
