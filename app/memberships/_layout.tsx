@@ -7,6 +7,7 @@ import {
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
 import { withLayoutContext } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { useFont } from "@/contexts/FontContext";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -19,6 +20,7 @@ export const MaterialTopTabs = withLayoutContext<
 
 export default function MembershipsLayout() {
   const { t } = useTranslation();
+  const { fontFamilyBold } = useFont();
   return (
     <>
       <MaterialTopTabs
@@ -43,12 +45,15 @@ export default function MembershipsLayout() {
           name="packages"
           options={{
             title: t("membership.packages"),
+            tabBarLabelStyle: fontFamilyBold ? { fontFamily: fontFamilyBold } : {},
           }}
         />
         <MaterialTopTabs.Screen
           name="royal-investor"
           options={{
             title: t("membership.royalInvestor"),
+            tabBarLabelStyle: fontFamilyBold ? { fontFamily: fontFamilyBold } : {},
+
           }}
         />
       </MaterialTopTabs>

@@ -20,7 +20,7 @@ LogBox.ignoreAllLogs(true);
 export default function TabLayout() {
   const { revenueCat, loadEnvironment } = useEnvironment();
   const { t } = useTranslation();
-  const { fontFamily } = useFont();
+  const { fontFamilyBold } = useFont();
   useEffect(() => {
     loadEnvironment();
   }, [loadEnvironment]);
@@ -41,7 +41,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarLabelStyle: {
-          fontFamily: fontFamily,
+          ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
         },
         tabBarActiveTintColor: Colors.darkGold,
         tabBarInactiveTintColor: Colors.darkGray,
@@ -60,7 +60,7 @@ export default function TabLayout() {
           title: t("nav.home"),
           headerTitle: t("nav.appName"),
           headerTitleStyle: {
-            fontFamily: fontFamily,
+            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
@@ -75,7 +75,7 @@ export default function TabLayout() {
           headerTitle: t("nav.formationBuilder"),
           headerTitleAlign: "center",
           headerTitleStyle: {
-            fontFamily: fontFamily,
+            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
           tabBarIcon: ({ color, size }) => (
             <LayoutGrid size={size} color={color} />
@@ -89,7 +89,7 @@ export default function TabLayout() {
           headerTitle: t("nav.penaltyGame"),
           headerTitleAlign: "center",
           headerTitleStyle: {
-            fontFamily: fontFamily,
+            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
           headerShown: false,
           tabBarPosition: "right",
@@ -110,8 +110,8 @@ export default function TabLayout() {
           title: t("nav.team"),
           headerTitle: t("nav.realMadridTeam"),
           headerTitleAlign: "center",
-          headerTitleStyle: {
-            fontFamily: fontFamily,
+          headerTitleStyle: { 
+            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
           tabBarIcon: ({ color, size }) => (
             <Users size={size} color={color} />
@@ -125,7 +125,7 @@ export default function TabLayout() {
           headerTitle: t("nav.shop"),
           headerTitleAlign: "center",
           headerTitleStyle: {
-            fontFamily: fontFamily,
+            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
           tabBarItemStyle: {
             display: "none",
@@ -142,7 +142,7 @@ export default function TabLayout() {
           headerTitle: t("nav.donation"),
           headerTitleAlign: "center",
           headerTitleStyle: {
-            fontFamily: fontFamily,
+            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
           tabBarIcon: ({ color, size }) => (
             <Heart size={size} color={color} />
@@ -156,7 +156,7 @@ export default function TabLayout() {
           headerTitle: t("nav.myAccount"),
           headerTitleAlign: "center",
           headerTitleStyle: {
-            fontFamily: fontFamily,
+            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
           tabBarIcon: ({ color, size }) => (
             <User size={size} color={color} />

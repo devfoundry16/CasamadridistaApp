@@ -23,7 +23,6 @@ export default function TeamForm({ matches, nextMatchTeamId }: TeamFormProps) {
     const sameSide = nextMatchTeamId === match.teams.home.id;
     const win = sameSide ? homeGoals > awayGoals : homeGoals < awayGoals;
     const draw = homeGoals === awayGoals;
-    const loss = sameSide ? homeGoals < awayGoals : homeGoals > awayGoals;
     return win ? "win" : draw ? "draw" : "loss";
   };
 
@@ -35,9 +34,12 @@ export default function TeamForm({ matches, nextMatchTeamId }: TeamFormProps) {
         return (
           <View
             key={idx}
-            className={`w-[15px] h-[15px] rounded-full justify-center items-center ${outcomeClassNames[outcome]}`}
+            className={`w-[15px] h-[15px] rounded-full justify-center justify-self-center items-center ${outcomeClassNames[outcome]}`}
           >
-            <Text className="text-[11px] font-bold text-text-primary text-center">
+            <Text
+              className="text-[11px] leading-[11px] text-center font-bold text-text-primary"
+              style={{ includeFontPadding: false }}
+            >
               {displayText}
             </Text>
           </View>
