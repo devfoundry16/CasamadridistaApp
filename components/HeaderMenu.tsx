@@ -13,19 +13,20 @@ import {
   Mail,
   MoreVertical,
 } from "lucide-react-native";
-
+import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import Colors from "@/constants/colors";
 
 function HeaderMenu() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [menuVisible, setMenuVisible] = useState(false);
 
   const menuItems = [
-    { label: "Campaigns", icon: Heart, route: "/donate" },
-    { label: "About Us", icon: Info, route: "/about" },
-    { label: "Memberships", icon: Crown, route: "/memberships" },
-    { label: "Contact", icon: Mail, route: "/contact" },
+    { labelKey: "nav.campaigns", icon: Heart, route: "/donate" },
+    { labelKey: "nav.aboutUs", icon: Info, route: "/about" },
+    { labelKey: "nav.memberships", icon: Crown, route: "/memberships" },
+    { labelKey: "nav.contact", icon: Mail, route: "/contact" },
   ];
 
   const handleMenuItemPress = (route: string) => {
@@ -67,7 +68,7 @@ function HeaderMenu() {
                   activeOpacity={0.7}
                 >
                   <Icon color={Colors.text.primary} size={20} />
-                  <Text className="text-base font-medium text-text-primary">{item.label}</Text>
+                  <Text className="text-base font-medium text-text-primary">{t(item.labelKey)}</Text>
                 </TouchableOpacity>
               );
             })}

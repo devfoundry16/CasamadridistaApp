@@ -3,11 +3,13 @@ import SportsInfoService from "@/services/Football/SportsInfoService";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, Dimensions, ScrollView, Text, View } from "react-native";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 const VenueDetailScreen = () => {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const [venue, setVenue] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
@@ -18,7 +20,7 @@ const VenueDetailScreen = () => {
         setVenue(venue);
         setLoading(false);
       } catch (error) {
-        Alert.alert("Error", "Error occurs while loading venue");
+        Alert.alert(t("common.error"), t("venue.loading"));
       }
     };
     fetchVenue();
@@ -28,7 +30,7 @@ const VenueDetailScreen = () => {
     return (
       <>
         <View className="flex-1 bg-bg-medium">
-          <Text className="text-rm-gold text-3xl font-bold text-center">No Venue Information</Text>
+          <Text className="text-rm-gold text-3xl font-bold text-center">{t("venue.noInfo")}</Text>
         </View>
       </>
     );
@@ -37,7 +39,7 @@ const VenueDetailScreen = () => {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium">
-        <Spinner content="Loading venue" />
+        <Spinner content={t("venue.loading")} />
       </View>
     );
   }

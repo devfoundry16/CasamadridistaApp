@@ -1,6 +1,7 @@
 import { sendContactEmail } from "@/services/EmailService";
 import { Link } from "expo-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Dimensions,
@@ -16,6 +17,7 @@ import {
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function ContactScreen() {
+  const { t } = useTranslation();
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
@@ -24,16 +26,13 @@ export default function ContactScreen() {
 
   const handleSubmit = async () => {
     if (!firstName.trim() || !email.trim() || !comment.trim()) {
-      Alert.alert(
-        "Missing Information",
-        "Please fill in your name, email, and comment."
-      );
+      Alert.alert(t("common.error"), t("contact.missingInfo"));
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      Alert.alert(t("alerts.invalidEmail"), t("contact.invalidEmail"));
       return;
     }
 
@@ -45,7 +44,7 @@ export default function ContactScreen() {
         email: email.trim(),
         comment: comment.trim(),
       });
-      Alert.alert("Success", "Your message has been sent successfully!");
+      Alert.alert(t("common.success"), t("contact.messageSent"));
       setFirstName("");
       setLastName("");
       setPhone("");
@@ -58,8 +57,8 @@ export default function ContactScreen() {
           ? (error as { response?: { data?: { error?: string } } }).response?.data?.error
           : null;
       Alert.alert(
-        "Error",
-        message || "Failed to send email. Please try again."
+        t("common.error"),
+        message || t("contact.sendFailed")
       );
     }
   };
@@ -75,13 +74,13 @@ export default function ContactScreen() {
           imageStyle={{ opacity: 0.3 }}
         >
           <View className="items-center">
-            <Text className="text-4xl font-bold text-white mb-3">Contact</Text>
+            <Text className="text-4xl font-bold text-white mb-3">{t("contact.title")}</Text>
             <View className="flex-row items-center">
               <Link href="/" className="no-underline">
-                <Text className="text-sm text-rm-gold">Home</Text>
+                <Text className="text-sm text-rm-gold">{t("common.home")}</Text>
               </Link>
               <Text className="text-sm text-white"> / </Text>
-              <Text className="text-sm text-white">Contact</Text>
+              <Text className="text-sm text-white">{t("contact.title")}</Text>
             </View>
           </View>
         </ImageBackground>
@@ -90,12 +89,10 @@ export default function ContactScreen() {
           <View className="flex-row gap-10 flex-wrap">
             <View className="flex-1 min-w-[300px]">
               <Text className="text-[26px] font-bold text-white mb-4 leading-10">
-                Your Voice Matters - Contact Us
+                {t("contact.voiceMatters")}
               </Text>
               <Text className="text-[15px] text-text-tertiary leading-6 mb-0">
-                Have questions, suggestions, or partnership ideas? We&apos;d
-                love to hear from you! Fill out the form below and we&apos;ll
-                get back to you as soon as possible.
+                {t("contact.voiceSubtitle")}
               </Text>
               <Image
                 source={{
@@ -109,20 +106,20 @@ export default function ContactScreen() {
             <View className="flex-1 min-w-[300px] bg-bg-medium rounded-xl p-6">
               <View className="flex-row gap-4 mb-5">
                 <View className="flex-1">
-                  <Text className="text-sm text-white mb-2 font-medium">Your Name</Text>
+                  <Text className="text-sm text-white mb-2 font-medium">{t("contact.yourName")}</Text>
                   <TextInput
                     className="bg-bg-light rounded px-4 py-3 text-sm text-white border border-border-light"
-                    placeholder="Your Name"
+                    placeholder={t("contact.yourName")}
                     placeholderTextColor="#666"
                     value={firstName}
                     onChangeText={setFirstName}
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm text-white mb-2 font-medium">Last Name</Text>
+                  <Text className="text-sm text-white mb-2 font-medium">{t("contact.lastName")}</Text>
                   <TextInput
                     className="bg-bg-light rounded px-4 py-3 text-sm text-white border border-border-light"
-                    placeholder="Last Name"
+                    placeholder={t("contact.lastName")}
                     placeholderTextColor="#666"
                     value={lastName}
                     onChangeText={setLastName}
@@ -132,10 +129,10 @@ export default function ContactScreen() {
 
               <View className="flex-row gap-4 mb-5">
                 <View className="flex-1">
-                  <Text className="text-sm text-white mb-2 font-medium">Phone Number</Text>
+                  <Text className="text-sm text-white mb-2 font-medium">{t("contact.phoneNumber")}</Text>
                   <TextInput
                     className="bg-bg-light rounded px-4 py-3 text-sm text-white border border-border-light"
-                    placeholder="Phone Number"
+                    placeholder={t("contact.phoneNumber")}
                     placeholderTextColor="#666"
                     value={phone}
                     onChangeText={setPhone}
@@ -143,10 +140,10 @@ export default function ContactScreen() {
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm text-white mb-2 font-medium">Email</Text>
+                  <Text className="text-sm text-white mb-2 font-medium">{t("contact.email")}</Text>
                   <TextInput
                     className="bg-bg-light rounded px-4 py-3 text-sm text-white border border-border-light"
-                    placeholder="Email"
+                    placeholder={t("contact.email")}
                     placeholderTextColor="#666"
                     value={email}
                     onChangeText={setEmail}
@@ -157,10 +154,10 @@ export default function ContactScreen() {
               </View>
 
               <View className="mb-6">
-                <Text className="text-sm text-white mb-2 font-medium">Comment</Text>
+                <Text className="text-sm text-white mb-2 font-medium">{t("contact.comment")}</Text>
                 <TextInput
                   className="bg-bg-light rounded px-4 py-3 text-sm text-white border border-border-light h-[120px] pt-3"
-                  placeholder="Comment"
+                  placeholder={t("contact.comment")}
                   placeholderTextColor="#666"
                   value={comment}
                   onChangeText={setComment}
@@ -175,7 +172,7 @@ export default function ContactScreen() {
                 onPress={handleSubmit}
                 activeOpacity={0.8}
               >
-                <Text className="text-base font-semibold text-bg-deep-dark">Confirm</Text>
+                <Text className="text-base font-semibold text-bg-deep-dark">{t("contact.confirm")}</Text>
               </TouchableOpacity>
             </View>
           </View>

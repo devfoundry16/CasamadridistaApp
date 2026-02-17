@@ -1,4 +1,5 @@
 import { Spinner } from "@/components/Spinner";
+import i18n from "@/i18n";
 import React from "react";
 import { View } from "react-native";
 
@@ -10,7 +11,7 @@ import { View } from "react-native";
 export default function AuthCallbackScreen() {
   return (
     <View className="flex-1 bg-bg-medium justify-center items-center">
-      <Spinner content="Completing sign-in..." />
+      <Spinner content={i18n.t("common.completingSignIn")} />
     </View>
   );
 }

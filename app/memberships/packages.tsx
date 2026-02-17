@@ -1,6 +1,7 @@
 import { Spinner } from "@/components/Spinner";
 import { Check, X } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   ScrollView,
@@ -89,6 +90,7 @@ const packages = [
 ];
 
 export default function PackagesScreen() {
+  const { t } = useTranslation();
   const [billingType, setBillingType] = useState<"monthly" | "yearly">(
     "monthly"
   );
@@ -128,17 +130,17 @@ export default function PackagesScreen() {
       const { customerInfo } = await Purchases.purchasePackage(pkg);
       setActiveProductIds(customerInfo.activeSubscriptions || []);
       if (typeof customerInfo.entitlements.active[pkg.product.title] !== 'undefined') {
-        Alert.alert("Success", "Subscription purchased successfully.");
+        Alert.alert(t("common.success"), t("alerts.subscriptionSuccess"));
       }
     } catch (error: any) {
-      Alert.alert("Alert", error.message || "Failed to purchase subscription. Please try again.");
+      Alert.alert(t("common.error"), error.message || t("alerts.subscriptionFailed"));
       return;
     }
   }
   if (isLoadingPackages) {
     return (
       <View className="flex-1 bg-bg-medium justify-center items-center">
-        <Spinner content="Loading packages" />
+        <Spinner content={t("membership.loadingPackages")} />
       </View>
     );
   }
@@ -146,9 +148,9 @@ export default function PackagesScreen() {
   return (
     <ScrollView className="flex-1 bg-bg-medium">
       <View className="p-5">
-        <Text className="text-2xl font-bold text-text-primary mb-2 text-center">Choose Your Membership Package</Text>
+        <Text className="text-2xl font-bold text-text-primary mb-2 text-center">{t("membership.choosePackage")}</Text>
         <Text className="text-sm text-text-primary mb-6 text-center">
-          Join Casa Madridista and get exclusive access to Real Madrid content
+          {t("home.joinLargest")}
         </Text>
         <View className="flex-row bg-rm-gold rounded-xl overflow-hidden mb-6 p-1">
           <TouchableOpacity

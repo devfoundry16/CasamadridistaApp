@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import "@/i18n";
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
 import { useEnvironment } from "@/hooks/useEnvironment";
@@ -10,9 +11,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
-
+import { useTranslation } from "react-i18next";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
+import { View } from "react-native";
+import { I18nManager } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { development } from "@/config/environment";
 import { StatusBar } from "expo-status-bar";
@@ -40,25 +43,26 @@ const defaultOptions: {
 };
 
 function RootLayoutNav() {
+  const { t } = useTranslation();
   return (
     <>
       <StatusBar style="auto" />
       <Stack>
         <Stack.Screen
           name="(tabs)"
-          options={{ headerShown: false, title: "Home" }}
+          options={{ headerShown: false, title: t("nav.home") }}
         />
         <Stack.Screen
           name="auth/forgot-password"
           options={{
-            title: "Forgot password",
+            title: t("nav.forgotPassword"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="auth/reset-password"
           options={{
-            title: "Set new password",
+            title: t("nav.setNewPassword"),
             ...defaultOptions,
           }}
         />
@@ -66,119 +70,119 @@ function RootLayoutNav() {
           name="auth/callback"
           options={{
             ...defaultOptions,
-            title: "Signing in",
+            title: t("nav.signingIn"),
             headerShown: false,
           }}
         />
         <Stack.Screen
           name="account/wallet"
           options={{
-            title: "Wallet",
+            title: t("nav.wallet"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="account/details"
           options={{
-            title: "Account Details",
+            title: t("nav.accountDetails"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="account/subscription"
           options={{
-            title: "Subscription",
+            title: t("nav.subscription"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="about"
           options={{
-            title: "About",
+            title: t("nav.about"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="contact"
           options={{
-            title: "Contact",
+            title: t("nav.contact"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="privacy-policy"
           options={{
-            title: "Privacy Policy",
+            title: t("nav.privacyPolicy"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="terms-of-service"
           options={{
-            title: "Terms of Service",
+            title: t("nav.termsOfService"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="campaign/[id]"
           options={{
-            title: "Campaign Details",
+            title: t("nav.campaignDetails"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="coach/[id]"
           options={{
-            title: "Coach Details",
+            title: t("nav.coachDetails"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="league/[id]/[season]"
           options={{
-            title: "League Details",
+            title: t("nav.leagueDetails"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="match/[id]"
           options={{
-            title: "Match Details",
+            title: t("nav.matchDetails"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="memberships"
           options={{
-            title: "Membership",
+            title: t("nav.membership"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="player/[team]/[id]"
           options={{
-            title: "Player Details",
+            title: t("nav.playerDetails"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="product/[id]"
           options={{
-            title: "Product Details",
+            title: t("nav.productDetails"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="team/[id]"
           options={{
-            title: "Team Details",
+            title: t("nav.teamDetails"),
             ...defaultOptions,
           }}
         />
         <Stack.Screen
           name="venue/[id]"
           options={{
-            title: "Venue Details",
+            title: t("nav.venueDetails"),
             ...defaultOptions,
           }}
         />
@@ -217,7 +221,9 @@ function RootLayoutInner() {
     >
       <DataInitializer />
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <RootLayoutNav />
+        <View style={{ flex: 1, direction: I18nManager.isRTL ? "rtl" : "ltr" }}>
+          <RootLayoutNav />
+        </View>
       </GestureHandlerRootView>
     </StripeProvider>
   );

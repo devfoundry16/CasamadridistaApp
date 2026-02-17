@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { View, Text, TouchableOpacity } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
@@ -7,6 +8,7 @@ import CampaignService, { Campaign } from "@/services/CampaignService";
 
 export default function DonateScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState<boolean>(true);
   const [campaignsList, setCampaignsList] = useState<Campaign[]>([]);
 
@@ -29,7 +31,7 @@ export default function DonateScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium">
-        <Spinner content="Loading campaign" />
+        <Spinner content={t("donate.loading")} />
       </View>
     );
   }

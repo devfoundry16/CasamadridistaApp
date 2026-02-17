@@ -71,6 +71,7 @@ class WalletServiceClass {
         axios.get(`${API_BASE_URL}wallet`, { headers })
       );
     } catch (error: any) {
+      console.error(error);
       throw new Error(error.response?.data?.error || 'Failed to get wallet');
     }
   }
@@ -83,6 +84,7 @@ class WalletServiceClass {
       const wallet = await this.getWallet();
       return wallet.balance;
     } catch (error) {
+      console.error(error);
       return 0;
     }
   }

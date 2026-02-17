@@ -4,6 +4,7 @@ import { useEnvironment } from "@/hooks/useEnvironment";
 import SportsInfoService from "@/services/Football/SportsInfoService";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Image,
   ScrollView,
@@ -14,6 +15,7 @@ import {
 
 const LeagueDetailScreen = () => {
   const router = useRouter();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState<boolean>(true);
   const { id, season } = useLocalSearchParams();
   const { apiSports } = useEnvironment();
@@ -70,7 +72,7 @@ const LeagueDetailScreen = () => {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium">
-        <Spinner content="Loading league" />
+        <Spinner content={t("league.loading")} />
       </View>
     )
   }

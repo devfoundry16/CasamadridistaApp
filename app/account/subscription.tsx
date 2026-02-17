@@ -4,6 +4,7 @@ import { formatDate } from "@/utils/helper";
 import { router } from "expo-router";
 import { ArrowRight, Calendar, Crown } from "lucide-react-native";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ScrollView,
   Text,
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 
 export default function SubscriptionScreen() {
+  const { t } = useTranslation();
   const { subscriptions, isLoading, loadSubscriptions } = useSubscription();
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export default function SubscriptionScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium">
-        <Spinner content="Loading subscription" />
+        <Spinner content={t("account.loadingSubscription")} />
       </View>
     );
   }

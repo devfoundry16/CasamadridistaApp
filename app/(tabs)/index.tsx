@@ -22,8 +22,11 @@ import {
   Text,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
+
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { teamInfoList, fetchProfileData, fetchLiveMatchData, isLoading } =
     useFootball();
   const { apiSports } = useEnvironment();
@@ -153,7 +156,7 @@ export default function HomeScreen() {
         });
       });
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to load initial data");
+      Alert.alert(t("common.error"), error.message || t("common.failedToLoadData"));
     }
   }, []);
 
@@ -194,7 +197,7 @@ export default function HomeScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-deep-dark">
-        <Spinner content="Loading Context" />
+        <Spinner content={t("common.loadingContext")} />
       </View>
     );
   }
@@ -219,17 +222,17 @@ export default function HomeScreen() {
         />
         <View className="absolute left-0 right-0 items-center pb-[300px] pt-[10%]">
           <Text className="text-[30px] font-black text-white mb-3.5 text-center italic">
-            REAL MADRID OFFICIAL FAN CLUB
+            {t("home.fanClub")}
           </Text>
           <Text className="text-lg text-white opacity-80 italic text-center">
-            Join the largest gathering of Madridistas in the world
+            {t("home.joinLargest")}
           </Text>
           <Pressable
             className="py-3.5 px-3 rounded-xl items-center mt-6 bg-rm-gold"
             onPress={() => router.push("/memberships/royal-investor")}
           >
             <Text className="text-base font-semibold text-white">
-              Become a Member
+              {t("home.becomeMember")}
             </Text>
           </Pressable>
 
@@ -239,11 +242,11 @@ export default function HomeScreen() {
                 <Text className="text-lg font-bold text-white mb-3.5">
                   {liveMatch
                     ? liveMatch.fixture.status.long +
-                      ` ${liveMatch.fixture.status.elapsed != null ? liveMatch.fixture.status.elapsed + "' Elapsed" : ""}` +
+                      ` ${liveMatch.fixture.status.elapsed != null ? liveMatch.fixture.status.elapsed + "' " + t("home.elapsed") : ""}` +
                       (liveMatch.fixture.status.extra != null
-                        ? ` Extra Time ${liveMatch.fixture.status.extra}'`
+                        ? ` ${t("home.extraTime")} ${liveMatch.fixture.status.extra}'`
                         : "")
-                    : "Upcoming"}
+                    : t("home.upcoming")}
                 </Text>
                 {liveMatch ? (
                   <UpcomingForm

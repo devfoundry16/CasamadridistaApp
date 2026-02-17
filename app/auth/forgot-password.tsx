@@ -4,6 +4,7 @@ import AuthService from "@/services/AuthService";
 import { router } from "expo-router";
 import { Mail } from "lucide-react-native";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -16,6 +17,7 @@ import {
 } from "react-native";
 
 export default function ForgotPasswordScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -23,7 +25,7 @@ export default function ForgotPasswordScreen() {
   const handleSendResetLink = async () => {
     const trimmed = email.trim();
     if (!trimmed) {
-      Alert.alert("Error", "Please enter your email address");
+      Alert.alert(t("common.error"), t("auth.pleaseEnterEmail"));
       return;
     }
     setIsLoading(true);
@@ -31,7 +33,7 @@ export default function ForgotPasswordScreen() {
       await AuthService.forgotPassword(trimmed);
       setSent(true);
     } catch (err: any) {
-      Alert.alert("Error", err?.message || "Failed to send reset link");
+      Alert.alert(t("common.error"), err?.message || t("auth.failedToSendResetLink"));
     } finally {
       setIsLoading(false);
     }
@@ -44,16 +46,16 @@ export default function ForgotPasswordScreen() {
         contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingHorizontal: 24 }}
       >
         <View className="items-center mb-8">
-          <Text className="text-[32px] font-bold text-rm-gold mb-2 text-center">Check your email</Text>
+          <Text className="text-[32px] font-bold text-rm-gold mb-2 text-center">{t("auth.checkYourEmail")}</Text>
           <Text className="text-base text-text-secondary text-center px-4">
-            We sent a password reset link to {email.trim()}. Open the link on this device so the app can open and let you set a new password.
+            {t("auth.resetLinkSent", { email: email.trim() })}
           </Text>
         </View>
         <TouchableOpacity
           className="bg-rm-gold p-4 rounded-[25px] items-center mt-2"
           onPress={() => router.replace("/(tabs)/account")}
         >
-          <Text className="text-base font-bold text-white">Back to login</Text>
+          <Text className="text-base font-bold text-white">{t("auth.backToLogin")}</Text>
         </TouchableOpacity>
       </ScrollView>
     );
@@ -70,21 +72,21 @@ export default function ForgotPasswordScreen() {
         className="flex-1"
       >
         <View className="items-center mb-6">
-          <Text className="text-[32px] font-bold text-rm-gold mb-2 text-center">Forgot password?</Text>
+          <Text className="text-[32px] font-bold text-rm-gold mb-2 text-center">{t("auth.forgotPasswordTitle")}</Text>
           <Text className="text-base text-text-secondary text-center">
-            Enter your email and we&apos;ll send you a link to reset your password.
+            {t("auth.forgotPasswordSubtitle")}
           </Text>
         </View>
 
         <View className="mb-5">
-          <Text className="text-sm font-semibold text-white mb-2">Email Address *</Text>
+          <Text className="text-sm font-semibold text-white mb-2">{t("auth.emailAddress")}</Text>
           <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
             <Mail size={18} color={Colors.textLight} />
             <TextInput
               className="flex-1 py-4 pl-3 text-base text-white"
               value={email}
               onChangeText={setEmail}
-              placeholder="Enter your email"
+              placeholder={t("auth.enterEmail")}
               placeholderTextColor={Colors.textLight}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -94,13 +96,13 @@ export default function ForgotPasswordScreen() {
           </View>
         </View>
 
-        {isLoading && <Spinner content="Sending reset link" />}
+        {isLoading && <Spinner content={t("auth.sendResetLink")} />}
         {!isLoading && (
           <TouchableOpacity
             className="bg-rm-gold p-4 rounded-[25px] items-center mt-2"
             onPress={handleSendResetLink}
           >
-            <Text className="text-base font-bold text-white">Send reset link</Text>
+            <Text className="text-base font-bold text-white">{t("auth.sendResetLink")}</Text>
           </TouchableOpacity>
         )}
 
@@ -108,7 +110,7 @@ export default function ForgotPasswordScreen() {
           className="mt-6 items-center"
           onPress={() => router.back()}
         >
-          <Text className="text-sm text-rm-gold underline">Back to login</Text>
+          <Text className="text-sm text-rm-gold underline">{t("auth.backToLogin")}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

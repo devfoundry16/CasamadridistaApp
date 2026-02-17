@@ -1,5 +1,6 @@
 // store/thunks/userThunks.ts
 import AuthService from "@/services/AuthService";
+import i18n from "@/i18n";
 import { PaymentMethod } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
@@ -27,7 +28,7 @@ export const loginUser = createAsyncThunk(
       dispatch(setUser(userData));
       return userData;
     } catch (error: any) {
-      Alert.alert("Login error", error.message);
+      Alert.alert(i18n.t("alerts.loginError"), error.message);
       throw error;
     } finally {
       dispatch(setLoading(false));
@@ -77,7 +78,7 @@ export const registerUser = createAsyncThunk(
       Alert.alert("Registration Success", "You can now login with your credentials");
       return response;
     } catch (error: any) {
-      Alert.alert("Registration error", error.message);
+      Alert.alert(i18n.t("alerts.registrationError"), error.message);
       throw error;
     } finally {
       dispatch(setLoading(false));
@@ -110,7 +111,7 @@ export const updateUser = createAsyncThunk(
       dispatch(setUser(updatedUser));
       return updatedUser;
     } catch (error: any) {
-      Alert.alert("Update error", error.message);
+      Alert.alert(i18n.t("alerts.updateError"), error.message);
       throw error;
     } finally {
       dispatch(setLoading(false));
@@ -141,7 +142,7 @@ export const updateCustomer = createAsyncThunk(
       dispatch(setUser(updatedUser));
       return updatedUser;
     } catch (error: any) {
-      Alert.alert("Update error", error.message);
+      Alert.alert(i18n.t("alerts.updateError"), error.message);
       throw error;
     } finally {
       dispatch(setLoading(false));

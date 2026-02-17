@@ -11,13 +11,14 @@ import {
   User,
   Users,
 } from "lucide-react-native";
-
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 import { Platform, LogBox } from 'react-native';
 LogBox.ignoreAllLogs(true);
 export default function TabLayout() {
   const { revenueCat, loadEnvironment } = useEnvironment();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadEnvironment();
@@ -52,8 +53,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
-          headerTitle: "Casa Madridista",
+          title: t("nav.home"),
+          headerTitle: t("nav.appName"),
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
             <Home size={size} color={color} />
@@ -63,8 +64,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="create-formation"
         options={{
-          title: "Formation",
-          headerTitle: "Formation Builder",
+          title: t("nav.formation"),
+          headerTitle: t("nav.formationBuilder"),
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
             <LayoutGrid size={size} color={color} />
@@ -74,8 +75,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="penalty"
         options={{
-          title: "Penalty",
-          headerTitle: "Penalty Game",
+          title: t("nav.penalty"),
+          headerTitle: t("nav.penaltyGame"),
           headerTitleAlign: "center",
           headerShown: false,
           tabBarPosition: "right",
@@ -93,8 +94,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="team"
         options={{
-          title: "Team",
-          headerTitle: "Ream Madrid Team",
+          title: t("nav.team"),
+          headerTitle: t("nav.realMadridTeam"),
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
             <Users size={size} color={color} />
@@ -104,8 +105,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="shop"
         options={{
-          title: "Shop",
-          headerTitle: "Shop",
+          title: t("nav.shop"),
+          headerTitle: t("nav.shop"),
           headerTitleAlign: "center",
           tabBarItemStyle: {
             display: "none",
@@ -118,8 +119,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="donate"
         options={{
-          title: "Donation",
-          headerTitle: "Donation",
+          title: t("nav.donation"),
+          headerTitle: t("nav.donation"),
           headerTitleAlign: "center",
 
           tabBarIcon: ({ color, size }) => (
@@ -130,8 +131,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="account"
         options={{
-          title: "Profile",
-          headerTitle: "My Account",
+          title: t("nav.profile"),
+          headerTitle: t("nav.myAccount"),
           headerTitleAlign: "center",
           tabBarIcon: ({ color, size }) => (
             <User size={size} color={color} />

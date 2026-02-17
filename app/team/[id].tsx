@@ -9,6 +9,7 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Building2, Calendar, MapPin } from "lucide-react-native";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ScrollView,
   Text,
@@ -25,6 +26,7 @@ const map: CountryMap = countries;
 
 export default function TeamDetailScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamId = Number(id);
   const { apiSports } = useEnvironment();
@@ -96,7 +98,7 @@ export default function TeamDetailScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium">
-        <Spinner content="Loading squads" />
+        <Spinner content={t("team.loadingSquads")} />
       </View>
     );
   }

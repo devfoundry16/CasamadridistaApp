@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -18,6 +19,7 @@ import { useDonation } from "@/hooks/useDonation";
 import CampaignService, { Campaign } from "@/services/CampaignService";
 
 export default function CampaignDetailScreen() {
+  const { t } = useTranslation();
   const { id, productType, payment_status } = useLocalSearchParams();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,19 +86,19 @@ export default function CampaignDetailScreen() {
         donorEmail: donationData.email,
       });
 
-      Alert.alert("Success", "Thank you for your donation!");
+      Alert.alert(t("common.success"), t("alerts.donationThankYou"));
       router.back();
     } catch (err: any) {
-      Alert.alert("Error", err.message || "Donation failed");
+      Alert.alert(t("common.error"), err.message || t("alerts.donationFailed"));
     }
   };
 
   const handleSuccess = async () => {
     try {
-      Alert.alert("Success", "Thank you for your donation!");
+      Alert.alert(t("common.success"), t("alerts.donationThankYou"));
       router.back();
     } catch (err: any) {
-      Alert.alert("Error", err.message || "Donation failed");
+      Alert.alert(t("common.error"), err.message || t("alerts.donationFailed"));
     }
   };
 
@@ -109,7 +111,7 @@ export default function CampaignDetailScreen() {
     return (
       <>
         <View className="flex-1 justify-center items-center bg-bg-medium">
-          <Spinner content="Loading Campaign" />
+          <Spinner content={t("campaign.loading")} />
         </View>
       </>
     );
@@ -119,7 +121,7 @@ export default function CampaignDetailScreen() {
     return (
       <View className="flex-1 bg-bg-medium">
         <View className="flex-1 justify-center items-center">
-          <Text className="text-white text-lg">Campaign not found.</Text>
+          <Text className="text-white text-lg">{t("alerts.campaignNotFound")}</Text>
         </View>
       </View>
     );
@@ -173,7 +175,7 @@ export default function CampaignDetailScreen() {
           </View>
           <TextInput
             className="bg-bg-medium text-white p-2.5 mb-4 rounded border border-border-default"
-            placeholder="Enter custom amount"
+            placeholder={t("campaign.enterCustomAmount")}
             placeholderTextColor={Colors.text.secondary}
             value={donationData.customAmount}
             onChangeText={(text) =>
@@ -233,7 +235,7 @@ export default function CampaignDetailScreen() {
           </Text>
           <TextInput
             className="bg-bg-medium text-white p-2.5 mb-4 rounded border border-border-default"
-            placeholder="First Name"
+            placeholder={t("campaign.firstName")}
             value={donationData.firstName}
             onChangeText={(text) =>
               setDonationData({ ...donationData, firstName: text })
@@ -241,7 +243,7 @@ export default function CampaignDetailScreen() {
           />
           <TextInput
             className="bg-bg-medium text-white p-2.5 mb-4 rounded border border-border-default"
-            placeholder="Last Name"
+            placeholder={t("campaign.lastName")}
             value={donationData.lastName}
             onChangeText={(text) =>
               setDonationData({ ...donationData, lastName: text })
@@ -249,7 +251,7 @@ export default function CampaignDetailScreen() {
           />
           <TextInput
             className="bg-bg-medium text-white p-2.5 mb-4 rounded border border-border-default"
-            placeholder="Email Address"
+            placeholder={t("campaign.emailAddress")}
             value={donationData.email}
             onChangeText={(text) =>
               setDonationData({ ...donationData, email: text })
