@@ -1,6 +1,7 @@
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useUser } from "@/hooks/useUser";
+import * as AppleAuthentication from "expo-apple-authentication";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import {
@@ -309,7 +310,7 @@ function AuthForm({
   isLogin: boolean;
   setIsLogin: (value: boolean) => void;
 }) {
-  const { login, register, signInWithGoogle, isLoading } = useUser();
+  const { login, register, signInWithGoogle, signInWithApple, isLoading } = useUser();
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -491,6 +492,14 @@ function AuthForm({
                     {t("auth.signInWithGoogle")}
                   </Text>
                 </TouchableOpacity>
+
+                <AppleAuthentication.AppleAuthenticationButton
+                  buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                  buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                  cornerRadius={25}
+                  style={{ width: "100%", height: 52, marginTop: 12 }}
+                  onPress={() => signInWithApple()}
+                />
               </>
             )}
           </>

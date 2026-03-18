@@ -108,6 +108,8 @@
     "placeholderPasswordMin": "6 أحرف على الأقل",
     "placeholderConfirmNewPassword": "تأكيد كلمة المرور الجديدة",
     "failedGoogleSignIn": "فشل بدء تسجيل الدخول عبر Google",
+    "signInWithApple": "تسجيل الدخول عبر Apple",
+    "failedAppleSignIn": "فشل تسجيل الدخول عبر Apple",
     "registrationSuccess": "يمكنك الآن تسجيل الدخول ببياناتك"
   },
   "account": {
@@ -212,7 +214,10 @@
     "changePlan": "تغيير الخطة",
     "perMonth": " شهرياً",
     "perYear": " سنوياً",
-    "notAvailable": "غير متاح"
+    "notAvailable": "غير متاح",
+    "autoRenewDisclosure": "يتجدد الاشتراك تلقائياً ما لم يتم إلغاؤه قبل 24 ساعة على الأقل من نهاية الفترة الحالية. يمكنك إدارة اشتراكك أو إلغاؤه من إعدادات حسابك في App Store.",
+    "termsOfUse": "شروط الاستخدام",
+    "privacyPolicy": "سياسة الخصوصية"
   },
   "venue": {
     "loading": "جاري تحميل الملعب",

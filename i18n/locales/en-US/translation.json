@@ -108,6 +108,8 @@
     "placeholderPasswordMin": "At least 6 characters",
     "placeholderConfirmNewPassword": "Confirm your new password",
     "failedGoogleSignIn": "Failed to start Google sign-in",
+    "signInWithApple": "Sign in with Apple",
+    "failedAppleSignIn": "Failed to sign in with Apple",
     "registrationSuccess": "You can now login with your credentials"
   },
   "account": {
@@ -212,7 +214,10 @@
     "changePlan": "Change Plan",
     "perMonth": " per month",
     "perYear": " per year",
-    "notAvailable": "Not Available"
+    "notAvailable": "Not Available",
+    "autoRenewDisclosure": "Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel your subscription in your App Store account settings.",
+    "termsOfUse": "Terms of Use",
+    "privacyPolicy": "Privacy Policy"
   },
   "venue": {
     "loading": "Loading venue",

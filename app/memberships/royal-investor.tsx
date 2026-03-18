@@ -130,7 +130,7 @@ export default function RoyalInvestorScreen() {
             source={{
               uri: "https://casamadridista.com/wp-content/uploads/2025/09/34534535.webp",
             }}
-            style={{ width: screenWidth, height: 208, borderRadius: 12 }}
+            style={{ width: '100%', height: 208, borderRadius: 12 }}
             className="mt-3 mb-3"
             contentFit="cover"
           />

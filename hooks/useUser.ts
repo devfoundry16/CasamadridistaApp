@@ -5,6 +5,7 @@ import {
   deletePaymentMethod,
   loadUserData,
   loginUser,
+  loginWithApple,
   loginWithGoogle,
   logoutUser,
   registerUser,
@@ -45,6 +46,10 @@ export const useUser = () => {
 
   const signInWithGoogle = useCallback(() => {
     return dispatch(loginWithGoogle());
+  }, [dispatch]);
+
+  const signInWithApple = useCallback(() => {
+    return dispatch(loginWithApple());
   }, [dispatch]);
 
   const updateUserProfile = useCallback(
@@ -121,6 +126,7 @@ export const useUser = () => {
     login,
     register,
     signInWithGoogle,
+    signInWithApple,
     deleteUser: deleteUserProfile,
     getStripeId: getCustomerStripeId,
     updateUser: updateUserProfile,

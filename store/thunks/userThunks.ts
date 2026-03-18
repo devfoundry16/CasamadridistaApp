@@ -4,8 +4,8 @@ import i18n from "@/i18n";
 import { PaymentMethod } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import * as FileSystem from "expo-file-system";
 import * as WebBrowser from "expo-web-browser";
-import RNFS from "react-native-fs";
 import { Alert } from "react-native";
 import {
   clearUser,
@@ -46,6 +46,27 @@ export const loginWithGoogle = createAsyncThunk(
       await WebBrowser.openBrowserAsync(url);
     } catch (error: any) {
       Alert.alert(i18n.t("auth.signInWithGoogle"), error?.message ?? i18n.t("auth.failedGoogleSignIn"));
+      throw error;
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+);
+
+// Apple sign-in: exchanges Apple identity token directly with Supabase — no browser redirect needed.
+export const loginWithApple = createAsyncThunk(
+  "user/loginWithApple",
+  async (_, { dispatch }) => {
+    dispatch(setLoading(true));
+    try {
+      const userData = await AuthService.signInWithApple();
+      dispatch(setUser(userData));
+      return userData;
+    } catch (error: any) {
+      // ERR_CANCELED means the user dismissed the Apple sheet — don't show an error alert.
+      if (error?.code !== "ERR_CANCELED") {
+        Alert.alert(i18n.t("auth.signInWithApple"), error?.message ?? i18n.t("auth.failedAppleSignIn"));
+      }
       throw error;
     } finally {
       dispatch(setLoading(false));
@@ -162,10 +183,12 @@ export const updateAvatar = createAsyncThunk(
 
     dispatch(setLoading(true));
     try {
-      const filePath = imageUri.startsWith("file://")
-        ? imageUri.replace("file://", "")
-        : imageUri;
-      const imageBase64 = await RNFS.readFile(filePath, "base64");
+      const fileUri = imageUri.startsWith("file://")
+        ? imageUri
+        : `file://${imageUri}`;
+      const imageBase64 = await FileSystem.readAsStringAsync(fileUri, {
+        encoding: "base64",
+      });
       const updatedProfile = await AuthService.uploadAvatar(imageBase64, filename);
       const updatedUser = {
         ...state.user.user,

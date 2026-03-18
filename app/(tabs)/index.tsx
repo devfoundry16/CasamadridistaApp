@@ -221,7 +221,7 @@ export default function HomeScreen() {
           contentFit="cover"
         />
         <View className="absolute left-0 right-0 items-center pb-[300px] pt-[10%]">
-          <Text className="text-[25px] font-bold text-white mb-3.5">
+          <Text className="text-[25px] font-bold text-center text-white mb-3.5">
             {t("home.fanClub")}
           </Text>
           <Text className="text-lg text-white opacity-80 text-center">

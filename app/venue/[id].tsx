@@ -31,7 +31,7 @@ const VenueDetailScreen = () => {
     return (
       <>
         <View className="flex-1 bg-bg-medium">
-          <Text className="text-rm-gold text-3xl font-bold text-center">{t("venue.noInfo")}</Text>
+          <Text className="text-rm-gold text-3xl font-bold text-center mt-10">{t("venue.noInfo")}</Text>
         </View>
       </>
     );

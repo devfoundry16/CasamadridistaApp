@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import { Platform } from 'react-native';
 import { API_BASE_URL, supabase } from '@/config/supabase';
 
 // Deeplink for password reset. Must match app.json "scheme" (casamadridistaapp).
@@ -222,6 +224,69 @@ class AuthServiceClass {
     if (error) throw new Error(error.message);
     if (!data?.url) throw new Error('No OAuth URL returned');
     return data.url;
+  }
+
+  /**
+   * Check if Apple Sign In is available on this device (iOS 13+ only).
+   */
+  async isAppleSignInAvailable(): Promise<boolean> {
+    if (Platform.OS !== 'ios') return false;
+    return AppleAuthentication.isAvailableAsync();
+  }
+
+  /**
+   * Sign in with Apple. Gets an identity token from Apple, exchanges it with Supabase via signInWithIdToken,
+   * then fetches (and optionally updates) the user profile from the backend.
+   * Apple only returns email/fullName on the very first sign-in — subsequent calls return null for those fields.
+   */
+  async signInWithApple(): Promise<User> {
+
+    const credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
+
+    if (!credential.identityToken) {
+      throw new Error('Apple Sign In did not return an identity token');
+    }
+
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: 'apple',
+      token: credential.identityToken,
+    });
+
+    if (error) throw new Error(error.message);
+    const session = data.session;
+    if (!session) throw new Error('No session returned from Supabase');
+
+    const authHeader = { Authorization: `Bearer ${session.access_token}` };
+
+    // Fetch profile; backend auto-creates the profile row for new OAuth users.
+    const profileResponse = await axios.get(`${API_BASE_URL}auth/profile`, { headers: authHeader });
+    let profile = profileResponse.data as User['profile'];
+
+    // Apple only provides name on the very first authentication — update it when available.
+    const givenName = credential.fullName?.givenName;
+    const familyName = credential.fullName?.familyName;
+    if (givenName) {
+      const updatedResponse = await axios.put(
+        `${API_BASE_URL}auth/profile`,
+        { firstName: givenName, lastName: familyName ?? '' },
+        { headers: authHeader }
+      );
+      profile = updatedResponse.data as User['profile'];
+    }
+
+    const user: User = {
+      id: session.user.id,
+      email: session.user.email ?? credential.email ?? '',
+      profile,
+    };
+
+    await this.storeAuthData(session.access_token, session.refresh_token, user);
+    return user;
   }
 
   /**
