@@ -59,7 +59,29 @@
     "venueDetails": "Venue Details",
     "campaigns": "Campaigns",
     "aboutUs": "About Us",
-    "memberships": "Memberships"
+    "memberships": "Memberships",
+    "fanClubs": "Global Fan Clubs",
+    "fanClubsTitle": "Global Fan Clubs"
+  },
+  "fanClubs": {
+    "title": "Global Fan Clubs",
+    "subtitle": "Find official Real Madrid fan clubs around the world",
+    "selectCountry": "Select a country to view its fan clubs",
+    "clubsIn": "Fan Clubs in {{country}}",
+    "noClubs": "No fan clubs found for this country.",
+    "joinClub": "Join Club",
+    "founded": "Founded {{year}}",
+    "foundedUnknown": "Founded N/A",
+    "partnerTitle": "Are you an official Real Madrid fan club?",
+    "partnerText": "Join the largest unified platform for Madridistas worldwide. Grow your member base, generate revenue, and get global visibility.",
+    "partnerCta": "Apply to become a partner club",
+    "applyHere": "Your fan club is not listed? Apply here",
+    "loadingCountries": "Loading countries...",
+    "loadingClubs": "Loading fan clubs...",
+    "errorCountries": "Failed to load countries. Please try again.",
+    "errorClubs": "Failed to load fan clubs. Please try again.",
+    "retry": "Retry",
+    "clubs": "clubs"
   },
   "auth": {
     "welcomeBack": "Welcome Back",

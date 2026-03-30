@@ -169,6 +169,20 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="fan-clubs/index"
+          options={{
+            title: t("nav.fanClubsTitle"),
+            ...options,
+          }}
+        />
+        <Stack.Screen
+          name="fan-clubs/[country]"
+          options={{
+            title: t("nav.fanClubs"),
+            ...options,
+          }}
+        />
+        <Stack.Screen
           name="player/[team]/[id]"
           options={{
             title: t("nav.playerDetails"),

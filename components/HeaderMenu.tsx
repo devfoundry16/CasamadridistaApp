@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import {
   Crown,
+  Globe,
   Heart,
   Info,
   Mail,
@@ -23,6 +24,7 @@ function HeaderMenu() {
   const [menuVisible, setMenuVisible] = useState(false);
 
   const menuItems = [
+    { labelKey: "nav.fanClubs", icon: Globe, route: "/fan-clubs" },
     { labelKey: "nav.campaigns", icon: Heart, route: "/donate" },
     { labelKey: "nav.aboutUs", icon: Info, route: "/about" },
     { labelKey: "nav.memberships", icon: Crown, route: "/memberships" },
