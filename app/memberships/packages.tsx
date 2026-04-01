@@ -11,7 +11,7 @@ import {
   Platform
 } from "react-native";
 import Purchases, {PurchasesOfferings, PurchasesPackage} from 'react-native-purchases';
-import {useRouter} from "expo-router";
+import {useLocalSearchParams, useRouter} from "expo-router";
 
 const packages = [
   {
@@ -95,6 +95,11 @@ const packages = [
 export default function PackagesScreen() {
   const {t} = useTranslation();
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    fanClubId?: string;
+    fanClubName?: string;
+    country?: string;
+  }>();
   const [billingType, setBillingType] = useState<"monthly" | "yearly">(
     "monthly"
   );
@@ -131,11 +136,19 @@ export default function PackagesScreen() {
   const handleSubscribe = async (pkg: PurchasesPackage) => {
     console.log(pkg.product.title, pkg.packageType.toLowerCase());
     try {
-      const {customerInfo} = await Purchases.purchasePackage(pkg);
-      setActiveProductIds(customerInfo.activeSubscriptions || []);
-      if (typeof customerInfo.entitlements.active[pkg.product.title] !== 'undefined') {
-        Alert.alert(t("common.success"), t("alerts.subscriptionSuccess"));
-      }
+      //const {customerInfo} = await Purchases.purchasePackage(pkg);
+      //setActiveProductIds(customerInfo.activeSubscriptions || []);
+      //if (typeof customerInfo.entitlements.active[pkg.product.title] !== 'undefined') {
+        // Navigate to member registration, passing fan club context if available
+        router.push({
+          pathname: '/memberships/registration' as any,
+          params: {
+            fanClubId:   params.fanClubId || undefined,
+            fanClubName: params.fanClubName || undefined,
+            country:     params.country || undefined,
+          },
+        });
+      //}
     } catch (error: any) {
       Alert.alert(t("common.error"), error.message || t("alerts.subscriptionFailed"));
       return;

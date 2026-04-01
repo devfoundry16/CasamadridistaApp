@@ -18,7 +18,7 @@ const DEFAULT_LOGO = 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid
 
 interface FanClubCardProps {
   club: FanClub;
-  onJoin: () => void;
+  onJoin: (club: FanClub) => void;
 }
 
 function FanClubCard({ club, onJoin }: FanClubCardProps) {
@@ -72,7 +72,7 @@ function FanClubCard({ club, onJoin }: FanClubCardProps) {
 
       <View className="px-4 pb-4">
         <Pressable
-          onPress={onJoin}
+          onPress={() => onJoin(club)}
           className="py-3 rounded-xl items-center"
           style={{ backgroundColor: Colors.darkGold }}
           android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
@@ -101,7 +101,7 @@ export default function CountryClubsScreen() {
       setError(null);
       const data = await FanClubService.getClubsByCountry(country);
       setClubs(data);
-    } catch (err: any) {
+    } catch {
       setError(t('fanClubs.errorClubs'));
     } finally {
       setIsLoading(false);
@@ -118,8 +118,15 @@ export default function CountryClubsScreen() {
     loadClubs();
   };
 
-  const handleJoinClub = () => {
-    router.push('/memberships/packages' as any);
+  const handleJoinClub = (club: FanClub) => {
+    router.push({
+      pathname: '/memberships/packages' as any,
+      params: {
+        fanClubId:   club.id,
+        fanClubName: encodeURIComponent(club.name),
+        country:     encodeURIComponent(club.country),
+      },
+    });
   };
 
   if (isLoading) {
@@ -181,7 +188,7 @@ export default function CountryClubsScreen() {
         />
       }
       renderItem={({ item }) => (
-        <FanClubCard club={item} onJoin={handleJoinClub} />
+        <FanClubCard club={item} onJoin={() => handleJoinClub(item)} />
       )}
     />
   );

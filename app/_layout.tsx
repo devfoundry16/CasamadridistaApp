@@ -169,6 +169,13 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="memberships/registration"
+          options={{
+            title: t("nav.memberRegistration"),
+            ...options,
+          }}
+        />
+        <Stack.Screen
           name="fan-clubs/index"
           options={{
             title: t("nav.fanClubsTitle"),
