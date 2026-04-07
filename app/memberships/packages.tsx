@@ -136,9 +136,9 @@ export default function PackagesScreen() {
   const handleSubscribe = async (pkg: PurchasesPackage) => {
     console.log(pkg.product.title, pkg.packageType.toLowerCase());
     try {
-      //const {customerInfo} = await Purchases.purchasePackage(pkg);
-      //setActiveProductIds(customerInfo.activeSubscriptions || []);
-      //if (typeof customerInfo.entitlements.active[pkg.product.title] !== 'undefined') {
+      const {customerInfo} = await Purchases.purchasePackage(pkg);
+      setActiveProductIds(customerInfo.activeSubscriptions || []);
+      if (typeof customerInfo.entitlements.active[pkg.product.title] !== 'undefined') {
         // Navigate to member registration, passing fan club context if available
         router.push({
           pathname: '/memberships/registration' as any,
@@ -148,7 +148,7 @@ export default function PackagesScreen() {
             country:     params.country || undefined,
           },
         });
-      //}
+      }
     } catch (error: any) {
       Alert.alert(t("common.error"), error.message || t("alerts.subscriptionFailed"));
       return;

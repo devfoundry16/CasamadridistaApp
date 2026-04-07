@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Dimensions,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -8,9 +9,11 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { FileText, RefreshCw } from 'lucide-react-native';
+import { GoldAccentBanner } from '@/components/GoldAccentBanner';
 import { Text } from '@/components/Text';
 import { Spinner } from '@/components/Spinner';
 import MemberRegistrationService, {
@@ -18,7 +21,10 @@ import MemberRegistrationService, {
   MemberRegistrationInput,
 } from '@/services/MemberRegistrationService';
 import { useUser } from '@/hooks/useUser';
-import Colors from '@/constants/colors';
+
+const { width: screenWidth } = Dimensions.get('window');
+const MEMBERSHIP_HERO_IMAGE =
+  'https://casamadridista.com/wp-content/uploads/2025/09/4234234234.webp';
 interface FormField {
   key: keyof FormState;
   labelKey: string;
@@ -179,19 +185,18 @@ export default function MemberRegistrationScreen() {
   };
   if (isLoadingData) {
     return (
-      <View className="flex-1 justify-center items-center bg-bg-deep-dark">
+      <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content={t('registration.loadingRegistration')} />
       </View>
     );
   }
   if (loadError) {
     return (
-      <View className="flex-1 justify-center items-center bg-bg-deep-dark px-6">
+      <View className="flex-1 justify-center items-center bg-bg-medium px-6">
         <Text className="text-white text-center mb-4">{loadError}</Text>
         <Pressable
           onPress={loadExisting}
-          className="py-3 px-8 rounded-xl"
-          style={{ backgroundColor: Colors.darkGold }}
+          className="py-3 px-8 rounded-lg bg-rm-gold"
         >
           <Text className="text-white font-semibold">{t('fanClubs.retry')}</Text>
         </Pressable>
@@ -200,49 +205,46 @@ export default function MemberRegistrationScreen() {
   }
   return (
     <KeyboardAvoidingView
-      className="flex-1"
+      className="flex-1 bg-bg-medium"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        className="flex-1 bg-bg-deep-dark"
+        className="flex-1 bg-bg-medium"
         contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View className="px-5 pt-6 pb-4 items-center">
-          <FileText size={36} color={Colors.darkGold} />
-          <Text
-            className="text-2xl font-bold text-center mt-3 mb-1"
-            style={{ color: Colors.darkGold }}
-          >
-            {t('registration.title')}
-          </Text>
-          <Text className="text-sm text-center opacity-70" style={{ color: Colors.text.primary }}>
-            {t('registration.subtitle')}
-          </Text>
-          {existingRegistration && (
-            <View
-              className="mt-3 px-4 py-2 rounded-xl"
-              style={{ backgroundColor: Colors.primary }}
-            >
-              <Text className="text-xs text-center opacity-80" style={{ color: Colors.darkGold }}>
-                {t('registration.alreadyRegistered')}
-              </Text>
-            </View>
-          )}
+        {/* Hero banner (aligned with royal-investor) */}
+        <View style={{ width: screenWidth, height: 260 }}>
+          <Image
+            source={{ uri: MEMBERSHIP_HERO_IMAGE }}
+            style={{ width: screenWidth, height: 260, position: 'absolute', top: 0, left: 0 }}
+            contentFit="cover"
+          />
+          <View className="flex-1 justify-center items-center px-5" style={{ height: 260 }}>
+            <FileText size={48} color="#BC9045" />
+            <Text className="text-2xl font-bold text-white mt-4 mb-2 text-center">
+              {t('registration.title')}
+            </Text>
+            <Text className="text-base text-white text-center leading-6">
+              {t('registration.subtitle')}
+            </Text>
+          </View>
         </View>
-        {/* Form fields */}
-        <View className="px-5">
+
+        <View className="p-9">
+          {existingRegistration && (
+            <GoldAccentBanner className="mb-6">
+              {t('registration.alreadyRegistered')}
+            </GoldAccentBanner>
+          )}
+
           {FIELDS.map(({ key, labelKey, placeholderKey, required, keyboardType, autoCapitalize }, index) => (
-            <View key={key} className="mb-4">
-              <Text
-                className="text-sm font-semibold mb-1"
-                style={{ color: Colors.text.primary }}
-              >
+            <View key={key} className="mb-5">
+              <Text className="text-sm font-semibold text-white mb-2">
                 {t(labelKey)}
                 {required && (
-                  <Text style={{ color: Colors.darkGold }}> *</Text>
+                  <Text className="text-rm-gold"> *</Text>
                 )}
               </Text>
               <TextInput
@@ -250,7 +252,7 @@ export default function MemberRegistrationScreen() {
                 value={form[key]}
                 onChangeText={(v) => updateField(key, v)}
                 placeholder={t(placeholderKey)}
-                placeholderTextColor="rgba(255,255,255,0.35)"
+                placeholderTextColor="#666666"
                 keyboardType={keyboardType || 'default'}
                 autoCapitalize={autoCapitalize || 'sentences'}
                 returnKeyType={index < FIELDS.length - 1 ? 'next' : 'done'}
@@ -258,60 +260,48 @@ export default function MemberRegistrationScreen() {
                   const next = FIELDS[index + 1];
                   if (next) inputRefs.current[next.key]?.focus();
                 }}
-                className="rounded-xl px-4 py-3.5 text-white text-sm"
-                style={{
-                  backgroundColor: Colors.primary,
-                  color: Colors.text.primary,
-                  borderWidth: errors[key] ? 1 : 0,
-                  borderColor: errors[key] ? '#e53e3e' : 'transparent',
-                }}
+                className={`rounded-lg px-4 py-3 text-sm text-white border ${
+                  errors[key] ? 'border-status-error bg-bg-light' : 'border-border-default bg-bg-light'
+                }`}
               />
               {errors[key] && (
-                <Text className="text-xs mt-1" style={{ color: '#e53e3e' }}>
+                <Text className="text-xs mt-1 text-status-error">
                   {errors[key]}
                 </Text>
               )}
             </View>
           ))}
-        </View>
-        {/* Signature note */}
-        <View className="px-5 mb-6">
-          <Text className="text-xs opacity-50" style={{ color: Colors.text.primary }}>
-            By typing your full name in the Signature field above, you are legally signing this registration form.
-          </Text>
-        </View>
-        {/* Submit button */}
-        <View className="px-5">
+
+          <View className="mb-6 mt-1">
+            <Text className="text-xs text-text-secondary leading-5">
+              By typing your full name in the Signature field above, you are legally signing this registration form.
+            </Text>
+          </View>
+
           <Pressable
             onPress={handleSubmit}
             disabled={isSaving}
-            className="py-4 rounded-xl items-center"
-            style={{
-              backgroundColor: isSaving ? 'rgba(188,144,69,0.5)' : Colors.darkGold,
-            }}
+            className={`py-3.5 rounded-lg items-center ${isSaving ? 'opacity-60' : ''} bg-rm-gold`}
           >
             {isSaving ? (
-              <Text className="text-white font-bold text-base">{t('registration.saving')}</Text>
+              <Text className="text-base font-semibold text-white">{t('registration.saving')}</Text>
             ) : (
-              <Text className="text-white font-bold text-base">{t('registration.submit')}</Text>
+              <Text className="text-base font-semibold text-white">{t('registration.submit')}</Text>
             )}
           </Pressable>
-        </View>
-        {/* Regenerate PDF (only if previously registered) */}
-        {existingRegistration && (
-          <View className="px-5 mt-4">
+
+          {existingRegistration && (
             <Pressable
               onPress={handleRegeneratePdf}
-              className="flex-row items-center justify-center py-3 rounded-xl gap-2"
-              style={{ backgroundColor: Colors.primary }}
+              className="flex-row items-center justify-center py-3.5 rounded-lg gap-2 mt-4 bg-bg-light border border-border-default"
             >
-              <RefreshCw size={16} color={Colors.darkGold} />
-              <Text className="text-sm font-semibold" style={{ color: Colors.darkGold }}>
+              <RefreshCw size={18} color="#BC9045" />
+              <Text className="text-base font-semibold text-white">
                 {t('registration.regeneratePdf')}
               </Text>
             </Pressable>
-          </View>
-        )}
+          )}
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -49,6 +49,13 @@ export default function MembershipsLayout() {
           }}
         />
         <MaterialTopTabs.Screen
+          name="registration"
+          options={{
+            title: t("membership.registration"),
+            tabBarLabelStyle: fontFamilyBold ? { fontFamily: fontFamilyBold } : {},
+          }}
+        />
+        <MaterialTopTabs.Screen
           name="royal-investor"
           options={{
             title: t("membership.royalInvestor"),
