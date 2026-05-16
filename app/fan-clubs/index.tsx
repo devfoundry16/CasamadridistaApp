@@ -1,20 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   FlatList,
-  Linking,
   Pressable,
   RefreshControl,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Globe, Mail } from 'lucide-react-native';
+import { Globe } from 'lucide-react-native';
 import { Text } from '@/components/Text';
 import { Spinner } from '@/components/Spinner';
 import FanClubService, { FanClubCountry } from '@/services/FanClubService';
 import Colors from '@/constants/colors';
-
-const PARTNERSHIP_EMAIL = 'partnerships@casamadridista.com';
+import FanClubPartnershipSection from '@/components/FanClubPartnershipSection';
 
 /**
  * Convert an ISO-3166-1 alpha-2 code to a flag emoji.
@@ -92,10 +90,6 @@ export default function FanClubsScreen() {
     });
   };
 
-  const handleApplyPress = () => {
-    Linking.openURL(`mailto:${PARTNERSHIP_EMAIL}`);
-  };
-
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-deep-dark">
@@ -131,32 +125,7 @@ export default function FanClubsScreen() {
     </View>
   );
 
-  const ListFooter = (
-    <View
-      className="mx-4 my-6 rounded-2xl p-5 items-center"
-      style={{ backgroundColor: Colors.primary }}
-    >
-      <Mail size={28} color={Colors.darkGold} />
-      <Text className="text-base font-bold text-center mt-3 mb-2" style={{ color: Colors.darkGold }}>
-        {t('fanClubs.partnerTitle')}
-      </Text>
-      <Text className="text-sm text-center opacity-80 mb-4" style={{ color: Colors.text.primary }}>
-        {t('fanClubs.partnerText')}
-      </Text>
-      <Pressable
-        onPress={handleApplyPress}
-        className="py-3 px-6 rounded-xl w-full items-center mb-3"
-        style={{ backgroundColor: Colors.darkGold }}
-      >
-        <Text className="text-white font-semibold text-sm">{t('fanClubs.partnerCta')}</Text>
-      </Pressable>
-      <Pressable onPress={handleApplyPress} className="py-2">
-        <Text className="text-sm underline text-center" style={{ color: Colors.darkGold }}>
-          {t('fanClubs.applyHere')}
-        </Text>
-      </Pressable>
-    </View>
-  );
+  const ListFooter = <FanClubPartnershipSection variant="fanClubs" />;
 
   return (
     <FlatList

@@ -8,6 +8,7 @@ import {
   Heart,
   Home,
   LayoutGrid,
+  MessageCircle,
   ShoppingBag,
   User,
   Users,
@@ -132,6 +133,20 @@ export default function TabLayout() {
           },
           tabBarIcon: ({ color, size }) => (
             <ShoppingBag size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="community"
+        options={{
+          title: "Community",
+          headerTitle: "Madridista Feed",
+          headerTitleAlign: "center",
+          headerTitleStyle: {
+            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
+          },
+          tabBarIcon: ({ color, size }) => (
+            <MessageCircle size={size} color={color} />
           ),
         }}
       />

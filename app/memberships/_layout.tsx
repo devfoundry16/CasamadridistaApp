@@ -5,7 +5,7 @@ import {
   createMaterialTopTabNavigator,
 } from "@react-navigation/material-top-tabs";
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
-import { withLayoutContext } from "expo-router";
+import { Stack, withLayoutContext } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useFont } from "@/contexts/FontContext";
 
@@ -23,6 +23,18 @@ export default function MembershipsLayout() {
   const { fontFamilyBold } = useFont();
   return (
     <>
+      <Stack.Screen
+        options={{
+          title: t("nav.membership"),
+          headerStyle: { backgroundColor: Colors.darkGold },
+          headerTintColor: Colors.text.primary,
+          headerTitleStyle: {
+            color: Colors.text.primary,
+            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
+          },
+          headerTitleAlign: "center",
+        }}
+      />
       <MaterialTopTabs
         screenOptions={{
           tabBarActiveTintColor: Colors.secondary,
@@ -45,22 +57,27 @@ export default function MembershipsLayout() {
           name="packages"
           options={{
             title: t("membership.packages"),
-            tabBarLabelStyle: fontFamilyBold ? { fontFamily: fontFamilyBold } : {},
+            tabBarLabelStyle: fontFamilyBold
+              ? { fontFamily: fontFamilyBold }
+              : {},
           }}
         />
         <MaterialTopTabs.Screen
           name="registration"
           options={{
             title: t("membership.registration"),
-            tabBarLabelStyle: fontFamilyBold ? { fontFamily: fontFamilyBold } : {},
+            tabBarLabelStyle: fontFamilyBold
+              ? { fontFamily: fontFamilyBold }
+              : {},
           }}
         />
         <MaterialTopTabs.Screen
           name="royal-investor"
           options={{
             title: t("membership.royalInvestor"),
-            tabBarLabelStyle: fontFamilyBold ? { fontFamily: fontFamilyBold } : {},
-
+            tabBarLabelStyle: fontFamilyBold
+              ? { fontFamily: fontFamilyBold }
+              : {},
           }}
         />
       </MaterialTopTabs>

@@ -1,5 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import CustomWebView from "@/components/CustomWebView";
+import FanClubPartnershipSection from "@/components/FanClubPartnershipSection";
+import HomePartnershipBanner from "@/components/HomePartnershipBanner";
 import QuoteSection from "@/components/Home/QuoteSection";
 import StrengthSection from "@/components/Home/StrengthSection";
 import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
@@ -8,6 +10,7 @@ import { Spinner } from "@/components/Spinner";
 import UpcomingForm from "@/components/UpcomingForm";
 import { useFootball } from "@/hooks/useFootball";
 import { useEnvironment } from "@/hooks/useEnvironment";
+import { ENABLE_HOME_PARTNERSHIP_BANNER } from "@/constants/partnerships";
 
 import MatchService from "@/services/Football/MatchService";
 import { Match } from "@/types/soccer/match";
@@ -15,13 +18,7 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Text } from "@/components/Text";
-import {
-  Alert,
-  Dimensions,
-  Pressable,
-  ScrollView,
-  View,
-} from "react-native";
+import { Alert, Dimensions, Pressable, ScrollView, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 export default function HomeScreen() {
@@ -37,11 +34,11 @@ export default function HomeScreen() {
   const [isLive, setIsLive] = useState<boolean>(false);
 
   const nextMatches = teamInfoList.find(
-    (p) => p.team.id === RealMadridId
+    (p) => p.team.id === RealMadridId,
   )?.nextMatches;
 
   const lastMatches = teamInfoList.find(
-    (p) => p.team.id === RealMadridId
+    (p) => p.team.id === RealMadridId,
   )?.lastMatches;
 
   const matches = [...(nextMatches ?? []), ...(lastMatches ?? [])];
@@ -107,21 +104,22 @@ export default function HomeScreen() {
   const checkLiveMatch = useCallback(async () => {
     try {
       const liveMatchData = await fetchLiveMatchData(RealMadridId);
-      
+
       // Check if match is actually live based on fixture status
       if (liveMatchData && liveMatchData.fixture?.status) {
         const status = liveMatchData.fixture.status.short;
         // Match is live if status is: 1H, 2H, HT, ET, P, BT, LIVE, or if elapsed time exists
-        const isMatchLive = 
-          status === "1H" || 
-          status === "2H" || 
-          status === "HT" || 
-          status === "ET" || 
-          status === "P" || 
-          status === "BT" || 
+        const isMatchLive =
+          status === "1H" ||
+          status === "2H" ||
+          status === "HT" ||
+          status === "ET" ||
+          status === "P" ||
+          status === "BT" ||
           status === "LIVE" ||
-          (liveMatchData.fixture.status.elapsed != null && liveMatchData.fixture.status.elapsed > 0);
-        
+          (liveMatchData.fixture.status.elapsed != null &&
+            liveMatchData.fixture.status.elapsed > 0);
+
         if (isMatchLive) {
           setLiveMatch(liveMatchData);
           setIsLive(true);
@@ -156,7 +154,10 @@ export default function HomeScreen() {
         });
       });
     } catch (error: any) {
-      Alert.alert(t("common.error"), error.message || t("common.failedToLoadData"));
+      Alert.alert(
+        t("common.error"),
+        error.message || t("common.failedToLoadData"),
+      );
     }
   }, []);
 
@@ -171,7 +172,10 @@ export default function HomeScreen() {
 
   // When there's a live match, fetch last 5 matches for the LIVE match's teams (not the "next" match's teams)
   useEffect(() => {
-    if (liveMatch?.teams?.home?.id != null && liveMatch?.teams?.away?.id != null) {
+    if (
+      liveMatch?.teams?.home?.id != null &&
+      liveMatch?.teams?.away?.id != null
+    ) {
       MatchService.fetchLastMatches(liveMatch.teams.home.id).then((data) => {
         setHomeTeamLastMatches(data);
       });
@@ -209,6 +213,7 @@ export default function HomeScreen() {
       onScroll={handleScroll}
       scrollEventThrottle={16}
     >
+      {ENABLE_HOME_PARTNERSHIP_BANNER && <HomePartnershipBanner />}
       <View className="items-center">
         <Image
           source={{
@@ -281,10 +286,10 @@ export default function HomeScreen() {
         shouldAnimate={shouldAnimate}
         handleStrengthSectionLayout={handleStrengthSectionLayout}
       />
+      <FanClubPartnershipSection variant="home" />
       <VisionSection />
       {/* <SquadSection /> */}
       <QuoteSection />
     </ScrollView>
   );
 }
-

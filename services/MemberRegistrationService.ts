@@ -79,6 +79,20 @@ class MemberRegistrationServiceClass {
       throw new Error(error.response?.data?.error || 'Failed to regenerate PDF');
     }
   }
+
+  /**
+   * Fetch (or lazily create) the current user's unique QR token.
+   * Returns the raw token UUID to embed in the QR code.
+   */
+  async getQrToken(): Promise<string> {
+    try {
+      const headers = await this.getAuthHeader();
+      const response = await axios.get(`${API_BASE_URL}member/qr-token`, { headers });
+      return response.data.token as string;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to load QR token');
+    }
+  }
 }
 
 const MemberRegistrationService = new MemberRegistrationServiceClass();

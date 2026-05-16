@@ -60,7 +60,7 @@ function RootLayoutNav() {
       <Stack>
         <Stack.Screen
           name="(tabs)"
-          options={{ headerShown: false, title: t("nav.home")}}
+          options={{ headerShown: false, title: t("nav.home") }}
         />
         <Stack.Screen
           name="auth/forgot-password"
@@ -161,7 +161,7 @@ function RootLayoutNav() {
             ...options,
           }}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="memberships"
           options={{
             title: t("nav.membership"),
@@ -174,7 +174,7 @@ function RootLayoutNav() {
             title: t("nav.memberRegistration"),
             ...options,
           }}
-        />
+        /> */}
         <Stack.Screen
           name="fan-clubs/index"
           options={{
@@ -217,6 +217,20 @@ function RootLayoutNav() {
             ...options,
           }}
         />
+        <Stack.Screen
+          name="community/compose"
+          options={{
+            title: "New Post",
+            headerShown: true,
+            headerStyle: { backgroundColor: Colors.darkGold },
+            headerTintColor: Colors.textWhite,
+            headerTitleAlign: "center",
+            headerTitleStyle: {
+              color: Colors.textWhite,
+              ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
+            },
+          }}
+        />
       </Stack>
     </>
   );
@@ -227,11 +241,9 @@ const DataInitializer = () => {
   const { loadUserData } = useUser();
 
   useEffect(() => {
-    Promise.all([initializeAppData(), loadUserData()]).then(
-      () => {
-        SplashScreen.hideAsync();
-      }
-    );
+    Promise.all([initializeAppData(), loadUserData()]).then(() => {
+      SplashScreen.hideAsync();
+    });
   }, []);
 
   return null;

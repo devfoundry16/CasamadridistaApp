@@ -13,6 +13,7 @@ import { Text } from '@/components/Text';
 import { Spinner } from '@/components/Spinner';
 import FanClubService, { FanClub } from '@/services/FanClubService';
 import Colors from '@/constants/colors';
+import FanClubPartnershipSection from '@/components/FanClubPartnershipSection';
 
 const DEFAULT_LOGO = 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg';
 
@@ -180,6 +181,7 @@ export default function CountryClubsScreen() {
       contentContainerStyle={{ paddingBottom: 32 }}
       style={{ flex: 1, backgroundColor: '#111' }}
       ListHeaderComponent={ListHeader}
+      ListFooterComponent={<FanClubPartnershipSection variant="fanClubs" />}
       refreshControl={
         <RefreshControl
           refreshing={isRefreshing}
