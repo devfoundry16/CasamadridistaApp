@@ -40,8 +40,8 @@ export interface Match {
     };
     away: {
       id: number;
-      name: string;//"Villarreal";
-      logo: string;//"https://media.api-sports.io/football/teams/533.png";
+      name: string; //"Villarreal";
+      logo: string; //"https://media.api-sports.io/football/teams/533.png";
       winner: string;
     };
   };

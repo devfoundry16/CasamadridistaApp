@@ -1,4 +1,5 @@
 import countries from "@/constants/countries.json";
+import { CURRENT_FOOTBALL_SEASON_LABEL } from "@/constants/football";
 import {
   Coach,
   CoachWithTeam,
@@ -122,7 +123,7 @@ export default function TeamDetailScreen() {
             {teamInfo?.team?.name} {t("team.squad")}
           </Text>
           <Text className="text-sm text-white text-center">
-            {t("team.season", { season: "2024-2025" })}
+            {t("team.season", { season: CURRENT_FOOTBALL_SEASON_LABEL })}
           </Text>
         </View>
         <View className="p-4">

@@ -10,6 +10,7 @@ import { Spinner } from "@/components/Spinner";
 import UpcomingForm from "@/components/UpcomingForm";
 import { useFootball } from "@/hooks/useFootball";
 import { useEnvironment } from "@/hooks/useEnvironment";
+import { CURRENT_FOOTBALL_SEASON } from "@/constants/football";
 import { ENABLE_HOME_PARTNERSHIP_BANNER } from "@/constants/partnerships";
 
 import MatchService from "@/services/Football/MatchService";
@@ -93,7 +94,7 @@ export default function HomeScreen() {
                        <api-sports-widget 
                           data-type="standings" 
                           data-league="140" 
-                          data-season="2025"
+                          data-season="${CURRENT_FOOTBALL_SEASON}"
                         ></api-sports-widget>
 
                         <script type="module" src="https://widgets.api-sports.io/3.1.0/widgets.js"></script>
