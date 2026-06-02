@@ -93,7 +93,7 @@ export default function FeedList({ tab }: Props) {
       renderItem={renderItem}
       onEndReached={onEndReached}
       onEndReachedThreshold={0.7}
-      contentContainerStyle={{ paddingHorizontal: 12, paddingTop: 8, paddingBottom: 80 }}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: 80 }}
       style={{ backgroundColor: Colors.background.medium }}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={VIEWABILITY_CONFIG}

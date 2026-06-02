@@ -20,7 +20,7 @@ import {
 } from "lucide-react-native";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useTranslation } from "react-i18next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text } from "@/components/Text";
 import {
   Alert,
@@ -36,6 +36,9 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CountryFlag from "react-native-country-flag";
 import { LANG_STORAGE_KEY } from "@/i18n";
+import axios from "axios";
+import { API_BASE_URL } from "@/config/supabase";
+import { LayoutDashboard, ShieldCheck } from "lucide-react-native";
 
 type Locale = "en-US" | "ar-SA";
 
@@ -49,6 +52,22 @@ export default function AccountScreen() {
   const { t, i18n } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isFanClubAdmin, setIsFanClubAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    AsyncStorage.getItem('auth_token').then(token => {
+      if (!token) return;
+      axios
+        .get(`${API_BASE_URL}auth/roles`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => {
+          setIsSuperAdmin(res.data.superAdmin ?? false);
+          setIsFanClubAdmin(res.data.fanClubAdmin ?? false);
+        })
+        .catch(() => {});
+    });
+  }, [user]);
 
   const currentLng = i18n.language?.startsWith("ar") ? "ar-SA" : "en-US";
   const currentLocale = LOCALES.find((x) => x.lng === currentLng);
@@ -230,6 +249,30 @@ export default function AccountScreen() {
             </View>
           </View>
         </TouchableOpacity>
+
+        {isSuperAdmin && (
+          <TouchableOpacity
+            className="flex-row items-center bg-bg-card p-4 rounded-[25px] mb-3 gap-4 border border-rm-gold"
+            onPress={() => router.push('/admin' as any)}
+          >
+            <ShieldCheck size={24} color={Colors.darkGold} />
+            <View className="flex-1 flex-row justify-between items-center">
+              <Text className="text-base font-semibold text-text-primary">Admin Panel</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        {isFanClubAdmin && (
+          <TouchableOpacity
+            className="flex-row items-center bg-bg-card p-4 rounded-[25px] mb-3 gap-4 border border-rm-gold"
+            onPress={() => router.push('/fan-club-dashboard' as any)}
+          >
+            <LayoutDashboard size={24} color={Colors.darkGold} />
+            <View className="flex-1 flex-row justify-between items-center">
+              <Text className="text-base font-semibold text-text-primary">Club Dashboard</Text>
+            </View>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           className="flex-row items-center bg-bg-light p-4 rounded-[25px] mb-3 gap-4 border border-status-error"

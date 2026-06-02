@@ -78,6 +78,7 @@ class SubscriptionServiceClass {
     currency?: string;
     endDate?: string;
     receiptData?: any;
+    fanClubId?: string | null;
   }): Promise<Subscription> {
     try {
       const headers = await this.getAuthHeader();

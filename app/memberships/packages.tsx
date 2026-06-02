@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import Purchases, {PurchasesOfferings, PurchasesPackage} from 'react-native-purchases';
 import {useLocalSearchParams, useRouter} from "expo-router";
+import SubscriptionService from '@/services/SubscriptionService';
 
 const packages = [
   {
@@ -139,7 +140,13 @@ export default function PackagesScreen() {
       const {customerInfo} = await Purchases.purchasePackage(pkg);
       setActiveProductIds(customerInfo.activeSubscriptions || []);
       if (typeof customerInfo.entitlements.active[pkg.product.title] !== 'undefined') {
-        // Navigate to member registration, passing fan club context if available
+        SubscriptionService.createSubscription({
+          subscriptionType: pkg.product.identifier,
+          price:            pkg.product.price,
+          currency:         pkg.product.currencyCode,
+          fanClubId:        params.fanClubId || null,
+        }).catch(() => {});
+
         router.push({
           pathname: '/memberships/registration' as any,
           params: {

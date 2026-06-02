@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { Post } from '@/services/FeedService';
 import PostHeader  from './PostHeader';
@@ -10,16 +10,13 @@ import Colors from '@/constants/colors';
 
 interface Props {
   post: Post;
-  /** Whether the post's video should be paused (controlled by feed visibility) */
   paused?: boolean;
 }
 
 function PostCard({ post, paused = true }: Props) {
   const router = useRouter();
 
-  const goToAuthor = useCallback(() => {
-    // Navigate to profile or fan-club page when available
-  }, []);
+  const goToAuthor = useCallback(() => {}, []);
 
   const goToComments = useCallback(() => {
     router.push(`/community/comments/${post.id}`);
@@ -29,27 +26,23 @@ function PostCard({ post, paused = true }: Props) {
     router.push(`/community/report/${post.id}`);
   }, [post.id]);
 
-  const goToPost = useCallback(() => {
-    router.push(`/community/post/${post.id}`);
-  }, [post.id]);
-
   return (
-    <View
-      className="rounded-xl mb-3 overflow-hidden"
-      style={{ backgroundColor: Colors.background.card }}
-    >
-      <PostHeader post={post} onAuthorPress={goToAuthor} />
+    <View style={styles.container}>
+      <PostHeader post={post} onAuthorPress={goToAuthor} onReportPress={goToReport} />
       <PostBody   post={post} />
       {post.media?.length > 0 && (
         <PostMedia media={post.media} paused={paused} />
       )}
-      <PostActions
-        post={post}
-        onCommentPress={goToComments}
-        onReportPress={goToReport}
-      />
+      <PostActions post={post} onCommentPress={goToComments} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.border.default,
+  },
+});
 
 export default memo(PostCard);

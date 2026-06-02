@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import type { FeedTab } from "@/services/FeedService";
 import Colors from "@/constants/colors";
 
@@ -20,18 +20,8 @@ export default function FeedTabs({ active, onSelect }: Props) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={{
-        borderBottomWidth: 1,
-        borderColor: Colors.border.default,
-        backgroundColor: Colors.background.medium,
-        flexGrow: 0,
-      }}
-      contentContainerStyle={{
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-      }}
+      style={styles.scroll}
+      contentContainerStyle={styles.content}
     >
       {TABS.map((tab) => {
         const isActive = tab.key === active;
@@ -39,23 +29,55 @@ export default function FeedTabs({ active, onSelect }: Props) {
           <TouchableOpacity
             key={tab.key}
             onPress={() => onSelect(tab.key)}
-            className="px-4 py-1.5 mr-1 rounded-full"
-            style={{
-              backgroundColor: isActive ? Colors.darkGold : "transparent",
-            }}
             activeOpacity={0.7}
+            style={styles.tab}
           >
-            <Text
-              className="text-sm font-semibold"
-              style={{
-                color: isActive ? Colors.textWhite : Colors.text.tertiary,
-              }}
-            >
+            <Text style={[styles.label, isActive ? styles.labelActive : styles.labelInactive]}>
               {tab.label}
             </Text>
+            {isActive && <View style={styles.underline} />}
           </TouchableOpacity>
         );
       })}
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  scroll: {
+    flexGrow: 0,
+    backgroundColor: Colors.background.medium,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border.default,
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+  },
+  tab: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginRight: 4,
+    position: "relative",
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  labelActive: {
+    color: Colors.text.primary,
+  },
+  labelInactive: {
+    color: Colors.text.tertiary,
+  },
+  underline: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: Colors.darkGold,
+    borderRadius: 1,
+  },
+});

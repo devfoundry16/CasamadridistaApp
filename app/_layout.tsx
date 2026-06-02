@@ -231,6 +231,22 @@ function RootLayoutNav() {
             },
           }}
         />
+        <Stack.Screen
+          name="admin/index"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="fan-club-dashboard/index"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="fan-club-dashboard/members"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="fan-club-dashboard/revenue"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </>
   );
