@@ -67,9 +67,11 @@ export default function PostHeader({ post, onAuthorPress, onReportPress }: Props
         {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
       </View>
 
-      <TouchableOpacity onPress={onReportPress} activeOpacity={0.7} style={styles.moreButton}>
-        <MoreHorizontal size={18} color={Colors.text.tertiary} />
-      </TouchableOpacity>
+      {onReportPress && (
+        <TouchableOpacity onPress={onReportPress} activeOpacity={0.7} style={styles.moreButton}>
+          <MoreHorizontal size={18} color={Colors.text.tertiary} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

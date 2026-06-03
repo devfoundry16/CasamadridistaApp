@@ -20,13 +20,9 @@ function PostCard({ post, paused = true }: Props) {
     router.push(`/community/post/${post.id}`);
   }, [post.id, router]);
 
-  const goToReport = useCallback(() => {
-    router.push(`/community/report/${post.id}`);
-  }, [post.id, router]);
-
   return (
     <Pressable onPress={goToPost} style={styles.container}>
-      <PostHeader post={post} onAuthorPress={goToPost} onReportPress={goToReport} />
+      <PostHeader post={post} onAuthorPress={goToPost} />
       <PostBody   post={post} truncate />
       {post.media?.length > 0 && (
         <PostMedia media={post.media} paused={paused} />
