@@ -29,9 +29,7 @@ function FanClubCard({ club, onJoin }: FanClubCardProps) {
     ? t('fanClubs.founded', { year: club.founding_year })
     : t('fanClubs.foundedUnknown');
 
-  const description = [foundingLabel, club.address]
-    .filter(Boolean)
-    .join(' · ');
+  const description = club.description || [foundingLabel, club.address].filter(Boolean).join(' · ');
 
   return (
     <View

@@ -8,6 +8,7 @@ export interface FanClub {
   country_code: string | null;
   founding_year: string | null;
   address: string | null;
+  description: string | null;
   president: string | null;
   secretary: string | null;
   contact: string | null;
