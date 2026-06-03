@@ -4,6 +4,10 @@ import { FontProvider, useFont } from "@/contexts/FontContext";
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
 import { useEnvironment } from "@/hooks/useEnvironment";
+import AuthService from "@/services/AuthService";
+import { clearUser } from "@/store/slices/userSlice";
+import { AppDispatch } from "@/store/store";
+import { useDispatch } from "react-redux";
 import { useAuthCallbackDeeplink } from "@/hooks/useAuthCallbackDeeplink";
 import { usePasswordResetDeeplink } from "@/hooks/usePasswordResetDeeplink";
 import { Provider } from "react-redux";
@@ -255,8 +259,10 @@ function RootLayoutNav() {
 const DataInitializer = () => {
   const { initializeAppData } = useFootball();
   const { loadUserData } = useUser();
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
+    AuthService.setupAxiosInterceptors(() => dispatch(clearUser()));
     Promise.all([initializeAppData(), loadUserData()]).then(() => {
       SplashScreen.hideAsync();
     });

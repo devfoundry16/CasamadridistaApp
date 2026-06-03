@@ -245,7 +245,9 @@
     "subscriptionFailed": "Failed to purchase subscription. Please try again.",
     "loginError": "Login error",
     "registrationError": "Registration error",
-    "updateError": "Update error"
+    "updateError": "Update error",
+    "sessionExpired": "Session Expired",
+    "sessionExpiredMessage": "Your session has expired. Please log in again."
   },
   "donate": {
     "donateNow": "Donate Now",

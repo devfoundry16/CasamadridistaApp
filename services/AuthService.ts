@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
+import i18n from '@/i18n';
 import { API_BASE_URL, supabase } from '@/config/supabase';
 
 // Deeplink for password reset. Must match app.json "scheme" (casamadridistaapp).
@@ -377,6 +378,47 @@ class AuthServiceClass {
     } catch {
       return false;
     }
+  }
+
+  private interceptorsSetup = false;
+
+  /**
+   * Register a global axios response interceptor that handles 401s.
+   * On 401: attempts token refresh and retries. If refresh fails, clears
+   * storage and calls onSessionExpired so Redux state can be cleared too.
+   * Safe to call multiple times — registers only once.
+   */
+  setupAxiosInterceptors(onSessionExpired: () => void): void {
+    if (this.interceptorsSetup) return;
+    this.interceptorsSetup = true;
+
+    axios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+          try {
+            const newToken = await this.refreshToken();
+            if (originalRequest.headers) {
+              originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+            } else {
+              originalRequest.headers = { Authorization: `Bearer ${newToken}` };
+            }
+            return axios(originalRequest);
+          } catch {
+            onSessionExpired();
+            Alert.alert(
+              i18n.t('alerts.sessionExpired'),
+              i18n.t('alerts.sessionExpiredMessage')
+            );
+          }
+        }
+
+        return Promise.reject(error);
+      }
+    );
   }
 }
 

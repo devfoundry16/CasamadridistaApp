@@ -245,7 +245,9 @@
     "subscriptionFailed": "فشل شراء الاشتراك. يرجى المحاولة مرة أخرى.",
     "loginError": "خطأ في تسجيل الدخول",
     "registrationError": "خطأ في التسجيل",
-    "updateError": "خطأ في التحديث"
+    "updateError": "خطأ في التحديث",
+    "sessionExpired": "انتهت الجلسة",
+    "sessionExpiredMessage": "انتهت صلاحية جلستك. يرجى تسجيل الدخول مجدداً."
   },
   "donate": {
     "donateNow": "تبرع الآن",
