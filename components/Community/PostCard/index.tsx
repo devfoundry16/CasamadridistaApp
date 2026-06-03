@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { Post } from '@/services/FeedService';
 import PostHeader  from './PostHeader';
@@ -16,25 +16,23 @@ interface Props {
 function PostCard({ post, paused = true }: Props) {
   const router = useRouter();
 
-  const goToAuthor = useCallback(() => {}, []);
-
-  const goToComments = useCallback(() => {
-    router.push(`/community/comments/${post.id}`);
-  }, [post.id]);
+  const goToPost = useCallback(() => {
+    router.push(`/community/post/${post.id}`);
+  }, [post.id, router]);
 
   const goToReport = useCallback(() => {
     router.push(`/community/report/${post.id}`);
-  }, [post.id]);
+  }, [post.id, router]);
 
   return (
-    <View style={styles.container}>
-      <PostHeader post={post} onAuthorPress={goToAuthor} onReportPress={goToReport} />
-      <PostBody   post={post} />
+    <Pressable onPress={goToPost} style={styles.container}>
+      <PostHeader post={post} onAuthorPress={goToPost} onReportPress={goToReport} />
+      <PostBody   post={post} truncate />
       {post.media?.length > 0 && (
         <PostMedia media={post.media} paused={paused} />
       )}
-      <PostActions post={post} onCommentPress={goToComments} />
-    </View>
+      <PostActions post={post} onCommentPress={goToPost} />
+    </Pressable>
   );
 }
 
