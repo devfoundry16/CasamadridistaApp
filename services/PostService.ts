@@ -5,6 +5,7 @@ import type { Post } from './FeedService';
 
 export interface CreatePostPayload {
   kind: 'text' | 'image' | 'video';
+  title?: string;
   body?: string;
   country_code?: string;
   tagged_fan_club_id?: string;

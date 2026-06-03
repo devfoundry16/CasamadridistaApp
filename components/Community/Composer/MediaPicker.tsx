@@ -43,7 +43,7 @@ export default function MediaPicker({ media, onPick }: Props) {
     <View>
       {/* Preview */}
       {media && (
-        <View className="relative mx-4 mb-2 rounded-xl overflow-hidden" style={{ height: 200 }}>
+        <View className="relative mx-4 rounded-xl overflow-hidden" style={{ height: 200, marginBottom: 14 }}>
           <Image
             source={{ uri: media.thumbnailUri ?? media.uri }}
             style={{ width: '100%', height: '100%' }}
@@ -67,7 +67,7 @@ export default function MediaPicker({ media, onPick }: Props) {
 
       {/* Buttons */}
       {!media && (
-        <View className="flex-row px-4 mb-2 gap-3">
+        <View className="flex-row px-4 gap-3" style={{ paddingBottom: 14 }}>
           <TouchableOpacity
             onPress={pickImage}
             className="flex-row items-center rounded-full px-4 py-2"

@@ -54,7 +54,7 @@ export default function TagPicker({ selectedCountry, selectedFanClub, onCountryC
   );
 
   return (
-    <View className="flex-row flex-wrap px-4 gap-2 mb-2">
+    <View className="flex-row flex-wrap px-4 gap-2" style={{ paddingBottom: 14 }}>
       {/* Country tag */}
       <TouchableOpacity
         onPress={openCountry}

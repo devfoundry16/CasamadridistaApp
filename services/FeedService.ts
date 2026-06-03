@@ -42,6 +42,7 @@ export interface Post {
   author_type: 'user' | 'fan_club';
   fan_club_id: string | null;
   kind: 'text' | 'image' | 'video';
+  title: string | null;
   body: string | null;
   language: string;
   country_code: string | null;
