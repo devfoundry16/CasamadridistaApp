@@ -61,7 +61,7 @@ function RootLayoutNav() {
   return (
     <>
       <StatusBar style="auto" />
-      <Stack>
+      <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
         <Stack.Screen
           name="(tabs)"
           options={{ headerShown: false, title: t("nav.home") }}

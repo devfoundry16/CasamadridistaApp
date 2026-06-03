@@ -79,31 +79,41 @@ export default function PostDetailPage() {
     );
   }, [post, commentsLoading]);
 
+  const screenOptions = (
+    <Stack.Screen
+      options={{
+        title: 'Post',
+        headerStyle: { backgroundColor: Colors.darkGold },
+        headerTintColor: Colors.textWhite,
+      }}
+    />
+  );
+
   if (postLoading) {
     return (
-      <View className="flex-1 items-center justify-center" style={{ backgroundColor: Colors.background.dark }}>
-        <ActivityIndicator color={Colors.darkGold} />
-      </View>
+      <>
+        {screenOptions}
+        <View className="flex-1 items-center justify-center" style={{ backgroundColor: Colors.background.dark }}>
+          <ActivityIndicator color={Colors.darkGold} />
+        </View>
+      </>
     );
   }
 
   if (postError || !post) {
     return (
-      <View className="flex-1 items-center justify-center" style={{ backgroundColor: Colors.background.dark }}>
-        <Text style={{ color: Colors.text.tertiary }}>Post not found.</Text>
-      </View>
+      <>
+        {screenOptions}
+        <View className="flex-1 items-center justify-center" style={{ backgroundColor: Colors.background.dark }}>
+          <Text style={{ color: Colors.text.tertiary }}>Post not found.</Text>
+        </View>
+      </>
     );
   }
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'Post',
-          headerStyle: { backgroundColor: Colors.darkGold },
-          headerTintColor: Colors.textWhite,
-        }}
-      />
+      {screenOptions}
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: Colors.background.dark }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
