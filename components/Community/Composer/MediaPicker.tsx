@@ -19,7 +19,7 @@ interface Props {
 export default function MediaPicker({ media, onPick }: Props) {
   const pickImage = async () => {
     const result = await ExpoImagePicker.launchImageLibraryAsync({
-      mediaTypes: ExpoImagePicker.MediaType.Images,
+      mediaTypes: 'images',
       quality: 1,
       allowsEditing: false,
     });
@@ -30,7 +30,7 @@ export default function MediaPicker({ media, onPick }: Props) {
 
   const pickVideo = async () => {
     const result = await ExpoImagePicker.launchImageLibraryAsync({
-      mediaTypes: ExpoImagePicker.MediaType.Videos,
+      mediaTypes: 'videos',
       quality: 1,
       videoMaxDuration: 60,
     });

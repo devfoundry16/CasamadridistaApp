@@ -4,7 +4,7 @@ import i18n from "@/i18n";
 import { PaymentMethod } from "@/types/user/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as WebBrowser from "expo-web-browser";
 import { Alert } from "react-native";
 import {
