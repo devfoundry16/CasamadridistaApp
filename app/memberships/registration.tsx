@@ -274,7 +274,7 @@ export default function MemberRegistrationScreen() {
 
           <View className="mb-6 mt-1">
             <Text className="text-xs text-text-secondary leading-5">
-              By typing your full name in the Signature field above, you are legally signing this registration form.
+              {t('registration.signatureDisclaimer')}
             </Text>
           </View>
 

@@ -225,7 +225,7 @@ function RootLayoutNav() {
         <Stack.Screen
           name="community/compose"
           options={{
-            title: "New Post",
+            title: t("nav.newPost"),
             headerShown: true,
             headerStyle: { backgroundColor: Colors.darkGold },
             headerTintColor: Colors.textWhite,

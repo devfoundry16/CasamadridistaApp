@@ -257,7 +257,7 @@ export default function AccountScreen() {
           >
             <ShieldCheck size={24} color={Colors.darkGold} />
             <View className="flex-1 flex-row justify-between items-center">
-              <Text className="text-base font-semibold text-text-primary">Admin Panel</Text>
+              <Text className="text-base font-semibold text-text-primary">{t("admin.adminPanel")}</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -269,7 +269,7 @@ export default function AccountScreen() {
           >
             <LayoutDashboard size={24} color={Colors.darkGold} />
             <View className="flex-1 flex-row justify-between items-center">
-              <Text className="text-base font-semibold text-text-primary">Club Dashboard</Text>
+              <Text className="text-base font-semibold text-text-primary">{t("admin.clubDashboard")}</Text>
             </View>
           </TouchableOpacity>
         )}

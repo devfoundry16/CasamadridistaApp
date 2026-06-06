@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import * as ExpoImagePicker from 'expo-image-picker';
 import { Image as ImageIcon, Video, X } from 'lucide-react-native';
 import Colors from '@/constants/colors';
@@ -17,6 +18,8 @@ interface Props {
 }
 
 export default function MediaPicker({ media, onPick }: Props) {
+  const { t } = useTranslation();
+
   const pickImage = async () => {
     const result = await ExpoImagePicker.launchImageLibraryAsync({
       mediaTypes: 'images',
@@ -52,7 +55,7 @@ export default function MediaPicker({ media, onPick }: Props) {
           {media.kind === 'video' && (
             <View className="absolute bottom-2 left-2 rounded-full px-2 py-0.5"
               style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
-              <Text className="text-white text-xs">Video</Text>
+              <Text className="text-white text-xs">{t('community.video')}</Text>
             </View>
           )}
           <TouchableOpacity
@@ -75,7 +78,7 @@ export default function MediaPicker({ media, onPick }: Props) {
             activeOpacity={0.7}
           >
             <ImageIcon size={16} color={Colors.darkGold} />
-            <Text className="ml-2 text-sm" style={{ color: Colors.text.primary }}>Photo</Text>
+            <Text className="ml-2 text-sm" style={{ color: Colors.text.primary }}>{t('community.photo')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={pickVideo}
@@ -84,7 +87,7 @@ export default function MediaPicker({ media, onPick }: Props) {
             activeOpacity={0.7}
           >
             <Video size={16} color={Colors.darkGold} />
-            <Text className="ml-2 text-sm" style={{ color: Colors.text.primary }}>Video</Text>
+            <Text className="ml-2 text-sm" style={{ color: Colors.text.primary }}>{t('community.video')}</Text>
           </TouchableOpacity>
         </View>
       )}

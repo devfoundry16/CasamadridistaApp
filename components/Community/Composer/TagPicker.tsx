@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, FlatList, TextInput, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { MapPin, Users, X, Search } from 'lucide-react-native';
 import FanClubService, { type FanClub, type FanClubCountry } from '@/services/FanClubService';
 import Colors from '@/constants/colors';
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function TagPicker({ selectedCountry, selectedFanClub, onCountryChange, onFanClubChange }: Props) {
+  const { t } = useTranslation();
   const [modalType, setModalType]   = useState<'country' | 'fanclub' | null>(null);
   const [countries, setCountries]   = useState<FanClubCountry[]>([]);
   const [fanClubs, setFanClubs]     = useState<FanClub[]>([]);
@@ -64,7 +66,7 @@ export default function TagPicker({ selectedCountry, selectedFanClub, onCountryC
       >
         <MapPin size={13} color={Colors.darkGold} />
         <Text className="ml-1 text-sm" style={{ color: Colors.text.primary }}>
-          {selectedCountry ? selectedCountry.country : 'Tag Country'}
+          {selectedCountry ? selectedCountry.country : t('community.tagCountry')}
         </Text>
         {selectedCountry && (
           <TouchableOpacity onPress={() => { onCountryChange(null); onFanClubChange(null); }} className="ml-1">
@@ -83,7 +85,7 @@ export default function TagPicker({ selectedCountry, selectedFanClub, onCountryC
         >
           <Users size={13} color={Colors.darkGold} />
           <Text className="ml-1 text-sm" style={{ color: Colors.text.primary }}>
-            {selectedFanClub ? selectedFanClub.name : 'Tag Fan Club'}
+            {selectedFanClub ? selectedFanClub.name : t('community.tagFanClub')}
           </Text>
           {selectedFanClub && (
             <TouchableOpacity onPress={() => onFanClubChange(null)} className="ml-1">
@@ -99,7 +101,7 @@ export default function TagPicker({ selectedCountry, selectedFanClub, onCountryC
           <View className="rounded-t-2xl pt-4 pb-8" style={{ backgroundColor: Colors.background.deepDark, maxHeight: '70%' }}>
             <View className="flex-row items-center justify-between px-4 mb-3">
               <Text className="text-lg font-bold" style={{ color: Colors.text.primary }}>
-                {modalType === 'country' ? 'Select Country' : 'Select Fan Club'}
+                {modalType === 'country' ? t('community.selectCountry') : t('community.selectFanClub')}
               </Text>
               <TouchableOpacity onPress={close}><X size={22} color={Colors.text.tertiary} /></TouchableOpacity>
             </View>
@@ -108,7 +110,7 @@ export default function TagPicker({ selectedCountry, selectedFanClub, onCountryC
               <TextInput
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Search..."
+                placeholder={t('community.search')}
                 placeholderTextColor={Colors.text.tertiary}
                 className="flex-1 ml-2 text-sm"
                 style={{ color: Colors.text.primary }}

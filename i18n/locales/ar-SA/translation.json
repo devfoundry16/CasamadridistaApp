@@ -62,7 +62,11 @@
     "memberships": "العضويات",
     "fanClubs": "أندية المشجعين العالمية",
     "fanClubsTitle": "أندية المشجعين العالمية",
-    "memberRegistration": "تسجيل العضوية"
+    "memberRegistration": "تسجيل العضوية",
+    "community": "المجتمع",
+    "madristaFeed": "تغذية المدريدية",
+    "newPost": "منشور جديد",
+    "post": "المنشور"
   },
   "registration": {
     "title": "تسجيل العضوية",
@@ -94,7 +98,8 @@
     "required": "هذا الحقل مطلوب.",
     "fieldRequired": "{{field}} مطلوب.",
     "loadingRegistration": "جاري تحميل بيانات تسجيلك...",
-    "errorLoading": "فشل تحميل بيانات التسجيل."
+    "errorLoading": "فشل تحميل بيانات التسجيل.",
+    "signatureDisclaimer": "بكتابة اسمك الكامل في حقل التوقيع أعلاه، فأنت توقّع هذا النموذج قانونياً."
   },
   "fanClubs": {
     "title": "أندية المشجعين العالمية",
@@ -439,7 +444,10 @@
     "upgradePlan": "ترقية الخطة",
     "noActive": "لا يوجد اشتراك نشط",
     "joinBenefits": "انضم إلى كاسا مدريديسا واستمتع بالمزايا الحصرية",
-    "viewPlans": "عرض خطط العضوية"
+    "viewPlans": "عرض خطط العضوية",
+    "membershipQr": "رمز QR للعضوية",
+    "tapToEnlarge": "اضغط للتكبير",
+    "qrScanHint": "امسح هذا الرمز للتحقق من عضويتك"
   },
   "shop": {
     "welcome": "مرحباً",
@@ -680,6 +688,161 @@
         "هذه الشروط ملزمة قانونياً، وأي مخالفة تشكل أساساً كافياً لإلغاء العضوية أو تطبيق العقوبات."
       ]
     }
+  },
+  "community": {
+    "tabForYou": "لك",
+    "tabTrending": "الأكثر تداولاً",
+    "tabFanClubs": "أندية المشجعين",
+    "tabRecent": "الأحدث",
+    "post": "نشر",
+    "titleLabel": "العنوان",
+    "titlePlaceholder": "أضف عنواناً…",
+    "contentLabel": "المحتوى",
+    "contentPlaceholder": "شارك شيئاً مع مجتمع المدريدية…",
+    "mediaLabel": "الوسائط",
+    "postAsLabel": "النشر باسم",
+    "tagsLabel": "الوسوم",
+    "photo": "صورة",
+    "video": "فيديو",
+    "search": "بحث...",
+    "tagCountry": "وسم الدولة",
+    "tagFanClub": "وسم نادي المشجعين",
+    "selectCountry": "اختر الدولة",
+    "selectFanClub": "اختر نادي المشجعين",
+    "reply": "رد",
+    "madridista": "مدريدستا",
+    "unknown": "مجهول",
+    "defaultUser": "مستخدم",
+    "postNotFound": "المنشور غير موجود.",
+    "noComments": "لا توجد تعليقات بعد. كن أول من يبدأ المحادثة!",
+    "replyingTo": "الرد على {{name}}…",
+    "commentSingular": "تعليق",
+    "commentPlural": "تعليقات",
+    "feedFailed": "فشل تحميل المنشورات. اسحب للتحديث.",
+    "noPostsYet": "لا توجد منشورات بعد. كن الأول!",
+    "uploadingMedia": "جاري رفع الوسائط…",
+    "failedToPost": "فشل النشر",
+    "reportContent": "الإبلاغ عن المحتوى",
+    "reportWhy": "لماذا تُبلّغ عن هذا؟",
+    "reportSubmit": "إرسال البلاغ",
+    "reportedTitle": "تم الإبلاغ",
+    "reportedMessage": "شكراً. سيراجع المشرفون هذا المحتوى.",
+    "reportFailed": "فشل إرسال البلاغ",
+    "reportDescribePlaceholder": "يرجى وصف المشكلة…",
+    "reasonSpam": "بريد مزعج",
+    "reasonSpamDesc": "محتوى متكرر وغير مرغوب فيه",
+    "reasonNudity": "محتوى إباحي",
+    "reasonNudityDesc": "محتوى جنسي غير لائق",
+    "reasonViolence": "عنف",
+    "reasonViolenceDesc": "محتوى صادم أو عنيف",
+    "reasonHate": "خطاب الكراهية",
+    "reasonHateDesc": "تمييز أو مضايقة",
+    "reasonMisinformation": "معلومات مضللة",
+    "reasonMisinformationDesc": "محتوى كاذب أو مضلل",
+    "reasonOther": "أخرى",
+    "reasonOtherDesc": "سبب آخر"
+  },
+  "membershipPackages": {
+    "halaGold": {
+      "name": "بطاقة هالا غولد",
+      "features": [
+        "بطاقة عضوية رقمية رسمية",
+        "الوصول إلى قناة أخبار واتساب",
+        "التصويت في التشكيلات والاستطلاعات",
+        "محتوى فيديو حصري (مرة/شهر)",
+        "خصم 5% على التذاكر والبضائع"
+      ],
+      "nonFeatured": [
+        "مسابقات حصرية للأعضاء",
+        "الوصول إلى تذاكر رمزية لريال مدريد",
+        "الاسم في صفحة الشكر",
+        "جلسة مباشرة شهرية",
+        "دعوة لحدث سنوي أو هدية موقعة",
+        "حق الحضور والتصويت في اجتماعات نادي المشجعين"
+      ]
+    },
+    "reyDeEuropa": {
+      "name": "ري دي أوروبا بريميوم",
+      "features": [
+        "بطاقة عضوية رقمية رسمية",
+        "الوصول إلى قناة أخبار واتساب",
+        "التصويت في التشكيلات والاستطلاعات",
+        "محتوى فيديو حصري (مرة/شهر)",
+        "خصم 10% على التذاكر والبضائع",
+        "مسابقات حصرية للأعضاء",
+        "الوصول إلى تذاكر رمزية لريال مدريد"
+      ],
+      "nonFeatured": [
+        "الاسم في صفحة الشكر",
+        "جلسة مباشرة شهرية",
+        "دعوة لحدث سنوي أو هدية موقعة",
+        "حق الحضور والتصويت في اجتماعات نادي المشجعين"
+      ]
+    },
+    "galacticos": {
+      "name": "جالاكتيكوس - VIP",
+      "features": [
+        "بطاقة عضوية رقمية رسمية",
+        "الوصول إلى قناة أخبار واتساب",
+        "التصويت في التشكيلات والاستطلاعات",
+        "محتوى فيديو حصري (أسبوعي/شهري)",
+        "خصم 20% على التذاكر والبضائع",
+        "مسابقات حصرية للأعضاء",
+        "الوصول إلى تذاكر رمزية لريال مدريد",
+        "الاسم في صفحة الشكر",
+        "جلسة مباشرة شهرية مع الفريق أو التحليل",
+        "حدث سنوي حصري واحد أو هدية موقعة",
+        "حق الحضور والتصويت في اجتماعات نادي المشجعين"
+      ],
+      "nonFeatured": []
+    }
+  },
+  "fanClubDashboard": {
+    "title": "لوحة تحكم النادي",
+    "activeMembers": "الأعضاء النشطون",
+    "thisMonth": "هذا الشهر",
+    "members": "الأعضاء",
+    "revenuePayouts": "الإيرادات والمدفوعات",
+    "noMembers": "لا يوجد أعضاء بعد",
+    "joined": "انضم {{date}}",
+    "requestPayout": "طلب دفع",
+    "amountUSD": "المبلغ (دولار)",
+    "request": "طلب",
+    "noTransactions": "لا توجد معاملات بعد",
+    "invalidAmount": "أدخل مبلغاً موجباً صالحاً",
+    "confirmPayout": "تأكيد الدفع",
+    "confirmPayoutMessage": "طلب دفع ${{amount}}؟",
+    "payoutRequested": "تم طلب دفع ${{amount}}",
+    "payoutFailed": "فشل طلب الدفع",
+    "revenueShare": "حصة الإيرادات",
+    "payout": "دفع"
+  },
+  "admin": {
+    "title": "لوحة المشرف العام",
+    "adminPanel": "لوحة المشرف",
+    "clubDashboard": "لوحة تحكم النادي",
+    "assignAdmins": "تعيين المشرفين",
+    "revenuePercent": "نسبة الإيرادات %",
+    "searchUser": "بحث عن مستخدم",
+    "searchPlaceholder": "البريد الإلكتروني أو الاسم...",
+    "selected": "المحدد: {{email}}",
+    "assignToFanClub": "تعيين في نادي المشجعين:",
+    "assignAsAdmin": "تعيين كمشرف",
+    "currentAdmins": "المشرفون الحاليون",
+    "noAdmins": "لا يوجد مشرفون معيّنون بعد",
+    "walletBalance": "المحفظة: ${{amount}}",
+    "failedToLoadAdmins": "فشل تحميل المشرفين",
+    "failedToLoadFanClubs": "فشل تحميل أندية المشجعين",
+    "searchFailed": "فشل البحث",
+    "selectUserAndClub": "الرجاء تحديد مستخدم ونادي مشجعين أولاً",
+    "assignedAsAdmin": "تم تعيين {{email}} كمشرف",
+    "assignmentFailed": "فشل التعيين",
+    "removeAdmin": "إزالة المشرف",
+    "removeAdminMessage": "إزالة {{email}} من {{club}}؟",
+    "remove": "إزالة",
+    "failedToRemoveAdmin": "فشل إزالة المشرف",
+    "invalidPercentage": "أدخل نسبة مئوية صالحة بين 0 و 100",
+    "failedToUpdateRevenue": "فشل تحديث نسبة الإيرادات"
   },
   "royalInvestor": {
     "programTitle": "برنامج المستثمر الملكي",

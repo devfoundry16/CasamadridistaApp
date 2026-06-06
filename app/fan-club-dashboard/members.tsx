@@ -5,9 +5,11 @@ import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import FanClubDashboardService, { DashboardMember } from '@/services/FanClubDashboardService';
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardMembersScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [members, setMembers] = useState<DashboardMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -52,7 +54,7 @@ export default function DashboardMembersScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
           <ChevronLeft size={24} color={Colors.text.primary} />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-text-primary">Members</Text>
+        <Text className="text-xl font-bold text-text-primary">{t("fanClubDashboard.members")}</Text>
       </View>
 
       {isLoading ? (
@@ -74,7 +76,7 @@ export default function DashboardMembersScreen() {
             isLoadingMore ? <ActivityIndicator color={Colors.darkGold} className="my-4" /> : null
           }
           ListEmptyComponent={
-            <Text className="text-text-secondary text-center mt-8">No members yet</Text>
+            <Text className="text-text-secondary text-center mt-8">{t("fanClubDashboard.noMembers")}</Text>
           }
           renderItem={({ item }) => {
             const name = [item.user_profiles.first_name, item.user_profiles.last_name]
@@ -91,7 +93,7 @@ export default function DashboardMembersScreen() {
                       <Text className="text-text-secondary text-sm">{item.user_profiles.email}</Text>
                     ) : null}
                     <Text className="text-text-secondary text-xs mt-1">
-                      Joined {formatDate(item.created_at)}
+                      {t("fanClubDashboard.joined", { date: formatDate(item.created_at) })}
                     </Text>
                   </View>
                   <View

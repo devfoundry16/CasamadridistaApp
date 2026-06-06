@@ -19,11 +19,13 @@ import SuperAdminService, {
   AdminFanClub,
   UserSearchResult,
 } from '@/services/SuperAdminService';
+import { useTranslation } from 'react-i18next';
 
 type Tab = 'admins' | 'clubs';
 
 export default function AdminPanelScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>('admins');
 
   // --- Admins tab state ---
@@ -49,7 +51,7 @@ export default function AdminPanelScreen() {
       setAdmins(data);
     } catch (e: any) {
       const msg = e?.response?.data?.error || e?.message || 'Unknown error';
-      Alert.alert('Failed to load admins', msg);
+      Alert.alert(t("admin.failedToLoadAdmins"), msg);
     } finally {
       setIsLoadingAdmins(false);
     }
@@ -61,7 +63,7 @@ export default function AdminPanelScreen() {
       setFanClubs(data);
       if (data.length > 0) setSelectedClubId(prev => prev || data[0].id);
     } catch {
-      Alert.alert('Error', 'Failed to load fan clubs');
+      Alert.alert(t("common.error"), t("admin.failedToLoadFanClubs"));
     }
   }, []);
 
@@ -77,7 +79,7 @@ export default function AdminPanelScreen() {
       const results = await SuperAdminService.searchUsers(searchQuery.trim());
       setSearchResults(results);
     } catch {
-      Alert.alert('Error', 'Search failed');
+      Alert.alert(t("common.error"), t("admin.searchFailed"));
     } finally {
       setIsSearching(false);
     }
@@ -85,20 +87,20 @@ export default function AdminPanelScreen() {
 
   const handleAssign = async () => {
     if (!selectedUser || !selectedClubId) {
-      Alert.alert('Error', 'Select a user and a fan club first');
+      Alert.alert(t("common.error"), t("admin.selectUserAndClub"));
       return;
     }
     setIsAssigning(true);
     try {
       await SuperAdminService.assignAdmin(selectedUser.id, selectedClubId);
-      Alert.alert('Success', `${selectedUser.email} assigned as admin`);
+      Alert.alert(t("common.success"), t("admin.assignedAsAdmin", { email: selectedUser.email }));
       setSelectedUser(null);
       setSearchResults([]);
       setSearchQuery('');
       await loadAdmins();
     } catch (e: any) {
-      const msg = e?.response?.data?.error || e?.message || 'Assignment failed';
-      Alert.alert('Error', msg);
+      const msg = e?.response?.data?.error || e?.message || t("admin.assignmentFailed");
+      Alert.alert(t("common.error"), msg);
     } finally {
       setIsAssigning(false);
     }
@@ -106,19 +108,19 @@ export default function AdminPanelScreen() {
 
   const handleRemoveAdmin = (admin: AdminAssignment) => {
     Alert.alert(
-      'Remove Admin',
-      `Remove ${admin.user_profiles.email} from ${admin.fan_clubs.name}?`,
+      t("admin.removeAdmin"),
+      t("admin.removeAdminMessage", { email: admin.user_profiles.email, club: admin.fan_clubs.name }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t("common.cancel"), style: 'cancel' },
         {
-          text: 'Remove',
+          text: t("admin.remove"),
           style: 'destructive',
           onPress: async () => {
             try {
               await SuperAdminService.removeAdmin(admin.user_id);
               await loadAdmins();
             } catch {
-              Alert.alert('Error', 'Failed to remove admin');
+              Alert.alert(t("common.error"), t("admin.failedToRemoveAdmin"));
             }
           },
         },
@@ -129,7 +131,7 @@ export default function AdminPanelScreen() {
   const handleSaveRevenue = async (club: AdminFanClub) => {
     const pct = parseFloat(revenueInput);
     if (isNaN(pct) || pct < 0 || pct > 100) {
-      Alert.alert('Error', 'Enter a valid percentage between 0 and 100');
+      Alert.alert(t("common.error"), t("admin.invalidPercentage"));
       return;
     }
     setIsSavingClub(true);
@@ -138,7 +140,7 @@ export default function AdminPanelScreen() {
       setFanClubs(prev => prev.map(c => (c.id === updated.id ? updated : c)));
       setEditingClub(null);
     } catch {
-      Alert.alert('Error', 'Failed to update revenue percentage');
+      Alert.alert(t("common.error"), t("admin.failedToUpdateRevenue"));
     } finally {
       setIsSavingClub(false);
     }
@@ -154,19 +156,19 @@ export default function AdminPanelScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
           <ChevronLeft size={24} color={Colors.text.primary} />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-text-primary">Super Admin Panel</Text>
+        <Text className="text-xl font-bold text-text-primary">{t("admin.title")}</Text>
       </View>
 
       {/* Tabs */}
       <View className="flex-row bg-bg-card mx-4 mt-4 rounded-xl overflow-hidden">
-        {(['admins', 'clubs'] as Tab[]).map(t => (
+        {(['admins', 'clubs'] as Tab[]).map(tabKey => (
           <TouchableOpacity
-            key={t}
-            className={`flex-1 py-3 items-center ${tab === t ? 'bg-rm-gold' : ''}`}
-            onPress={() => setTab(t)}
+            key={tabKey}
+            className={`flex-1 py-3 items-center ${tab === tabKey ? 'bg-rm-gold' : ''}`}
+            onPress={() => setTab(tabKey)}
           >
-            <Text className={`font-semibold ${tab === t ? 'text-white' : 'text-text-secondary'}`}>
-              {t === 'admins' ? 'Assign Admins' : 'Revenue %'}
+            <Text className={`font-semibold ${tab === tabKey ? 'text-white' : 'text-text-secondary'}`}>
+              {tabKey === 'admins' ? t("admin.assignAdmins") : t("admin.revenuePercent")}
             </Text>
           </TouchableOpacity>
         ))}
@@ -175,11 +177,11 @@ export default function AdminPanelScreen() {
       {tab === 'admins' ? (
         <ScrollView className="flex-1 px-4 mt-4" keyboardShouldPersistTaps="handled">
           {/* Search */}
-          <Text className="text-text-primary font-semibold mb-2">Search User</Text>
+          <Text className="text-text-primary font-semibold mb-2">{t("admin.searchUser")}</Text>
           <View className="flex-row gap-2 mb-3">
             <TextInput
               className="flex-1 bg-bg-card text-text-primary rounded-xl px-4 py-3"
-              placeholder="Email or name..."
+              placeholder={t("admin.searchPlaceholder")}
               placeholderTextColor={Colors.text.secondary}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -220,9 +222,9 @@ export default function AdminPanelScreen() {
           {selectedUser && (
             <View className="bg-bg-card rounded-xl p-4 mb-4">
               <Text className="text-text-primary font-semibold mb-1">
-                Selected: {selectedUser.email}
+                {t("admin.selected", { email: selectedUser.email })}
               </Text>
-              <Text className="text-text-secondary text-sm mb-3">Assign to fan club:</Text>
+              <Text className="text-text-secondary text-sm mb-3">{t("admin.assignToFanClub")}</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3">
                 {fanClubs.map(club => (
                   <TouchableOpacity
@@ -245,17 +247,17 @@ export default function AdminPanelScreen() {
                 ) : (
                   <UserPlus size={18} color="#fff" />
                 )}
-                <Text className="text-white font-bold">Assign as Admin</Text>
+                <Text className="text-white font-bold">{t("admin.assignAsAdmin")}</Text>
               </TouchableOpacity>
             </View>
           )}
 
           {/* Current Admins */}
-          <Text className="text-text-primary font-semibold mb-2">Current Admins</Text>
+          <Text className="text-text-primary font-semibold mb-2">{t("admin.currentAdmins")}</Text>
           {isLoadingAdmins ? (
             <ActivityIndicator color={Colors.darkGold} className="my-4" />
           ) : admins.length === 0 ? (
-            <Text className="text-text-secondary text-center my-4">No admins assigned yet</Text>
+            <Text className="text-text-secondary text-center my-4">{t("admin.noAdmins")}</Text>
           ) : (
             admins.map(admin => (
               <View key={admin.user_id} className="bg-bg-card rounded-xl px-4 py-3 mb-2 flex-row items-center justify-between">
@@ -300,10 +302,10 @@ export default function AdminPanelScreen() {
                       onPress={() => handleSaveRevenue(item)}
                       disabled={isSavingClub}
                     >
-                      <Text className="text-white font-bold">Save</Text>
+                      <Text className="text-white font-bold">{t("common.save")}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setEditingClub(null)}>
-                      <Text className="text-text-secondary">Cancel</Text>
+                      <Text className="text-text-secondary">{t("common.cancel")}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -319,7 +321,7 @@ export default function AdminPanelScreen() {
                 )}
               </View>
               <Text className="text-text-secondary text-xs">
-                Wallet: ${Number(item.wallet_balance).toFixed(2)}
+                {t("admin.walletBalance", { amount: Number(item.wallet_balance).toFixed(2) })}
               </Text>
             </View>
           )}

@@ -17,78 +17,34 @@ import SubscriptionService from '@/services/SubscriptionService';
 const packages = [
   {
     id: 1,
-    name: "Hala Gold Card",
+    translationKey: 'halaGold',
     monthlyPrice: "4.99",
     yearlyPrice: "47.99",
     yearlyOriginal: "59.99",
     product_id: 50869,
     variation_id: [50891, 50892],
     offerIdentifier: 'offer_hala',
-    features: [
-      "OLicial digital membership card",
-      "WhatsApp news channel access",
-      "Vote in formations and polls",
-      "Exclusive video content (1/month)",
-      "5% discount on tickets & merchandise",
-    ],
-    non_featured: [
-      "Members-only competitions",
-      "Access to symbolic Real Madrid tickets",
-      "Name on gratitude page",
-      "Monthly live session",
-      "Annual event invite or signed gift",
-      "Right to attend & vote in fan club meetings",
-    ],
   },
   {
     id: 2,
-    name: "Rey de Europa Premium",
+    translationKey: 'reyDeEuropa',
     monthlyPrice: "14.99",
     yearlyPrice: "143.99",
     yearlyOriginal: "179.99",
     product_id: 50874,
     variation_id: [50888, 50889],
     offerIdentifier: 'offer_rey',
-    features: [
-      "OLicial digital membership card",
-      "WhatsApp news channel access",
-      "Vote in formations and polls",
-      "Exclusive video content (1/month)",
-      "10% discount on tickets & merchandise",
-      "Members-only competitions",
-      "Access to symbolic Real Madrid tickets",
-    ],
-    non_featured: [
-      "Name on gratitude page",
-      "Monthly live session",
-      "Annual event invite or signed gift",
-      "Right to attend & vote in fan club meetings",
-    ],
     badge: "Popular",
   },
   {
     id: 3,
-    name: "Galácticos - VIP",
+    translationKey: 'galacticos',
     monthlyPrice: "34.99",
     yearlyPrice: "334.99",
     offerIdentifier: 'offer_vip',
     yearlyOriginal: "419.99",
     product_id: 50879,
     variation_id: [50883, 50884],
-    features: [
-      "OLicial digital membership card",
-      "WhatsApp news channel access",
-      "Vote in formations and polls",
-      "Exclusive video content (weekly/monthly)",
-      "20% discount on tickets & merchandise",
-      "Members-only competitions",
-      "Access to symbolic Real Madrid tickets",
-      "Name on gratitude page",
-      "Monthly live session with team or analysis",
-      "1 exclusive annual event or signed gift",
-      "Right to attend & vote in fan club meetings",
-    ],
-    non_featured: [],
     badge: "VIP",
   },
 ];
@@ -203,6 +159,10 @@ export default function PackagesScreen() {
             {packages
               .filter(pkg => pkg.offerIdentifier === offering.identifier)
               .map(pkg => {
+                const pkgName = t(`membershipPackages.${pkg.translationKey}.name`);
+                const pkgFeatures = t(`membershipPackages.${pkg.translationKey}.features`, { returnObjects: true }) as string[];
+                const pkgNonFeatured = t(`membershipPackages.${pkg.translationKey}.nonFeatured`, { returnObjects: true }) as string[];
+
                 // Determine correct PurchasesPackage by billingType
                 const selectedPurchasePackage =
                   offering.availablePackages.find(apkg =>
@@ -249,11 +209,11 @@ export default function PackagesScreen() {
                           <View
                             className={`self-start px-3 py-1 rounded-full mb-2 ${pkg.badge === "VIP" ? "bg-rm-gold" : "bg-rm-gold"}`}>
                             <Text className="text-xs font-bold text-white">
-                              {pkg.badge.toUpperCase()}
+                              {pkg.badge === "Popular" ? t("membership.popular") : pkg.badge}
                             </Text>
                           </View>
                         )}
-                        <Text className="text-xl font-bold text-white">{pkg.name}</Text>
+                        <Text className="text-xl font-bold text-white">{pkgName}</Text>
                       </View>
                       <View className="mb-4 flex-row items-center gap-2">
                         {billingType === "yearly" && (
@@ -271,7 +231,7 @@ export default function PackagesScreen() {
                         </Text>
                       </View>
                       <View className="mb-4">
-                        {pkg.features.map((feature, index) => (
+                        {pkgFeatures.map((feature, index) => (
                           <View key={index} className="mb-2">
                             <View key={index} className="flex-row items-center gap-2">
                               <Check size={20} strokeWidth={4} color="#BC9045"/>
@@ -280,7 +240,7 @@ export default function PackagesScreen() {
                             <View className="h-px bg-border-default my-1"/>
                           </View>
                         ))}
-                        {pkg.non_featured.map((feature, index) => (
+                        {pkgNonFeatured.map((feature, index) => (
                           <View key={index} className="mb-2">
                             <View key={index} className="flex-row items-center gap-2">
                               <X size={20} strokeWidth={4} color="#BC9045"/>

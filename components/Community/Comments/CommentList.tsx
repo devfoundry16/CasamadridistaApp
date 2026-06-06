@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { FlatList, View, Text, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import CommentService, { type Comment } from '@/services/CommentService';
 import CommentRow from './CommentRow';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function CommentList({ postId }: Props) {
+  const { t } = useTranslation();
   const queryClient               = useQueryClient();
   const [replyTo, setReplyTo]     = useState<Comment | null>(null);
 
@@ -58,7 +60,7 @@ export default function CommentList({ postId }: Props) {
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
           <View className="py-10 items-center">
-            <Text style={{ color: Colors.text.tertiary }}>No comments yet. Start the conversation!</Text>
+            <Text style={{ color: Colors.text.tertiary }}>{t('community.noComments')}</Text>
           </View>
         }
         ListFooterComponent={
@@ -73,7 +75,7 @@ export default function CommentList({ postId }: Props) {
         postId={postId}
         replyTo={replyTo?.id}
         onSubmit={handleSubmit}
-        placeholder={replyTo ? `Replying to ${replyTo.author?.first_name ?? 'user'}…` : undefined}
+        placeholder={replyTo ? t('community.replyingTo', { name: replyTo.author?.first_name ?? t('community.defaultUser') }) : undefined}
       />
     </View>
   );

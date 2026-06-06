@@ -5,9 +5,11 @@ import { useRouter } from 'expo-router';
 import { ChevronLeft, ChevronRight, TrendingUp, Users, Wallet } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import FanClubDashboardService, { DashboardOverview } from '@/services/FanClubDashboardService';
+import { useTranslation } from 'react-i18next';
 
 export default function FanClubDashboardScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export default function FanClubDashboardScreen() {
           <ChevronLeft size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <View className="flex-1">
-          <Text className="text-xl font-bold text-text-primary">Club Dashboard</Text>
+          <Text className="text-xl font-bold text-text-primary">{t("fanClubDashboard.title")}</Text>
           {overview && (
             <Text className="text-text-secondary text-sm">{overview.club.name}</Text>
           )}
@@ -51,14 +53,14 @@ export default function FanClubDashboardScreen() {
               <Text className="text-2xl font-bold text-text-primary mt-2">
                 {overview.activeMembers}
               </Text>
-              <Text className="text-text-secondary text-xs text-center mt-1">Active Members</Text>
+              <Text className="text-text-secondary text-xs text-center mt-1">{t("fanClubDashboard.activeMembers")}</Text>
             </View>
             <View className="flex-1 bg-bg-card rounded-2xl p-4 items-center">
               <TrendingUp size={24} color={Colors.darkGold} />
               <Text className="text-2xl font-bold text-text-primary mt-2">
                 ${overview.monthlyRevenue.toFixed(2)}
               </Text>
-              <Text className="text-text-secondary text-xs text-center mt-1">This Month</Text>
+              <Text className="text-text-secondary text-xs text-center mt-1">{t("fanClubDashboard.thisMonth")}</Text>
             </View>
           </View>
 
@@ -66,7 +68,7 @@ export default function FanClubDashboardScreen() {
             <View className="flex-row items-center gap-3">
               <Wallet size={28} color={Colors.darkGold} />
               <View>
-                <Text className="text-text-secondary text-sm">Wallet Balance</Text>
+                <Text className="text-text-secondary text-sm">{t("wallet.balance")}</Text>
                 <Text className="text-2xl font-bold text-text-primary">
                   ${overview.walletBalance.toFixed(2)}
                 </Text>
@@ -86,7 +88,7 @@ export default function FanClubDashboardScreen() {
           >
             <View className="flex-row items-center gap-3">
               <Users size={20} color={Colors.darkGold} />
-              <Text className="text-text-primary font-semibold">Members</Text>
+              <Text className="text-text-primary font-semibold">{t("fanClubDashboard.members")}</Text>
             </View>
             <ChevronRight size={20} color={Colors.text.secondary} />
           </TouchableOpacity>
@@ -97,7 +99,7 @@ export default function FanClubDashboardScreen() {
           >
             <View className="flex-row items-center gap-3">
               <TrendingUp size={20} color={Colors.darkGold} />
-              <Text className="text-text-primary font-semibold">Revenue & Payouts</Text>
+              <Text className="text-text-primary font-semibold">{t("fanClubDashboard.revenuePayouts")}</Text>
             </View>
             <ChevronRight size={20} color={Colors.text.secondary} />
           </TouchableOpacity>

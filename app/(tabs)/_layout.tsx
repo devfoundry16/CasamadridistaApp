@@ -139,8 +139,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="community"
         options={{
-          title: "Community",
-          headerTitle: "Madridista Feed",
+          title: t("nav.community"),
+          headerTitle: t("nav.madristaFeed"),
           headerTitleAlign: "center",
           headerTitleStyle: {
             ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),

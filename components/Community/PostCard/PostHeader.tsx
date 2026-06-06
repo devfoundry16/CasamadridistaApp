@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
 import { MoreHorizontal } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,15 +15,6 @@ interface Props {
   onReportPress?: () => void;
 }
 
-function authorDisplayName(post: Post): string {
-  if (post.author_type === 'fan_club' && post.fan_club?.name) {
-    return post.fan_club.name;
-  }
-  const a = post.author;
-  if (!a) return 'Unknown';
-  return [a.first_name, a.last_name].filter(Boolean).join(' ') || 'Madridista';
-}
-
 function authorAvatarUrl(post: Post): string | null {
   if (post.author_type === 'fan_club' && post.fan_club?.logo_url) {
     return post.fan_club.logo_url;
@@ -33,7 +25,17 @@ function authorAvatarUrl(post: Post): string | null {
 const PLACEHOLDER = require('@/assets/images/placeholder_avatar.png');
 
 export default function PostHeader({ post, onAuthorPress, onReportPress }: Props) {
-  const displayName = authorDisplayName(post);
+  const { t } = useTranslation();
+
+  const displayName = (() => {
+    if (post.author_type === 'fan_club' && post.fan_club?.name) {
+      return post.fan_club.name;
+    }
+    const a = post.author;
+    if (!a) return t('community.unknown');
+    return [a.first_name, a.last_name].filter(Boolean).join(' ') || t('community.madridista');
+  })();
+
   const avatarUrl   = authorAvatarUrl(post);
   const isFanClub   = post.author_type === 'fan_club';
   const isVerified  = isFanClub

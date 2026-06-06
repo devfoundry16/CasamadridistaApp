@@ -13,6 +13,7 @@ import {
   Switch,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostService from "@/services/PostService";
 import AuthService from "@/services/AuthService";
@@ -25,6 +26,7 @@ import Colors from "@/constants/colors";
 
 export default function Composer() {
   const router = useRouter();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const [title, setTitle] = useState("");
@@ -64,7 +66,7 @@ export default function Composer() {
       });
 
       if (media) {
-        setUploadProgress("Uploading media…");
+        setUploadProgress(t('community.uploadingMedia'));
         if (media.kind === "image") {
           await MediaService.uploadImage(media.uri, post.id);
         } else {
@@ -75,12 +77,12 @@ export default function Composer() {
       queryClient.invalidateQueries({ queryKey: ["feed"] });
       router.back();
     } catch (err: any) {
-      Alert.alert("Error", err.message ?? "Failed to post");
+      Alert.alert(t('common.error'), err.message ?? t('community.failedToPost'));
     } finally {
       setSubmitting(false);
       setUploadProgress("");
     }
-  }, [canPost, title, body, media, country, fanClub, queryClient, router]);
+  }, [canPost, title, body, media, country, fanClub, queryClient, router, t]);
 
   return (
     <KeyboardAvoidingView
@@ -96,12 +98,12 @@ export default function Composer() {
 
           {/* ── Title ── */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>Title</Text>
+            <Text style={styles.sectionLabel}>{t('community.titleLabel')}</Text>
           </View>
           <TextInput
             value={title}
             onChangeText={setTitle}
-            placeholder="Add a title…"
+            placeholder={t('community.titlePlaceholder')}
             placeholderTextColor={Colors.text.muted}
             maxLength={200}
             style={styles.titleInput}
@@ -113,12 +115,12 @@ export default function Composer() {
 
           {/* ── Content ── */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>Content</Text>
+            <Text style={styles.sectionLabel}>{t('community.contentLabel')}</Text>
           </View>
           <TextInput
             value={body}
             onChangeText={setBody}
-            placeholder="Share something with the Madridista community…"
+            placeholder={t('community.contentPlaceholder')}
             placeholderTextColor={Colors.text.muted}
             multiline
             maxLength={2000}
@@ -130,7 +132,7 @@ export default function Composer() {
 
           {/* ── Media ── */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>Media</Text>
+            <Text style={styles.sectionLabel}>{t('community.mediaLabel')}</Text>
           </View>
           <MediaPicker media={media} onPick={setMedia} />
 
@@ -138,7 +140,7 @@ export default function Composer() {
             <>
               <View style={styles.divider} />
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionLabel}>Post As</Text>
+                <Text style={styles.sectionLabel}>{t('community.postAsLabel')}</Text>
               </View>
               <View style={styles.toggleRow}>
                 <Shield size={16} color={Colors.darkGold} />
@@ -161,7 +163,7 @@ export default function Composer() {
             <>
               <View style={styles.divider} />
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionLabel}>Tags</Text>
+                <Text style={styles.sectionLabel}>{t('community.tagsLabel')}</Text>
               </View>
               <TagPicker
                 selectedCountry={country}
@@ -191,7 +193,7 @@ export default function Composer() {
             <ActivityIndicator size="small" color={Colors.textWhite} />
           ) : (
             <Text style={[styles.postButtonText, !canPost && styles.postButtonTextDisabled]}>
-              Post
+              {t('community.post')}
             </Text>
           )}
         </TouchableOpacity>

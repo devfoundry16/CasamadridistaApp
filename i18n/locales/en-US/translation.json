@@ -62,7 +62,11 @@
     "memberships": "Memberships",
     "fanClubs": "Global Fan Clubs",
     "fanClubsTitle": "Global Fan Clubs",
-    "memberRegistration": "Member Registration"
+    "memberRegistration": "Member Registration",
+    "community": "Community",
+    "madristaFeed": "Madridista Feed",
+    "newPost": "New Post",
+    "post": "Post"
   },
   "registration": {
     "title": "Member Registration",
@@ -94,7 +98,8 @@
     "required": "This field is required.",
     "fieldRequired": "{{field}} is required.",
     "loadingRegistration": "Loading your registration...",
-    "errorLoading": "Failed to load registration data."
+    "errorLoading": "Failed to load registration data.",
+    "signatureDisclaimer": "By typing your full name in the Signature field above, you are legally signing this registration form."
   },
   "fanClubs": {
     "title": "Global Fan Clubs",
@@ -439,7 +444,10 @@
     "upgradePlan": "Upgrade Plan",
     "noActive": "No Active Subscription",
     "joinBenefits": "Join Casa Madridista and enjoy exclusive benefits",
-    "viewPlans": "View Membership Plans"
+    "viewPlans": "View Membership Plans",
+    "membershipQr": "Membership QR Code",
+    "tapToEnlarge": "Tap to enlarge",
+    "qrScanHint": "Scan this code to verify your membership"
   },
   "shop": {
     "welcome": "Welcome",
@@ -680,6 +688,161 @@
         "These terms are legally binding, and any violation constitutes sufficient grounds for membership cancellation or enforcement of penalties."
       ]
     }
+  },
+  "community": {
+    "tabForYou": "For You",
+    "tabTrending": "Trending",
+    "tabFanClubs": "Fan Clubs",
+    "tabRecent": "Recent",
+    "post": "Post",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Add a title…",
+    "contentLabel": "Content",
+    "contentPlaceholder": "Share something with the Madridista community…",
+    "mediaLabel": "Media",
+    "postAsLabel": "Post As",
+    "tagsLabel": "Tags",
+    "photo": "Photo",
+    "video": "Video",
+    "search": "Search...",
+    "tagCountry": "Tag Country",
+    "tagFanClub": "Tag Fan Club",
+    "selectCountry": "Select Country",
+    "selectFanClub": "Select Fan Club",
+    "reply": "Reply",
+    "madridista": "Madridista",
+    "unknown": "Unknown",
+    "defaultUser": "user",
+    "postNotFound": "Post not found.",
+    "noComments": "No comments yet. Start the conversation!",
+    "replyingTo": "Replying to {{name}}…",
+    "commentSingular": "Comment",
+    "commentPlural": "Comments",
+    "feedFailed": "Failed to load feed. Pull to refresh.",
+    "noPostsYet": "No posts yet. Be the first!",
+    "uploadingMedia": "Uploading media…",
+    "failedToPost": "Failed to post",
+    "reportContent": "Report Content",
+    "reportWhy": "Why are you reporting this?",
+    "reportSubmit": "Submit Report",
+    "reportedTitle": "Reported",
+    "reportedMessage": "Thank you. Our moderators will review this content.",
+    "reportFailed": "Failed to submit report",
+    "reportDescribePlaceholder": "Please describe the issue…",
+    "reasonSpam": "Spam",
+    "reasonSpamDesc": "Repetitive, unwanted content",
+    "reasonNudity": "Nudity",
+    "reasonNudityDesc": "Inappropriate sexual content",
+    "reasonViolence": "Violence",
+    "reasonViolenceDesc": "Graphic or violent content",
+    "reasonHate": "Hate Speech",
+    "reasonHateDesc": "Discrimination or harassment",
+    "reasonMisinformation": "Misinformation",
+    "reasonMisinformationDesc": "False or misleading content",
+    "reasonOther": "Other",
+    "reasonOtherDesc": "Another reason"
+  },
+  "membershipPackages": {
+    "halaGold": {
+      "name": "Hala Gold Card",
+      "features": [
+        "Official digital membership card",
+        "WhatsApp news channel access",
+        "Vote in formations and polls",
+        "Exclusive video content (1/month)",
+        "5% discount on tickets & merchandise"
+      ],
+      "nonFeatured": [
+        "Members-only competitions",
+        "Access to symbolic Real Madrid tickets",
+        "Name on gratitude page",
+        "Monthly live session",
+        "Annual event invite or signed gift",
+        "Right to attend & vote in fan club meetings"
+      ]
+    },
+    "reyDeEuropa": {
+      "name": "Rey de Europa Premium",
+      "features": [
+        "Official digital membership card",
+        "WhatsApp news channel access",
+        "Vote in formations and polls",
+        "Exclusive video content (1/month)",
+        "10% discount on tickets & merchandise",
+        "Members-only competitions",
+        "Access to symbolic Real Madrid tickets"
+      ],
+      "nonFeatured": [
+        "Name on gratitude page",
+        "Monthly live session",
+        "Annual event invite or signed gift",
+        "Right to attend & vote in fan club meetings"
+      ]
+    },
+    "galacticos": {
+      "name": "Galácticos - VIP",
+      "features": [
+        "Official digital membership card",
+        "WhatsApp news channel access",
+        "Vote in formations and polls",
+        "Exclusive video content (weekly/monthly)",
+        "20% discount on tickets & merchandise",
+        "Members-only competitions",
+        "Access to symbolic Real Madrid tickets",
+        "Name on gratitude page",
+        "Monthly live session with team or analysis",
+        "1 exclusive annual event or signed gift",
+        "Right to attend & vote in fan club meetings"
+      ],
+      "nonFeatured": []
+    }
+  },
+  "fanClubDashboard": {
+    "title": "Club Dashboard",
+    "activeMembers": "Active Members",
+    "thisMonth": "This Month",
+    "members": "Members",
+    "revenuePayouts": "Revenue & Payouts",
+    "noMembers": "No members yet",
+    "joined": "Joined {{date}}",
+    "requestPayout": "Request Payout",
+    "amountUSD": "Amount (USD)",
+    "request": "Request",
+    "noTransactions": "No transactions yet",
+    "invalidAmount": "Enter a valid positive amount",
+    "confirmPayout": "Confirm Payout",
+    "confirmPayoutMessage": "Request a payout of ${{amount}}?",
+    "payoutRequested": "Payout of ${{amount}} requested",
+    "payoutFailed": "Payout request failed",
+    "revenueShare": "Revenue Share",
+    "payout": "Payout"
+  },
+  "admin": {
+    "title": "Super Admin Panel",
+    "adminPanel": "Admin Panel",
+    "clubDashboard": "Club Dashboard",
+    "assignAdmins": "Assign Admins",
+    "revenuePercent": "Revenue %",
+    "searchUser": "Search User",
+    "searchPlaceholder": "Email or name...",
+    "selected": "Selected: {{email}}",
+    "assignToFanClub": "Assign to fan club:",
+    "assignAsAdmin": "Assign as Admin",
+    "currentAdmins": "Current Admins",
+    "noAdmins": "No admins assigned yet",
+    "walletBalance": "Wallet: ${{amount}}",
+    "failedToLoadAdmins": "Failed to load admins",
+    "failedToLoadFanClubs": "Failed to load fan clubs",
+    "searchFailed": "Search failed",
+    "selectUserAndClub": "Select a user and a fan club first",
+    "assignedAsAdmin": "{{email}} assigned as admin",
+    "assignmentFailed": "Assignment failed",
+    "removeAdmin": "Remove Admin",
+    "removeAdminMessage": "Remove {{email}} from {{club}}?",
+    "remove": "Remove",
+    "failedToRemoveAdmin": "Failed to remove admin",
+    "invalidPercentage": "Enter a valid percentage between 0 and 100",
+    "failedToUpdateRevenue": "Failed to update revenue percentage"
   },
   "royalInvestor": {
     "programTitle": "Royal Investor Program",

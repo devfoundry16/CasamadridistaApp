@@ -7,6 +7,7 @@ import {
   RefreshControl,
   ViewToken,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import FeedService, { type FeedTab, type Post } from '@/services/FeedService';
 import PostCard from './PostCard';
@@ -22,6 +23,7 @@ const VIEWABILITY_CONFIG = {
 };
 
 export default function FeedList({ tab }: Props) {
+  const { t } = useTranslation();
   const visibleIds = useRef<Set<string>>(new Set());
 
   const {
@@ -80,7 +82,7 @@ export default function FeedList({ tab }: Props) {
     return (
       <View className="flex-1 items-center justify-center px-8" style={{ backgroundColor: Colors.background.medium }}>
         <Text className="text-center text-base" style={{ color: Colors.text.tertiary }}>
-          Failed to load feed. Pull to refresh.
+          {t('community.feedFailed')}
         </Text>
       </View>
     );
@@ -114,7 +116,7 @@ export default function FeedList({ tab }: Props) {
       }
       ListEmptyComponent={
         <View className="flex-1 items-center justify-center pt-20">
-          <Text style={{ color: Colors.text.tertiary }}>No posts yet. Be the first!</Text>
+          <Text style={{ color: Colors.text.tertiary }}>{t('community.noPostsYet')}</Text>
         </View>
       }
     />

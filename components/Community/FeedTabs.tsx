@@ -1,14 +1,8 @@
 import React from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import type { FeedTab } from "@/services/FeedService";
 import Colors from "@/constants/colors";
-
-const TABS: { key: FeedTab; label: string }[] = [
-  { key: "for-you", label: "For You" },
-  { key: "trending", label: "Trending" },
-  { key: "fan-clubs", label: "Fan Clubs" },
-  { key: "recent", label: "Recent" },
-];
 
 interface Props {
   active: FeedTab;
@@ -16,6 +10,15 @@ interface Props {
 }
 
 export default function FeedTabs({ active, onSelect }: Props) {
+  const { t } = useTranslation();
+
+  const TABS: { key: FeedTab; label: string }[] = [
+    { key: "for-you",    label: t('community.tabForYou') },
+    { key: "trending",   label: t('community.tabTrending') },
+    { key: "fan-clubs",  label: t('community.tabFanClubs') },
+    { key: "recent",     label: t('community.tabRecent') },
+  ];
+
   return (
     <ScrollView
       horizontal

@@ -14,9 +14,11 @@ import { useRouter } from 'expo-router';
 import { ArrowDownLeft, ArrowUpRight, ChevronLeft } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import FanClubDashboardService, { RevenueTransaction } from '@/services/FanClubDashboardService';
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardRevenueScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [transactions, setTransactions] = useState<RevenueTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -57,18 +59,18 @@ export default function DashboardRevenueScreen() {
   const handleRequestPayout = async () => {
     const amount = parseFloat(payoutAmount);
     if (isNaN(amount) || amount <= 0) {
-      Alert.alert('Error', 'Enter a valid positive amount');
+      Alert.alert(t("common.error"), t("fanClubDashboard.invalidAmount"));
       return;
     }
-    Alert.alert('Confirm Payout', `Request a payout of $${amount.toFixed(2)}?`, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t("fanClubDashboard.confirmPayout"), t("fanClubDashboard.confirmPayoutMessage", { amount: amount.toFixed(2) }), [
+      { text: t("common.cancel"), style: 'cancel' },
       {
-        text: 'Confirm',
+        text: t("common.confirm"),
         onPress: async () => {
           setIsRequesting(true);
           try {
             await FanClubDashboardService.requestPayout(amount);
-            Alert.alert('Success', `Payout of $${amount.toFixed(2)} requested`);
+            Alert.alert(t("common.success"), t("fanClubDashboard.payoutRequested", { amount: amount.toFixed(2) }));
             setPayoutAmount('');
             setPage(1);
             setTransactions([]);
@@ -76,7 +78,7 @@ export default function DashboardRevenueScreen() {
             await loadRevenue(1);
             setIsLoading(false);
           } catch (e: any) {
-            Alert.alert('Error', e.message || 'Payout request failed');
+            Alert.alert(t("common.error"), e.message || t("fanClubDashboard.payoutFailed"));
           } finally {
             setIsRequesting(false);
           }
@@ -97,16 +99,16 @@ export default function DashboardRevenueScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
           <ChevronLeft size={24} color={Colors.text.primary} />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-text-primary">Revenue & Payouts</Text>
+        <Text className="text-xl font-bold text-text-primary">{t("fanClubDashboard.revenuePayouts")}</Text>
       </View>
 
       {/* Payout Request Form */}
       <View className="mx-4 mt-4 mb-2 bg-bg-card rounded-2xl p-4">
-        <Text className="text-text-primary font-semibold mb-3">Request Payout</Text>
+        <Text className="text-text-primary font-semibold mb-3">{t("fanClubDashboard.requestPayout")}</Text>
         <View className="flex-row gap-2">
           <TextInput
             className="flex-1 bg-bg-light text-text-primary rounded-xl px-4 py-3"
-            placeholder="Amount (USD)"
+            placeholder={t("fanClubDashboard.amountUSD")}
             placeholderTextColor={Colors.text.secondary}
             value={payoutAmount}
             onChangeText={setPayoutAmount}
@@ -120,7 +122,7 @@ export default function DashboardRevenueScreen() {
             {isRequesting ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text className="text-white font-bold">Request</Text>
+              <Text className="text-white font-bold">{t("fanClubDashboard.request")}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -145,7 +147,7 @@ export default function DashboardRevenueScreen() {
             isLoadingMore ? <ActivityIndicator color={Colors.darkGold} className="my-4" /> : null
           }
           ListEmptyComponent={
-            <Text className="text-text-secondary text-center mt-8">No transactions yet</Text>
+            <Text className="text-text-secondary text-center mt-8">{t("fanClubDashboard.noTransactions")}</Text>
           }
           renderItem={({ item }) => {
             const isRevenue = item.type === 'revenue_share';
@@ -162,7 +164,7 @@ export default function DashboardRevenueScreen() {
                 </View>
                 <View className="flex-1">
                   <Text className="text-text-primary font-medium text-sm">
-                    {item.description || (isRevenue ? 'Revenue Share' : 'Payout')}
+                    {item.description || (isRevenue ? t("fanClubDashboard.revenueShare") : t("fanClubDashboard.payout"))}
                   </Text>
                   <Text className="text-text-secondary text-xs">{formatDate(item.created_at)}</Text>
                 </View>

@@ -9,18 +9,10 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react-native';
 import ReportService, { type ReportReason } from '@/services/ReportService';
 import Colors from '@/constants/colors';
-
-const REASONS: { key: ReportReason; label: string; description: string }[] = [
-  { key: 'spam',          label: 'Spam',            description: 'Repetitive, unwanted content'    },
-  { key: 'nudity',        label: 'Nudity',           description: 'Inappropriate sexual content'   },
-  { key: 'violence',      label: 'Violence',         description: 'Graphic or violent content'     },
-  { key: 'hate',          label: 'Hate Speech',      description: 'Discrimination or harassment'   },
-  { key: 'misinformation',label: 'Misinformation',   description: 'False or misleading content'   },
-  { key: 'other',         label: 'Other',            description: 'Another reason'                 },
-];
 
 interface Props {
   visible: boolean;
@@ -30,9 +22,19 @@ interface Props {
 }
 
 export default function ReportSheet({ visible, postId, commentId, onClose }: Props) {
-  const [selected, setSelected]     = useState<ReportReason | null>(null);
+  const { t } = useTranslation();
+  const [selected, setSelected]       = useState<ReportReason | null>(null);
   const [description, setDescription] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting]   = useState(false);
+
+  const REASONS: { key: ReportReason; label: string; description: string }[] = [
+    { key: 'spam',           label: t('community.reasonSpam'),            description: t('community.reasonSpamDesc')            },
+    { key: 'nudity',         label: t('community.reasonNudity'),          description: t('community.reasonNudityDesc')          },
+    { key: 'violence',       label: t('community.reasonViolence'),        description: t('community.reasonViolenceDesc')        },
+    { key: 'hate',           label: t('community.reasonHate'),            description: t('community.reasonHateDesc')            },
+    { key: 'misinformation', label: t('community.reasonMisinformation'),  description: t('community.reasonMisinformationDesc')  },
+    { key: 'other',          label: t('community.reasonOther'),           description: t('community.reasonOtherDesc')           },
+  ];
 
   const handleSubmit = async () => {
     if (!selected) return;
@@ -43,12 +45,12 @@ export default function ReportSheet({ visible, postId, commentId, onClose }: Pro
       } else if (commentId) {
         await ReportService.reportComment(commentId, selected, description.trim() || undefined);
       }
-      Alert.alert('Reported', 'Thank you. Our moderators will review this content.');
+      Alert.alert(t('community.reportedTitle'), t('community.reportedMessage'));
       setSelected(null);
       setDescription('');
       onClose();
     } catch (err: any) {
-      Alert.alert('Error', err.message ?? 'Failed to submit report');
+      Alert.alert(t('common.error'), err.message ?? t('community.reportFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -62,7 +64,7 @@ export default function ReportSheet({ visible, postId, commentId, onClose }: Pro
           style={{ backgroundColor: Colors.background.deepDark, maxHeight: '80%' }}
         >
           <View className="flex-row items-center justify-between px-4 mb-4">
-            <Text className="text-lg font-bold" style={{ color: Colors.text.primary }}>Report Content</Text>
+            <Text className="text-lg font-bold" style={{ color: Colors.text.primary }}>{t('community.reportContent')}</Text>
             <TouchableOpacity onPress={onClose} disabled={submitting}>
               <X size={22} color={Colors.text.tertiary} />
             </TouchableOpacity>
@@ -70,7 +72,7 @@ export default function ReportSheet({ visible, postId, commentId, onClose }: Pro
 
           <ScrollView keyboardShouldPersistTaps="handled">
             <Text className="px-4 mb-3 text-sm" style={{ color: Colors.text.secondary }}>
-              Why are you reporting this?
+              {t('community.reportWhy')}
             </Text>
 
             {REASONS.map((r) => {
@@ -104,7 +106,7 @@ export default function ReportSheet({ visible, postId, commentId, onClose }: Pro
               <TextInput
                 value={description}
                 onChangeText={setDescription}
-                placeholder="Please describe the issue…"
+                placeholder={t('community.reportDescribePlaceholder')}
                 placeholderTextColor={Colors.text.muted}
                 multiline
                 maxLength={500}
@@ -124,7 +126,7 @@ export default function ReportSheet({ visible, postId, commentId, onClose }: Pro
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text className="font-bold text-sm" style={{ color: selected ? Colors.textWhite : Colors.text.tertiary }}>
-                  Submit Report
+                  {t('community.reportSubmit')}
                 </Text>
               )}
             </TouchableOpacity>

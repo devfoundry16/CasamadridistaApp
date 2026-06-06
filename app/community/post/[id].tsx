@@ -9,6 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import PostService from '@/services/PostService';
 import CommentService, { type Comment } from '@/services/CommentService';
@@ -22,6 +23,7 @@ import ReportSheet  from '@/components/Community/Moderation/ReportSheet';
 import Colors from '@/constants/colors';
 
 export default function PostDetailPage() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const queryClient = useQueryClient();
   const [reportOpen, setReportOpen] = useState(false);
@@ -68,7 +70,7 @@ export default function PostDetailPage() {
         <PostActions post={post} />
         <View style={styles.divider} />
         <Text style={styles.commentsLabel}>
-          {post.comment_count} {post.comment_count === 1 ? 'Comment' : 'Comments'}
+          {post.comment_count} {post.comment_count === 1 ? t('community.commentSingular') : t('community.commentPlural')}
         </Text>
         {commentsLoading && (
           <View className="py-6 items-center">
@@ -82,7 +84,7 @@ export default function PostDetailPage() {
   const screenOptions = (
     <Stack.Screen
       options={{
-        title: 'Post',
+        title: t('nav.post'),
         headerStyle: { backgroundColor: Colors.darkGold },
         headerTintColor: Colors.textWhite,
       }}
@@ -105,7 +107,7 @@ export default function PostDetailPage() {
       <>
         {screenOptions}
         <View className="flex-1 items-center justify-center" style={{ backgroundColor: Colors.background.dark }}>
-          <Text style={{ color: Colors.text.tertiary }}>Post not found.</Text>
+          <Text style={{ color: Colors.text.tertiary }}>{t('community.postNotFound')}</Text>
         </View>
       </>
     );
@@ -131,7 +133,7 @@ export default function PostDetailPage() {
             commentsLoading ? null : (
               <View className="py-10 items-center">
                 <Text style={{ color: Colors.text.tertiary }}>
-                  No comments yet. Start the conversation!
+                  {t('community.noComments')}
                 </Text>
               </View>
             )
@@ -148,7 +150,7 @@ export default function PostDetailPage() {
           postId={id}
           replyTo={replyTo?.id}
           onSubmit={handleSubmit}
-          placeholder={replyTo ? `Replying to ${replyTo.author?.first_name ?? 'user'}…` : undefined}
+          placeholder={replyTo ? t('community.replyingTo', { name: replyTo.author?.first_name ?? t('community.defaultUser') }) : undefined}
         />
       </KeyboardAvoidingView>
       <ReportSheet visible={reportOpen} postId={post.id} onClose={() => setReportOpen(false)} />
