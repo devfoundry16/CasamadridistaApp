@@ -56,19 +56,19 @@ export default function FanClubPartnershipSection({
         <Pressable
           onPress={openPartnershipInquiry}
           className="py-3.5 rounded-xl items-center mt-4 mb-2"
-          style={{ backgroundColor: Colors.darkGold }}
+          style={({ pressed }) => ({ backgroundColor: Colors.darkGold, opacity: pressed ? 0.7 : 1 })}
           android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
         >
           <Text className="text-white font-bold text-sm">{t('fanClubs.partnerCta')}</Text>
         </Pressable>
 
-        <Pressable onPress={openPartnershipInquiry} className="items-center py-1.5">
+        <Pressable onPress={openPartnershipInquiry} className="items-center py-1.5" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
           <Text className="text-sm opacity-70" style={{ color: Colors.darkGold }}>
             {t('fanClubs.partnerEmailLabel')}
           </Text>
         </Pressable>
 
-        <Pressable onPress={openPartnershipInquiry} className="items-center py-1">
+        <Pressable onPress={openPartnershipInquiry} className="items-center py-1" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
           <Text
             className="text-sm underline text-center"
             style={{ color: Colors.darkGold }}
@@ -118,19 +118,19 @@ export default function FanClubPartnershipSection({
       <Pressable
         onPress={openPartnershipInquiry}
         className="py-3 px-6 rounded-xl w-full items-center mt-4 mb-2"
-        style={{ backgroundColor: Colors.background.dark }}
+        style={({ pressed }) => ({ backgroundColor: Colors.background.dark, opacity: pressed ? 0.7 : 1 })}
         android_ripple={{ color: 'rgba(188,144,69,0.3)' }}
       >
         <Text className="text-white font-semibold text-sm">{t('fanClubs.partnerCta')}</Text>
       </Pressable>
 
-      <Pressable onPress={openPartnershipInquiry} className="py-1.5">
+      <Pressable onPress={openPartnershipInquiry} className="py-1.5" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
         <Text className="text-sm opacity-80 text-white text-center">
           {t('fanClubs.partnerEmailLabel')}
         </Text>
       </Pressable>
 
-      <Pressable onPress={openPartnershipInquiry} className="py-1">
+      <Pressable onPress={openPartnershipInquiry} className="py-1" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
         <Text className="text-sm underline text-center text-white opacity-80">
           {t('fanClubs.applyHere')}
         </Text>

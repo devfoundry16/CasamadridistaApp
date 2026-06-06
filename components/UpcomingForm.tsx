@@ -97,6 +97,7 @@ export default function UpcomingForm({
         {nextMatch?.league.season + 1} | {nextMatch?.league.round}
       </Text>
       <TouchableOpacity
+        activeOpacity={0.7}
         onPress={() => router.push(`/venue/${nextMatch?.fixture.venue.id}`)}
       >
         <Text className="text-text-primary text-[11px] text-center mb-2.5">
@@ -109,6 +110,7 @@ export default function UpcomingForm({
       <View className="flex-row justify-between w-full mb-5">
         {/* Home Team */}
         <TouchableOpacity
+          activeOpacity={0.7}
           className="items-center flex-1"
           onPress={() => router.push(`/team/${nextMatch.teams.home.id}`)}
         >
@@ -138,6 +140,7 @@ export default function UpcomingForm({
         )}
         {/* Away Team */}
         <TouchableOpacity
+          activeOpacity={0.7}
           className="items-center flex-1"
           onPress={() => router.push(`/team/${nextMatch.teams.away.id}`)}
         >

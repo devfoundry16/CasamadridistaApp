@@ -33,13 +33,14 @@ export default function HomePartnershipBanner() {
   return (
     <Pressable
       onPress={openPartnershipInquiry}
-      style={{
+      style={({ pressed }) => ({
         backgroundColor: BG,
         borderWidth: 1,
         borderColor: BORDER,
         borderLeftWidth: 4,
         borderLeftColor: GOLD,
-      }}
+        opacity: pressed ? 0.75 : 1,
+      })}
       className="flex-row items-center px-4 py-3 gap-3"
     >
       <Text
@@ -54,6 +55,7 @@ export default function HomePartnershipBanner() {
         hitSlop={12}
         className="p-1"
         android_ripple={{ color: 'rgba(255,255,255,0.15)', radius: 16 }}
+        style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
       >
         <X size={16} color={GOLD} strokeWidth={2.5} />
       </Pressable>

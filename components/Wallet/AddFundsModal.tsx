@@ -116,6 +116,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
         <View className="flex-row justify-between items-center p-4 border-b border-border-default">
           <Text className="text-lg font-bold text-text-primary">{t("wallet.addFunds")}</Text>
           <TouchableOpacity
+            activeOpacity={0.7}
             onPress={handleClose}
             className="w-[30px] h-[30px] rounded-full bg-bg-light justify-center items-center"
           >
@@ -150,6 +151,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
                   return (
                     <TouchableOpacity
                       key={quickAmount}
+                      activeOpacity={0.7}
                       className={`px-4 py-2 rounded-full border ${
                         isSelected
                           ? "bg-rm-gold border-rm-gold"
@@ -186,6 +188,7 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
           {/* Add Funds Button */}
           <TouchableOpacity
+            activeOpacity={0.7}
             className={`p-4 rounded-lg items-center mt-5 ${
               !amount || loading
                 ? "bg-bg-gray opacity-60"

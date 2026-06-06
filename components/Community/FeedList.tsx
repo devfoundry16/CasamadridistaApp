@@ -57,7 +57,7 @@ export default function FeedList({ tab }: Props) {
   );
 
   const renderItem = useCallback(({ item }: { item: Post }) => {
-    return <PostCard post={item} paused={!visibleIds.current.has(item.id)} />;
+    return <PostCard post={item} />;
   }, []);
 
   const keyExtractor = useCallback((item: Post) => item.id, []);

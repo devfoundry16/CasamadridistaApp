@@ -10,10 +10,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  Switch,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostService from "@/services/PostService";
+import AuthService from "@/services/AuthService";
+import { Shield } from "lucide-react-native";
 import MediaService from "@/services/MediaService";
 import MediaPicker, { type PickedMedia } from "./MediaPicker";
 import TagPicker from "./TagPicker";
@@ -29,8 +32,17 @@ export default function Composer() {
   const [media, setMedia] = useState<PickedMedia | null>(null);
   const [country, setCountry] = useState<FanClubCountry | null>(null);
   const [fanClub, setFanClub] = useState<FanClub | null>(null);
+  const [postAsFanClub, setPostAsFanClub] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
+
+  const { data: roles } = useQuery({
+    queryKey: ['myRoles'],
+    queryFn: () => AuthService.getMyRoles(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isFanClubAdmin = roles?.fanClubAdmin ?? false;
 
   const canPost = !submitting && title.trim().length > 0 && (body.trim().length > 0 || !!media);
 
@@ -46,7 +58,9 @@ export default function Composer() {
         title: title.trim(),
         body: body.trim() || undefined,
         country_code: country?.country_code ?? undefined,
-        tagged_fan_club_id: fanClub?.id ?? undefined,
+        ...(postAsFanClub && roles?.fanClubId
+          ? { fan_club_id: roles.fanClubId }
+          : { tagged_fan_club_id: fanClub?.id ?? undefined }),
       });
 
       if (media) {
@@ -120,18 +134,43 @@ export default function Composer() {
           </View>
           <MediaPicker media={media} onPick={setMedia} />
 
-          <View style={styles.divider} />
+          {isFanClubAdmin && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>Post As</Text>
+              </View>
+              <View style={styles.toggleRow}>
+                <Shield size={16} color={Colors.darkGold} />
+                <Text style={styles.toggleLabel}>{roles?.fanClubName}</Text>
+                <Switch
+                  value={postAsFanClub}
+                  onValueChange={(v) => {
+                    setPostAsFanClub(v);
+                    if (v) { setCountry(null); setFanClub(null); }
+                  }}
+                  trackColor={{ false: Colors.border.default, true: Colors.darkGold }}
+                  thumbColor="#fff"
+                  disabled={submitting}
+                />
+              </View>
+            </>
+          )}
 
-          {/* ── Tags ── */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>Tags</Text>
-          </View>
-          <TagPicker
-            selectedCountry={country}
-            selectedFanClub={fanClub}
-            onCountryChange={setCountry}
-            onFanClubChange={setFanClub}
-          />
+          {!postAsFanClub && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>Tags</Text>
+              </View>
+              <TagPicker
+                selectedCountry={country}
+                selectedFanClub={fanClub}
+                onCountryChange={setCountry}
+                onFanClubChange={setFanClub}
+              />
+            </>
+          )}
 
         </View>
 
@@ -209,6 +248,19 @@ const styles = StyleSheet.create({
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: Colors.border.default,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  toggleLabel: {
+    flex: 1,
+    color: Colors.text.primary,
+    fontSize: 15,
+    fontWeight: '500',
   },
   footer: {
     paddingHorizontal: 16,

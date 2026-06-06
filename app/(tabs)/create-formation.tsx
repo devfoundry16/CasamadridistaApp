@@ -247,6 +247,7 @@ export default function LineupBuilder() {
                   {t("formation.formation")}
                 </Text>
                 <TouchableOpacity
+                  activeOpacity={0.7}
                   className="bg-black/40 rounded-lg p-3 flex-row justify-between items-center"
                   onPress={() => setShowFormationPicker(!showFormationPicker)}
                 >
@@ -275,6 +276,7 @@ export default function LineupBuilder() {
                 {formationsList.map((f) => (
                   <TouchableOpacity
                     key={f}
+                    activeOpacity={0.7}
                     className={`p-3 border-b border-white/10 ${
                       formation === f ? "bg-status-success/20" : ""
                     }`}
@@ -304,6 +306,7 @@ export default function LineupBuilder() {
 
             <View className="flex-row gap-2 mt-2">
               <TouchableOpacity
+                activeOpacity={0.7}
                 className="flex-1 bg-status-error rounded-lg py-3.5 flex-row justify-center items-center"
                 onPress={resetFormation}
               >
@@ -313,6 +316,7 @@ export default function LineupBuilder() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
+                activeOpacity={0.7}
                 className="flex-1 bg-status-success rounded-lg py-3.5 flex-row justify-center items-center"
                 onPress={downloadFormation}
               >
@@ -502,6 +506,7 @@ export default function LineupBuilder() {
                   return (
                     <TouchableOpacity
                       key={index}
+                      activeOpacity={0.7}
                       className="absolute items-center"
                       style={{
                         left: `${slot.x}%`,
@@ -585,6 +590,7 @@ export default function LineupBuilder() {
                 return (
                   <TouchableOpacity
                     key={index}
+                    activeOpacity={0.7}
                     className="w-[30%] mb-4 items-center"
                     style={{
                       transform: isSelected ? [{ scale: 1.15 }] : [],

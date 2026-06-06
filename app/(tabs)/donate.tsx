@@ -80,6 +80,7 @@ export default function DonateScreen() {
           {t("donate.impactMessage")}
         </Text>
         <TouchableOpacity
+          activeOpacity={0.7}
           className="bg-rm-gold py-4 px-8 rounded-xl"
           onPress={handleOpenDonationLink}
         >

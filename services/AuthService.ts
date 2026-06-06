@@ -5,6 +5,10 @@ import { Alert, Platform } from 'react-native';
 import i18n from '@/i18n';
 import { API_BASE_URL, supabase } from '@/config/supabase';
 
+// Interceptor-free axios instance used for auth endpoints (login, refresh) to avoid
+// the response interceptor triggering on these calls and causing circular refresh loops.
+const rawAxios = axios.create();
+
 // Deeplink for password reset. Must match app.json "scheme" (casamadridistaapp).
 // Add this exact URL (or casamadridistaapp://**) in Supabase Dashboard > Authentication > URL Configuration > Redirect URLs.
 export const PASSWORD_RESET_REDIRECT_URL = 'casamadridistaapp://auth/reset-password';
@@ -97,7 +101,7 @@ class AuthServiceClass {
 
       const { access_token, refresh_token, user } = response.data;
       await this.storeAuthData(access_token, refresh_token, user);
-
+      this.resetSessionState();
       return user;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Login failed');
@@ -116,11 +120,14 @@ class AuthServiceClass {
   }
 
   /**
-   * Check if user is authenticated
+   * Check if user is authenticated and their token has not expired.
    */
   async isAuthenticated(): Promise<boolean> {
     const token = await AsyncStorage.getItem(this.AUTH_TOKEN_KEY);
-    return !!token;
+    if (!token) return false;
+    const expiry = this.parseJwtExpiry(token);
+    if (expiry !== null && Date.now() >= expiry) return false;
+    return true;
   }
 
   /**
@@ -287,6 +294,7 @@ class AuthServiceClass {
     };
 
     await this.storeAuthData(session.access_token, session.refresh_token, user);
+    this.resetSessionState();
     return user;
   }
 
@@ -295,6 +303,7 @@ class AuthServiceClass {
    */
   async storeOAuthSession(accessToken: string, refreshToken: string, user: User): Promise<void> {
     await this.storeAuthData(accessToken, refreshToken, user);
+    this.resetSessionState();
   }
 
   /**
@@ -344,7 +353,9 @@ class AuthServiceClass {
         throw new Error('No refresh token available');
       }
 
-      const response = await axios.post(`${API_BASE_URL}auth/refresh`, {
+      // Use rawAxios (no interceptors) to prevent the response interceptor from
+      // catching a 401 here and triggering a recursive refresh deadlock.
+      const response = await rawAxios.post(`${API_BASE_URL}auth/refresh`, {
         refresh_token: refreshToken,
       });
 
@@ -356,7 +367,10 @@ class AuthServiceClass {
 
       return access_token;
     } catch (error: any) {
-      await this.logout();
+      // Only clear the session for definitive auth failures (4xx). A network error
+      // or server 500 should not permanently destroy a still-valid session.
+      const isAuthFailure = error.response?.status >= 400 && error.response?.status < 500;
+      if (isAuthFailure) await this.logout();
       throw new Error(error.response?.data?.error || 'Failed to refresh token');
     }
   }
@@ -369,18 +383,76 @@ class AuthServiceClass {
   }
 
   /**
-   * Validate credentials (for account operations)
+   * Validate credentials without side effects — does not store tokens or alter the current session.
    */
   async validateCredentials(email: string, password: string): Promise<boolean> {
     try {
-      await this.login(email, password);
+      await rawAxios.post(`${API_BASE_URL}auth/login`, { email, password });
       return true;
     } catch {
       return false;
     }
   }
 
+  async getMyRoles(): Promise<{
+    superAdmin: boolean;
+    fanClubAdmin: boolean;
+    fanClubId: string | null;
+    fanClubName: string | null;
+  }> {
+    try {
+      const headers = await this.getAuthHeader();
+      const response = await axios.get(`${API_BASE_URL}auth/roles`, { headers });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to load roles');
+    }
+  }
+
   private interceptorsSetup = false;
+  private isRefreshing = false;
+  private sessionExpiredAlertShown = false;
+  private refreshQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = [];
+
+  private parseJwtExpiry(token: string): number | null {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+      const payload = JSON.parse(atob(padded));
+      return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private async performRefresh(): Promise<string> {
+    if (this.isRefreshing) {
+      return new Promise<string>((resolve, reject) => {
+        this.refreshQueue.push({ resolve, reject });
+      });
+    }
+    this.isRefreshing = true;
+    try {
+      const newToken = await this.refreshToken();
+      this.isRefreshing = false;
+      this.refreshQueue.forEach(({ resolve }) => resolve(newToken));
+      this.refreshQueue = [];
+      return newToken;
+    } catch (error) {
+      this.isRefreshing = false;
+      this.refreshQueue.forEach(({ reject }) => reject(error));
+      this.refreshQueue = [];
+      throw error;
+    }
+  }
+
+  resetSessionState(): void {
+    this.isRefreshing = false;
+    this.sessionExpiredAlertShown = false;
+    this.refreshQueue = [];
+  }
 
   /**
    * Register a global axios response interceptor that handles 401s.
@@ -392,31 +464,66 @@ class AuthServiceClass {
     if (this.interceptorsSetup) return;
     this.interceptorsSetup = true;
 
+    // Proactive refresh: if the token expires within 5 minutes, refresh before the request goes out.
+    axios.interceptors.request.use(async (config) => {
+      const token = await AsyncStorage.getItem(this.AUTH_TOKEN_KEY);
+      if (!token) return config;
+
+      const expiry = this.parseJwtExpiry(token);
+      if (expiry === null) return config;
+
+      const fiveMinutes = 5 * 60 * 1000;
+      if (expiry - Date.now() < fiveMinutes) {
+        try {
+          const newToken = await this.performRefresh();
+          config.headers = config.headers ?? {};
+          config.headers['Authorization'] = `Bearer ${newToken}`;
+        } catch {
+          // Refresh failed in the proactive path — let the request proceed;
+          // the response interceptor will handle the resulting 401.
+        }
+      }
+
+      return config;
+    });
+
+    // Reactive 401 handler: catches any 401 not prevented by the request interceptor.
     axios.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
-          originalRequest._retry = true;
-          try {
-            const newToken = await this.refreshToken();
-            if (originalRequest.headers) {
-              originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-            } else {
-              originalRequest.headers = { Authorization: `Bearer ${newToken}` };
-            }
-            return axios(originalRequest);
-          } catch {
-            onSessionExpired();
-            Alert.alert(
-              i18n.t('alerts.sessionExpired'),
-              i18n.t('alerts.sessionExpiredMessage')
-            );
-          }
+        if (error.response?.status !== 401 || originalRequest._retry) {
+          return Promise.reject(error);
         }
 
-        return Promise.reject(error);
+        // If there is no stored token the user is a guest — this 401 is an
+        // unauthenticated request to a protected resource, not a session expiry.
+        // Pass through silently without showing any alert or clearing state.
+        const existingToken = await AsyncStorage.getItem(this.AUTH_TOKEN_KEY);
+        if (!existingToken) return Promise.reject(error);
+
+        originalRequest._retry = true;
+
+        try {
+          const newToken = await this.performRefresh();
+          originalRequest.headers = originalRequest.headers ?? {};
+          originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+          return axios(originalRequest);
+        } catch (refreshError) {
+          onSessionExpired();
+
+          if (!this.sessionExpiredAlertShown) {
+            this.sessionExpiredAlertShown = true;
+            Alert.alert(
+              i18n.t('alerts.sessionExpired'),
+              i18n.t('alerts.sessionExpiredMessage'),
+              [{ text: 'OK', onPress: () => { this.sessionExpiredAlertShown = false; } }]
+            );
+          }
+
+          return Promise.reject(refreshError);
+        }
       }
     );
   }

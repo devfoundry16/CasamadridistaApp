@@ -178,6 +178,7 @@ export default function PackagesScreen() {
         </Text>
         <View className="flex-row bg-rm-gold rounded-xl overflow-hidden mb-6 p-1">
           <TouchableOpacity
+            activeOpacity={0.7}
             className={`flex-1 py-3 px-4 rounded-xl ${billingType === "monthly" ? "bg-white" : ""}`}
             onPress={() => setBillingType("monthly")}
           >
@@ -187,6 +188,7 @@ export default function PackagesScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
+            activeOpacity={0.7}
             className={`flex-1 py-3 px-4 rounded-xl ${billingType === "yearly" ? "bg-white" : ""}`}
             onPress={() => setBillingType("yearly")}
           >
@@ -289,6 +291,7 @@ export default function PackagesScreen() {
                         ))}
                       </View>
                       <TouchableOpacity
+                        activeOpacity={0.7}
                         disabled={disableCTA}
                         className={`py-4 rounded-xl items-center ${pkg.badge === "Popular" ? "bg-rm-gold" : "bg-bg-light"} ${disableCTA ? "opacity-50" : ""}`}
                         onPress={() => selectedPurchasePackage && !disableCTA && handleSubscribe(selectedPurchasePackage)}
@@ -312,13 +315,13 @@ export default function PackagesScreen() {
                   {t("membership.autoRenewDisclosure")}
                 </Text>
                 <View className="flex-row justify-center items-center gap-4">
-                    <TouchableOpacity onPress={() => router.push("/terms-of-service")}>
+                    <TouchableOpacity activeOpacity={0.7} onPress={() => router.push("/terms-of-service")}>
                         <Text className="text-xs text-rm-gold underline">
                           {t("membership.termsOfUse")}
                         </Text>
                     </TouchableOpacity>
                     <Text className="text-xs text-text-secondary">|</Text>
-                    <TouchableOpacity onPress={() => router.push("/privacy-policy")}>
+                    <TouchableOpacity activeOpacity={0.7} onPress={() => router.push("/privacy-policy")}>
                         <Text className="text-xs text-rm-gold underline">
                           {t("membership.privacyPolicy")}
                         </Text>

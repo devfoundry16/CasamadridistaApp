@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import "@/i18n";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontProvider, useFont } from "@/contexts/FontContext";
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
@@ -19,10 +20,10 @@ import {
   Cairo_700Bold,
   useFonts,
 } from "@expo-google-fonts/cairo";
-import { Stack } from "expo-router";
+import { Stack, router, usePathname } from "expo-router";
 import { useTranslation } from "react-i18next";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { View, I18nManager } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { development } from "@/config/environment";
@@ -260,9 +261,26 @@ const DataInitializer = () => {
   const { initializeAppData } = useFootball();
   const { loadUserData } = useUser();
   const dispatch = useDispatch<AppDispatch>();
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
 
   useEffect(() => {
-    AuthService.setupAxiosInterceptors(() => dispatch(clearUser()));
+    pathnameRef.current = pathname;
+  }, [pathname]);
+
+  useEffect(() => {
+    AuthService.setupAxiosInterceptors(async () => {
+      // Clean up all persisted session data — mirrors what logoutUser thunk does.
+      await AsyncStorage.removeItem('paymentMethods');
+      dispatch(clearUser());
+      // Only force-navigate if the user is on a protected route. Public screens
+      // (home, matches, community, etc.) can gracefully degrade to their
+      // unauthenticated state without a disruptive redirect.
+      const isProtectedRoute = pathnameRef.current.startsWith('/account/');
+      if (isProtectedRoute) {
+        router.replace('/(tabs)/account' as any);
+      }
+    });
     Promise.all([initializeAppData(), loadUserData()]).then(() => {
       SplashScreen.hideAsync();
     });

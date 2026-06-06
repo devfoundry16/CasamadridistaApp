@@ -117,29 +117,33 @@ export default function TagPicker({ selectedCountry, selectedFanClub, onCountryC
             </View>
             {loading ? (
               <ActivityIndicator color={Colors.darkGold} className="py-8" />
+            ) : modalType === 'country' ? (
+              <FlatList
+                data={filteredCountries}
+                keyExtractor={(item) => item.country}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => { onCountryChange(item); onFanClubChange(null); close(); }}
+                    className="px-4 py-3 border-b"
+                    style={{ borderColor: Colors.border.default }}
+                  >
+                    <Text style={{ color: Colors.text.primary }}>{item.country}</Text>
+                  </TouchableOpacity>
+                )}
+              />
             ) : (
               <FlatList
-                data={modalType === 'country' ? filteredCountries : filteredClubs}
-                keyExtractor={(item) => ('country' in item ? item.country : (item as FanClub).id)}
-                renderItem={({ item }) =>
-                  'country' in item ? (
-                    <TouchableOpacity
-                      onPress={() => { onCountryChange(item); onFanClubChange(null); close(); }}
-                      className="px-4 py-3 border-b"
-                      style={{ borderColor: Colors.border.default }}
-                    >
-                      <Text style={{ color: Colors.text.primary }}>{item.country}</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      onPress={() => { onFanClubChange(item as FanClub); close(); }}
-                      className="px-4 py-3 border-b"
-                      style={{ borderColor: Colors.border.default }}
-                    >
-                      <Text style={{ color: Colors.text.primary }}>{(item as FanClub).name}</Text>
-                    </TouchableOpacity>
-                  )
-                }
+                data={filteredClubs}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => { onFanClubChange(item); close(); }}
+                    className="px-4 py-3 border-b"
+                    style={{ borderColor: Colors.border.default }}
+                  >
+                    <Text style={{ color: Colors.text.primary }}>{item.name}</Text>
+                  </TouchableOpacity>
+                )}
               />
             )}
           </View>

@@ -1,7 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@/config/supabase';
-import AuthService from './AuthService';
 
 export interface Wallet {
   id: string;
@@ -40,26 +39,15 @@ class WalletServiceClass {
   }
 
   /**
-   * Executes an authenticated request and retries once on expired token.
+   * Executes an authenticated request. 401 handling and token refresh are
+   * managed by the global axios interceptor in AuthService — no retry needed here.
    */
   private async requestWithAuth<T>(
     requestFn: (headers: Record<string, string>) => Promise<{ data: T }>
   ): Promise<T> {
-    let headers = await this.getAuthHeader();
-
-    try {
-      const response = await requestFn(headers);
-      return response.data;
-    } catch (error: any) {
-      const status = error?.response?.status;
-      if (status === 401) {
-        const newAccessToken = await AuthService.refreshToken();
-        headers = { Authorization: `Bearer ${newAccessToken}` };
-        const retryResponse = await requestFn(headers);
-        return retryResponse.data;
-      }
-      throw error;
-    }
+    const headers = await this.getAuthHeader();
+    const response = await requestFn(headers);
+    return response.data;
   }
 
   /**

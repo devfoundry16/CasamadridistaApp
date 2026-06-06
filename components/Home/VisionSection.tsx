@@ -35,6 +35,7 @@ const VisionSection = () => {
             {t("vision.subtitle")}
           </Text>
           <TouchableOpacity
+            activeOpacity={0.7}
             className="bg-rm-gold px-[30px] py-3 rounded-lg"
             onPress={() => router.push("/contact")}
           >

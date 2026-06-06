@@ -33,7 +33,7 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
 
   const renderCard = (item: any) => (
     <View className="bg-bg-card rounded-[10px] p-3 items-center justify-center w-[90%] h-full self-center">
-      <TouchableOpacity onPress={() => router.push(`/league/${item.league.id}/${item.league.season}`)}>
+      <TouchableOpacity activeOpacity={0.7} onPress={() => router.push(`/league/${item.league.id}/${item.league.season}`)}>
         <Text className="text-text-primary text-base text-center">
           {item.league.name} {item.league.season}-{item.league.season + 1}
         </Text>
@@ -43,6 +43,7 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
       </Text>
 
       <TouchableOpacity
+        activeOpacity={0.7}
         className="flex-row items-center justify-around w-full my-2"
         onPress={() => router.push(`/match/${item.fixture.id}`)}
       >
@@ -93,6 +94,7 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
       </View>
       <View className="flex-row items-center justify-center">
         <TouchableOpacity
+          activeOpacity={0.7}
           className="w-[30px] h-[30px] rounded-full bg-bg-light items-center justify-center"
           onPress={() =>
             carouselRef.current?.scrollTo({ count: -1, animated: true })
@@ -114,6 +116,7 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
         />
 
         <TouchableOpacity
+          activeOpacity={0.7}
           className="w-[30px] h-[30px] rounded-full bg-bg-light items-center justify-center"
           onPress={() =>
             carouselRef.current?.scrollTo({ count: 1, animated: true })
