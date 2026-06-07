@@ -34,7 +34,11 @@ function FanClubCard({ club, onJoin }: FanClubCardProps) {
   return (
     <View
       className="mx-4 mb-4 rounded-2xl overflow-hidden"
-      style={{ backgroundColor: Colors.primary }}
+      style={{
+        backgroundColor: Colors.background.card,
+        borderWidth: 1,
+        borderColor: 'rgba(188,144,69,0.2)',
+      }}
     >
       <View className="flex-row items-center p-4">
         <Image
@@ -45,7 +49,7 @@ function FanClubCard({ club, onJoin }: FanClubCardProps) {
         <View className="flex-1 ml-3">
           <Text
             className="text-base font-bold mb-0.5"
-            style={{ color: Colors.darkGold }}
+            style={{ color: Colors.text.primary }}
             numberOfLines={2}
           >
             {club.name}
@@ -163,7 +167,7 @@ export default function CountryClubsScreen() {
 
   const ListHeader = (
     <View className="px-4 pt-5 pb-3">
-      <Text className="text-xl font-bold mb-1" style={{ color: Colors.darkGold }}>
+      <Text className="text-xl font-bold mb-1" style={{ color: Colors.text.primary }}>
         {t('fanClubs.clubsIn', { country })}
       </Text>
       <Text className="text-sm opacity-60" style={{ color: Colors.text.primary }}>

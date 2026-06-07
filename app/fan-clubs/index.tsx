@@ -38,7 +38,12 @@ function CountryCard({ item, onPress }: CountryCardProps) {
     <Pressable
       onPress={() => onPress(item.country)}
       className="flex-1 m-1.5 rounded-2xl items-center justify-center py-4 px-2"
-      style={{ backgroundColor: Colors.primary, minHeight: 90 }}
+      style={{
+        backgroundColor: Colors.background.card,
+        borderWidth: 1,
+        borderColor: 'rgba(188,144,69,0.2)',
+        minHeight: 90,
+      }}
       android_ripple={{ color: Colors.darkGold }}
     >
       <Text className="text-4xl mb-1">{countryCodeToFlag(item.country_code)}</Text>
@@ -116,7 +121,7 @@ export default function FanClubsScreen() {
 
   const ListHeader = (
     <View className="px-4 pt-5 pb-3">
-      <Text className="text-2xl font-bold text-center mb-1" style={{ color: Colors.darkGold }}>
+      <Text className="text-2xl font-bold text-center mb-1" style={{ color: Colors.text.primary }}>
         {t('fanClubs.title')}
       </Text>
       <Text className="text-sm text-center opacity-70 mb-4" style={{ color: Colors.text.primary }}>

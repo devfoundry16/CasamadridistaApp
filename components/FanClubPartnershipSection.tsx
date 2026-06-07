@@ -26,7 +26,7 @@ export default function FanClubPartnershipSection({
           <Mail size={20} color={Colors.darkGold} />
           <Text
             className="text-lg font-bold flex-1"
-            style={{ color: Colors.darkGold }}
+            style={{ color: Colors.text.primary }}
           >
             {t('fanClubs.partnerNetworkTitle')}
           </Text>
@@ -46,7 +46,7 @@ export default function FanClubPartnershipSection({
         {Array.isArray(bullets) &&
           bullets.map((bullet, i) => (
             <View key={i} className="flex-row items-start mb-1.5 gap-2">
-              <CheckCircle size={14} color={Colors.darkGold} style={{ marginTop: 2 }} />
+              <CheckCircle size={14} color={Colors.text.tertiary} style={{ marginTop: 2 }} />
               <Text className="text-sm leading-5 flex-1 opacity-80" style={{ color: Colors.text.primary }}>
                 {bullet}
               </Text>
@@ -80,13 +80,17 @@ export default function FanClubPartnershipSection({
     );
   }
 
-  // fanClubs variant — gold card matching existing footer style
+  // fanClubs variant
   return (
     <View
       className="mx-4 my-6 rounded-2xl p-5 items-center"
-      style={{ backgroundColor: Colors.primary, opacity: 1 }}
+      style={{
+        backgroundColor: Colors.background.medium,
+        borderWidth: 1,
+        borderColor: 'rgba(188,144,69,0.35)',
+      }}
     >
-      <Mail size={28} color="#fff" />
+      <Mail size={28} color={Colors.darkGold} />
 
       <Text
         className="text-base font-bold text-center mt-3 mb-1 text-white"
@@ -108,7 +112,7 @@ export default function FanClubPartnershipSection({
       {Array.isArray(bullets) &&
         bullets.map((bullet, i) => (
           <View key={i} className="flex-row items-start mb-1.5 gap-2 self-start">
-            <CheckCircle size={13} color="#fff" style={{ marginTop: 2 }} />
+            <CheckCircle size={13} color={Colors.darkGold} style={{ marginTop: 2 }} />
             <Text className="text-sm leading-5 flex-1 opacity-85 text-white">
               {bullet}
             </Text>
@@ -118,20 +122,20 @@ export default function FanClubPartnershipSection({
       <Pressable
         onPress={openPartnershipInquiry}
         className="py-3 px-6 rounded-xl w-full items-center mt-4 mb-2"
-        style={({ pressed }) => ({ backgroundColor: Colors.background.dark, opacity: pressed ? 0.7 : 1 })}
-        android_ripple={{ color: 'rgba(188,144,69,0.3)' }}
+        style={({ pressed }) => ({ backgroundColor: Colors.darkGold, opacity: pressed ? 0.7 : 1 })}
+        android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
       >
         <Text className="text-white font-semibold text-sm">{t('fanClubs.partnerCta')}</Text>
       </Pressable>
 
       <Pressable onPress={openPartnershipInquiry} className="py-1.5" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
-        <Text className="text-sm opacity-80 text-white text-center">
+        <Text className="text-sm opacity-70 text-center" style={{ color: Colors.darkGold }}>
           {t('fanClubs.partnerEmailLabel')}
         </Text>
       </Pressable>
 
       <Pressable onPress={openPartnershipInquiry} className="py-1" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
-        <Text className="text-sm underline text-center text-white opacity-80">
+        <Text className="text-sm underline text-center" style={{ color: Colors.darkGold }}>
           {t('fanClubs.applyHere')}
         </Text>
       </Pressable>
