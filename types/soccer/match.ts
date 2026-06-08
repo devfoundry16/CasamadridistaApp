@@ -27,7 +27,7 @@ export interface Match {
     country: string;
     logo: string;
     flag: string;
-    season: 2025;
+    season: 2026;
     round: string; //"Regular Season - 8";
     standings: true;
   };

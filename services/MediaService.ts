@@ -79,7 +79,7 @@ class MediaServiceClass {
   // ---- Upload bytes (Supabase signed URL path) ----
 
   async uploadToSignedUrl(signedUrl: string, localUri: string, mimeType: string): Promise<void> {
-    const fileInfo = await FileSystem.getInfoAsync(localUri, { size: true });
+    const fileInfo = await FileSystem.getInfoAsync(localUri);
     if (!fileInfo.exists) throw new Error('File does not exist');
 
     // expo-file-system uploadAsync supports PUT with binary body
