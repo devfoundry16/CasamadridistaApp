@@ -64,7 +64,7 @@ export default function PostActions({ post, onCommentPress }: Props) {
     try {
       await Share.share({
         message: post.body ?? "Check out this post on Casamadridista!",
-        url: `https://casamadridista.com/feed/${post.id}`,
+        url: `casamadridistaapp://community/post/${post.id}`,
       });
       await PostService.sharePost(post.id, "native_share");
     } catch {
