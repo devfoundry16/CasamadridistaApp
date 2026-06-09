@@ -99,7 +99,11 @@ export default function CountryClubsScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const loadClubs = useCallback(async () => {
-    if (!country) return;
+    if (!country) {
+      setIsLoading(false);
+      setError(t('fanClubs.errorClubs'));
+      return;
+    }
     try {
       setError(null);
       const data = await FanClubService.getClubsByCountry(country);
@@ -126,8 +130,8 @@ export default function CountryClubsScreen() {
       pathname: '/memberships/packages' as any,
       params: {
         fanClubId:   club.id,
-        fanClubName: encodeURIComponent(club.name),
-        country:     encodeURIComponent(club.country),
+        fanClubName: club.name,
+        country:     club.country,
       },
     });
   };
