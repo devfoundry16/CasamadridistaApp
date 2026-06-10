@@ -12,7 +12,7 @@ import {
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { FileText, RefreshCw } from 'lucide-react-native';
+import { FileText, Lock, RefreshCw } from 'lucide-react-native';
 import { GoldAccentBanner } from '@/components/GoldAccentBanner';
 import { Text } from '@/components/Text';
 import { Spinner } from '@/components/Spinner';
@@ -21,6 +21,7 @@ import MemberRegistrationService, {
   MemberRegistrationInput,
 } from '@/services/MemberRegistrationService';
 import { useUser } from '@/hooks/useUser';
+import Purchases from 'react-native-purchases';
 
 const { width: screenWidth } = Dimensions.get('window');
 const MEMBERSHIP_HERO_IMAGE =
@@ -93,12 +94,31 @@ export default function MemberRegistrationScreen() {
   const countryParam = params.country;
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+  const [hasSubscription, setHasSubscription] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [existingRegistration, setExistingRegistration] = useState<MemberRegistration | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   // Ref map for sequential TextInput focus
   const inputRefs = useRef<Record<string, TextInput | null>>({});
+
+  useEffect(() => {
+    const guardSubscription = async () => {
+      try {
+        const customerInfo = await Purchases.getCustomerInfo();
+        setHasSubscription(
+          !!customerInfo.activeSubscriptions && customerInfo.activeSubscriptions.length > 0
+        );
+      } catch {
+        // If RevenueCat is unreachable, allow through — the backend gate is authoritative
+        setHasSubscription(true);
+      }
+      setIsCheckingAccess(false);
+    };
+    guardSubscription();
+  }, []);
+
   const loadExisting = useCallback(async () => {
     try {
       setLoadError(null);
@@ -183,13 +203,37 @@ export default function MemberRegistrationScreen() {
       Alert.alert(t('common.error'), error.message);
     }
   };
-  if (isLoadingData) {
+  if (isCheckingAccess || isLoadingData) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium">
         <Spinner content={t('registration.loadingRegistration')} />
       </View>
     );
   }
+  if (!hasSubscription) {
+    return (
+      <View className="flex-1 justify-center items-center bg-bg-medium px-8">
+        <View className="w-20 h-20 rounded-full bg-bg-light items-center justify-center mb-6">
+          <Lock size={36} color="#BC9045" />
+        </View>
+        <Text className="text-xl font-bold text-white text-center mb-3">
+          {t('registration.noSubscriptionTitle')}
+        </Text>
+        <Text className="text-sm text-text-secondary text-center leading-6 mb-8">
+          {t('registration.noSubscriptionMessage')}
+        </Text>
+        <Pressable
+          onPress={() => router.navigate('/memberships/packages' as any)}
+          className="py-3.5 px-8 rounded-lg bg-rm-gold items-center w-full"
+        >
+          <Text className="text-base font-semibold text-white">
+            {t('registration.viewPackages')}
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   if (loadError) {
     return (
       <View className="flex-1 justify-center items-center bg-bg-medium px-6">

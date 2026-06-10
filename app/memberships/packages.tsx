@@ -63,13 +63,15 @@ export default function PackagesScreen() {
   const [offerings, setOfferings] = useState<PurchasesOfferings | null>(null);
   const [activeProductIds, setActiveProductIds] = useState<string[]>([]);
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const getCustomerInfo = useCallback(async () => {
     try {
       const customerInfo = await Purchases.getCustomerInfo();
       setActiveProductIds(customerInfo.activeSubscriptions || []);
     } catch {
-      // Silent failure, we can still show default CTA
+      // Silent failure — customer info is non-critical; default CTA still works
     }
   }, []);
 
@@ -79,10 +81,12 @@ export default function PackagesScreen() {
       if (result !== null && result.current?.availablePackages.length !== 0) {
         setOfferings(result);
       }
+    } catch {
+      setLoadError(t('membership.errorLoadingPackages'));
     } finally {
       setIsLoadingPackages(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     setIsLoadingPackages(true);
@@ -91,17 +95,22 @@ export default function PackagesScreen() {
     });
   }, [getOfferings, getCustomerInfo]);
   const handleSubscribe = async (pkg: PurchasesPackage) => {
-    console.log(pkg.product.title, pkg.packageType.toLowerCase());
+    if (isPurchasing) return;
+    setIsPurchasing(true);
     try {
       const {customerInfo} = await Purchases.purchasePackage(pkg);
       setActiveProductIds(customerInfo.activeSubscriptions || []);
-      if (typeof customerInfo.entitlements.active[pkg.product.title] !== 'undefined') {
-        SubscriptionService.createSubscription({
-          subscriptionType: pkg.product.identifier,
-          price:            pkg.product.price,
-          currency:         pkg.product.currencyCode,
-          fanClubId:        params.fanClubId || null,
-        }).catch(() => {});
+      if (customerInfo.activeSubscriptions.includes(pkg.product.identifier)) {
+        try {
+          await SubscriptionService.createSubscription({
+            subscriptionType: pkg.product.identifier,
+            price:            pkg.product.price,
+            currency:         pkg.product.currencyCode,
+            fanClubId:        params.fanClubId || null,
+          });
+        } catch (err) {
+          console.error('Subscription record creation failed:', err);
+        }
 
         router.push({
           pathname: '/memberships/registration' as any,
@@ -114,13 +123,36 @@ export default function PackagesScreen() {
       }
     } catch (error: any) {
       Alert.alert(t("common.error"), error.message || t("alerts.subscriptionFailed"));
-      return;
+    } finally {
+      setIsPurchasing(false);
     }
   }
   if (isLoadingPackages) {
     return (
       <View className="flex-1 bg-bg-medium justify-center items-center">
         <Spinner content={t("membership.loadingPackages")}/>
+      </View>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <View className="flex-1 bg-bg-medium justify-center items-center px-6">
+        <Text className="text-white text-center mb-4">{loadError}</Text>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => {
+            setLoadError(null);
+            setIsLoadingPackages(true);
+            Promise.all([getOfferings(), getCustomerInfo()]).finally(() =>
+              setIsLoadingPackages(false)
+            );
+          }}
+          className="py-3 px-6 rounded-xl"
+          style={{ backgroundColor: '#BC9045' }}
+        >
+          <Text className="text-white font-semibold">{t('membership.retry')}</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -252,9 +284,9 @@ export default function PackagesScreen() {
                       </View>
                       <TouchableOpacity
                         activeOpacity={0.7}
-                        disabled={disableCTA}
-                        className={`py-4 rounded-xl items-center ${pkg.badge === "Popular" ? "bg-rm-gold" : "bg-bg-light"} ${disableCTA ? "opacity-50" : ""}`}
-                        onPress={() => selectedPurchasePackage && !disableCTA && handleSubscribe(selectedPurchasePackage)}
+                        disabled={disableCTA || isPurchasing}
+                        className={`py-4 rounded-xl items-center ${pkg.badge === "Popular" ? "bg-rm-gold" : "bg-bg-light"} ${disableCTA || isPurchasing ? "opacity-50" : ""}`}
+                        onPress={() => selectedPurchasePackage && !disableCTA && !isPurchasing && handleSubscribe(selectedPurchasePackage)}
                       >
                         <Text
                           className={`text-base font-bold ${pkg.badge === "Popular" ? "text-white" : "text-white"}`}>

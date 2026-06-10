@@ -3,6 +3,7 @@ import Colors from "@/constants/colors";
 import { Tabs } from "expo-router";
 import { useFont } from "@/contexts/FontContext";
 import { useEnvironment } from "@/hooks/useEnvironment";
+import { useUser } from "@/hooks/useUser";
 import {
   Gamepad2,
   Heart,
@@ -20,6 +21,7 @@ import { Platform, LogBox } from 'react-native';
 LogBox.ignoreAllLogs(true);
 export default function TabLayout() {
   const { revenueCat, loadEnvironment } = useEnvironment();
+  const { user } = useUser();
   const { t } = useTranslation();
   const { fontFamilyBold } = useFont();
   useEffect(() => {
@@ -27,17 +29,17 @@ export default function TabLayout() {
   }, [loadEnvironment]);
 
   useEffect(() => {
-    if (!revenueCat.iosApiKey && !revenueCat.androidApiKey) {
-      return; // Wait for keys to be loaded
+    if ((!revenueCat.iosApiKey && !revenueCat.androidApiKey) || !user?.id) {
+      return;
     }
-    
+
     Purchases.setLogLevel(LOG_LEVEL.DEBUG);
     if (Platform.OS === 'ios' && revenueCat.iosApiKey) {
-        Purchases.configure({ apiKey: revenueCat.iosApiKey });
+        Purchases.configure({ apiKey: revenueCat.iosApiKey, appUserID: user.id });
     } else if (Platform.OS === 'android' && revenueCat.androidApiKey) {
-        Purchases.configure({ apiKey: revenueCat.androidApiKey });
+        Purchases.configure({ apiKey: revenueCat.androidApiKey, appUserID: user.id });
     }
-}, [revenueCat]);
+  }, [revenueCat, user?.id]);
   return (
     <Tabs
       screenOptions={{

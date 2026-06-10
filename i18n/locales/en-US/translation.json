@@ -99,7 +99,10 @@
     "fieldRequired": "{{field}} is required.",
     "loadingRegistration": "Loading your registration...",
     "errorLoading": "Failed to load registration data.",
-    "signatureDisclaimer": "By typing your full name in the Signature field above, you are legally signing this registration form."
+    "signatureDisclaimer": "By typing your full name in the Signature field above, you are legally signing this registration form.",
+    "noSubscriptionTitle": "No Active Membership",
+    "noSubscriptionMessage": "You need an active membership to complete your registration. Choose a plan to get started.",
+    "viewPackages": "View Membership Plans"
   },
   "fanClubs": {
     "title": "Global Fan Clubs",
@@ -292,7 +295,9 @@
     "notAvailable": "Not Available",
     "autoRenewDisclosure": "Subscription automatically renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel your subscription in your App Store account settings.",
     "termsOfUse": "Terms of Use",
-    "privacyPolicy": "Privacy Policy"
+    "privacyPolicy": "Privacy Policy",
+    "errorLoadingPackages": "Failed to load packages. Please check your connection.",
+    "retry": "Try Again"
   },
   "venue": {
     "loading": "Loading venue",

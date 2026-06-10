@@ -37,6 +37,7 @@ export default function MembershipsLayout() {
       />
       <MaterialTopTabs
         screenOptions={{
+          swipeEnabled: false,
           tabBarActiveTintColor: Colors.secondary,
           tabBarInactiveTintColor: Colors.secondary,
           tabBarLabelStyle: {
