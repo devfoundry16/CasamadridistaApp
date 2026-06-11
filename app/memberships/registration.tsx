@@ -107,9 +107,10 @@ export default function MemberRegistrationScreen() {
     const guardSubscription = async () => {
       try {
         const customerInfo = await Purchases.getCustomerInfo();
-        setHasSubscription(
-          !!customerInfo.activeSubscriptions && customerInfo.activeSubscriptions.length > 0
-        );
+        const hasActive =
+          (customerInfo.activeSubscriptions?.length ?? 0) > 0 ||
+          Object.keys(customerInfo.entitlements.active || {}).length > 0;
+        setHasSubscription(hasActive);
       } catch {
         // If RevenueCat is unreachable, allow through — the backend gate is authoritative
         setHasSubscription(true);

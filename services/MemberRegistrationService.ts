@@ -1,6 +1,6 @@
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from '@/config/supabase';
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_BASE_URL } from "@/config/supabase";
 
 export interface MemberRegistration {
   id: string;
@@ -32,7 +32,7 @@ export interface MemberRegistrationInput {
 }
 
 class MemberRegistrationServiceClass {
-  private readonly AUTH_TOKEN_KEY = 'auth_token';
+  private readonly AUTH_TOKEN_KEY = "auth_token";
 
   private async getAuthHeader(): Promise<Record<string, string>> {
     const token = await AsyncStorage.getItem(this.AUTH_TOKEN_KEY);
@@ -45,11 +45,15 @@ class MemberRegistrationServiceClass {
   async getRegistration(): Promise<MemberRegistration | null> {
     try {
       const headers = await this.getAuthHeader();
-      const response = await axios.get(`${API_BASE_URL}member-registration`, { headers });
+      const response = await axios.get(`${API_BASE_URL}member-registration`, {
+        headers,
+      });
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) return null;
-      throw new Error(error.response?.data?.error || 'Failed to load registration');
+      throw new Error(
+        error.response?.data?.error || "Failed to load registration",
+      );
     }
   }
 
@@ -57,13 +61,21 @@ class MemberRegistrationServiceClass {
    * Create or update the registration.
    * On success, the backend generates the Ficha adulto PDF and emails it.
    */
-  async upsertRegistration(data: MemberRegistrationInput): Promise<MemberRegistration & { pdfGenerated: boolean }> {
+  async upsertRegistration(
+    data: MemberRegistrationInput,
+  ): Promise<MemberRegistration & { pdfGenerated: boolean }> {
     try {
       const headers = await this.getAuthHeader();
-      const response = await axios.put(`${API_BASE_URL}member-registration`, data, { headers });
+      const response = await axios.put(
+        `${API_BASE_URL}member-registration`,
+        data,
+        { headers },
+      );
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to save registration');
+      throw new Error(
+        error.response?.data?.error || "Failed to save registration",
+      );
     }
   }
 
@@ -73,10 +85,16 @@ class MemberRegistrationServiceClass {
   async regeneratePdf(): Promise<{ success: boolean; pdfGenerated: boolean }> {
     try {
       const headers = await this.getAuthHeader();
-      const response = await axios.post(`${API_BASE_URL}member-registration/regenerate-pdf`, {}, { headers });
+      const response = await axios.post(
+        `${API_BASE_URL}member-registration/regenerate-pdf`,
+        {},
+        { headers },
+      );
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to regenerate PDF');
+      throw new Error(
+        error.response?.data?.error || "Failed to regenerate PDF",
+      );
     }
   }
 
@@ -87,10 +105,12 @@ class MemberRegistrationServiceClass {
   async getQrToken(): Promise<string> {
     try {
       const headers = await this.getAuthHeader();
-      const response = await axios.get(`${API_BASE_URL}member/qr-token`, { headers });
+      const response = await axios.get(`${API_BASE_URL}member/qr-token`, {
+        headers,
+      });
       return response.data.token as string;
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to load QR token');
+      throw new Error(error.response?.data?.error || "Failed to load QR token");
     }
   }
 }

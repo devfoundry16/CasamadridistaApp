@@ -1,47 +1,51 @@
-import {Spinner} from "@/components/Spinner";
-import {Check, X} from "lucide-react-native";
-import React, {useCallback, useEffect, useState} from "react";
-import {useTranslation} from "react-i18next";
-import {Text} from "@/components/Text";
+import { Spinner } from "@/components/Spinner";
+import { Check, X } from "lucide-react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Text } from "@/components/Text";
 import {
   Alert,
   ScrollView,
   TouchableOpacity,
   View,
-  Platform
+  Platform,
 } from "react-native";
-import Purchases, {PurchasesOfferings, PurchasesPackage} from 'react-native-purchases';
-import {useLocalSearchParams, useRouter} from "expo-router";
-import SubscriptionService from '@/services/SubscriptionService';
+import Purchases, {
+  PURCHASES_ERROR_CODE,
+  PurchasesOfferings,
+  PurchasesPackage,
+} from "react-native-purchases";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import SubscriptionService from "@/services/SubscriptionService";
 
 const packages = [
   {
     id: 1,
-    translationKey: 'halaGold',
+    translationKey: "halaGold",
     monthlyPrice: "4.99",
     yearlyPrice: "47.99",
     yearlyOriginal: "59.99",
     product_id: 50869,
     variation_id: [50891, 50892],
-    offerIdentifier: 'offer_hala',
+    offerIdentifier: "offer_hala",
   },
   {
     id: 2,
-    translationKey: 'reyDeEuropa',
+    translationKey: "reyDeEuropa",
     monthlyPrice: "14.99",
     yearlyPrice: "143.99",
     yearlyOriginal: "179.99",
     product_id: 50874,
     variation_id: [50888, 50889],
-    offerIdentifier: 'offer_rey',
+    offerIdentifier: "offer_rey",
     badge: "Popular",
   },
   {
     id: 3,
-    translationKey: 'galacticos',
+    translationKey: "galacticos",
     monthlyPrice: "34.99",
     yearlyPrice: "334.99",
-    offerIdentifier: 'offer_vip',
+    offerIdentifier: "offer_vip",
     yearlyOriginal: "419.99",
     product_id: 50879,
     variation_id: [50883, 50884],
@@ -50,7 +54,7 @@ const packages = [
 ];
 
 export default function PackagesScreen() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams<{
     fanClubId?: string;
@@ -58,7 +62,7 @@ export default function PackagesScreen() {
     country?: string;
   }>();
   const [billingType, setBillingType] = useState<"monthly" | "yearly">(
-    "monthly"
+    "monthly",
   );
   const [offerings, setOfferings] = useState<PurchasesOfferings | null>(null);
   const [activeProductIds, setActiveProductIds] = useState<string[]>([]);
@@ -69,7 +73,13 @@ export default function PackagesScreen() {
   const getCustomerInfo = useCallback(async () => {
     try {
       const customerInfo = await Purchases.getCustomerInfo();
-      setActiveProductIds(customerInfo.activeSubscriptions || []);
+      const fromSubscriptions = customerInfo.activeSubscriptions || [];
+      const fromEntitlements = Object.values(
+        customerInfo.entitlements.active || {},
+      ).map((e) => e.productIdentifier);
+      setActiveProductIds([
+        ...new Set([...fromSubscriptions, ...fromEntitlements]),
+      ]);
     } catch {
       // Silent failure — customer info is non-critical; default CTA still works
     }
@@ -82,7 +92,7 @@ export default function PackagesScreen() {
         setOfferings(result);
       }
     } catch {
-      setLoadError(t('membership.errorLoadingPackages'));
+      setLoadError(t("membership.errorLoadingPackages"));
     } finally {
       setIsLoadingPackages(false);
     }
@@ -98,39 +108,44 @@ export default function PackagesScreen() {
     if (isPurchasing) return;
     setIsPurchasing(true);
     try {
-      const {customerInfo} = await Purchases.purchasePackage(pkg);
+      const { customerInfo } = await Purchases.purchasePackage(pkg);
       setActiveProductIds(customerInfo.activeSubscriptions || []);
       if (customerInfo.activeSubscriptions.includes(pkg.product.identifier)) {
         try {
           await SubscriptionService.createSubscription({
             subscriptionType: pkg.product.identifier,
-            price:            pkg.product.price,
-            currency:         pkg.product.currencyCode,
-            fanClubId:        params.fanClubId || null,
+            price: pkg.product.price,
+            currency: pkg.product.currencyCode,
+            fanClubId: params.fanClubId || null,
           });
         } catch (err) {
-          console.error('Subscription record creation failed:', err);
+          console.error("Subscription record creation failed:", err);
         }
 
         router.push({
-          pathname: '/memberships/registration' as any,
+          pathname: "/memberships/registration" as any,
           params: {
-            fanClubId:   params.fanClubId || undefined,
+            fanClubId: params.fanClubId || undefined,
             fanClubName: params.fanClubName || undefined,
-            country:     params.country || undefined,
+            country: params.country || undefined,
           },
         });
       }
     } catch (error: any) {
-      Alert.alert(t("common.error"), error.message || t("alerts.subscriptionFailed"));
+      if (error?.code !== PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
+        Alert.alert(
+          t("common.error"),
+          error.message || t("alerts.subscriptionFailed"),
+        );
+      }
     } finally {
       setIsPurchasing(false);
     }
-  }
+  };
   if (isLoadingPackages) {
     return (
       <View className="flex-1 bg-bg-medium justify-center items-center">
-        <Spinner content={t("membership.loadingPackages")}/>
+        <Spinner content={t("membership.loadingPackages")} />
       </View>
     );
   }
@@ -145,13 +160,15 @@ export default function PackagesScreen() {
             setLoadError(null);
             setIsLoadingPackages(true);
             Promise.all([getOfferings(), getCustomerInfo()]).finally(() =>
-              setIsLoadingPackages(false)
+              setIsLoadingPackages(false),
             );
           }}
           className="py-3 px-6 rounded-xl"
-          style={{ backgroundColor: '#BC9045' }}
+          style={{ backgroundColor: "#BC9045" }}
         >
-          <Text className="text-white font-semibold">{t('membership.retry')}</Text>
+          <Text className="text-white font-semibold">
+            {t("membership.retry")}
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -160,7 +177,9 @@ export default function PackagesScreen() {
   return (
     <ScrollView className="flex-1 bg-bg-medium">
       <View className="p-5">
-        <Text className="text-2xl font-bold text-text-primary mb-2 text-center">{t("membership.choosePackage")}</Text>
+        <Text className="text-2xl font-bold text-text-primary mb-2 text-center">
+          {t("membership.choosePackage")}
+        </Text>
         <Text className="text-sm text-text-primary mb-6 text-center">
           {t("home.joinLargest")}
         </Text>
@@ -171,7 +190,8 @@ export default function PackagesScreen() {
             onPress={() => setBillingType("monthly")}
           >
             <Text
-              className={`text-base font-semibold text-center ${billingType === "monthly" ? "text-rm-gold" : "text-white"}`}>
+              className={`text-base font-semibold text-center ${billingType === "monthly" ? "text-rm-gold" : "text-white"}`}
+            >
               {t("membership.monthly")}
             </Text>
           </TouchableOpacity>
@@ -181,71 +201,98 @@ export default function PackagesScreen() {
             onPress={() => setBillingType("yearly")}
           >
             <Text
-              className={`text-base font-semibold text-center ${billingType === "yearly" ? "text-rm-gold" : "text-white"}`}>
+              className={`text-base font-semibold text-center ${billingType === "yearly" ? "text-rm-gold" : "text-white"}`}
+            >
               {t("membership.yearly")}
             </Text>
           </TouchableOpacity>
         </View>
-        {Object.values(offerings?.all || {}).map(offering => (
+        {Object.values(offerings?.all || {}).map((offering) => (
           <View key={offering.identifier}>
             {packages
-              .filter(pkg => pkg.offerIdentifier === offering.identifier)
-              .map(pkg => {
-                const pkgName = t(`membershipPackages.${pkg.translationKey}.name`);
-                const pkgFeatures = t(`membershipPackages.${pkg.translationKey}.features`, { returnObjects: true }) as string[];
-                const pkgNonFeatured = t(`membershipPackages.${pkg.translationKey}.nonFeatured`, { returnObjects: true }) as string[];
+              .filter((pkg) => pkg.offerIdentifier === offering.identifier)
+              .map((pkg) => {
+                const pkgName = t(
+                  `membershipPackages.${pkg.translationKey}.name`,
+                );
+                const pkgFeatures = t(
+                  `membershipPackages.${pkg.translationKey}.features`,
+                  { returnObjects: true },
+                ) as string[];
+                const pkgNonFeatured = t(
+                  `membershipPackages.${pkg.translationKey}.nonFeatured`,
+                  { returnObjects: true },
+                ) as string[];
 
                 // Determine correct PurchasesPackage by billingType
-                const selectedPurchasePackage =
-                  offering.availablePackages.find(apkg =>
+                const selectedPurchasePackage = offering.availablePackages.find(
+                  (apkg) =>
                     billingType === "monthly"
                       ? apkg.packageType.toLowerCase() === "monthly"
-                      : apkg.packageType.toLowerCase() === "annual" || apkg.packageType.toLowerCase() === "yearly"
-                  );
+                      : apkg.packageType.toLowerCase() === "annual" ||
+                        apkg.packageType.toLowerCase() === "yearly",
+                );
 
-                const selectedProductId = selectedPurchasePackage?.product.identifier;
+                const selectedProductId =
+                  selectedPurchasePackage?.product.identifier;
 
                 // Find current active package (if any) within this offering to compare pricing
-                const currentActiveId = activeProductIds.find(id =>
-                  offering.availablePackages.some(apkg => apkg.product.identifier === id)
+                const currentActiveId = activeProductIds.find((id) =>
+                  offering.availablePackages.some(
+                    (apkg) => apkg.product.identifier === id,
+                  ),
                 );
                 const currentActivePackage = offering.availablePackages.find(
-                  apkg => apkg.product.identifier === currentActiveId
+                  (apkg) => apkg.product.identifier === currentActiveId,
                 );
 
-                const selectedPrice = selectedPurchasePackage?.product.price ?? NaN;
+                const selectedPrice =
+                  selectedPurchasePackage?.product.price ?? NaN;
                 const currentPrice = currentActivePackage?.product.price ?? NaN;
 
                 // Derive CTA label based on current active subscription
                 let ctaLabel = t("membership.subscribe");
                 if (activeProductIds.length > 0) {
-                  if (selectedProductId && activeProductIds.includes(selectedProductId)) {
+                  if (
+                    selectedProductId &&
+                    activeProductIds.includes(selectedProductId)
+                  ) {
                     ctaLabel = t("membership.currentPlan");
                   } else if (!isNaN(currentPrice) && !isNaN(selectedPrice)) {
-                    if (selectedPrice > currentPrice) ctaLabel = t("membership.upgrade");
-                    else if (selectedPrice < currentPrice) ctaLabel = t("membership.downgrade");
+                    if (selectedPrice > currentPrice)
+                      ctaLabel = t("membership.upgrade");
+                    else if (selectedPrice < currentPrice)
+                      ctaLabel = t("membership.downgrade");
                     else ctaLabel = t("membership.changePlan");
                   } else {
                     ctaLabel = t("membership.changePlan");
                   }
                 }
 
-                const disableCTA = !selectedPurchasePackage || ctaLabel === t("membership.currentPlan");
+                const disableCTA =
+                  !selectedPurchasePackage ||
+                  ctaLabel === t("membership.currentPlan");
 
                 return (
                   <View key={pkg.id}>
-
-                    <View className={`bg-bg-card p-5 mb-4 ${pkg.badge === "Popular" ? "border-2 border-rm-gold" : ""}`}>
+                    <View
+                      className={`bg-bg-card p-5 mb-4 ${pkg.badge === "Popular" ? "border-2 border-rm-gold" : ""}`}
+                    >
                       <View className="mb-6">
                         {pkg.badge && (
                           <View
-                            className={`self-start px-3 py-1 rounded-full mb-2 ${pkg.badge === "VIP" ? "bg-rm-gold" : "bg-rm-gold"}`}>
+                            className={`self-start px-3 py-1 rounded-full mb-2 ${pkg.badge === "VIP" ? "bg-rm-gold" : "bg-rm-gold"}`}
+                          >
                             <Text className="text-xs font-bold text-white">
-                              {pkg.badge === "Popular" ? t("membership.popular") : pkg.badge}
+                              {pkg.badge === "Popular"
+                                ? t("membership.popular")
+                                : pkg.badge}
                             </Text>
                           </View>
                         )}
-                        <Text className="text-xl font-bold text-white">{pkgName}</Text>
+                        <Text className="text-xl font-bold text-white">
+                          {pkgName}
+                        </Text>
                       </View>
                       <View className="mb-4 flex-row items-center gap-2">
                         {billingType === "yearly" && (
@@ -259,26 +306,42 @@ export default function PackagesScreen() {
                             : `$${pkg.yearlyPrice}`}
                         </Text>
                         <Text className="text-sm text-text-secondary">
-                          {billingType === "monthly" ? t("membership.perMonth") : t("membership.perYear")}
+                          {billingType === "monthly"
+                            ? t("membership.perMonth")
+                            : t("membership.perYear")}
                         </Text>
                       </View>
                       <View className="mb-4">
                         {pkgFeatures.map((feature, index) => (
                           <View key={index} className="mb-2">
-                            <View key={index} className="flex-row items-center gap-2">
-                              <Check size={20} strokeWidth={4} color="#BC9045"/>
-                              <Text className="text-sm text-white flex-1">{feature}</Text>
+                            <View
+                              key={index}
+                              className="flex-row items-center gap-2"
+                            >
+                              <Check
+                                size={20}
+                                strokeWidth={4}
+                                color="#BC9045"
+                              />
+                              <Text className="text-sm text-white flex-1">
+                                {feature}
+                              </Text>
                             </View>
-                            <View className="h-px bg-border-default my-1"/>
+                            <View className="h-px bg-border-default my-1" />
                           </View>
                         ))}
                         {pkgNonFeatured.map((feature, index) => (
                           <View key={index} className="mb-2">
-                            <View key={index} className="flex-row items-center gap-2">
-                              <X size={20} strokeWidth={4} color="#BC9045"/>
-                              <Text className="text-sm text-white flex-1">{feature}</Text>
+                            <View
+                              key={index}
+                              className="flex-row items-center gap-2"
+                            >
+                              <X size={20} strokeWidth={4} color="#BC9045" />
+                              <Text className="text-sm text-white flex-1">
+                                {feature}
+                              </Text>
                             </View>
-                            <View className="h-px bg-border-default my-1"/>
+                            <View className="h-px bg-border-default my-1" />
                           </View>
                         ))}
                       </View>
@@ -286,11 +349,19 @@ export default function PackagesScreen() {
                         activeOpacity={0.7}
                         disabled={disableCTA || isPurchasing}
                         className={`py-4 rounded-xl items-center ${pkg.badge === "Popular" ? "bg-rm-gold" : "bg-bg-light"} ${disableCTA || isPurchasing ? "opacity-50" : ""}`}
-                        onPress={() => selectedPurchasePackage && !disableCTA && !isPurchasing && handleSubscribe(selectedPurchasePackage)}
+                        onPress={() =>
+                          selectedPurchasePackage &&
+                          !disableCTA &&
+                          !isPurchasing &&
+                          handleSubscribe(selectedPurchasePackage)
+                        }
                       >
                         <Text
-                          className={`text-base font-bold ${pkg.badge === "Popular" ? "text-white" : "text-white"}`}>
-                          {selectedPurchasePackage ? ctaLabel : t("membership.notAvailable")}
+                          className={`text-base font-bold ${pkg.badge === "Popular" ? "text-white" : "text-white"}`}
+                        >
+                          {selectedPurchasePackage
+                            ? ctaLabel
+                            : t("membership.notAvailable")}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -300,29 +371,33 @@ export default function PackagesScreen() {
           </View>
         ))}
         {/* Legal footer — required by Apple Guideline 3.1.2(c) */}
-        {
-          Platform.OS === 'ios' &&
-            <View className="mt-6 mb-4 px-2">
-                <Text className="text-xs text-text-secondary text-center mb-3 leading-5">
-                  {t("membership.autoRenewDisclosure")}
+        {Platform.OS === "ios" && (
+          <View className="mt-6 mb-4 px-2">
+            <Text className="text-xs text-text-secondary text-center mb-3 leading-5">
+              {t("membership.autoRenewDisclosure")}
+            </Text>
+            <View className="flex-row justify-center items-center gap-4">
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => router.push("/terms-of-service")}
+              >
+                <Text className="text-xs text-rm-gold underline">
+                  {t("membership.termsOfUse")}
                 </Text>
-                <View className="flex-row justify-center items-center gap-4">
-                    <TouchableOpacity activeOpacity={0.7} onPress={() => router.push("/terms-of-service")}>
-                        <Text className="text-xs text-rm-gold underline">
-                          {t("membership.termsOfUse")}
-                        </Text>
-                    </TouchableOpacity>
-                    <Text className="text-xs text-text-secondary">|</Text>
-                    <TouchableOpacity activeOpacity={0.7} onPress={() => router.push("/privacy-policy")}>
-                        <Text className="text-xs text-rm-gold underline">
-                          {t("membership.privacyPolicy")}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+              </TouchableOpacity>
+              <Text className="text-xs text-text-secondary">|</Text>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => router.push("/privacy-policy")}
+              >
+                <Text className="text-xs text-rm-gold underline">
+                  {t("membership.privacyPolicy")}
+                </Text>
+              </TouchableOpacity>
             </View>
-        }
+          </View>
+        )}
       </View>
     </ScrollView>
   );
 }
-

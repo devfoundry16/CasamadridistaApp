@@ -17,7 +17,19 @@ import {
   View,
 } from "react-native";
 
-const BACKEND_BASE = (development.DEFAULT_BACKEND_API_URL || "https://casamadridista-backend.vercel.app/api/").replace(/\/api\/$/, "");
+const BACKEND_BASE = (
+  development.DEFAULT_BACKEND_API_URL ||
+  "https://casamadridista-backend.vercel.app/api/"
+).replace(/\/api\/$/, "");
+
+const PRODUCT_LABELS: Record<string, { nameKey: string; billingKey: string }> = {
+  sub_hala_gold_monthly:      { nameKey: 'membershipPackages.halaGold.name',    billingKey: 'membership.monthly' },
+  sub_hala_gold_yearly:       { nameKey: 'membershipPackages.halaGold.name',    billingKey: 'membership.yearly' },
+  sub_rey_premium_monthly:    { nameKey: 'membershipPackages.reyDeEuropa.name', billingKey: 'membership.monthly' },
+  sub_rey_premium_yearly:     { nameKey: 'membershipPackages.reyDeEuropa.name', billingKey: 'membership.yearly' },
+  sub_galacticos_vip_monthly: { nameKey: 'membershipPackages.galacticos.name',  billingKey: 'membership.monthly' },
+  sub_galacticos_vip_yearly:  { nameKey: 'membershipPackages.galacticos.name',  billingKey: 'membership.yearly' },
+};
 
 function buildVerifyUrl(token: string): string {
   return `${BACKEND_BASE}/api/verify/${token}`;
@@ -66,9 +78,15 @@ export default function SubscriptionScreen() {
       <ScrollView className="flex-1 bg-bg-medium">
         {subscriptions?.length ? (
           subscriptions.map((subscription) => {
-            const statusColor = subscription.status === "active" ? "#BC9045" : "#666";
+            const statusColor =
+              subscription.status === "active" ? "#BC9045" : "#666";
             const statusText =
-              subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
+              subscription.status.charAt(0).toUpperCase() +
+              subscription.status.slice(1);
+            const productLabel = PRODUCT_LABELS[subscription.subscription_type];
+            const subscriptionTitle = productLabel
+              ? `${t(productLabel.nameKey)} · ${t(productLabel.billingKey)}`
+              : subscription.subscription_type;
 
             const verifyUrl = qrToken ? buildVerifyUrl(qrToken) : null;
 
@@ -79,9 +97,12 @@ export default function SubscriptionScreen() {
                     <Crown size={48} color="#BC9045" />
                   </View>
                   <Text className="text-[28px] font-bold text-rm-gold mb-2 text-center">
-                    {subscription.subscription_type}
+                    {subscriptionTitle}
                   </Text>
-                  <Text className="text-sm text-text-secondary mb-4" style={{ color: statusColor }}>
+                  <Text
+                    className="text-sm text-text-secondary mb-4"
+                    style={{ color: statusColor }}
+                  >
                     {statusText}
                   </Text>
 
@@ -123,7 +144,10 @@ export default function SubscriptionScreen() {
                   </View>
 
                   {/* QR Code Section */}
-                  <View className="w-full mt-6 pt-6 items-center" style={{ borderTopWidth: 1, borderTopColor: "#2a2a2a" }}>
+                  <View
+                    className="w-full mt-6 pt-6 items-center"
+                    style={{ borderTopWidth: 1, borderTopColor: "#2a2a2a" }}
+                  >
                     <View className="flex-row items-center gap-2 mb-4">
                       <QrCode size={16} color="#BC9045" />
                       <Text className="text-sm font-semibold text-rm-gold">
@@ -198,9 +222,17 @@ export default function SubscriptionScreen() {
         onRequestClose={() => setQrModalVisible(false)}
       >
         <View
-          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center" }}
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.85)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
-          <View className="bg-bg-deep-dark rounded-2xl p-8 items-center mx-6" style={{ borderWidth: 1, borderColor: "#BC9045" }}>
+          <View
+            className="bg-bg-deep-dark rounded-2xl p-8 items-center mx-6"
+            style={{ borderWidth: 1, borderColor: "#BC9045" }}
+          >
             <TouchableOpacity
               onPress={() => setQrModalVisible(false)}
               style={{ position: "absolute", top: 16, right: 16 }}
@@ -227,7 +259,10 @@ export default function SubscriptionScreen() {
             )}
 
             <Text className="text-sm text-text-secondary text-center mt-4 leading-5">
-              {t("subscription.qrScanHint", "Scan this code to verify your membership")}
+              {t(
+                "subscription.qrScanHint",
+                "Scan this code to verify your membership",
+              )}
             </Text>
           </View>
         </View>

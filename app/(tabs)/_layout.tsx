@@ -16,8 +16,8 @@ import {
 } from "lucide-react-native";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import Purchases, { LOG_LEVEL } from 'react-native-purchases';
-import { Platform, LogBox } from 'react-native';
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
+import { Platform, LogBox } from "react-native";
 LogBox.ignoreAllLogs(true);
 export default function TabLayout() {
   const { revenueCat, loadEnvironment } = useEnvironment();
@@ -34,12 +34,15 @@ export default function TabLayout() {
     }
 
     Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-    if (Platform.OS === 'ios' && revenueCat.iosApiKey) {
-        Purchases.configure({ apiKey: revenueCat.iosApiKey, appUserID: user.id });
-    } else if (Platform.OS === 'android' && revenueCat.androidApiKey) {
-        Purchases.configure({ apiKey: revenueCat.androidApiKey, appUserID: user.id });
+    if (Platform.OS === "ios" && revenueCat.iosApiKey) {
+      Purchases.configure({ apiKey: revenueCat.iosApiKey, appUserID: user.id });
+    } else if (Platform.OS === "android" && revenueCat.androidApiKey) {
+      Purchases.configure({
+        apiKey: revenueCat.androidApiKey,
+        appUserID: user.id,
+      });
     }
-  }, [revenueCat, user?.id]);
+  }, [revenueCat.iosApiKey, revenueCat.androidApiKey, user?.id]);
   return (
     <Tabs
       screenOptions={{
@@ -66,9 +69,7 @@ export default function TabLayout() {
             ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
           headerTitleAlign: "center",
-          tabBarIcon: ({ color, size }) => (
-            <Home size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -113,12 +114,10 @@ export default function TabLayout() {
           title: t("nav.team"),
           headerTitle: t("nav.realMadridTeam"),
           headerTitleAlign: "center",
-          headerTitleStyle: { 
+          headerTitleStyle: {
             ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
-          tabBarIcon: ({ color, size }) => (
-            <Users size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -161,9 +160,7 @@ export default function TabLayout() {
           headerTitleStyle: {
             ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
-          tabBarIcon: ({ color, size }) => (
-            <Heart size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Heart size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -175,9 +172,7 @@ export default function TabLayout() {
           headerTitleStyle: {
             ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
-          tabBarIcon: ({ color, size }) => (
-            <User size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>
