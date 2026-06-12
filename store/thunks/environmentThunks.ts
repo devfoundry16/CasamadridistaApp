@@ -30,11 +30,14 @@ export const fetchEnvironment = createAsyncThunk(
             apiSports: {
               apiKey: response.data.apiSports?.apiKey || "",
             },
+            football: {
+              currentSeason: response.data.football?.currentSeason ?? 2025,
+            },
             revenueCat: {
               iosApiKey: response.data.revenueCat?.iosApiKey || "",
               androidApiKey: response.data.revenueCat?.androidApiKey || "",
             },
-          })
+          }),
         );
         return response.data;
       } else {
@@ -46,5 +49,5 @@ export const fetchEnvironment = createAsyncThunk(
     } finally {
       dispatch(setLoading(false));
     }
-  }
+  },
 );

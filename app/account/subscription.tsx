@@ -48,7 +48,7 @@ export default function SubscriptionScreen() {
   }, []);
 
   useEffect(() => {
-    if (subscriptions && subscriptions.length > 0) {
+    if (subscriptions && subscriptions.some(s => s.status === 'active')) {
       loadQrToken();
     }
   }, [subscriptions]);
@@ -143,39 +143,41 @@ export default function SubscriptionScreen() {
                     </View>
                   </View>
 
-                  {/* QR Code Section */}
-                  <View
-                    className="w-full mt-6 pt-6 items-center"
-                    style={{ borderTopWidth: 1, borderTopColor: "#2a2a2a" }}
-                  >
-                    <View className="flex-row items-center gap-2 mb-4">
-                      <QrCode size={16} color="#BC9045" />
-                      <Text className="text-sm font-semibold text-rm-gold">
-                        {t("subscription.membershipQr", "Membership QR Code")}
-                      </Text>
-                    </View>
-
-                    {qrLoading ? (
-                      <ActivityIndicator color="#BC9045" size="small" />
-                    ) : verifyUrl ? (
-                      <TouchableOpacity
-                        onPress={() => setQrModalVisible(true)}
-                        activeOpacity={0.85}
-                      >
-                        <View className="p-3 bg-white rounded-xl">
-                          <QRCode
-                            value={verifyUrl}
-                            size={140}
-                            color="#000000"
-                            backgroundColor="#ffffff"
-                          />
-                        </View>
-                        <Text className="text-xs text-text-secondary text-center mt-2">
-                          {t("subscription.tapToEnlarge", "Tap to enlarge")}
+                  {/* QR Code Section — only for active memberships */}
+                  {subscription.status === 'active' && (
+                    <View
+                      className="w-full mt-6 pt-6 items-center"
+                      style={{ borderTopWidth: 1, borderTopColor: "#2a2a2a" }}
+                    >
+                      <View className="flex-row items-center gap-2 mb-4">
+                        <QrCode size={16} color="#BC9045" />
+                        <Text className="text-sm font-semibold text-rm-gold">
+                          {t("subscription.membershipQr", "Membership QR Code")}
                         </Text>
-                      </TouchableOpacity>
-                    ) : null}
-                  </View>
+                      </View>
+
+                      {qrLoading ? (
+                        <ActivityIndicator color="#BC9045" size="small" />
+                      ) : verifyUrl ? (
+                        <TouchableOpacity
+                          onPress={() => setQrModalVisible(true)}
+                          activeOpacity={0.85}
+                        >
+                          <View className="p-3 bg-white rounded-xl">
+                            <QRCode
+                              value={verifyUrl}
+                              size={140}
+                              color="#000000"
+                              backgroundColor="#ffffff"
+                            />
+                          </View>
+                          <Text className="text-xs text-text-secondary text-center mt-2">
+                            {t("subscription.tapToEnlarge", "Tap to enlarge")}
+                          </Text>
+                        </TouchableOpacity>
+                      ) : null}
+                    </View>
+                  )}
                 </View>
 
                 <View className="p-6 pt-0 gap-3">

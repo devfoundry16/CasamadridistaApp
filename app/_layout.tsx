@@ -276,7 +276,8 @@ const DataInitializer = () => {
       // Only force-navigate if the user is on a protected route. Public screens
       // (home, matches, community, etc.) can gracefully degrade to their
       // unauthenticated state without a disruptive redirect.
-      const isProtectedRoute = pathnameRef.current.startsWith('/account/');
+      const protectedPrefixes = ['/account/', '/fan-club-dashboard', '/admin'];
+      const isProtectedRoute = protectedPrefixes.some(p => pathnameRef.current.startsWith(p));
       if (isProtectedRoute) {
         router.replace('/(tabs)/account' as any);
       }

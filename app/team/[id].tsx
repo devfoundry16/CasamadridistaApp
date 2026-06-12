@@ -1,5 +1,4 @@
 import countries from "@/constants/countries.json";
-import { CURRENT_FOOTBALL_SEASON_LABEL } from "@/constants/football";
 import {
   Coach,
   CoachWithTeam,
@@ -30,7 +29,7 @@ export default function TeamDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamId = Number(id);
-  const { apiSports } = useEnvironment();
+  const { apiSports, football } = useEnvironment();
 
   const { playersList, coachList, teamInfoList, fetchProfileData, isLoading } =
     useFootball();
@@ -123,7 +122,7 @@ export default function TeamDetailScreen() {
             {teamInfo?.team?.name} {t("team.squad")}
           </Text>
           <Text className="text-sm text-white text-center">
-            {t("team.season", { season: CURRENT_FOOTBALL_SEASON_LABEL })}
+            {t("team.season", { season: `${football.currentSeason}-${football.currentSeason + 1}` })}
           </Text>
         </View>
         <View className="p-4">

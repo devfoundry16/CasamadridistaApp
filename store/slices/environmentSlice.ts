@@ -23,6 +23,9 @@ interface EnvironmentState {
   apiSports: {
     apiKey: string;
   };
+  football: {
+    currentSeason: number;
+  };
   revenueCat: {
     iosApiKey: string;
     androidApiKey: string;
@@ -52,6 +55,9 @@ const initialState: EnvironmentState = {
   },
   apiSports: {
     apiKey: "",
+  },
+  football: {
+    currentSeason: 2025,
   },
   revenueCat: {
     iosApiKey: "",

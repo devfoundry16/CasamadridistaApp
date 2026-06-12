@@ -22,12 +22,12 @@ export interface Match {
     };
   };
   league: {
-    id: 140;
+    id: number;
     name: string;
     country: string;
     logo: string;
     flag: string;
-    season: 2026;
+    season: number;
     round: string; //"Regular Season - 8";
     standings: true;
   };

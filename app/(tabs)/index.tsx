@@ -10,7 +10,6 @@ import { Spinner } from "@/components/Spinner";
 import UpcomingForm from "@/components/UpcomingForm";
 import { useFootball } from "@/hooks/useFootball";
 import { useEnvironment } from "@/hooks/useEnvironment";
-import { CURRENT_FOOTBALL_SEASON } from "@/constants/football";
 import { ENABLE_HOME_PARTNERSHIP_BANNER } from "@/constants/partnerships";
 
 import MatchService from "@/services/Football/MatchService";
@@ -27,7 +26,7 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const { teamInfoList, fetchProfileData, fetchLiveMatchData, isLoading } =
     useFootball();
-  const { apiSports } = useEnvironment();
+  const { apiSports, football } = useEnvironment();
   const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
@@ -94,7 +93,7 @@ export default function HomeScreen() {
                        <api-sports-widget 
                           data-type="standings" 
                           data-league="140" 
-                          data-season="${CURRENT_FOOTBALL_SEASON}"
+                          data-season="${football.currentSeason}"
                         ></api-sports-widget>
 
                         <script type="module" src="https://widgets.api-sports.io/3.1.0/widgets.js"></script>
@@ -147,6 +146,7 @@ export default function HomeScreen() {
     try {
       if (teamInfoList.length && !isLive) fetchProfileData(RealMadridId);
       MatchService.fetchNextMatch(RealMadridId).then((result) => {
+        if (!result?.teams) return;
         MatchService.fetchLastMatches(result.teams.home.id).then((data) => {
           setHomeTeamLastMatches(data);
         });

@@ -17,6 +17,9 @@ export type AppInfoResponse = {
     apiSports?: {
       apiKey: string;
     };
+    football?: {
+      currentSeason: number;
+    };
     revenueCat?: {
       iosApiKey: string;
       androidApiKey: string;
