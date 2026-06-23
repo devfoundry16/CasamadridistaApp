@@ -4,6 +4,7 @@ import FanClubPartnershipSection from "@/components/FanClubPartnershipSection";
 import HomePartnershipBanner from "@/components/HomePartnershipBanner";
 import QuoteSection from "@/components/Home/QuoteSection";
 import StrengthSection from "@/components/Home/StrengthSection";
+import OffSeasonMatchCard from "@/components/Home/OffSeasonMatchCard";
 import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
 import VisionSection from "@/components/Home/VisionSection";
 import { Spinner } from "@/components/Spinner";
@@ -41,8 +42,18 @@ export default function HomeScreen() {
     (p) => p.team.id === RealMadridId,
   )?.lastMatches;
 
-  const matches = [...(nextMatches ?? []), ...(lastMatches ?? [])];
+  const hasUpcomingMatches = (nextMatches?.length ?? 0) > 0;
   const nextMatch = nextMatches?.at(0);
+  const carouselMatches = hasUpcomingMatches
+    ? (nextMatches ?? [])
+    : (lastMatches ?? []);
+  const carouselVariant = hasUpcomingMatches ? "upcoming" : "recent";
+  const realMadridTeam = teamInfoList.find(
+    (p) => p.team.id === RealMadridId,
+  )?.team;
+  const seasonYear = Number(football.currentSeason);
+  const nextSeasonLabel = `${seasonYear}-${seasonYear + 1}`;
+  const isOffSeason = !liveMatch && !hasUpcomingMatches;
   const [strengthSectionY, setStrengthSectionY] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
@@ -252,7 +263,9 @@ export default function HomeScreen() {
                       (liveMatch.fixture.status.extra != null
                         ? ` ${t("home.extraTime")} ${liveMatch.fixture.status.extra}'`
                         : "")
-                    : t("home.upcoming")}
+                    : isOffSeason
+                      ? t("home.seasonBreak")
+                      : t("home.upcoming")}
                 </Text>
                 {liveMatch ? (
                   <UpcomingForm
@@ -261,13 +274,24 @@ export default function HomeScreen() {
                     homeTeamLastMatches={homeTeamLastMatches}
                     awayTeamLastMatches={awayTeamLastMatches}
                   />
+                ) : nextMatch ? (
+                  <UpcomingForm
+                    setLive={setIsLive}
+                    nextMatch={nextMatch}
+                    homeTeamLastMatches={homeTeamLastMatches}
+                    awayTeamLastMatches={awayTeamLastMatches}
+                  />
                 ) : (
-                  nextMatch && (
-                    <UpcomingForm
-                      setLive={setIsLive}
-                      nextMatch={nextMatch}
-                      homeTeamLastMatches={homeTeamLastMatches}
-                      awayTeamLastMatches={awayTeamLastMatches}
+                  isOffSeason && (
+                    <OffSeasonMatchCard
+                      teamId={RealMadridId}
+                      teamName={realMadridTeam?.name ?? t("player.realMadrid")}
+                      teamLogo={
+                        realMadridTeam?.logo ??
+                        "https://media.api-sports.io/football/teams/541.png"
+                      }
+                      lastMatches={lastMatches ?? []}
+                      nextSeasonLabel={nextSeasonLabel}
                     />
                   )
                 )}
@@ -275,7 +299,10 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-        <UpcomingMatchesCarousel data={matches} />
+        <UpcomingMatchesCarousel
+          data={carouselMatches}
+          variant={carouselVariant}
+        />
       </View>
 
       <CustomWebView

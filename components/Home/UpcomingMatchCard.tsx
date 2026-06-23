@@ -14,10 +14,23 @@ import {
 import Carousel from "react-native-reanimated-carousel";
 const { width } = Dimensions.get("window");
 
-export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
+type CarouselVariant = "upcoming" | "recent";
+
+export default function UpcomingMatchesCarousel({
+  data,
+  variant = "upcoming",
+}: {
+  data: Match[];
+  variant?: CarouselVariant;
+}) {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const carouselRef = useRef<any>(null);
+
+  if (data.length === 0) return null;
+
+  const sectionTitle =
+    variant === "recent" ? t("home.recentMatches") : t("home.upcomingMatch");
 
   const renderDate = (date: string) =>
     new Date(date as any).toLocaleDateString(
@@ -88,7 +101,7 @@ export default function UpcomingMatchesCarousel({ data }: { data: Match[] }) {
       <View className="flex-row items-center justify-center">
         <View className="w-[70px] h-0.5 bg-rm-gold mx-[30px]" />
         <Text className="text-2xl font-bold text-text-primary text-center">
-          {t("home.upcomingMatch")}
+          {sectionTitle}
         </Text>
         <View className="w-[70px] h-0.5 bg-rm-gold mx-[30px]" />
       </View>

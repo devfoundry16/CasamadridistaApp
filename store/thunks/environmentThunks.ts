@@ -31,7 +31,7 @@ export const fetchEnvironment = createAsyncThunk(
               apiKey: response.data.apiSports?.apiKey || "",
             },
             football: {
-              currentSeason: response.data.football?.currentSeason ?? 2025,
+              currentSeason: Number(response.data.football?.currentSeason ?? 2025),
             },
             revenueCat: {
               iosApiKey: response.data.revenueCat?.iosApiKey || "",
