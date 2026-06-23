@@ -20,7 +20,7 @@ function aspectRatio(m: PostMediaType) {
 }
 
 function VideoPlayer({ media, paused }: { media: PostMediaType; paused: boolean }) {
-  const src = media.hls_url ?? undefined;
+  const src = media.hls_url ?? media.public_url ?? undefined;
   const player = useVideoPlayer(src ? { uri: src } : null, (p) => {
     p.loop = false;
     if (!paused) p.play();

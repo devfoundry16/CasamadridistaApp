@@ -27,6 +27,7 @@ export interface PostMedia {
   storage_provider: string;
   storage_key: string | null;
   hls_url: string | null;
+  public_url: string | null;
   thumbnail_url: string | null;
   blurhash: string | null;
   width: number | null;

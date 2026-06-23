@@ -20,6 +20,8 @@ export interface UploadSlot {
   mediaId: string;
   provider: string;
   externalId: string;
+  thumbnailUploadUrl?: string;
+  thumbnailPublicUrl?: string;
 }
 
 export interface UploadedMedia {
@@ -141,22 +143,39 @@ class MediaServiceClass {
   // For Supabase, it's a signed URL (plain PUT).
 
   async uploadVideo(localUri: string, postId: string): Promise<UploadedMedia> {
-    // 1. Get thumbnail poster
+    console.log('[MediaService] uploadVideo start', { postId });
+
+    // 1. Generate local thumbnail for compose preview
     const thumbnailUri = await this.generateVideoThumbnail(localUri);
+    console.log('[MediaService] thumbnail generated:', thumbnailUri ? 'yes' : 'no');
 
-    // 2. Get upload slot
+    // 2. Get upload slot — backend returns signed URLs for both video and thumbnail
     const slot = await this.requestUploadSlot('video', postId);
+    console.log('[MediaService] upload slot received, mediaId:', slot.mediaId,
+      'hasThumbSlot:', !!slot.thumbnailUploadUrl);
 
-    // 3. Upload (Supabase signed URL — PUT)
-    // CF Stream TUS requires the tus-js-client library on React Native;
-    // for now we use the Supabase path universally, and CF Stream is handled
-    // server-side when MEDIA_PROVIDER=cloudflare_stream (TUS via CF dashboard or SDK).
+    // 3. Upload video bytes to Supabase signed URL
+    console.log('[MediaService] uploading video bytes...');
     await this.uploadToSignedUrl(slot.uploadUrl, localUri, 'video/mp4');
+    console.log('[MediaService] video bytes uploaded');
 
-    // 4. Complete
+    // 4. Upload thumbnail image to Supabase and get its public URL
+    let publicThumbnailUrl: string | undefined;
+    if (thumbnailUri && slot.thumbnailUploadUrl && slot.thumbnailPublicUrl) {
+      try {
+        await this.uploadToSignedUrl(slot.thumbnailUploadUrl, thumbnailUri, 'image/jpeg');
+        publicThumbnailUrl = slot.thumbnailPublicUrl;
+        console.log('[MediaService] thumbnail uploaded, publicUrl:', publicThumbnailUrl);
+      } catch (e) {
+        console.warn('[MediaService] thumbnail upload failed (non-fatal):', e);
+      }
+    }
+
+    // 5. Notify backend — pass the real public thumbnail URL, not a local file URI
     await this.completeUpload(slot.mediaId, {
-      thumbnail_url: thumbnailUri,
+      thumbnail_url: publicThumbnailUrl,
     });
+    console.log('[MediaService] completeUpload done');
 
     return {
       mediaId:      slot.mediaId,

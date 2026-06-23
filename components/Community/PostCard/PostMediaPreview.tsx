@@ -22,8 +22,9 @@ function ImageItem({ media }: { media: PostMediaType }) {
 }
 
 function VideoPlayerInline({ media }: { media: PostMediaType }) {
+  const src = media.hls_url ?? media.public_url;
   const player = useVideoPlayer(
-    media.hls_url ? { uri: media.hls_url } : null,
+    src ? { uri: src } : null,
     (p) => {
       p.loop = false;
       p.play();

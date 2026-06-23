@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import * as ExpoImagePicker from 'expo-image-picker';
+import * as VideoThumbnails from 'expo-video-thumbnails';
 import { Image as ImageIcon, Video, X } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 
@@ -38,7 +39,17 @@ export default function MediaPicker({ media, onPick }: Props) {
       videoMaxDuration: 60,
     });
     if (!result.canceled && result.assets[0]) {
-      onPick({ uri: result.assets[0].uri, kind: 'video', mimeType: result.assets[0].mimeType });
+      let thumbnailUri: string | undefined;
+      try {
+        const thumb = await VideoThumbnails.getThumbnailAsync(result.assets[0].uri, { time: 500 });
+        thumbnailUri = thumb.uri;
+      } catch {}
+      onPick({
+        uri: result.assets[0].uri,
+        kind: 'video',
+        mimeType: result.assets[0].mimeType,
+        thumbnailUri,
+      });
     }
   };
 
