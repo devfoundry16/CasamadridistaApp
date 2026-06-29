@@ -3,8 +3,7 @@ import { Platform } from "react-native";
 const API_BASE_URL =
   process.env.EXPO_PUBLIC_BACKEND_API_URL ||
   Platform.select({
-    // ios: "https://casamadridista-backend.vercel.app/api/",
-    ios: "http://localhost:3000/api/",
+    ios: "https://casamadridista-backend.vercel.app/api/",
     android: "https://casamadridista-backend.vercel.app/api/",
     default: "https://casamadridista-backend.vercel.app/api/",
   });
