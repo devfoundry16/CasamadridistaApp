@@ -13,7 +13,9 @@
       "bundleIdentifier": "com.anonymous.casamadridistaApp",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Casa Madridista uses the camera so you can take photos for your profile and community posts.",
+        "NSPhotoLibraryUsageDescription": "Casa Madridista accesses your photos so you can choose images and videos for your profile and posts."
       },
       "icon": {
         "light": "./assets/icons/ios-light.png",
