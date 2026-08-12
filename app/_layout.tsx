@@ -139,13 +139,6 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
-          name="campaign/[id]"
-          options={{
-            title: t("nav.campaignDetails"),
-            ...options,
-          }}
-        />
-        <Stack.Screen
           name="coach/[id]"
           options={{
             title: t("nav.coachDetails"),

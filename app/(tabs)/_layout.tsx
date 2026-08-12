@@ -6,7 +6,6 @@ import { useEnvironment } from "@/hooks/useEnvironment";
 import { useUser } from "@/hooks/useUser";
 import {
   Gamepad2,
-  Heart,
   Home,
   LayoutGrid,
   MessageCircle,
@@ -149,18 +148,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <MessageCircle size={size} color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="donate"
-        options={{
-          title: t("nav.donation"),
-          headerTitle: t("nav.donation"),
-          headerTitleAlign: "center",
-          headerTitleStyle: {
-            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
-          },
-          tabBarIcon: ({ color, size }) => <Heart size={size} color={color} />,
         }}
       />
       <Tabs.Screen

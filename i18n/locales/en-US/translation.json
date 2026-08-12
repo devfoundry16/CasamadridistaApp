@@ -35,7 +35,6 @@
     "team": "Team",
     "realMadridTeam": "Real Madrid Team",
     "shop": "Shop",
-    "donation": "Donation",
     "profile": "Profile",
     "myAccount": "My Account",
     "forgotPassword": "Forgot password",
@@ -48,7 +47,6 @@
     "contact": "Contact",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
-    "campaignDetails": "Campaign Details",
     "coachDetails": "Coach Details",
     "leagueDetails": "League Details",
     "matchDetails": "Match Details",
@@ -57,7 +55,6 @@
     "productDetails": "Product Details",
     "teamDetails": "Team Details",
     "venueDetails": "Venue Details",
-    "campaigns": "Campaigns",
     "aboutUs": "About Us",
     "memberships": "Memberships",
     "fanClubs": "Global Fan Clubs",
@@ -246,9 +243,6 @@
     "error": "Error",
     "success": "Success",
     "invalidEmail": "Invalid Email",
-    "campaignNotFound": "Campaign not found.",
-    "donationThankYou": "Thank you for your donation!",
-    "donationFailed": "Donation failed",
     "subscriptionSuccess": "Subscription purchased successfully.",
     "subscriptionFailed": "Failed to purchase subscription. Please try again.",
     "loginError": "Login error",
@@ -256,21 +250,6 @@
     "updateError": "Update error",
     "sessionExpired": "Session Expired",
     "sessionExpiredMessage": "Your session has expired. Please log in again."
-  },
-  "donate": {
-    "donateNow": "Donate Now",
-    "donorInfo": "Donor Information",
-    "paymentDetails": "Payment Details",
-    "stripePay": "Stripe Pay",
-    "paypalPay": "PayPal Pay",
-    "back": "Back",
-    "loading": "Loading campaign",
-    "howMuchToday": "How much would you like to donate today?",
-    "impactMessage": "All donations directly impact our organization and help us further our mission.",
-    "contactDetails": "Please provide your contact details.",
-    "reviewDonation": "Review your donation.",
-    "amount": "Amount",
-    "frequency": "Frequency"
   },
   "membership": {
     "choosePackage": "Choose Your Membership Package",
@@ -361,15 +340,6 @@
     "strengthPrizeInTotal": "Prize in Total",
     "strengthDailyUpdate": "Daily update",
     "strengthMadridistaFamily": "Madridista Family"
-  },
-  "campaign": {
-    "loading": "Loading Campaign",
-    "enterCustomAmount": "Enter custom amount",
-    "firstName": "First Name",
-    "lastName": "Last Name",
-    "emailAddress": "Email Address",
-    "goal": "Goal",
-    "raised": "Raised"
   },
   "wallet": {
     "loading": "Loading wallet",
@@ -515,7 +485,6 @@
         "Personal Information: Name, email address, phone number (optional where indicated), billing address, and payment details (processed securely via Stripe).",
         "Membership Data: Subscription tier, membership status, preferences, and engagement history.",
         "Wallet Data: In-app wallet balance, transaction history, add-funds and transfer activity (when you use the wallet feature).",
-        "Donation Data: When you donate to campaigns, we collect donation amount, frequency, name, email, and payment method; payment details are processed by Stripe.",
         "Contact & Support: When you use the contact form, we collect name, email, optional phone, and your message. When you submit the Royal Investor application form, we collect full name, age, phone number, email, nationality, place of residence, and annual income. We send this information by email (via our email service provider, Resend) to respond to your inquiry or process your application.",
         "Device Information: Device identifiers, app version, and device type (collected by third-party services for app functionality).",
         "Photos/Media: User profile pictures and avatars (with your permission when you upload them).",
@@ -603,8 +572,8 @@
       "points": []
     },
     "section10": {
-      "title": "10. In-App Wallet and Donations",
-      "startDesc": "When you use the in-app wallet (balance, add funds, transfers) or make donations to campaigns, we process the data needed to complete those operations. Wallet balance and transaction history are stored on our servers and linked to your account. Donation amounts and donor information may be used for campaign reporting and receipts. Payment details for wallet top-ups and donations are handled by our payment processors (Stripe) and are not stored by us.",
+      "title": "10. In-App Wallet",
+      "startDesc": "When you use the in-app wallet (balance, add funds, transfers), we process the data needed to complete those operations. Wallet balance and transaction history are stored on our servers and linked to your account. Payment details for wallet top-ups are handled by our payment processors (Stripe) and are not stored by us.",
       "endDesc": "",
       "points": []
     },
