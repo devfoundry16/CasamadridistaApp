@@ -230,6 +230,25 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="community/photo/[postId]"
+          options={{
+            headerShown: false,
+            // Declared here rather than in-screen: native-stack consumes
+            // `presentation` when the screen is created, so setting it from
+            // inside the screen flickers on the first frame.
+            // transparentModal (not fullScreenModal) keeps the feed mounted
+            // behind the fading backdrop so swipe-down-to-dismiss reveals it.
+            presentation: "transparentModal",
+            animation: "fade",
+            animationDuration: 200,
+            contentStyle: { backgroundColor: "transparent" },
+            gestureEnabled: false, // our own swipe-down owns dismissal
+            statusBarStyle: "light",
+            navigationBarColor: "#000000",
+            freezeOnBlur: true,
+          }}
+        />
+        <Stack.Screen
           name="admin/index"
           options={{ headerShown: false }}
         />

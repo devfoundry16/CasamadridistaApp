@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, FlatList, Pressable, StyleSheet, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Play } from 'lucide-react-native';
 import type { PostMedia as PostMediaType } from '@/services/FeedService';
 import Colors from '@/constants/colors';
@@ -9,15 +11,29 @@ import Colors from '@/constants/colors';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FEED_HEIGHT = 250;
 
-function ImageItem({ media }: { media: PostMediaType }) {
+/**
+ * Nested inside the card's outer Pressable on purpose: the deepest view that
+ * claims the touch responder wins, so tapping the photo opens the viewer while
+ * tapping anywhere else on the card still navigates to the post. Same pattern
+ * the like/share buttons in PostActions already rely on.
+ */
+function ImageItem({ media, onPress }: { media: PostMediaType; onPress: () => void }) {
+  const { t } = useTranslation();
   return (
-    <Image
-      source={{ uri: media.thumbnail_url ?? undefined }}
-      placeholder={media.blurhash ?? undefined}
+    <Pressable
+      onPress={onPress}
       style={{ width: SCREEN_WIDTH, height: FEED_HEIGHT }}
-      contentFit="cover"
-      transition={300}
-    />
+      accessibilityRole="imagebutton"
+      accessibilityLabel={t('community.openPhoto')}
+    >
+      <Image
+        source={{ uri: media.thumbnail_url ?? undefined }}
+        placeholder={media.blurhash ?? undefined}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        transition={300}
+      />
+    </Pressable>
   );
 }
 
@@ -82,10 +98,12 @@ function Carousel({
   items,
   playingId,
   onPlay,
+  onOpenPhoto,
 }: {
   items: PostMediaType[];
   playingId: string | null;
   onPlay: (id: string) => void;
+  onOpenPhoto: (media: PostMediaType) => void;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -110,7 +128,7 @@ function Carousel({
               <VideoThumbnail media={item} onPlay={() => onPlay(item.id)} />
             )
           ) : (
-            <ImageItem media={item} />
+            <ImageItem media={item} onPress={() => onOpenPhoto(item)} />
           )
         }
       />
@@ -124,14 +142,33 @@ interface Props {
 }
 
 export default function PostMediaPreview({ media }: Props) {
+  const router = useRouter();
   const [playingId, setPlayingId] = useState<string | null>(null);
+
+  const openPhoto = useCallback(
+    (m: PostMediaType) => {
+      // Pass the media id rather than an index: PostMediaPreview's own index
+      // tracking is derived from contentOffset.x, which inverts under RTL.
+      router.push({
+        pathname: '/community/photo/[postId]',
+        params: { postId: m.post_id, mediaId: m.id },
+      });
+    },
+    [router],
+  );
+
   const ready = media.filter((m) => m.status === 'ready');
   if (!ready.length) return null;
 
   if (ready.length > 1) {
     return (
       <View className="mt-1">
-        <Carousel items={ready} playingId={playingId} onPlay={setPlayingId} />
+        <Carousel
+          items={ready}
+          playingId={playingId}
+          onPlay={setPlayingId}
+          onOpenPhoto={openPhoto}
+        />
       </View>
     );
   }
@@ -146,7 +183,7 @@ export default function PostMediaPreview({ media }: Props) {
           <VideoThumbnail media={m} onPlay={() => setPlayingId(m.id)} />
         )
       ) : (
-        <ImageItem media={m} />
+        <ImageItem media={m} onPress={() => openPhoto(m)} />
       )}
     </View>
   );

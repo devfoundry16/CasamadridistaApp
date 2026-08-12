@@ -15,7 +15,8 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Casa Madridista uses the camera so you can take photos for your profile and community posts.",
-        "NSPhotoLibraryUsageDescription": "Casa Madridista accesses your photos so you can choose images and videos for your profile and posts."
+        "NSPhotoLibraryUsageDescription": "Casa Madridista accesses your photos so you can choose images and videos for your profile and posts.",
+        "NSPhotoLibraryAddUsageDescription": "Casa Madridista saves photos you download from the community feed to your device photo library."
       },
       "icon": {
         "light": "./assets/icons/ios-light.png",
@@ -56,7 +57,16 @@
       "expo-web-browser",
       "expo-localization",
       "expo-apple-authentication",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "Casa Madridista saves photos you download from the community feed to your device photo library.",
+          "isAccessMediaLocationEnabled": false,
+          "preventAutomaticLimitedAccessAlert": true,
+          "granularPermissions": ["photo"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

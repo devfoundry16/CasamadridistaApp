@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react';
-import { View, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Pressable, Dimensions, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { Play } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import type { PostMedia as PostMediaType } from '@/services/FeedService';
 import Colors from '@/constants/colors';
 
@@ -41,13 +42,19 @@ function VideoPlayer({ media, paused }: { media: PostMediaType; paused: boolean 
   );
 }
 
-function ImageItem({ media }: { media: PostMediaType }) {
+function ImageItem({ media, onPress }: { media: PostMediaType; onPress: () => void }) {
+  const { t } = useTranslation();
   const ratio  = aspectRatio(media);
   const height = Math.min(SCREEN_WIDTH / ratio, MAX_HEIGHT);
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <View style={{ width: SCREEN_WIDTH, height }}>
+    <Pressable
+      onPress={onPress}
+      style={{ width: SCREEN_WIDTH, height }}
+      accessibilityRole="imagebutton"
+      accessibilityLabel={t('community.openPhoto')}
+    >
       {!loaded && (
         <View className="absolute inset-0 items-center justify-center" style={{ backgroundColor: Colors.background.medium }}>
           <ActivityIndicator color={Colors.darkGold} />
@@ -61,11 +68,23 @@ function ImageItem({ media }: { media: PostMediaType }) {
         transition={300}
         onLoad={() => setLoaded(true)}
       />
-    </View>
+    </Pressable>
   );
 }
 
 export default function PostMedia({ media, paused = true }: Props) {
+  const router = useRouter();
+
+  const openPhoto = useCallback(
+    (m: PostMediaType) => {
+      router.push({
+        pathname: '/community/photo/[postId]',
+        params: { postId: m.post_id, mediaId: m.id },
+      });
+    },
+    [router],
+  );
+
   const ready = media.filter((m) => m.status === 'ready');
   if (!ready.length) return null;
 
@@ -75,7 +94,7 @@ export default function PostMedia({ media, paused = true }: Props) {
         m.kind === 'video' ? (
           <VideoPlayer key={m.id} media={m} paused={paused} />
         ) : (
-          <ImageItem key={m.id} media={m} />
+          <ImageItem key={m.id} media={m} onPress={() => openPhoto(m)} />
         )
       )}
     </View>
