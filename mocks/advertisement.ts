@@ -19,14 +19,6 @@ export interface CompanyHead {
   quote: string;
 }
 
-export interface Quote {
-  id: string;
-  text: string;
-  author: string;
-  role: string;
-  photo: string;
-}
-
 export const strengthStats: StrengthStat[] = [
   {
     icon: "users",
@@ -147,62 +139,5 @@ export const squadPlayers: SquadPlayer[] = [
     name: "Gonzalo García",
     photo:
       "https://casamadridista.com/wp-content/uploads/2025/07/Gonzalo-Garcia-1536x1536.jpg",
-  },
-];
-
-export const quotes: Quote[] = [
-  {
-    id: "1",
-    text: "بدأت فكرة تجمعات لمشاهدة مباريات ريال مدريد مع الأصدقاء في حاراتنا الصغيرة عام 2014، وتحولت هذه التجمعات مع الوقت إلى أسلوب حياة حقيقي لنا كمدريديستا. في 2017، أصبحت هذه التجمعات رابطة رسمية، وفي 2021 كرّمنا ريال مدريد عبر موقعه الرسمي كواحدة من أكبر الروابط في العالم. آمنّا بأنفسنا ووصلنا إلى ما نحن عليه اليوم، وأنا مؤمن أن كل عضو في تجمّع  بيت المدريديستا سيكون  شريك  لتحقيق نجاحات غير مسبوقة لمجتمع المدريديستا حول العالم.",
-    author: "Ali Fayad",
-    role: "Peña Beirut president",
-    photo: "https://casamadridista.com/wp-content/uploads/2025/08/IMG_3689.jpg",
-  },
-  {
-    id: "2",
-    text: "في كل مدينة، هناك مشجع يعيش حبه للنادي بصمت، يفرح عند الهدف ويشعر بالحزن عند الخسارة، لكنه لا يتوقف أبدًا عن دعم فريقه. بيت المدريديستا هو المكان الذي يجمع هؤلاء المشجعين، ليكون شغفهم قوة موحدة، وأحلامهم مسارًا نحو تجربة جماعية لا تنسى	",
-    author: "Mohammed Al-Chalabi",
-    role: "Peña Germany president",
-    photo:
-      "https://casamadridista.com/wp-content/uploads/2025/08/IMG_0878.webp",
-  },
-  {
-    id: "3",
-    text: "كل نجاح يبدأ بفكرة بسيطة، وكل مجتمع عظيم يبدأ بأعضاء يؤمنون ببعضهم. بيت المدريديستا هو مثال حي على ذلك, أشخاص متحدون بالشغف والعمل الجماعي، يثبتون أن قوة المجتمع تفوق أي تحدٍ، وأن الأحلام الكبيرة تتحقق عندما نكون معًا.",
-    author: "Fadi Farah",
-    role: "President Syria Fan Club",
-    photo:
-      "https://casamadridista.com/wp-content/uploads/2025/09/541035607_1704781420211471_4852917584578947202_n.png",
-  },
-  {
-    id: "4",
-    text: "ان تكون مدريديستا يعني القمة و المجد. ريال مدريد هو الإنتماء و الوفاء و الفرح في الفوز و الفخر في كل المناسبات. ريال مدريد هو كرة القدم",
-    author: "Emad Rmaity",
-    role: "Content Creator",
-    photo:
-      "https://casamadridista.com/wp-content/uploads/2025/08/0931f50c-5b4f-48f2-bec8-c55137f703b6.jpg",
-  },
-  {
-    id: "5",
-    text: "بيت المدريديستا ليس مجرد رابطة، إنه مستقبل نكتبه معًا. كل عضو يساهم بشغفه، كل لحظة تُشكل جزءًا من الرحلة",
-    author: "Amer Nuseibeh",
-    role: "Content Creator",
-    photo:
-      "https://casamadridista.com/wp-content/uploads/2025/08/39C4C4BC-19D6-4D14-B82A-961C233189E0.jpg",
-  },
-  {
-    id: "6",
-    text: "كل مشاركة، كل نقاش، وكل لحظة حب للنادي تصنع مجتمعًا لا يُنسى.",
-    author: "Mohammed Dean",
-    role: "Content Creator",
-    photo:
-      "https://casamadridista.com/wp-content/uploads/2025/08/FADEE1C2-0A06-440E-B7C5-900ECEA7633E.jpg",
-  },
-  {
-    id: "7",
-    text: "كونك مدريديستا يعني حمل قيم التميز والالتزام، والاعتزاز بتاريخ لا يُضاهى في عالم كرة القدم",
-    author: "Mahmoud Daoud",
-    role: "Content Creator",
-    photo: "https://casamadridista.com/wp-content/uploads/2025/08/IMG_5217.jpg",
   },
 ];

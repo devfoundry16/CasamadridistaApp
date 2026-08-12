@@ -2,7 +2,6 @@
 import CustomWebView from "@/components/CustomWebView";
 import FanClubPartnershipSection from "@/components/FanClubPartnershipSection";
 import HomePartnershipBanner from "@/components/HomePartnershipBanner";
-import QuoteSection from "@/components/Home/QuoteSection";
 import StrengthSection from "@/components/Home/StrengthSection";
 import OffSeasonMatchCard from "@/components/Home/OffSeasonMatchCard";
 import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
@@ -317,7 +316,6 @@ export default function HomeScreen() {
       <FanClubPartnershipSection variant="home" />
       <VisionSection />
       {/* <SquadSection /> */}
-      <QuoteSection />
     </ScrollView>
   );
 }
