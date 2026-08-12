@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import {
   FlatList,
   View,
@@ -18,8 +18,9 @@ import PostBody     from '@/components/Community/PostCard/PostBody';
 import PostMedia    from '@/components/Community/PostCard/PostMedia';
 import PostActions  from '@/components/Community/PostCard/PostActions';
 import CommentRow   from '@/components/Community/Comments/CommentRow';
-import CommentInput from '@/components/Community/Comments/CommentInput';
+import CommentInput, { type CommentInputHandle } from '@/components/Community/Comments/CommentInput';
 import ReportSheet  from '@/components/Community/Moderation/ReportSheet';
+import { useKeyboardOffsets } from '@/hooks/useKeyboardOffsets';
 import Colors from '@/constants/colors';
 
 export default function PostDetailPage() {
@@ -28,6 +29,12 @@ export default function PostDetailPage() {
   const queryClient = useQueryClient();
   const [reportOpen, setReportOpen] = useState(false);
   const [replyTo, setReplyTo]       = useState<Comment | null>(null);
+  const commentInputRef             = useRef<CommentInputHandle>(null);
+
+  // Header height + bottom safe-area inset, combined into the exact offset the
+  // KeyboardAvoidingView needs. See hooks/useKeyboardOffsets.ts for the maths.
+  // Must stay above the early returns below — hook order has to be stable.
+  const { keyboardVerticalOffset, bottomInset } = useKeyboardOffsets();
 
   const { data: post, isLoading: postLoading, isError: postError } = useQuery({
     queryKey: ['post', id],
@@ -58,7 +65,15 @@ export default function PostDetailPage() {
     queryClient.invalidateQueries({ queryKey: ['comments', id] });
   }, [id, replyTo, queryClient]);
 
-  const handleReply = useCallback((comment: Comment) => setReplyTo(comment), []);
+  const handleReply = useCallback((comment: Comment) => {
+    setReplyTo(comment);
+    // Focus immediately: this is a direct response to a user tap, so the
+    // keyboard is allowed to open. The KAV recomputes on keyboardWill/DidShow,
+    // so the reply banner's extra height does not need to be laid out first.
+    commentInputRef.current?.focus();
+  }, []);
+
+  const handleCancelReply = useCallback(() => setReplyTo(null), []);
 
   const postContent = useMemo(() => {
     if (!post) return null;
@@ -79,7 +94,7 @@ export default function PostDetailPage() {
         )}
       </View>
     );
-  }, [post, commentsLoading]);
+  }, [post, commentsLoading, t]);
 
   const screenOptions = (
     <Stack.Screen
@@ -118,7 +133,18 @@ export default function PostDetailPage() {
       {screenOptions}
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: Colors.background.dark }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        // "padding" on BOTH platforms. On iOS and on Android edge-to-edge
+        // (the Expo SDK 54 default) the window is not resized by the IME, so
+        // padding is the correct lift. On legacy Android that DOES resize, the
+        // computed padding goes negative and RN clamps it to 0 — so there is no
+        // double-push. "height" is wrong here: it caches _initialFrameHeight and
+        // drops flex, which re-measures the whole comment FlatList every toggle.
+        behavior="padding"
+        keyboardVerticalOffset={keyboardVerticalOffset}
+        // ReportSheet is an RN <Modal> sibling. Its TextInput still emits global
+        // keyboard events, which would otherwise re-layout the comment list
+        // underneath the modal for no visible benefit.
+        enabled={!reportOpen}
       >
         <FlatList
           data={comments}
@@ -129,6 +155,11 @@ export default function PostDetailPage() {
           onEndReachedThreshold={0.5}
           contentContainerStyle={{ paddingBottom: 8 }}
           style={{ backgroundColor: Colors.background.dark }}
+          // "handled" => taps on Reply / like register on the FIRST tap while
+          // the keyboard is open; taps on empty space still dismiss it.
+          keyboardShouldPersistTaps="handled"
+          // Chat-style dismissal. 'interactive' is iOS-only; 'on-drag' on Android.
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
           ListEmptyComponent={
             commentsLoading ? null : (
               <View className="py-10 items-center">
@@ -147,10 +178,13 @@ export default function PostDetailPage() {
           }
         />
         <CommentInput
+          ref={commentInputRef}
           postId={id}
           replyTo={replyTo?.id}
+          replyToName={replyTo?.author?.first_name ?? null}
           onSubmit={handleSubmit}
-          placeholder={replyTo ? t('community.replyingTo', { name: replyTo.author?.first_name ?? t('community.defaultUser') }) : undefined}
+          onCancelReply={handleCancelReply}
+          bottomInset={bottomInset}
         />
       </KeyboardAvoidingView>
       <ReportSheet visible={reportOpen} postId={post.id} onClose={() => setReportOpen(false)} />
