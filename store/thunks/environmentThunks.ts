@@ -6,6 +6,7 @@ import {
   setLoading,
   setError,
 } from "../slices/environmentSlice";
+import { CURRENT_FOOTBALL_SEASON } from "@/constants/football";
 
 // Fetch environment variables from backend
 export const fetchEnvironment = createAsyncThunk(
@@ -31,7 +32,9 @@ export const fetchEnvironment = createAsyncThunk(
               apiKey: response.data.apiSports?.apiKey || "",
             },
             football: {
-              currentSeason: Number(response.data.football?.currentSeason ?? 2025),
+              currentSeason: Number(
+                response.data.football?.currentSeason ?? CURRENT_FOOTBALL_SEASON,
+              ),
             },
             revenueCat: {
               iosApiKey: response.data.revenueCat?.iosApiKey || "",

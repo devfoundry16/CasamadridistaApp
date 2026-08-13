@@ -1,5 +1,6 @@
 // store/slices/environmentSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { CURRENT_FOOTBALL_SEASON } from "@/constants/football";
 
 interface EnvironmentState {
   auth: {
@@ -57,7 +58,7 @@ const initialState: EnvironmentState = {
     apiKey: "",
   },
   football: {
-    currentSeason: 2025,
+    currentSeason: CURRENT_FOOTBALL_SEASON,
   },
   revenueCat: {
     iosApiKey: "",
