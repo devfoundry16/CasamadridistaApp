@@ -111,7 +111,9 @@ export default function TabLayout() {
         name="team"
         options={{
           title: t("nav.team"),
-          headerTitle: t("nav.realMadridTeam"),
+          // "Team", not "Real Madrid Team": the identity strip 72pt below the
+          // header already says "Real Madrid".
+          headerTitle: t("nav.team"),
           headerTitleAlign: "center",
           headerTitleStyle: {
             ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),

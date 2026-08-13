@@ -36,8 +36,11 @@ export default function TeamForm({ matches, nextMatchTeamId }: TeamFormProps) {
             key={idx}
             className={`w-[15px] h-[15px] rounded-full justify-center justify-self-center items-center ${outcomeClassNames[outcome]}`}
           >
+            {/* Dark ink, not white: white on these fills is 2.54:1 (green),
+                2.15:1 (amber) and 3.76:1 (red) — all failing AA. #0A0A0A gives
+                7.80 / 9.22 / 5.26. */}
             <Text
-              className="text-[11px] leading-[11px] text-center font-bold text-text-primary"
+              className="text-[11px] leading-[11px] text-center font-bold text-bg-dark"
               style={{ includeFontPadding: false }}
             >
               {displayText}

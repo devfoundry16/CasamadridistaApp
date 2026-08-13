@@ -1,22 +1,8 @@
 import Colors from "@/constants/colors";
-import {
-  MaterialTopTabNavigationEventMap,
-  MaterialTopTabNavigationOptions,
-  createMaterialTopTabNavigator,
-} from "@react-navigation/material-top-tabs";
-import { ParamListBase, TabNavigationState } from "@react-navigation/native";
-import { Stack, withLayoutContext } from "expo-router";
+import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useFont } from "@/contexts/FontContext";
-
-const { Navigator } = createMaterialTopTabNavigator();
-
-export const MaterialTopTabs = withLayoutContext<
-  MaterialTopTabNavigationOptions,
-  typeof Navigator,
-  TabNavigationState<ParamListBase>,
-  MaterialTopTabNavigationEventMap
->(Navigator);
+import { MaterialTopTabs } from "@/components/navigation/MaterialTopTabs";
 
 export default function MembershipsLayout() {
   const { t } = useTranslation();
