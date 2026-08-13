@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Mail, CheckCircle } from 'lucide-react-native';
 import { Text } from '@/components/Text';
 import Colors from '@/constants/colors';
-import { PARTNERSHIP_EMAIL, openPartnershipInquiry } from '@/constants/partnerships';
+import { openPartnershipInquiry } from '@/constants/partnerships';
 
-export type PartnershipVariant = 'fanClubs' | 'home';
+export type PartnershipVariant = 'fanClubs' | 'home' | 'feed';
 
 interface FanClubPartnershipSectionProps {
   variant?: PartnershipVariant;
@@ -18,6 +18,52 @@ export default function FanClubPartnershipSection({
   const { t } = useTranslation();
 
   const bullets = t('fanClubs.partnerBullets', { returnObjects: true }) as string[];
+
+  // Compact card pinned above the Fan Clubs feed. The full pitch (bullets, email,
+  // apply link) stays on the /fan-clubs screens — pinning ~400px above a feed
+  // would leave under 300px for posts on a standard phone.
+  if (variant === 'feed') {
+    return (
+      <View
+        className="mx-4 mt-3 mb-2 rounded-2xl p-4"
+        style={{
+          // bg-card, not bg-medium: the community screen background IS bg-medium,
+          // so the fanClubs variant would be invisible against it.
+          backgroundColor: Colors.background.card,
+          borderWidth: 1,
+          borderColor: 'rgba(188,144,69,0.35)',
+        }}
+      >
+        <View className="flex-row items-start gap-2 mb-1.5">
+          <Mail size={18} color={Colors.darkGold} style={{ marginTop: 1 }} />
+          <Text
+            className="text-[15px] font-bold flex-1"
+            style={{ color: Colors.text.primary }}
+          >
+            {t('fanClubs.partnerNetworkTitle')}
+          </Text>
+        </View>
+
+        <Text
+          className="text-[13px] leading-5 mb-3"
+          numberOfLines={2}
+          style={{ color: Colors.text.secondary }}
+        >
+          {t('fanClubs.partnerLead')}
+        </Text>
+
+        <Pressable
+          onPress={openPartnershipInquiry}
+          accessibilityRole="button"
+          className="py-2.5 rounded-xl items-center justify-center"
+          style={({ pressed }) => ({ backgroundColor: Colors.darkGold, opacity: pressed ? 0.7 : 1 })}
+          android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
+        >
+          <Text className="text-white font-bold text-[13px]">{t('fanClubs.partnerCta')}</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   if (variant === 'home') {
     return (

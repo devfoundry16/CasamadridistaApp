@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Pencil } from 'lucide-react-native';
 import FeedTabs from '@/components/Community/FeedTabs';
 import FeedList from '@/components/Community/FeedList';
+import FanClubPartnershipSection from '@/components/FanClubPartnershipSection';
 import type { FeedTab } from '@/services/FeedService';
 import Colors from '@/constants/colors';
 
@@ -14,6 +15,7 @@ export default function CommunityScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background.medium }}>
       <FeedTabs active={tab} onSelect={setTab} />
+      {tab === 'fan-clubs' && <FanClubPartnershipSection variant="feed" />}
       <FeedList tab={tab} />
 
       <TouchableOpacity

@@ -1,7 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import CustomWebView from "@/components/CustomWebView";
-import FanClubPartnershipSection from "@/components/FanClubPartnershipSection";
-import HomePartnershipBanner from "@/components/HomePartnershipBanner";
 import StrengthSection from "@/components/Home/StrengthSection";
 import OffSeasonMatchCard from "@/components/Home/OffSeasonMatchCard";
 import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
@@ -10,7 +8,6 @@ import { Spinner } from "@/components/Spinner";
 import UpcomingForm from "@/components/UpcomingForm";
 import { useFootball } from "@/hooks/useFootball";
 import { useEnvironment } from "@/hooks/useEnvironment";
-import { ENABLE_HOME_PARTNERSHIP_BANNER } from "@/constants/partnerships";
 
 import MatchService from "@/services/Football/MatchService";
 import { Match } from "@/types/soccer/match";
@@ -224,7 +221,6 @@ export default function HomeScreen() {
       onScroll={handleScroll}
       scrollEventThrottle={16}
     >
-      {ENABLE_HOME_PARTNERSHIP_BANNER && <HomePartnershipBanner />}
       <View className="items-center">
         <Image
           source={{
@@ -313,7 +309,6 @@ export default function HomeScreen() {
         shouldAnimate={shouldAnimate}
         handleStrengthSectionLayout={handleStrengthSectionLayout}
       />
-      <FanClubPartnershipSection variant="home" />
       <VisionSection />
       {/* <SquadSection /> */}
     </ScrollView>
