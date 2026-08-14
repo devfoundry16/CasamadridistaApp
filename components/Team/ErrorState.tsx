@@ -1,7 +1,8 @@
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Text } from "@/components/Text";
+import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
 
 interface Props {
@@ -24,7 +25,7 @@ export default function ErrorState({ title, onRetry, compact = false }: Props) {
       >
         {title}
       </Text>
-      <Pressable
+      <Touchable
         onPress={onRetry}
         accessibilityRole="button"
         className="py-2.5 px-5 rounded-xl"
@@ -34,7 +35,7 @@ export default function ErrorState({ title, onRetry, compact = false }: Props) {
         })}
       >
         <Text className="text-[13px] font-semibold text-white">{t("team.retry")}</Text>
-      </Pressable>
+      </Touchable>
     </View>
   );
 }

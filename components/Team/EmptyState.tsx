@@ -1,7 +1,8 @@
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import type { LucideIcon } from "lucide-react-native";
 import { Text } from "@/components/Text";
+import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
 
 interface Props {
@@ -30,7 +31,7 @@ export default function EmptyState({ icon: Icon, title, body, action }: Props) {
         </Text>
       ) : null}
       {action ? (
-        <Pressable
+        <Touchable
           onPress={action.onPress}
           accessibilityRole="button"
           className="mt-4 py-2.5 px-5 rounded-xl"
@@ -40,7 +41,7 @@ export default function EmptyState({ icon: Icon, title, body, action }: Props) {
           })}
         >
           <Text className="text-[13px] font-semibold text-white">{action.label}</Text>
-        </Pressable>
+        </Touchable>
       ) : null}
     </View>
   );

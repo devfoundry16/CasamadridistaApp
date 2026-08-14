@@ -1,9 +1,10 @@
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Text } from "@/components/Text";
+import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
 import type { Match } from "@/types/soccer/match";
 import ResultPill from "./ResultPill";
@@ -20,7 +21,7 @@ export default function MatchRow({ match, teamId }: { match: Match; teamId: numb
   const home = isHome(match, teamId);
 
   return (
-    <Pressable
+    <Touchable
       onPress={() => router.push(`/match/${match.fixture.id}` as never)}
       accessibilityRole="button"
       style={({ pressed }) => ({
@@ -68,6 +69,6 @@ export default function MatchRow({ match, teamId }: { match: Match; teamId: numb
       </Text>
 
       <ResultPill home={own} away={other} outcome={outcome} size="sm" />
-    </Pressable>
+    </Touchable>
   );
 }

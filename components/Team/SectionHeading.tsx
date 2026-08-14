@@ -1,6 +1,7 @@
 import React from "react";
-import { I18nManager, Pressable, View } from "react-native";
+import { I18nManager, View } from "react-native";
 import { Text } from "@/components/Text";
+import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
 
 interface Props {
@@ -30,7 +31,7 @@ export default function SectionHeading({ title, action }: Props) {
         </Text>
 
         {action ? (
-          <Pressable
+          <Touchable
             onPress={action.onPress}
             accessibilityRole="button"
             hitSlop={12}
@@ -45,7 +46,7 @@ export default function SectionHeading({ title, action }: Props) {
             <Text className="text-[13px] font-semibold" style={{ color: Colors.darkGold }}>
               {action.label}
             </Text>
-          </Pressable>
+          </Touchable>
         ) : null}
       </View>
       <View style={{ height: 1, backgroundColor: Colors.border.default, marginTop: 6 }} />

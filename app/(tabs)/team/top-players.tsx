@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { ActivityIndicator, ScrollView, View } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Text } from "@/components/Text";
+import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
 import { useTopAssists, useTopScorers } from "@/hooks/football/queries";
 import { REAL_MADRID_TEAM_ID } from "@/constants/football";
@@ -38,7 +39,7 @@ function LeaderRow({
   const isRealMadrid = line?.team?.id === REAL_MADRID_TEAM_ID;
 
   return (
-    <Pressable
+    <Touchable
       onPress={onPress}
       accessibilityRole="button"
       style={({ pressed }) => ({
@@ -89,7 +90,7 @@ function LeaderRow({
       >
         {valueFor(entry, metric)}
       </Text>
-    </Pressable>
+    </Touchable>
   );
 }
 

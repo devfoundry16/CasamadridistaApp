@@ -1,10 +1,11 @@
 import React from "react";
-import { I18nManager, Pressable, View } from "react-native";
+import { I18nManager, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import CountryFlag from "react-native-country-flag";
 import { Text } from "@/components/Text";
+import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
 import countries from "@/constants/countries.json";
 import type { CountryMap, TeamInfo } from "@/types/soccer/profile";
@@ -57,7 +58,7 @@ function InfoRow({
   return (
     <View>
       {onPress ? (
-        <Pressable
+        <Touchable
           onPress={onPress}
           accessibilityRole="button"
           style={({ pressed }) => ({
@@ -65,7 +66,7 @@ function InfoRow({
           })}
         >
           {body}
-        </Pressable>
+        </Touchable>
       ) : (
         body
       )}

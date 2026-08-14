@@ -1,8 +1,9 @@
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Mail, CheckCircle } from 'lucide-react-native';
 import { Text } from '@/components/Text';
+import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import { openPartnershipInquiry } from '@/constants/partnerships';
 
@@ -52,7 +53,7 @@ export default function FanClubPartnershipSection({
           {t('fanClubs.partnerLead')}
         </Text>
 
-        <Pressable
+        <Touchable
           onPress={openPartnershipInquiry}
           accessibilityRole="button"
           className="py-2.5 rounded-xl items-center justify-center"
@@ -60,7 +61,7 @@ export default function FanClubPartnershipSection({
           android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
         >
           <Text className="text-white font-bold text-[13px]">{t('fanClubs.partnerCta')}</Text>
-        </Pressable>
+        </Touchable>
       </View>
     );
   }
@@ -99,29 +100,29 @@ export default function FanClubPartnershipSection({
             </View>
           ))}
 
-        <Pressable
+        <Touchable
           onPress={openPartnershipInquiry}
           className="py-3.5 rounded-xl items-center mt-4 mb-2"
           style={({ pressed }) => ({ backgroundColor: Colors.darkGold, opacity: pressed ? 0.7 : 1 })}
           android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
         >
           <Text className="text-white font-bold text-sm">{t('fanClubs.partnerCta')}</Text>
-        </Pressable>
+        </Touchable>
 
-        <Pressable onPress={openPartnershipInquiry} className="items-center py-1.5" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+        <Touchable onPress={openPartnershipInquiry} className="items-center py-1.5" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
           <Text className="text-sm opacity-70" style={{ color: Colors.darkGold }}>
             {t('fanClubs.partnerEmailLabel')}
           </Text>
-        </Pressable>
+        </Touchable>
 
-        <Pressable onPress={openPartnershipInquiry} className="items-center py-1" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+        <Touchable onPress={openPartnershipInquiry} className="items-center py-1" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
           <Text
             className="text-sm underline text-center"
             style={{ color: Colors.darkGold }}
           >
             {t('fanClubs.applyHere')}
           </Text>
-        </Pressable>
+        </Touchable>
       </View>
     );
   }
@@ -165,26 +166,26 @@ export default function FanClubPartnershipSection({
           </View>
         ))}
 
-      <Pressable
+      <Touchable
         onPress={openPartnershipInquiry}
         className="py-3 px-6 rounded-xl w-full items-center mt-4 mb-2"
         style={({ pressed }) => ({ backgroundColor: Colors.darkGold, opacity: pressed ? 0.7 : 1 })}
         android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
       >
         <Text className="text-white font-semibold text-sm">{t('fanClubs.partnerCta')}</Text>
-      </Pressable>
+      </Touchable>
 
-      <Pressable onPress={openPartnershipInquiry} className="py-1.5" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+      <Touchable onPress={openPartnershipInquiry} className="py-1.5" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
         <Text className="text-sm opacity-70 text-center" style={{ color: Colors.darkGold }}>
           {t('fanClubs.partnerEmailLabel')}
         </Text>
-      </Pressable>
+      </Touchable>
 
-      <Pressable onPress={openPartnershipInquiry} className="py-1" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+      <Touchable onPress={openPartnershipInquiry} className="py-1" style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
         <Text className="text-sm underline text-center" style={{ color: Colors.darkGold }}>
           {t('fanClubs.applyHere')}
         </Text>
-      </Pressable>
+      </Touchable>
     </View>
   );
 }

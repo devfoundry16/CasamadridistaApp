@@ -1,9 +1,10 @@
 import React from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Text } from "@/components/Text";
+import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
 import type { Match } from "@/types/soccer/match";
 import ResultPill from "./ResultPill";
@@ -39,7 +40,7 @@ export default function FormStrip({ matches, teamId }: Props) {
         const d = kickoff(m);
 
         return (
-          <Pressable
+          <Touchable
             key={m.fixture.id}
             onPress={() => router.push(`/match/${m.fixture.id}` as never)}
             accessibilityRole="button"
@@ -63,7 +64,7 @@ export default function FormStrip({ matches, teamId }: Props) {
               contentFit="contain"
             />
             <ResultPill home={own} away={other} outcome={outcome} size="sm" />
-          </Pressable>
+          </Touchable>
         );
       })}
     </View>

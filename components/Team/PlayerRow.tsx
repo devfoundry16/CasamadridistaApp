@@ -1,8 +1,9 @@
 import React from "react";
-import { I18nManager, Pressable, View } from "react-native";
+import { I18nManager, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { Text } from "@/components/Text";
+import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
 import countries from "@/constants/countries.json";
 import CountryFlag from "react-native-country-flag";
@@ -21,12 +22,16 @@ interface Props {
 }
 
 /**
- * Replaces the PlayerCard that was duplicated verbatim in both
- * app/(tabs)/team.tsx and app/team/[id].tsx.
+ * One squad row: number · photo · name · nationality · metric.
  *
- * Changes from the original: shirt number 25px -> 17px (it overpowered the
- * 16px name), photo 60 -> 44 (an 84pt row becomes 64pt), and logical
- * margins so the row mirrors correctly under RTL.
+ * Everything sits on a single 56pt line. An earlier version stacked the name
+ * over the nationality, which left the right two thirds of a 393pt screen
+ * empty; laying the four fields out horizontally uses the width and lets the
+ * eye scan one column at a time down the list.
+ *
+ * Widths: the name gets `flex: 1` and the nationality `flexShrink: 1`, so a
+ * long name pushes the country label to ellipsis before the name itself
+ * truncates — the name is the field people scan for.
  */
 export default function PlayerRow({
   player,
@@ -35,86 +40,115 @@ export default function PlayerRow({
   variant = "player",
 }: Props) {
   const Chevron = I18nManager.isRTL ? ChevronLeft : ChevronRight;
+  const isPlayer = variant === "player";
 
   const trailing =
-    metric === "age"
-      ? player.age != null
+    metric === "height"
+      ? player.height || "–"
+      : player.age != null
         ? String(player.age)
-        : "–"
-      : metric === "height"
-        ? player.height || "–"
-        : player.age != null
-          ? String(player.age)
-          : "–";
+        : "–";
+
+  const isoCode = player.nationality ? map[player.nationality] : undefined;
 
   return (
-    <Pressable
+    <Touchable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={player.name}
-      style={({ pressed }) => ({
-        flexDirection: "row",
-        alignItems: "center",
-        height: variant === "coach" ? 72 : 64,
-        paddingHorizontal: 14,
-        backgroundColor: pressed ? Colors.background.light : "transparent",
-      })}
+      style={({ pressed }) => [
+        styles.row,
+        pressed && { backgroundColor: Colors.background.light },
+      ]}
     >
-      {variant === "player" ? (
-        <View style={{ width: 28, alignItems: "center" }}>
-          <Text
-            className="text-[17px] font-bold"
-            style={{ color: Colors.darkGold }}
-            maxFontSizeMultiplier={1.2}
-          >
-            {player.number ?? ""}
-          </Text>
-        </View>
+      {isPlayer ? (
+        <Text style={styles.number} maxFontSizeMultiplier={1.2}>
+          {player.number ?? ""}
+        </Text>
       ) : null}
 
       <Image
         source={{ uri: player.photo }}
-        style={{
-          width: 44,
-          height: 44,
-          borderRadius: 22,
-          marginStart: variant === "player" ? 10 : 0,
-          marginEnd: 12,
-          borderWidth: 1,
-          borderColor: Colors.border.default,
-          backgroundColor: Colors.background.light,
-        }}
+        style={[styles.photo, isPlayer && { marginStart: 8 }]}
         contentFit="cover"
       />
 
-      <View className="flex-1 justify-center">
-        <Text
-          className="text-[15px] font-semibold"
-          style={{ color: Colors.text.primary }}
-          numberOfLines={1}
-        >
-          {player.name}
-        </Text>
-        <View className="flex-row items-center gap-1.5 mt-0.5">
-          {player.nationality && map[player.nationality] ? (
-            <CountryFlag isoCode={map[player.nationality]} size={12} />
-          ) : null}
-          <Text className="text-[12px]" style={{ color: Colors.text.tertiary }}>
+      <Text style={styles.name} numberOfLines={1}>
+        {player.name}
+      </Text>
+
+      {player.nationality ? (
+        <View style={styles.country}>
+          {isoCode ? <CountryFlag isoCode={isoCode} size={13} /> : null}
+          <Text style={styles.countryLabel} numberOfLines={1}>
             {player.nationality}
           </Text>
         </View>
-      </View>
+      ) : null}
 
-      {variant === "player" ? (
-        <Text
-          className="text-[14px] font-semibold"
-          style={{ color: Colors.text.secondary, marginEnd: 8 }}
-        >
+      {isPlayer ? (
+        <Text style={styles.metric} numberOfLines={1} maxFontSizeMultiplier={1.2}>
           {trailing}
         </Text>
       ) : null}
 
-      <Chevron size={18} color={Colors.text.muted} />
-    </Pressable>
+      <Chevron size={16} color={Colors.text.muted} style={styles.chevron} />
+    </Touchable>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 56,
+    paddingHorizontal: 14,
+  },
+  number: {
+    width: 24,
+    textAlign: "center",
+    fontSize: 15,
+    fontWeight: "700",
+    color: Colors.darkGold,
+    fontVariant: ["tabular-nums"],
+  },
+  photo: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginEnd: 12,
+    borderWidth: 1,
+    borderColor: Colors.border.default,
+    backgroundColor: Colors.background.light,
+  },
+  name: {
+    flex: 1,
+    minWidth: 0,
+    fontSize: 15,
+    fontWeight: "600",
+    color: Colors.text.primary,
+  },
+  country: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexShrink: 1,
+    marginStart: 10,
+  },
+  countryLabel: {
+    marginStart: 6,
+    fontSize: 12,
+    color: Colors.text.tertiary,
+  },
+  metric: {
+    minWidth: 34,
+    marginStart: 10,
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.text.secondary,
+    fontVariant: ["tabular-nums"],
+  },
+  chevron: {
+    marginStart: 4,
+  },
+});

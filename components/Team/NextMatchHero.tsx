@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import { Text } from "@/components/Text";
+import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
 import type { Match } from "@/types/soccer/match";
 import { isInPlay, kickoff } from "./matchUtils";
@@ -86,7 +87,7 @@ export default function NextMatchHero({ match, watermarkUri }: Props) {
   const showScore = live || expired;
 
   return (
-    <Pressable
+    <Touchable
       onPress={() => router.push(`/match/${match.fixture.id}` as never)}
       accessibilityRole="button"
       style={({ pressed }) => ({
@@ -243,6 +244,6 @@ export default function NextMatchHero({ match, watermarkUri }: Props) {
             .join(" · ")}
         </Text>
       </View>
-    </Pressable>
+    </Touchable>
   );
 }

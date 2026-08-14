@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { Post } from '@/services/FeedService';
 import PostHeader from './PostHeader';
@@ -7,6 +7,7 @@ import PostBody from './PostBody';
 import PostMediaPreview from './PostMediaPreview';
 import PostActions from './PostActions';
 import Colors from '@/constants/colors';
+import Touchable from '@/components/Touchable';
 
 interface Props {
   post: Post;
@@ -20,12 +21,12 @@ function PostCard({ post }: Props) {
   }, [post.id, router]);
 
   return (
-    <Pressable onPress={goToPost} style={({ pressed }) => [styles.container, { opacity: pressed ? 0.85 : 1 }]}>
+    <Touchable onPress={goToPost} style={({ pressed }) => [styles.container, { opacity: pressed ? 0.85 : 1 }]}>
       <PostHeader post={post} onAuthorPress={goToPost} />
       <PostBody post={post} truncate />
       {post.media?.length > 0 && <PostMediaPreview media={post.media} />}
       <PostActions post={post} onCommentPress={goToPost} />
-    </Pressable>
+    </Touchable>
   );
 }
 

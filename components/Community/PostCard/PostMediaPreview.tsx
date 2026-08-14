@@ -7,12 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { Play } from 'lucide-react-native';
 import type { PostMedia as PostMediaType } from '@/services/FeedService';
 import Colors from '@/constants/colors';
+import Touchable from '@/components/Touchable';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FEED_HEIGHT = 250;
 
 /**
- * Nested inside the card's outer Pressable on purpose: the deepest view that
+ * Nested inside the card's outer pressable on purpose: the deepest view that
  * claims the touch responder wins, so tapping the photo opens the viewer while
  * tapping anywhere else on the card still navigates to the post. Same pattern
  * the like/share buttons in PostActions already rely on.
@@ -58,7 +59,7 @@ function VideoPlayerInline({ media }: { media: PostMediaType }) {
 
 function VideoThumbnail({ media, onPlay }: { media: PostMediaType; onPlay: () => void }) {
   return (
-    <Pressable
+    <Touchable
       style={({ pressed }) => ({ width: SCREEN_WIDTH, height: FEED_HEIGHT, backgroundColor: Colors.background.dark, opacity: pressed ? 0.8 : 1 })}
       onPress={onPlay}
     >
@@ -74,7 +75,7 @@ function VideoThumbnail({ media, onPlay }: { media: PostMediaType; onPlay: () =>
           <Play size={24} color="#fff" fill="#fff" />
         </View>
       </View>
-    </Pressable>
+    </Touchable>
   );
 }
 

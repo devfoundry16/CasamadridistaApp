@@ -1,6 +1,6 @@
 import React from "react";
-import { Pressable } from "react-native";
 import { Text } from "@/components/Text";
+import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
  */
 export default function Chip({ label, active, onPress }: Props) {
   return (
-    <Pressable
+    <Touchable
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ checked: active }}
@@ -38,6 +38,6 @@ export default function Chip({ label, active, onPress }: Props) {
       >
         {label}
       </Text>
-    </Pressable>
+    </Touchable>
   );
 }
