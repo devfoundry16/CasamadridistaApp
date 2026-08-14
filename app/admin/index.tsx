@@ -117,7 +117,7 @@ export default function AdminPanelScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await SuperAdminService.removeAdmin(admin.user_id);
+              await SuperAdminService.removeAdmin(admin.user_id, admin.fan_club_id);
               await loadAdmins();
             } catch {
               Alert.alert(t("common.error"), t("admin.failedToRemoveAdmin"));

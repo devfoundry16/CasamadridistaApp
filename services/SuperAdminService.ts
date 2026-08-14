@@ -52,9 +52,15 @@ class SuperAdminServiceClass {
     return res.data;
   }
 
-  async removeAdmin(userId: string): Promise<void> {
+  /**
+   * The route is DELETE /admin/admins/:userId/:fanClubId — both keys are
+   * required because fan_club_admins is keyed on (fan_club_id, user_id) and a
+   * user may administer several clubs. Omitting the club id matched no route at
+   * all, so every removal 404'd.
+   */
+  async removeAdmin(userId: string, fanClubId: string): Promise<void> {
     const headers = await this.getAuthHeader();
-    await axios.delete(`${API_BASE_URL}admin/admins/${userId}`, { headers });
+    await axios.delete(`${API_BASE_URL}admin/admins/${userId}/${fanClubId}`, { headers });
   }
 
   async listFanClubs(): Promise<AdminFanClub[]> {
