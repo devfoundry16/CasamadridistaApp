@@ -91,21 +91,22 @@ export default function PickerPill<T extends string | number>({
             borderWidth: 1,
             borderColor: Colors.border.default,
             opacity: !interactive ? 0.6 : pressed ? 0.85 : 1,
+            // Shrink rather than overflow: two pills at their natural widths
+            // exceed the row on a narrow phone, and without this the second one
+            // is pushed off screen instead of the first one ellipsising.
+            flexShrink: 1,
           },
           maxWidth ? { maxWidth } : null,
         ]}
       >
-        {iconUri ? (
-          <Image
-            source={{ uri: iconUri }}
-            style={{ width: 16, height: 16, marginEnd: 6 }}
-            contentFit="contain"
-          />
-        ) : null}
+        {iconUri ? <Crest uri={iconUri} size={16} /> : null}
 
         <Text
           className="text-[13px] font-semibold"
-          style={[{ color: Colors.text.primary }, numericStyle]}
+          // flexShrink is load-bearing: with maxWidth clamping the pill, a long
+          // competition name that refuses to shrink pushes the chevron out past
+          // the rounded border instead of ellipsising.
+          style={[{ flexShrink: 1, color: Colors.text.primary }, numericStyle]}
           numberOfLines={1}
           maxFontSizeMultiplier={1.2}
         >
@@ -116,7 +117,7 @@ export default function PickerPill<T extends string | number>({
           <ChevronDown
             size={14}
             color={Colors.text.tertiary}
-            style={{ marginStart: 6 }}
+            style={{ marginStart: 6, flexShrink: 0 }}
           />
         ) : null}
       </Touchable>
@@ -204,11 +205,7 @@ export default function PickerPill<T extends string | number>({
                   ]}
                 >
                   {item.iconUri ? (
-                    <Image
-                      source={{ uri: item.iconUri }}
-                      style={{ width: 22, height: 22, marginEnd: 12 }}
-                      contentFit="contain"
-                    />
+                    <Crest uri={item.iconUri} size={22} marginEnd={12} />
                   ) : null}
 
                   <View style={{ flex: 1 }}>
@@ -247,5 +244,43 @@ export default function PickerPill<T extends string | number>({
         </View>
       </Modal>
     </>
+  );
+}
+
+/**
+ * A competition crest on a light backing.
+ *
+ * Several are near-black on transparent — the UEFA Champions League mark is
+ * dark navy — so drawn straight onto a #2F2F2F pill or a #1A1A1A sheet they
+ * read as a smudge. The white plate is what these marks are designed to sit on.
+ */
+function Crest({
+  uri,
+  size,
+  marginEnd = 6,
+}: {
+  uri: string;
+  size: number;
+  marginEnd?: number;
+}) {
+  const box = size + 6;
+  return (
+    <View
+      style={{
+        width: box,
+        height: box,
+        borderRadius: 5,
+        marginEnd,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: Colors.brand.white,
+      }}
+    >
+      <Image
+        source={{ uri }}
+        style={{ width: size, height: size }}
+        contentFit="contain"
+      />
+    </View>
   );
 }
