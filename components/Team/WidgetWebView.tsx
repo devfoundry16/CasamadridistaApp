@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { View } from "react-native";
 import WebView from "react-native-webview";
-import { useTranslation } from "react-i18next";
-import { Text } from "@/components/Text";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import SectionHeading from "./SectionHeading";
@@ -26,12 +24,10 @@ interface Props {
  * (no postMessage / ResizeObserver anywhere in the bundle).
  *
  * The widget renders a fixed grey theme we cannot restyle, so rather than
- * pretend it's our surface we frame it as a cited embed: our heading above, our
- * attribution below, our loading and error states. The first and last things
- * the eye lands on are ours.
+ * pretend it's our surface we frame it with our own chrome: our heading above,
+ * our loading and error states. The first thing the eye lands on is ours.
  */
 export default function WidgetWebView({ html, title, loadingLabel, errorLabel }: Props) {
-  const { t } = useTranslation();
   const [reloadKey, setReloadKey] = useState(0);
   const [failed, setFailed] = useState(false);
 
@@ -88,19 +84,6 @@ export default function WidgetWebView({ html, title, loadingLabel, errorLabel }:
         </View>
       )}
 
-      <View
-        style={{
-          height: 32,
-          alignItems: "center",
-          justifyContent: "center",
-          borderTopWidth: 1,
-          borderTopColor: Colors.border.default,
-        }}
-      >
-        <Text className="text-[11px]" style={{ color: Colors.text.muted }}>
-          {t("team.dataBy")}
-        </Text>
-      </View>
     </View>
   );
 }

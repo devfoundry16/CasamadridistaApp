@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { development } from "@/config/environment";
+import type { CompetitionCatalog } from "@/types/soccer/competitions";
 import type { LeagueStandings } from "@/types/soccer/standings";
 import type { TeamStatistics } from "@/types/soccer/teamStatistics";
 import type { TopPlayerEntry } from "@/types/soccer/topPlayers";
@@ -13,6 +14,12 @@ class ApiService {
       headers: { Accept: "application/json" },
       timeout: 15_000,
     });
+  }
+
+  /** The competitions a team has a table for, with the seasons available for each. */
+  async fetchTeamCompetitions(teamId: number): Promise<CompetitionCatalog> {
+    const { data } = await this.api.get(`/competitions/${teamId}`);
+    return data;
   }
 
   async fetchStandings(leagueId: number, season: number): Promise<LeagueStandings[]> {

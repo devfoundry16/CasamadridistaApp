@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import MatchService from "@/services/Football/MatchService";
 import StatsService from "@/services/Football/StatsService";
 import { useSeason } from "./useSeason";
-import { LA_LIGA_LEAGUE_ID } from "@/constants/football";
+import { LA_LIGA_LEAGUE_ID, REAL_MADRID_TEAM_ID } from "@/constants/football";
+import type { CompetitionCatalog } from "@/types/soccer/competitions";
 import type { LeagueStandings, StandingRow } from "@/types/soccer/standings";
 import type { TeamStatistics } from "@/types/soccer/teamStatistics";
 import type { TopPlayerEntry } from "@/types/soccer/topPlayers";
@@ -10,6 +11,7 @@ import type { Match } from "@/types/soccer/match";
 
 export const footballKeys = {
   all: ["football"] as const,
+  competitions: (t: number) => [...footballKeys.all, "competitions", t] as const,
   standings: (l: number, s: number) => [...footballKeys.all, "standings", l, s] as const,
   teamStats: (t: number, l: number, s: number) =>
     [...footballKeys.all, "team-stats", t, l, s] as const,
@@ -24,12 +26,31 @@ export const footballKeys = {
  *  the server would only answer from its own cache. */
 const H = 3_600_000;
 
-export function useStandings(leagueId: number = LA_LIGA_LEAGUE_ID) {
-  const season = useSeason();
+/** Which competitions the team has a readable table for, and in which seasons. */
+export function useTeamCompetitions(teamId: number = REAL_MADRID_TEAM_ID) {
+  return useQuery<CompetitionCatalog>({
+    queryKey: footballKeys.competitions(teamId),
+    queryFn: () => StatsService.fetchTeamCompetitions(teamId),
+    enabled: teamId > 0,
+    staleTime: 24 * H,
+  });
+}
+
+/**
+ * `season` and `enabled` are optional so existing callers keep working:
+ * `useStandings()` still resolves to La Liga in the current season.
+ */
+export function useStandings(
+  leagueId: number = LA_LIGA_LEAGUE_ID,
+  season?: number,
+  options?: { enabled?: boolean },
+) {
+  const fallbackSeason = useSeason();
+  const resolvedSeason = season ?? fallbackSeason;
   return useQuery<LeagueStandings[], Error, StandingRow[]>({
-    queryKey: footballKeys.standings(leagueId, season),
-    queryFn: () => StatsService.fetchStandings(leagueId, season),
-    enabled: season > 0,
+    queryKey: footballKeys.standings(leagueId, resolvedSeason),
+    queryFn: () => StatsService.fetchStandings(leagueId, resolvedSeason),
+    enabled: (options?.enabled ?? true) && resolvedSeason > 0 && leagueId > 0,
     staleTime: 12 * H,
     select: (data) => data?.[0]?.league?.standings?.flat() ?? [],
   });

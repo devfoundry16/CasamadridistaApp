@@ -56,24 +56,6 @@ function config(apiKey: string, lang: string): string {
     ></api-sports-widget>`;
 }
 
-export function standingsWidgetHtml(opts: {
-  apiKey: string;
-  leagueId: number;
-  season: number;
-  lang: string;
-}): string {
-  return shell(
-    opts.lang,
-    `${config(opts.apiKey, opts.lang)}
-
-    <api-sports-widget
-      data-type="standings"
-      data-league="${opts.leagueId}"
-      data-season="${opts.season}"
-    ></api-sports-widget>`,
-  );
-}
-
 export function teamStatisticsWidgetHtml(opts: {
   apiKey: string;
   teamId: number;

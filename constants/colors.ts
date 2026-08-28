@@ -51,6 +51,25 @@ const Colors = {
     info: "#0033A0",
   },
 
+  // Standings qualification-zone rails.
+  //
+  // These are the conventional competition colours every football app uses, so
+  // they read as data rather than decoration. Three of them are the status
+  // tokens above; only `europa` is new — status.info (#0033A0) as a 3pt rail on
+  // the #2F2F2F card is roughly 1.15:1, i.e. invisible.
+  //
+  // `conference` is amber rather than a second blue on purpose: at 3pt wide two
+  // blues are indistinguishable from each other.
+  zone: {
+    champions: "#10B981", // == status.success
+    championsQual: "#34D399",
+    europa: "#3B82F6",
+    conference: "#F59E0B", // == status.warning
+    relegationPlayoff: "#F97316",
+    relegation: "#EF4444", // == status.error
+    neutral: "#4A4A4A", // == border.light — unrecognised description
+  },
+
   // UI Element Colors
   ui: {
     tabIconDefault: "#9CA3AF",
