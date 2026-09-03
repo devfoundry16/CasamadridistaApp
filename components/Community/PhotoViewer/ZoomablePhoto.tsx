@@ -13,8 +13,8 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import type { PostMedia } from '@/services/FeedService';
-import { fitInBox, fullResUri, previewUri } from '@/utils/media';
+import type { ViewerPhoto } from '@/types/media/viewerPhoto';
+import { fitInBox } from '@/utils/media';
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -85,12 +85,12 @@ function timedReset(
 }
 
 type Props = {
-  media: PostMedia;
+  photo: ViewerPhoto;
   index: number;
   ctx: ViewerContext;
 };
 
-export default function ZoomablePhoto({ media, index, ctx }: Props) {
+export default function ZoomablePhoto({ photo, index, ctx }: Props) {
   // Destructure so worklets capture individual shared values instead of the
   // whole context object (smaller shareable clones, no captured JS methods).
   const { pageWidth, pageHeight, stride, count, pagerX, activeIndex, dragY, backdrop } = ctx;
@@ -110,7 +110,7 @@ export default function ZoomablePhoto({ media, index, ctx }: Props) {
 
   // Displayed (contain-fitted) size at scale 1 — the basis of every pan bound.
   const [boxSize, setBoxSize] = useState(() =>
-    fitInBox(media.width, media.height, pageWidth, pageHeight),
+    fitInBox(photo.width, photo.height, pageWidth, pageHeight),
   );
   const dispW = useSharedValue(boxSize.width);
   const dispH = useSharedValue(boxSize.height);
@@ -121,15 +121,15 @@ export default function ZoomablePhoto({ media, index, ctx }: Props) {
     dispH.value = boxSize.height;
   }, [boxSize.width, boxSize.height, dispW, dispH]);
 
-  // `PostMedia.width/height` are nullable; recover the intrinsic size from decode.
+  // Intrinsic size is optional on ViewerPhoto; recover it from decode.
   const handleLoad = useCallback(
     (event: ImageLoadEventData) => {
-      if (media.width && media.height) return;
+      if (photo.width && photo.height) return;
       const { width, height } = event.source ?? {};
       if (!width || !height) return;
       setBoxSize(fitInBox(width, height, pageWidth, pageHeight));
     },
-    [media.width, media.height, pageWidth, pageHeight],
+    [photo.width, photo.height, pageWidth, pageHeight],
   );
 
   // Leaving a page resets its zoom, so returning to it later starts clean.
@@ -357,9 +357,9 @@ export default function ZoomablePhoto({ media, index, ctx }: Props) {
     };
   });
 
-  const uri = fullResUri(media);
-  const preview = previewUri(media);
-  const placeholder = media.blurhash ?? (preview && preview !== uri ? { uri: preview } : undefined);
+  const uri = photo.uri;
+  const preview = photo.previewUri ?? null;
+  const placeholder = photo.blurhash ?? (preview && preview !== uri ? { uri: preview } : undefined);
 
   return (
     <GestureDetector gesture={gesture}>
@@ -375,7 +375,7 @@ export default function ZoomablePhoto({ media, index, ctx }: Props) {
             cachePolicy="memory-disk"
             priority="high"
             allowDownscaling={false} // critical: keeps pixels sharp at 4× zoom
-            recyclingKey={media.id}
+            recyclingKey={photo.id}
             onLoad={handleLoad}
             accessibilityIgnoresInvertColors
           />

@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import CustomWebView from "@/components/CustomWebView";
+import ExclusiveFromMadridModule from "@/components/Home/ExclusiveFromMadridModule";
 import StrengthSection from "@/components/Home/StrengthSection";
 import OffSeasonMatchCard from "@/components/Home/OffSeasonMatchCard";
 import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
@@ -299,6 +300,10 @@ export default function HomeScreen() {
           variant={carouselVariant}
         />
       </View>
+
+      {/* Casa Media. Renders nothing when there is no exclusive content, so
+          Home never grows a permanently empty block. */}
+      <ExclusiveFromMadridModule />
 
       <CustomWebView
         size={700}

@@ -6,6 +6,7 @@ import PostHeader from './PostHeader';
 import PostBody from './PostBody';
 import PostMediaPreview from './PostMediaPreview';
 import PostActions from './PostActions';
+import MediaTeaserCard from './MediaTeaserCard';
 import Colors from '@/constants/colors';
 import Touchable from '@/components/Touchable';
 
@@ -24,7 +25,11 @@ function PostCard({ post }: Props) {
     <Touchable onPress={goToPost} style={({ pressed }) => [styles.container, { opacity: pressed ? 0.85 : 1 }]}>
       <PostHeader post={post} onAuthorPress={goToPost} />
       <PostBody post={post} truncate />
-      {post.media?.length > 0 && <PostMediaPreview media={post.media} />}
+      {post.kind === 'media_teaser' && post.media_item ? (
+        <MediaTeaserCard item={post.media_item} />
+      ) : (
+        post.media?.length > 0 && <PostMediaPreview media={post.media} />
+      )}
       <PostActions post={post} onCommentPress={goToPost} />
     </Touchable>
   );

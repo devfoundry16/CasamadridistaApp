@@ -1,50 +1,73 @@
-import React, { useCallback, useState } from 'react';
-import { FlatList, View, Text, ActivityIndicator } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { FlatList, View, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import CommentService, { type Comment } from '@/services/CommentService';
+import { Text } from '@/components/Text';
+import type { Comment } from '@/services/CommentService';
+import {
+  commentsQueryKey,
+  createComment,
+  getComments,
+  type CommentTarget,
+} from '@/services/MediaCommentsAdapter';
 import CommentRow from './CommentRow';
 import CommentInput from './CommentInput';
 import Colors from '@/constants/colors';
 
 interface Props {
-  postId: string;
+  /**
+   * What the comments hang off. Posts and Casa Media items live in separate
+   * tables behind separate endpoints (see MediaCommentsAdapter), so the target
+   * is part of the identity of the list — and of its query key.
+   */
+  target: CommentTarget;
 }
 
-export default function CommentList({ postId }: Props) {
+export default function CommentList({ target }: Props) {
   const { t } = useTranslation();
-  const queryClient               = useQueryClient();
-  const [replyTo, setReplyTo]     = useState<Comment | null>(null);
+  const queryClient = useQueryClient();
+  const [replyTo, setReplyTo] = useState<Comment | null>(null);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = useInfiniteQuery({
-    queryKey: ['comments', postId],
-    queryFn: ({ pageParam }) => CommentService.getComments(postId, pageParam ?? null),
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    staleTime: 20_000,
-  });
+  const queryKey = useMemo(() => commentsQueryKey(target), [target]);
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey,
+      queryFn: ({ pageParam }) => getComments(target, pageParam ?? null),
+      initialPageParam: null as string | null,
+      getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+      staleTime: 20_000,
+      enabled: !!target.id,
+    });
 
   const comments = data?.pages.flatMap((p) => p.comments) ?? [];
+  // The server answers a gated item with `{ items: [], nextCursor: null,
+  // locked: true }`. Without this the screen reads as "be the first to comment"
+  // on a thread the viewer is not allowed to see or post to.
+  const locked = !!data?.pages[0]?.locked;
 
-  const handleSubmit = useCallback(async (body: string) => {
-    await CommentService.createComment(postId, body, replyTo?.id);
-    setReplyTo(null);
-    queryClient.invalidateQueries({ queryKey: ['comments', postId] });
-  }, [postId, replyTo, queryClient]);
+  const handleSubmit = useCallback(
+    async (body: string) => {
+      await createComment(target, body, replyTo?.id);
+      setReplyTo(null);
+      queryClient.invalidateQueries({ queryKey });
+    },
+    [target, replyTo, queryClient, queryKey],
+  );
 
-  const renderItem = useCallback(({ item }: { item: Comment }) => (
-    <CommentRow comment={item} onReply={setReplyTo} />
-  ), []);
+  const renderItem = useCallback(
+    ({ item }: { item: Comment }) => (
+      <CommentRow comment={item} targetKind={target.kind} onReply={setReplyTo} />
+    ),
+    [target.kind],
+  );
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center" style={{ backgroundColor: Colors.background.dark }}>
+      <View
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: Colors.background.dark }}
+      >
         <ActivityIndicator color={Colors.darkGold} />
       </View>
     );
@@ -56,11 +79,16 @@ export default function CommentList({ postId }: Props) {
         data={comments}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        onEndReached={() => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); }}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+        }}
         onEndReachedThreshold={0.5}
+        keyboardShouldPersistTaps="handled"
         ListEmptyComponent={
-          <View className="py-10 items-center">
-            <Text style={{ color: Colors.text.tertiary }}>{t('community.noComments')}</Text>
+          <View className="py-10 items-center px-8">
+            <Text style={{ color: Colors.text.tertiary, textAlign: 'center' }}>
+              {locked ? t('casaMedia.commentsLocked') : t('community.noComments')}
+            </Text>
           </View>
         }
         ListFooterComponent={
@@ -71,12 +99,15 @@ export default function CommentList({ postId }: Props) {
           ) : null
         }
       />
-      <CommentInput
-        postId={postId}
-        replyTo={replyTo?.id}
-        onSubmit={handleSubmit}
-        placeholder={replyTo ? t('community.replyingTo', { name: replyTo.author?.first_name ?? t('community.defaultUser') }) : undefined}
-      />
+      {/* Posting is refused server-side on a locked item; don't offer the box. */}
+      {locked ? null : (
+        <CommentInput
+          replyTo={replyTo?.id}
+          replyToName={replyTo?.author?.first_name ?? null}
+          onSubmit={handleSubmit}
+          onCancelReply={() => setReplyTo(null)}
+        />
+      )}
     </View>
   );
 }

@@ -10,6 +10,7 @@ import {
   Crown,
   Globe,
   Info,
+  LayoutGrid,
   Mail,
   MoreVertical,
 } from "lucide-react-native";
@@ -23,6 +24,9 @@ function HeaderMenu() {
   const [menuVisible, setMenuVisible] = useState(false);
 
   const menuItems = [
+    // Formation lost its tab slot to Casa Media (see app/(tabs)/_layout.tsx);
+    // the route still exists, it is just reached from here now.
+    { labelKey: "nav.formation", icon: LayoutGrid, route: "/create-formation" },
     { labelKey: "nav.fanClubs", icon: Globe, route: "/fan-clubs" },
     { labelKey: "nav.aboutUs", icon: Info, route: "/about" },
     { labelKey: "nav.memberships", icon: Crown, route: "/memberships" },

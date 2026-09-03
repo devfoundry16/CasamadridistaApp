@@ -279,6 +279,12 @@ export default function TeamStandingsTab() {
   }
 
   if (rows.length === 0) {
+    // A routine state now, not a failure: the newest season is offered from the
+    // day it appears, and a table only publishes once the competition's first
+    // matches are drawn. Point at the season picker only when there is actually
+    // an older season behind this one to fall back to.
+    const hasEarlierSeason = seasons.some((year) => year < (effective?.season ?? 0));
+
     return (
       <Screen>
         {header}
@@ -288,6 +294,7 @@ export default function TeamStandingsTab() {
               ? t("team.emptyStandingsFor", { competition: competition.name })
               : t("team.emptyStandings")
           }
+          body={hasEarlierSeason ? t("team.emptyStandingsBody") : undefined}
         />
       </Screen>
     );

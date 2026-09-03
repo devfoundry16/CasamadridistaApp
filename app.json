@@ -14,15 +14,20 @@
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSCameraUsageDescription": "Casa Madridista uses the camera so you can take photos for your profile and community posts.",
-        "NSPhotoLibraryUsageDescription": "Casa Madridista accesses your photos so you can choose images and videos for your profile and posts.",
-        "NSPhotoLibraryAddUsageDescription": "Casa Madridista saves photos you download from the community feed to your device photo library."
+        "NSCameraUsageDescription": "Casa Madridista uses the camera so you can take photos for your profile, community posts and Casa Media match-day reports.",
+        "NSPhotoLibraryUsageDescription": "Casa Madridista accesses your photos so you can choose images and videos for your profile, posts and Casa Media uploads.",
+        "NSPhotoLibraryAddUsageDescription": "Casa Madridista saves photos you download from the community feed to your device photo library.",
+        "NSMicrophoneUsageDescription": "Casa Madridista uses the microphone to record audio with videos you capture for Casa Media match-day reports."
       },
       "icon": {
         "light": "./assets/icons/ios-light.png",
         "dark": "./assets/icons/ios-dark.png",
         "tinted": "./assets/icons/ios-tinted.png"
-      }
+      },
+      "associatedDomains": [
+        "applinks:casamadridista.app",
+        "applinks:www.casamadridista.app"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -31,7 +36,39 @@
         "backgroundImage": "./assets/icons/adaptive-icon.png",
         "monochromeImage": "./assets/icons/adaptive-icon.png"
       },
-      "package": "com.anonymous.casamadridistaApp"
+      "package": "com.anonymous.casamadridistaApp",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "casamadridista.app",
+              "pathPrefix": "/m"
+            },
+            {
+              "scheme": "https",
+              "host": "casamadridista.app",
+              "pathPrefix": "/match"
+            },
+            {
+              "scheme": "https",
+              "host": "www.casamadridista.app",
+              "pathPrefix": "/m"
+            },
+            {
+              "scheme": "https",
+              "host": "www.casamadridista.app",
+              "pathPrefix": "/match"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "output": "static",
@@ -64,9 +101,20 @@
           "savePhotosPermission": "Casa Madridista saves photos you download from the community feed to your device photo library.",
           "isAccessMediaLocationEnabled": false,
           "preventAutomaticLimitedAccessAlert": true,
-          "granularPermissions": ["photo"]
+          "granularPermissions": [
+            "photo"
+          ]
         }
-      ]
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icons/adaptive-icon.png",
+          "color": "#BC9045",
+          "defaultChannel": "casa-media"
+        }
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

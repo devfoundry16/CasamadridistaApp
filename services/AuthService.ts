@@ -73,7 +73,13 @@ class AuthServiceClass {
     password: string,
     firstName?: string,
     lastName?: string,
-    phone?: string
+    phone?: string,
+    /**
+     * Optional Casa Media signup attribution ({ anon_id, item_id, campaign_id,
+     * source }) — see utils/finishAuthRedirect.ts. The server records it against
+     * the new account; omitting it is always safe.
+     */
+    attribution?: Record<string, string>
   ): Promise<User> {
     try {
       const response = await axios.post(`${API_BASE_URL}auth/register`, {
@@ -82,8 +88,21 @@ class AuthServiceClass {
         firstName,
         lastName,
         phone,
+        ...(attribution ? { attribution } : {}),
       });
-      return response.data.user;
+
+      const { user, access_token, refresh_token } = response.data ?? {};
+
+      // Some backends hand back a session with the new account, some require a
+      // separate sign-in (or email confirmation first). When tokens ARE present,
+      // adopt them here so the caller does not have to log in a second time —
+      // `isAuthenticated()` is then true and the returnTo redirect can proceed.
+      if (user && access_token && refresh_token) {
+        await this.storeAuthData(access_token, refresh_token, user);
+        this.resetSessionState();
+      }
+
+      return user;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Registration failed');
     }

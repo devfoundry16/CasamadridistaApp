@@ -18,13 +18,26 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Check, Download, Share2, X } from 'lucide-react-native';
 import PostService from '@/services/PostService';
-import type { FeedPage, Post } from '@/services/FeedService';
+import type { FeedPage, Post, PostMedia } from '@/services/FeedService';
+import type { ViewerPhoto } from '@/types/media/viewerPhoto';
 import PhotoPager from './PhotoPager';
 import { useDownloadMedia } from '@/hooks/useDownloadMedia';
-import { fullResUri, isViewablePhoto } from '@/utils/media';
+import { fullResUri, isViewablePhoto, previewUri } from '@/utils/media';
 import Colors from '@/constants/colors';
 
 type Props = { postId: string; initialMediaId?: string };
+
+/** The viewer speaks ViewerPhoto; the feed speaks PostMedia. Adapt here. */
+function toViewerPhoto(media: PostMedia): ViewerPhoto {
+  return {
+    id: media.id,
+    uri: fullResUri(media),
+    previewUri: previewUri(media),
+    blurhash: media.blurhash,
+    width: media.width,
+    height: media.height,
+  };
+}
 
 /**
  * Seed the viewer from whatever is already cached so the photo is on screen on
@@ -63,7 +76,10 @@ export default function PhotoViewerScreen({ postId, initialMediaId }: Props) {
   // RTL: mirror the strip so photo #1 sits on the right and "next" is to the
   // left, matching Arabic reading order. All pager math below stays LTR.
   const isRTL = I18nManager.isRTL;
-  const visualPhotos = useMemo(() => (isRTL ? [...photos].reverse() : photos), [photos, isRTL]);
+  const visualPhotos = useMemo(() => {
+    const mapped = photos.map(toViewerPhoto);
+    return isRTL ? mapped.reverse() : mapped;
+  }, [photos, isRTL]);
 
   const initialIndex = useMemo(() => {
     if (!visualPhotos.length) return 0;
@@ -94,7 +110,7 @@ export default function PhotoViewerScreen({ postId, initialMediaId }: Props) {
   // Warm the neighbours so paging is instant.
   useEffect(() => {
     const urls = [visualPhotos[index - 1], visualPhotos[index + 1]]
-      .map((m) => (m ? fullResUri(m) : null))
+      .map((m) => m?.uri ?? null)
       .filter((u): u is string => !!u);
     if (urls.length) Image.prefetch(urls, { cachePolicy: 'memory-disk' });
   }, [index, visualPhotos]);
@@ -120,7 +136,7 @@ export default function PhotoViewerScreen({ postId, initialMediaId }: Props) {
 
   const handleSave = useCallback(() => {
     if (!current) return;
-    const uri = fullResUri(current);
+    const uri = current.uri;
     if (!uri) {
       Alert.alert(t('common.error'), t('community.photoUnavailable'));
       return;
@@ -130,7 +146,7 @@ export default function PhotoViewerScreen({ postId, initialMediaId }: Props) {
 
   const handleShare = useCallback(() => {
     if (!current) return;
-    const uri = fullResUri(current);
+    const uri = current.uri;
     if (uri) void save(uri, current, { shareOnly: true });
   }, [current, save]);
 

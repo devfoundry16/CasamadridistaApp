@@ -38,6 +38,8 @@ export const useUser = () => {
       firstName?: string;
       lastName?: string;
       phone?: string;
+      /** Casa Media signup attribution; see utils/finishAuthRedirect.ts. */
+      attribution?: Record<string, string>;
     }) => {
       return dispatch(registerUser(userData));
     },

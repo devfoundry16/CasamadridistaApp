@@ -7,8 +7,13 @@ import * as Haptics from 'expo-haptics';
 // NEW FileSystem API. `expo-file-system/legacy` is the deprecated one and its
 // top-level helpers throw at runtime — do not mix the two in this module.
 import { File, Paths } from 'expo-file-system';
-import type { PostMedia } from '@/services/FeedService';
 import { downloadFileName } from '@/utils/media';
+
+/**
+ * Everything this hook needs from a media row. Community posts and Casa Media
+ * assets both satisfy it, so one download/share path serves both.
+ */
+export type DownloadableMedia = { id: string };
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 type PermissionOutcome = 'granted' | 'denied' | 'blocked';
@@ -69,7 +74,7 @@ export function useDownloadMedia() {
   }, []);
 
   /** Download to cache, hand to the share sheet, then delete the temp file. */
-  const shareFile = useCallback(async (url: string, media: PostMedia) => {
+  const shareFile = useCallback(async (url: string, media: DownloadableMedia) => {
     let file: DownloadedFile | null = null;
     try {
       if (!(await Sharing.isAvailableAsync())) return;
@@ -94,7 +99,7 @@ export function useDownloadMedia() {
   }, []);
 
   const promptPermanentlyDenied = useCallback(
-    (url: string, media: PostMedia) => {
+    (url: string, media: DownloadableMedia) => {
       Alert.alert(
         t('community.photoPermissionTitle'),
         t('community.photoPermissionBlockedMessage'),
@@ -119,7 +124,7 @@ export function useDownloadMedia() {
   );
 
   const save = useCallback(
-    async (url: string, media: PostMedia, options?: { shareOnly?: boolean }) => {
+    async (url: string, media: DownloadableMedia, options?: { shareOnly?: boolean }) => {
       if (inFlight.current) return; // guard double-taps
       inFlight.current = true;
 

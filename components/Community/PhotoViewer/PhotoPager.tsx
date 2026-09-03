@@ -5,13 +5,13 @@ import Animated, {
   useSharedValue,
   type SharedValue,
 } from 'react-native-reanimated';
-import type { PostMedia } from '@/services/FeedService';
+import type { ViewerPhoto } from '@/types/media/viewerPhoto';
 import ZoomablePhoto, { type ViewerContext } from './ZoomablePhoto';
 
 const GAP = 24; // dead space between pages so neighbours never peek during zoom
 
 type Props = {
-  photos: PostMedia[]; // already in VISUAL order (reversed under RTL)
+  photos: ViewerPhoto[]; // already in VISUAL order (reversed under RTL)
   initialIndex: number; // visual index
   pageWidth: number;
   pageHeight: number;
@@ -91,9 +91,9 @@ export default function PhotoPager({
         stripStyle,
       ]}
     >
-      {photos.map((media, i) => (
+      {photos.map((photo, i) => (
         <View
-          key={media.id}
+          key={photo.id}
           // `left` is a physical edge in Yoga and is NOT flipped by RTL
           // (only `start`/`end` are), so this is deterministic in both locales.
           style={{
@@ -104,7 +104,7 @@ export default function PhotoPager({
             height: pageHeight,
           }}
         >
-          <ZoomablePhoto media={media} index={i} ctx={ctx} />
+          <ZoomablePhoto photo={photo} index={i} ctx={ctx} />
         </View>
       ))}
     </Animated.View>

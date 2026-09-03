@@ -1,7 +1,9 @@
 // store/thunks/userThunks.ts
 import AuthService from "@/services/AuthService";
+import PushService from "@/services/PushService";
 import i18n from "@/i18n";
 import { PaymentMethod } from "@/types/user/profile";
+import { resetAuthRedirectClaim } from "@/utils/authRedirectLatch";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import * as FileSystem from "expo-file-system/legacy";
@@ -84,6 +86,8 @@ export const registerUser = createAsyncThunk(
       firstName?: string;
       lastName?: string;
       phone?: string;
+      /** Casa Media signup attribution; see utils/finishAuthRedirect.ts. */
+      attribution?: Record<string, string>;
     },
     { dispatch }
   ) => {
@@ -94,9 +98,45 @@ export const registerUser = createAsyncThunk(
         userData.password,
         userData.firstName,
         userData.lastName,
-        userData.phone
+        userData.phone,
+        userData.attribution
       );
-      Alert.alert(i18n.t("common.success"), i18n.t("auth.registrationSuccess"));
+
+      // Registration alone never produced a session: AuthService.register stored
+      // no tokens and this thunk never dispatched setUser, so a user who signed
+      // up from a locked media item was left on the form and their pending
+      // returnTo was never consumed. Adopt a session if the backend issued one
+      // with the account, otherwise sign in with the same credentials — either
+      // way `user` becomes non-null and AuthForm's onSuccess fires.
+      //
+      // `AuthService.login` directly rather than the `loginUser` thunk: that
+      // thunk pops its own "login failed" alert, and a failure here is the
+      // expected path when the project requires email confirmation. One message
+      // that says what to do next beats two that contradict each other.
+      let signedIn = false;
+      if (response && (await AuthService.isAuthenticated())) {
+        dispatch(setUser(response));
+        signedIn = true;
+      } else {
+        try {
+          dispatch(setUser(await AuthService.login(userData.email, userData.password)));
+          signedIn = true;
+        } catch {
+          signedIn = false;
+        }
+      }
+
+      // Alert.alert does not block, and the redirect the caller runs must not
+      // wait on the user dismissing it.
+      if (signedIn) {
+        Alert.alert(i18n.t("common.success"), i18n.t("auth.registrationSuccess"));
+      } else {
+        Alert.alert(
+          i18n.t("auth.registrationConfirmTitle"),
+          i18n.t("auth.registrationConfirmBody")
+        );
+      }
+
       return response;
     } catch (error: any) {
       Alert.alert(i18n.t("alerts.registrationError"), error.message);
@@ -234,8 +274,17 @@ export const loadUserData = createAsyncThunk(
 export const logoutUser = createAsyncThunk(
   "user/logout",
   async (_, { dispatch }) => {
+    // MUST run first: unregistering needs the auth token that AuthService.logout
+    // is about to delete, otherwise the request is anonymous and the device row
+    // stays bound to the account that just signed out.
+    await PushService.unregister();
     await AuthService.logout();
     await AsyncStorage.removeItem("paymentMethods");
+    // The redirect latch stays claimed for the whole auth episode. Without this
+    // the *next* sign-in in the same app session finds it already claimed and
+    // silently skips finishAuthRedirect — the user lands on the account tab
+    // instead of the media item they were trying to open.
+    resetAuthRedirectClaim();
     dispatch(clearUser());
   }
 );
@@ -277,8 +326,10 @@ export const deletePaymentMethod = createAsyncThunk(
 export const deleteUser = createAsyncThunk(
   "user/deleteUser",
   async (_: any, { dispatch }) => {
+    await PushService.unregister();
     await AuthService.deleteAccount();
     await AsyncStorage.removeItem("paymentMethods");
+    resetAuthRedirectClaim();
     dispatch(clearUser());
   }
 );

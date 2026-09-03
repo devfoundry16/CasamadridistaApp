@@ -32,8 +32,13 @@ export function extensionFromUrl(url: string, fallback = 'jpg'): string {
   return ext && SAFE_EXTENSIONS.includes(ext) ? ext : fallback;
 }
 
-/** iOS refuses to import a file with no/unknown extension — always append one. */
-export function downloadFileName(media: PostMedia, url: string, stamp: number): string {
+/**
+ * iOS refuses to import a file with no/unknown extension — always append one.
+ *
+ * Takes `{ id }` rather than a full `PostMedia` so Casa Media assets (a
+ * different table) can be downloaded by the same hook.
+ */
+export function downloadFileName(media: { id: string }, url: string, stamp: number): string {
   const id = media.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 24) || 'photo';
   return `casamadridista-${id}-${stamp}.${extensionFromUrl(url)}`;
 }

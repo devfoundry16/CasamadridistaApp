@@ -19,7 +19,11 @@ export interface CommentInputHandle {
 }
 
 interface Props {
-  postId: string;
+  /**
+   * Optional and unused by this component — it renders a draft, it does not own
+   * the target. Kept so existing call sites read naturally.
+   */
+  postId?: string;
   /** id of the comment being replied to, or null/undefined for a top-level comment */
   replyTo?: string | null;
   /** display name shown in the "Replying to …" banner */

@@ -1,7 +1,7 @@
+import AuthForm from "@/components/Auth/AuthForm";
 import { Spinner } from "@/components/Spinner";
 import Colors from "@/constants/colors";
 import { useUser } from "@/hooks/useUser";
-import * as AppleAuthentication from "expo-apple-authentication";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import {
@@ -10,15 +10,11 @@ import {
   ChevronRight,
   Crown,
   Globe,
-  Lock,
   LogOut,
-  Mail,
-  Phone,
   Settings,
   User,
   Wallet,
 } from "lucide-react-native";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import { Text } from "@/components/Text";
@@ -29,7 +25,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -38,7 +33,7 @@ import CountryFlag from "react-native-country-flag";
 import { LANG_STORAGE_KEY } from "@/i18n";
 import axios from "axios";
 import { API_BASE_URL } from "@/config/supabase";
-import { LayoutDashboard, ShieldCheck } from "lucide-react-native";
+import { Clapperboard, LayoutDashboard, ShieldCheck } from "lucide-react-native";
 
 type Locale = "en-US" | "ar-SA";
 
@@ -50,10 +45,12 @@ const LOCALES: { lng: Locale; isoCode: string; labelKey: string }[] = [
 export default function AccountScreen() {
   const { user, updateAvatar, logout, isLoading } = useUser();
   const { t, i18n } = useTranslation();
-  const [isLogin, setIsLogin] = useState(true);
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isFanClubAdmin, setIsFanClubAdmin] = useState(false);
+  // Casa Media contributor grant. `mediaContributor` is null for everyone
+  // else; a manager gets the same area through `mediaManager`.
+  const [isContributor, setIsContributor] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -64,6 +61,9 @@ export default function AccountScreen() {
         .then(res => {
           setIsSuperAdmin(res.data.superAdmin ?? false);
           setIsFanClubAdmin(res.data.fanClubAdmin ?? false);
+          setIsContributor(
+            res.data.mediaContributor?.status === 'active' || res.data.mediaManager === true,
+          );
         })
         .catch(() => {});
     });
@@ -160,7 +160,9 @@ export default function AccountScreen() {
   };
 
   if (!user) {
-    return <AuthForm isLogin={isLogin} setIsLogin={setIsLogin} />;
+    // Extracted to components/Auth/AuthForm.tsx so the Casa Media auth gate can
+    // present the identical form in a modal (app/auth/login.tsx).
+    return <AuthForm />;
   }
 
   const userName = user.profile?.first_name || user.email?.split('@')[0] || t("account.user");
@@ -274,6 +276,18 @@ export default function AccountScreen() {
           </TouchableOpacity>
         )}
 
+        {isContributor && (
+          <TouchableOpacity
+            className="flex-row items-center bg-bg-card p-4 rounded-[25px] mb-3 gap-4 border border-rm-gold"
+            onPress={() => router.push('/contributor' as any)}
+          >
+            <Clapperboard size={24} color={Colors.darkGold} />
+            <View className="flex-1 flex-row justify-between items-center">
+              <Text className="text-base font-semibold text-text-primary">{t("contributor.title")}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity
           className="flex-row items-center bg-bg-light p-4 rounded-[25px] mb-3 gap-4 border border-status-error"
           onPress={() => {
@@ -345,219 +359,3 @@ export default function AccountScreen() {
     </ScrollView>
   );
 }
-
-function AuthForm({
-  isLogin,
-  setIsLogin,
-}: {
-  isLogin: boolean;
-  setIsLogin: (value: boolean) => void;
-}) {
-  const { login, register, signInWithGoogle, signInWithApple, isLoading } = useUser();
-  const { t } = useTranslation();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
-
-  const handleSubmit = async () => {
-    if (isLogin) {
-      if (!email || !password) {
-        Alert.alert(t("common.error"), t("account.pleaseFillAllFields"));
-        return;
-      }
-      login(email, password);
-    } else {
-      if (!email || !password || !firstName || !lastName) {
-        Alert.alert(t("common.error"), t("account.pleaseFillRequiredFields"));
-        return;
-      }
-      await register({
-        email,
-        password,
-        firstName,
-        lastName,
-        phone,
-      });
-    }
-  };
-  const handleGoogleSignIn = () => {
-    signInWithGoogle();
-  };
-
-  return (
-    <ScrollView className="flex-1 bg-bg-medium">
-      <View className="p-8 pt-12 pb-10 items-center">
-        <View
-          className="rounded-[22px] overflow-hidden mb-2"
-          style={{ width: 100, height: 100 }}
-        >
-          <Image
-            source={require("@/assets/icons/splash-icon-dark.png")}
-            style={{ width: 100, height: 100 }}
-            resizeMode="cover"
-          />
-        </View>
-        <Text className="text-[28px] font-bold text-white mb-2">
-          {isLogin ? t("auth.welcomeBack") : t("auth.createAccount")}
-        </Text>
-        <Text className="text-base text-text-secondary text-center">
-          {isLogin ? t("auth.signInSubtitle") : t("auth.joinSubtitle")}
-        </Text>
-      </View>
-
-      <View className="p-6">
-        {!isLogin && (
-          <>
-            <View className="mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">{t("auth.firstName")}</Text>
-              <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
-                <User size={18} color={Colors.textLight} />
-                <TextInput
-                  className="flex-1 py-4 pl-3 text-base text-white"
-                  value={firstName}
-                  onChangeText={setFirstName}
-                  placeholder={t("auth.enterFirstName")}
-                  placeholderTextColor={Colors.textLight}
-                />
-              </View>
-            </View>
-            <View className="mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">{t("auth.lastName")}</Text>
-              <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
-                <User size={18} color={Colors.textLight} />
-                <TextInput
-                  className="flex-1 py-4 pl-3 text-base text-white"
-                  value={lastName}
-                  onChangeText={setLastName}
-                  placeholder={t("auth.enterLastName")}
-                  placeholderTextColor={Colors.textLight}
-                />
-              </View>
-            </View>
-            <View className="mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">{t("auth.phone")}</Text>
-              <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
-                <Phone size={18} color={Colors.textLight} />
-                <TextInput
-                  className="flex-1 py-4 pl-3 text-base text-white"
-                  value={phone}
-                  onChangeText={setPhone}
-                  placeholder={t("auth.enterPhone")}
-                  placeholderTextColor={Colors.textLight}
-                  keyboardType="phone-pad"
-                />
-              </View>
-            </View>
-            <View className="mb-5">
-              <Text className="text-sm font-semibold text-white mb-2">{t("auth.emailAddress")}</Text>
-              <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
-                <Mail size={18} color={Colors.textLight} />
-                <TextInput
-                  className="flex-1 py-4 pl-3 text-base text-white"
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder={t("auth.enterEmail")}
-                  placeholderTextColor={Colors.textLight}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-            </View>
-          </>
-        )}
-        {isLogin && (
-          <View className="mb-5">
-            <Text className="text-sm font-semibold text-white mb-2">{t("auth.emailAddress")}</Text>
-            <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
-              <Mail size={18} color={Colors.textLight} />
-              <TextInput
-                className="flex-1 py-4 pl-3 text-base text-white"
-                value={email}
-                onChangeText={setEmail}
-                placeholder={t("auth.enterEmail")}
-                placeholderTextColor={Colors.textLight}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-          </View>
-        )}
-        <View className="mb-5">
-          <Text className="text-sm font-semibold text-white mb-2">{t("auth.password")}</Text>
-          <View className="bg-bg-light border border-border-light rounded-xl px-4 flex-row items-center">
-            <Lock size={18} color={Colors.textLight} />
-            <TextInput
-              className="flex-1 py-4 pl-3 text-base text-white"
-              value={password}
-              onChangeText={setPassword}
-              placeholder={t("auth.enterPassword")}
-              placeholderTextColor={Colors.textLight}
-              secureTextEntry
-            />
-          </View>
-          {isLogin && (
-            <TouchableOpacity
-              className="mt-2 self-end"
-              onPress={() => router.push("/auth/forgot-password")}
-            >
-              <Text className="text-sm text-rm-gold underline">{t("auth.forgotPasswordTitle")}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        {isLoading && <Spinner content={isLogin ? t("auth.signIn") : t("auth.signUp")} />}
-        {!isLoading && (
-          <>
-            <TouchableOpacity
-              className="bg-rm-gold p-4 rounded-[25px] items-center mt-2"
-              onPress={handleSubmit}
-            >
-              <Text className="text-base font-bold text-white">
-                {isLogin ? t("auth.login") : t("auth.register")}
-              </Text>
-            </TouchableOpacity>
-
-            {isLogin && (
-              <>
-                <View className="flex-row items-center my-6">
-                  <View className="flex-1 h-[1px] bg-border-light" />
-                  <Text className="mx-4 text-text-secondary text-sm">{t("common.or")}</Text>
-                  <View className="flex-1 h-[1px] bg-border-light" />
-                </View>
-
-                <TouchableOpacity
-                  className="bg-white p-4 rounded-[25px] items-center flex-row justify-center gap-3 border-2 border-border-light"
-                  onPress={handleGoogleSignIn}
-                >
-                  <FontAwesome name="google" size={24} color={Colors.text.dark} />
-                  <Text className="text-base font-bold text-text-dark">
-                    {t("auth.signInWithGoogle")}
-                  </Text>
-                </TouchableOpacity>
-
-                <AppleAuthentication.AppleAuthenticationButton
-                  buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                  buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                  cornerRadius={25}
-                  style={{ width: "100%", height: 52, marginTop: 12 }}
-                  onPress={() => signInWithApple()}
-                />
-              </>
-            )}
-          </>
-        )}
-
-        <TouchableOpacity
-          className="mt-4 items-center"
-          onPress={() => setIsLogin(!isLogin)}
-        >
-          <Text className="text-sm text-rm-gold underline">
-            {isLogin ? t("auth.noAccountRegister") : t("auth.haveAccountLogin")}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
-}
-

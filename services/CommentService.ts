@@ -22,6 +22,11 @@ export interface Comment {
 export interface CommentsPage {
   comments: Comment[];
   nextCursor: string | null;
+  /**
+   * Casa Media only: the item is gated, so the server returned an empty thread
+   * on purpose. Distinguishes "no comments yet" from "you cannot see them".
+   */
+  locked?: boolean;
 }
 
 class CommentServiceClass {

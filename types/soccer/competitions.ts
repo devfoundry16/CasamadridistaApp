@@ -7,11 +7,14 @@ export interface Competition {
   country: string | null;
   flag: string | null;
   /**
-   * Seasons that have a standings table, newest first.
+   * Seasons worth offering in the picker, newest first.
    *
-   * The backend has already filtered these on the API's per-season
-   * `coverage.standings`, so a competition only reaches the client when at
-   * least one of its seasons is readable. Knockout cups never appear.
+   * A competition only reaches the client at all when at least one of its
+   * recent seasons carries the API's `coverage.standings` flag, which is what
+   * keeps knockout cups out. Within a competition that qualifies, the CURRENT
+   * season is always listed even before its table publishes — so this is not a
+   * promise that every year here has rows, and the screen has an empty state
+   * for the year that doesn't yet.
    */
   seasons: number[];
 }

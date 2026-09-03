@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
+import type { MediaItem } from '@/types/media/casaMedia';
 
 export type FeedTab = 'for-you' | 'trending' | 'recent' | 'fan-clubs';
 
@@ -42,7 +43,11 @@ export interface Post {
   author_id: string;
   author_type: 'user' | 'fan_club';
   fan_club_id: string | null;
-  kind: 'text' | 'image' | 'video';
+  /**
+   * `media_teaser` is a Casa Media share posted into the feed. It carries
+   * `media_item` and is rendered by `PostCard/MediaTeaserCard`, never inline.
+   */
+  kind: 'text' | 'image' | 'video' | 'media_teaser';
   title: string | null;
   body: string | null;
   language: string;
@@ -64,6 +69,8 @@ export interface Post {
   tagged_fan_club: PostFanClub | null;
   media: PostMedia[];
   liked_by_me: boolean;
+  /** Only present when `kind === 'media_teaser'`. */
+  media_item?: MediaItem | null;
 }
 
 export interface FeedPage {

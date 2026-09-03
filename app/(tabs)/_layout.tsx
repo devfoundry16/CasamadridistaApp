@@ -1,10 +1,11 @@
-import HeaderMenu from "@/components/HeaderMenu";
+import HeaderRight from "@/components/HeaderRight";
 import Colors from "@/constants/colors";
 import { Tabs } from "expo-router";
 import { useFont } from "@/contexts/FontContext";
 import { useEnvironment } from "@/hooks/useEnvironment";
 import { useUser } from "@/hooks/useUser";
 import {
+  Clapperboard,
   Gamepad2,
   Home,
   LayoutGrid,
@@ -56,7 +57,7 @@ export default function TabLayout() {
           height: 120,
         },
         headerTintColor: Colors.textWhite,
-        headerRight: () => <HeaderMenu />,
+        headerRight: () => <HeaderRight />,
       }}
     >
       <Tabs.Screen
@@ -72,6 +73,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="media"
+        options={{
+          title: t("nav.casaMedia"),
+          headerTitle: t("nav.casaMedia"),
+          headerTitleAlign: "center",
+          headerTitleStyle: {
+            ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
+          },
+          tabBarIcon: ({ color, size }) => (
+            <Clapperboard size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="create-formation"
         options={{
           title: t("nav.formation"),
@@ -79,6 +94,13 @@ export default function TabLayout() {
           headerTitleAlign: "center",
           headerTitleStyle: {
             ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
+          },
+          // Six visible tabs is the ceiling before the labels truncate, and
+          // Casa Media earns the slot. Formation moves into the header overflow
+          // menu (components/HeaderMenu.tsx) — same `display: 'none'` trick the
+          // shop tab already uses to stay routable but out of the bar.
+          tabBarItemStyle: {
+            display: "none",
           },
           tabBarIcon: ({ color, size }) => (
             <LayoutGrid size={size} color={color} />

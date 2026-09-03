@@ -1,6 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import "@/i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import MediaAuthSync from "@/components/Auth/MediaAuthSync";
+import { useNotificationRouting } from "@/hooks/useNotificationRouting";
+import { usePushRegistration } from "@/hooks/usePushRegistration";
+import AnalyticsService from "@/services/AnalyticsService";
+import UploadManager from "@/services/upload/UploadManager";
 import { FontProvider, useFont } from "@/contexts/FontContext";
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
@@ -249,6 +254,99 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="auth/login"
+          options={{
+            headerShown: false,
+            // A gate, not a destination: it slides up over whatever the user was
+            // looking at and returns them to it (or to their pending returnTo).
+            presentation: "modal",
+          }}
+        />
+        <Stack.Screen
+          name="media/item/[id]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="media/viewer/[id]"
+          options={{
+            headerShown: false,
+            // Copied from community/photo/[postId] — see the comment there for
+            // why presentation must be declared here rather than in-screen.
+            presentation: "transparentModal",
+            animation: "fade",
+            animationDuration: 200,
+            contentStyle: { backgroundColor: "transparent" },
+            gestureEnabled: false, // our own swipe-down owns dismissal
+            statusBarStyle: "light",
+            navigationBarColor: "#000000",
+            freezeOnBlur: true,
+          }}
+        />
+        <Stack.Screen
+          name="media/story/[groupId]"
+          options={{
+            headerShown: false,
+            presentation: "fullScreenModal",
+            animation: "fade",
+            statusBarStyle: "light",
+            navigationBarColor: "#000000",
+          }}
+        />
+        <Stack.Screen
+          name="media/now"
+          options={{ title: t("casaMedia.fromMadridNow"), ...options }}
+        />
+        <Stack.Screen
+          name="media/list/[collection]"
+          options={{ ...options }}
+        />
+        <Stack.Screen
+          name="media/archive"
+          options={{ title: t("casaMedia.archive"), ...options }}
+        />
+        <Stack.Screen
+          name="media/search"
+          options={{ title: t("casaMedia.search"), ...options }}
+        />
+        <Stack.Screen
+          name="media/comments/[id]"
+          options={{ title: t("casaMedia.comments"), ...options }}
+        />
+        <Stack.Screen
+          name="m/[id]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="notifications/index"
+          options={{ title: t("notifications.title"), ...options }}
+        />
+        {/* Contributor area (Milestone E). Headers on, because these are
+            editorial screens reached from Account, not immersive media. */}
+        <Stack.Screen
+          name="contributor/index"
+          options={{ title: t("nav.contributor"), ...options }}
+        />
+        <Stack.Screen
+          name="contributor/quick-post"
+          options={{ title: t("nav.quickPost"), ...options }}
+        />
+        <Stack.Screen
+          name="contributor/create"
+          options={{ title: t("nav.contributorCreate"), ...options }}
+        />
+        <Stack.Screen
+          name="contributor/my-content"
+          options={{ title: t("nav.contributorMyContent"), ...options }}
+        />
+        <Stack.Screen
+          name="contributor/uploads"
+          options={{ title: t("nav.contributorUploads"), ...options }}
+        />
+        <Stack.Screen
+          name="contributor/stats/[id]"
+          options={{ title: t("nav.contributorStats"), ...options }}
+        />
+        <Stack.Screen
           name="admin/index"
           options={{ headerShown: false }}
         />
@@ -306,12 +404,24 @@ function RootLayoutInner() {
   const { loadEnvironment } = useEnvironment();
   usePasswordResetDeeplink();
   useAuthCallbackDeeplink();
+  usePushRegistration();
+  // Must be inside the router tree: it waits for useRootNavigationState().key
+  // before navigating, otherwise a cold-start push tap is silently dropped.
+  useNotificationRouting();
   const [fontsLoaded] = useFonts({
     Cairo_400Regular,
     Cairo_700Bold,
   });
   useEffect(() => {
     loadEnvironment();
+    AnalyticsService.start();
+    // Rehydrates the persisted contributor upload queue and resumes anything
+    // that was in flight when the app was last killed. Idempotent.
+    void UploadManager.start();
+    return () => {
+      AnalyticsService.stop();
+      UploadManager.stop();
+    };
   }, []);
   if (!fontsLoaded) {
     return null;
@@ -323,6 +433,8 @@ function RootLayoutInner() {
       urlScheme="your-url-scheme" // required for 3D Secure and bank redirects
     >
       <DataInitializer />
+      {/* Drops cached Casa Media teasers when the signed-in user changes. */}
+      <MediaAuthSync />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={{ flex: 1, direction: I18nManager.isRTL ? "rtl" : "ltr" }}>
           <FontProvider>

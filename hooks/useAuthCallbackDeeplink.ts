@@ -3,8 +3,8 @@ import AuthService, { type User } from "@/services/AuthService";
 import { setUser } from "@/store/slices/userSlice";
 import { store } from "@/store/store";
 import axios from "axios";
-import { router } from "expo-router";
 import { useEffect, useRef } from "react";
+import { finishAuthRedirect } from "@/utils/finishAuthRedirect";
 import { Linking } from "react-native";
 
 const AUTH_CALLBACK_PATH = "auth/callback";
@@ -80,14 +80,19 @@ async function tryHandleAuthCallbackUrl(url: string | null): Promise<boolean> {
     user
   );
   store.dispatch(setUser(user));
-  router.replace("/(tabs)/account");
+  // Shared with the login modal and Apple sign-in: consume the pending
+  // returnTo (which survived the browser round-trip in AsyncStorage), post the
+  // signup attribution, then land the user where they were headed. Falls back
+  // to the account tab, which is the historical behaviour.
+  await finishAuthRedirect();
   return true;
 }
 
 /**
  * Listens for OAuth callback deeplink (e.g. Google sign-in).
  * When the app opens with casamadridistaapp://auth/callback#access_token=...&refresh_token=...,
- * parses URL, sets Supabase session, fetches profile (or builds from session), stores auth and updates Redux, then navigates to account.
+ * parses URL, sets Supabase session, fetches profile (or builds from session), stores auth and updates Redux,
+ * then hands off to finishAuthRedirect (pending returnTo, else the account tab).
  */
 export function useAuthCallbackDeeplink() {
   const handled = useRef(false);

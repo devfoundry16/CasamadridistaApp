@@ -12,7 +12,13 @@ import { useLocalSearchParams, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import PostService from '@/services/PostService';
-import CommentService, { type Comment } from '@/services/CommentService';
+import { type Comment } from '@/services/CommentService';
+import {
+  commentsQueryKey,
+  createComment,
+  getComments,
+  type CommentTarget,
+} from '@/services/MediaCommentsAdapter';
 import PostHeader   from '@/components/Community/PostCard/PostHeader';
 import PostBody     from '@/components/Community/PostCard/PostBody';
 import PostMedia    from '@/components/Community/PostCard/PostMedia';
@@ -30,6 +36,8 @@ export default function PostDetailPage() {
   const [reportOpen, setReportOpen] = useState(false);
   const [replyTo, setReplyTo]       = useState<Comment | null>(null);
   const commentInputRef             = useRef<CommentInputHandle>(null);
+  const target = useMemo<CommentTarget>(() => ({ kind: 'post', id }), [id]);
+  const commentsKey = useMemo(() => commentsQueryKey(target), [target]);
 
   // Header height + bottom safe-area inset, combined into the exact offset the
   // KeyboardAvoidingView needs. See hooks/useKeyboardOffsets.ts for the maths.
@@ -49,8 +57,8 @@ export default function PostDetailPage() {
     isFetchingNextPage,
     isLoading: commentsLoading,
   } = useInfiniteQuery({
-    queryKey: ['comments', id],
-    queryFn: ({ pageParam }) => CommentService.getComments(id, pageParam ?? null),
+    queryKey: commentsKey,
+    queryFn: ({ pageParam }) => getComments(target, pageParam ?? null),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     staleTime: 20_000,
@@ -60,10 +68,10 @@ export default function PostDetailPage() {
   const comments = commentsData?.pages.flatMap((p) => p.comments) ?? [];
 
   const handleSubmit = useCallback(async (body: string) => {
-    await CommentService.createComment(id, body, replyTo?.id);
+    await createComment(target, body, replyTo?.id);
     setReplyTo(null);
-    queryClient.invalidateQueries({ queryKey: ['comments', id] });
-  }, [id, replyTo, queryClient]);
+    queryClient.invalidateQueries({ queryKey: commentsKey });
+  }, [target, commentsKey, replyTo, queryClient]);
 
   const handleReply = useCallback((comment: Comment) => {
     setReplyTo(comment);
@@ -149,7 +157,7 @@ export default function PostDetailPage() {
         <FlatList
           data={comments}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <CommentRow comment={item} onReply={handleReply} />}
+          renderItem={({ item }) => <CommentRow comment={item} targetKind="post" onReply={handleReply} />}
           ListHeaderComponent={postContent}
           onEndReached={() => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); }}
           onEndReachedThreshold={0.5}
