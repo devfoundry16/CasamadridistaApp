@@ -239,7 +239,9 @@ function QuickPost({ me }: { me: ContributorMe }) {
 
       if (categoryId) void AsyncStorage.setItem(LAST_CATEGORY_KEY, categoryId);
 
-      router.replace('/contributor');
+      // See create.tsx: replace would leave the launching `/contributor`
+      // buried under a second copy of itself.
+      router.dismissTo('/contributor');
     } catch (error: any) {
       Alert.alert(t('contributor.errors.publishFailed'), error?.message ?? '');
     } finally {

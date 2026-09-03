@@ -199,7 +199,9 @@ class ContributorMediaServiceClass {
       const headers = await this.getAuthHeader();
       const { data } = await axios.post<UploadSlot>(
         `${BASE}/items/${itemId}/cover`,
-        {},
+        // `{ slot: true }` is required. The endpoint takes exactly two shapes and
+        // 400s on anything else, so an empty body asked for nothing at all.
+        { slot: true },
         { headers },
       );
       return data;

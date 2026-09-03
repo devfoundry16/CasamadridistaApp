@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +15,7 @@ import { Text } from '@/components/Text';
 import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import { useAssetMutations, useContributorItem, useContributorItemMutations } from '@/hooks/media/useMyContent';
+import { contributorKeys } from '@/hooks/media/keys';
 import { useItemUploadReadiness, useItemUploads } from '@/hooks/media/useUploadQueue';
 import UploadManager from '@/services/upload/UploadManager';
 import { pickFromLibrary, type PickResult } from '@/services/upload/pickMedia';
@@ -134,6 +136,19 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
   const { create, update, submit, remove } = useContributorItemMutations();
   const assetMutations = useAssetMutations(itemId);
   const uploads = useItemUploads(itemId);
+  const queryClient = useQueryClient();
+
+  // The cover lives on the item (React Query) while uploads live in the queue
+  // (Redux), and UploadManager promotes a finished cover without going through
+  // either. Nothing else connects the two, so without this the item keeps
+  // rendering the previous cover — or none — until some unrelated refetch.
+  const coverUploaded = uploads.some(
+    (entry) => entry.role === 'cover' && entry.status === 'ready',
+  );
+  useEffect(() => {
+    if (!coverUploaded || !itemId) return;
+    void queryClient.invalidateQueries({ queryKey: contributorKeys.item(itemId) });
+  }, [coverUploaded, itemId, queryClient]);
   const queue = useItemUploadReadiness(itemId);
 
   /* Seed the form from the server row exactly once. */
@@ -341,7 +356,14 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
                   publish_when_ready: value.publish_when_ready,
                 },
         });
-        router.replace('/contributor');
+        // `dismissTo`, not `replace`. Replace swaps only the *current* screen,
+        // so the `/contributor` this flow was launched from stays underneath and
+        // a second one lands on top of it — after a few edit-and-publish rounds
+        // the stack is contributor/my-content/contributor/my-content/… and back
+        // walks the whole history instead of leaving. dismissTo pops to the
+        // contributor home that is already there, and falls back to replace when
+        // there is none (a deep link straight into the editor).
+        router.dismissTo('/contributor');
       } catch (error: any) {
         Alert.alert(t('contributor.errors.publishFailed'), error?.message ?? '');
       } finally {
@@ -364,7 +386,7 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
         onPress: async () => {
           try {
             await remove.mutateAsync(itemId);
-            router.replace('/contributor');
+            router.dismissTo('/contributor');
           } catch (error: any) {
             Alert.alert(t('contributor.errors.deleteFailed'), error?.message ?? '');
           }

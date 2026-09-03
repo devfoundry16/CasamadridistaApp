@@ -398,6 +398,30 @@ class UploadManagerClass {
         duration_ms: entry.durationMs,
       });
 
+      // Uploading into the cover slot does not make the image the cover. The
+      // complete call writes `thumbnail_url` on the asset and stops there; only
+      // promotion copies the bytes to the item's deterministic public key and
+      // writes `cover_*` on the item. Without this, picking a cover uploaded a
+      // file that nothing ever displayed — the teaser stayed blank.
+      //
+      // This has to happen BEFORE the entry flips to `ready`: the create screen
+      // refetches the item the moment a cover entry reads ready, so promoting
+      // afterwards refetches an item whose cover_url is still null and nothing
+      // invalidates a second time. The upload succeeds and the form goes on
+      // saying "No cover image".
+      if (entry.role === 'cover') {
+        try {
+          await ContributorMediaService.setCoverFromAsset(entry.itemId, assetId);
+        } catch (error: any) {
+          // The bytes are stored and the asset is ready; only promotion failed.
+          // Failing the whole entry would invite a retry that re-uploads them
+          // for nothing, so surface it and let the upload stand.
+          this.update(entryId, {
+            error: error?.message || 'Uploaded, but could not be set as the cover',
+          });
+        }
+      }
+
       this.applyAssetStatus(entryId, asset);
     } catch (error: any) {
       const current = this.entries.get(entryId);
