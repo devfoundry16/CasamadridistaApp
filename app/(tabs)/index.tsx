@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import CustomWebView from "@/components/CustomWebView";
+import LaLigaStandings from "@/components/Home/LaLigaStandings";
 import ExclusiveFromMadridModule from "@/components/Home/ExclusiveFromMadridModule";
 import StrengthSection from "@/components/Home/StrengthSection";
 import OffSeasonMatchCard from "@/components/Home/OffSeasonMatchCard";
@@ -24,7 +24,7 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const { teamInfoList, fetchProfileData, fetchLiveMatchData, isLoading } =
     useFootball();
-  const { apiSports, football } = useEnvironment();
+  const { football } = useEnvironment();
   const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
@@ -75,39 +75,6 @@ export default function HomeScreen() {
       }
     }
   };
-
-  const statsHtml = ` 
-                    <!DOCTYPE html>
-                    <html>
-                      <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <style>
-                          body {
-                            margin: 0;
-                            padding: 0;
-                            background-color: transparent;
-                          }
-                        </style>
-                      </head>
-                      <body>
-                        <api-sports-widget
-                          data-type="config"
-                          data-key="${apiSports.apiKey || ""}"
-                          data-sport="football"
-                          data-theme="grey"
-                          data-show-logos="true"
-                        ></api-sports-widget>
-
-                       <api-sports-widget 
-                          data-type="standings" 
-                          data-league="140" 
-                          data-season="${football.currentSeason}"
-                        ></api-sports-widget>
-
-                        <script type="module" src="https://widgets.api-sports.io/3.1.0/widgets.js"></script>
-                      </body>
-                    </html>
-                  `;
 
   const checkLiveMatch = useCallback(async () => {
     try {
@@ -305,11 +272,7 @@ export default function HomeScreen() {
           Home never grows a permanently empty block. */}
       <ExclusiveFromMadridModule />
 
-      <CustomWebView
-        size={700}
-        title={t("home.laLigaStandings")}
-        statsHtml={statsHtml}
-      />
+      <LaLigaStandings />
       <StrengthSection
         shouldAnimate={shouldAnimate}
         handleStrengthSectionLayout={handleStrengthSectionLayout}

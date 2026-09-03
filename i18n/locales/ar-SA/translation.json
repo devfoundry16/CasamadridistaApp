@@ -1174,7 +1174,8 @@
       "moveEarlier": "تحريك للأمام",
       "moveLater": "تحريك للخلف",
       "setCover": "استخدام كغلاف",
-      "failed": "فشل"
+      "failed": "فشل",
+      "camera": "الكاميرا"
     },
     "cover": {
       "title": "الغلاف",

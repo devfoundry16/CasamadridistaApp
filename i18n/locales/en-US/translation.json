@@ -1174,7 +1174,8 @@
       "moveEarlier": "Move earlier",
       "moveLater": "Move later",
       "setCover": "Use as cover",
-      "failed": "Failed"
+      "failed": "Failed",
+      "camera": "Camera"
     },
     "cover": {
       "title": "Cover",

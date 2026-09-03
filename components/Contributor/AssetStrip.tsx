@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import {
   ChevronLeft,
   ChevronRight,
+  Camera,
   ImagePlus,
   Star,
   Trash2,
@@ -22,6 +23,8 @@ interface Props {
   onRemove: (assetId: string) => void;
   onSetCover?: (assetId: string) => void;
   onAdd?: () => void;
+  /** Capture straight from the camera. Optional: not every host offers one. */
+  onCapture?: () => void;
   /** Disables every control while a mutation is in flight. */
   busy?: boolean;
   coverAssetId?: string | null;
@@ -55,6 +58,7 @@ export default function AssetStrip({
   onRemove,
   onSetCover,
   onAdd,
+  onCapture,
   busy = false,
   coverAssetId,
 }: Props) {
@@ -231,6 +235,30 @@ export default function AssetStrip({
           <ImagePlus size={20} color={Colors.darkGold} />
           <Text className="text-[11px] mt-1" style={{ color: Colors.text.tertiary }}>
             {t('contributor.assets.add')}
+          </Text>
+        </Touchable>
+      ) : null}
+
+      {onCapture ? (
+        <Touchable
+          onPress={onCapture}
+          accessibilityRole="button"
+          accessibilityLabel={t('contributor.assets.camera')}
+          style={({ pressed }) => ({
+            width: TILE,
+            height: TILE,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderStyle: 'dashed',
+            borderColor: Colors.border.light,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.7 : 1,
+          })}
+        >
+          <Camera size={20} color={Colors.darkGold} />
+          <Text className="text-[11px] mt-1" style={{ color: Colors.text.tertiary }}>
+            {t('contributor.assets.camera')}
           </Text>
         </Touchable>
       ) : null}

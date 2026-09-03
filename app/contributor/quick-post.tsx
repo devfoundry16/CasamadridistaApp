@@ -269,6 +269,53 @@ function QuickPost({ me }: { me: ContributorMe }) {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}
           >
+            {/* Leading, not trailing: these used to sit after every selected
+                thumbnail in a horizontally scrolling strip, so once a few photos
+                were picked the camera was off-screen and looked missing. */}
+            <Touchable
+              onPress={() => void openLibrary(true)}
+              accessibilityRole="button"
+              accessibilityLabel={t('contributor.quickPost.addMore')}
+              style={({ pressed }) => ({
+                width: 88,
+                height: 88,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderStyle: 'dashed',
+                borderColor: Colors.border.light,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <ImagePlus size={20} color={Colors.darkGold} />
+              <Text className="text-[11px] mt-1" style={{ color: Colors.text.tertiary }}>
+                {t('contributor.quickPost.addMore')}
+              </Text>
+            </Touchable>
+
+            <Touchable
+              onPress={() => void openCamera(false)}
+              accessibilityRole="button"
+              accessibilityLabel={t('contributor.quickPost.camera')}
+              style={({ pressed }) => ({
+                width: 88,
+                height: 88,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderStyle: 'dashed',
+                borderColor: Colors.border.light,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <Camera size={20} color={Colors.darkGold} />
+              <Text className="text-[11px] mt-1" style={{ color: Colors.text.tertiary }}>
+                {t('contributor.quickPost.camera')}
+              </Text>
+            </Touchable>
+
             {assets.map((asset, index) => (
               <View key={`${asset.uri}-${index}`} style={{ width: 88 }}>
                 <View
@@ -316,43 +363,6 @@ function QuickPost({ me }: { me: ContributorMe }) {
               </View>
             ))}
 
-            <Touchable
-              onPress={() => void openLibrary(true)}
-              accessibilityRole="button"
-              accessibilityLabel={t('contributor.quickPost.addMore')}
-              style={({ pressed }) => ({
-                width: 88,
-                height: 88,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderStyle: 'dashed',
-                borderColor: Colors.border.light,
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <ImagePlus size={20} color={Colors.darkGold} />
-            </Touchable>
-
-            <Touchable
-              onPress={() => void openCamera(false)}
-              accessibilityRole="button"
-              accessibilityLabel={t('contributor.quickPost.camera')}
-              style={({ pressed }) => ({
-                width: 88,
-                height: 88,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderStyle: 'dashed',
-                borderColor: Colors.border.light,
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-              <Camera size={20} color={Colors.darkGold} />
-            </Touchable>
           </ScrollView>
 
           {!assets.length ? (

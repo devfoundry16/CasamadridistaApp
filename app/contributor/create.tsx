@@ -18,7 +18,7 @@ import { useAssetMutations, useContributorItem, useContributorItemMutations } fr
 import { contributorKeys } from '@/hooks/media/keys';
 import { useItemUploadReadiness, useItemUploads } from '@/hooks/media/useUploadQueue';
 import UploadManager from '@/services/upload/UploadManager';
-import { pickFromLibrary, type PickResult } from '@/services/upload/pickMedia';
+import { captureWithCamera, pickFromLibrary, type PickResult } from '@/services/upload/pickMedia';
 import type { MediaAccessLevel } from '@/types/media/casaMedia';
 import {
   isEditableStatus,
@@ -266,7 +266,7 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
   /* ------------------------------ assets ------------------------- */
 
   const addAssets = useCallback(
-    async (role: 'content' | 'cover') => {
+    async (role: 'content' | 'cover', source: 'library' | 'camera' = 'library') => {
       const id = await persist(value);
       if (!id) {
         Alert.alert(t('contributor.errors.noMatchTitle'), t('contributor.errors.noMatchBody'));
@@ -275,14 +275,20 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
 
       let result: PickResult;
       try {
-        result = await pickFromLibrary({
-          limits: me.limits,
-          selectionLimit:
-            role === 'cover'
-              ? 1
-              : Math.max(1, me.limits.maxGalleryAssets - contentAssets.length),
-          mediaTypes: role === 'cover' ? ['images'] : ['images', 'videos'],
-        });
+        result =
+          source === 'camera'
+            ? // Stills only. A video shot here would land in the same queue, but
+              // the camera is the "something is happening right now" path and a
+              // clip needs the length and format controls the library gives.
+              await captureWithCamera({ limits: me.limits, video: false })
+            : await pickFromLibrary({
+                limits: me.limits,
+                selectionLimit:
+                  role === 'cover'
+                    ? 1
+                    : Math.max(1, me.limits.maxGalleryAssets - contentAssets.length),
+                mediaTypes: role === 'cover' ? ['images'] : ['images', 'videos'],
+              });
       } catch (error: any) {
         Alert.alert(t('contributor.errors.pickFailed'), error?.message ?? '');
         return;
@@ -291,7 +297,13 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
       if (result.denied) {
         Alert.alert(
           t('contributor.errors.permissionTitle'),
-          t('contributor.errors.libraryDenied'),
+          // The two refusals are fixed in different places in Settings, so the
+          // message has to name the right one.
+          t(
+            result.denied === 'camera'
+              ? 'contributor.errors.cameraDenied'
+              : 'contributor.errors.libraryDenied',
+          ),
         );
         return;
       }
@@ -457,6 +469,7 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
         me={me}
         assets={contentAssets}
         onAddAssets={editable ? () => void addAssets('content') : undefined}
+        onCaptureAsset={editable ? () => void addAssets('content', 'camera') : undefined}
         onReorderAssets={(ids) => assetMutations.reorder.mutate(ids)}
         onRemoveAsset={(assetId) => assetMutations.remove.mutate(assetId)}
         onSetCover={(assetId) => assetMutations.setCover.mutate(assetId)}

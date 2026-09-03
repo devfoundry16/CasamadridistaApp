@@ -50,6 +50,7 @@ interface Props {
   assets: ContributorAsset[];
   coverAssetId?: string | null;
   onAddAssets?: () => void;
+  onCaptureAsset?: () => void;
   onReorderAssets: (assetIds: string[]) => void;
   onRemoveAsset: (assetId: string) => void;
   onSetCover?: (assetId: string) => void;
@@ -86,6 +87,7 @@ export default function DraftForm({
   assets,
   coverAssetId,
   onAddAssets,
+  onCaptureAsset,
   onReorderAssets,
   onRemoveAsset,
   onSetCover,
@@ -124,7 +126,7 @@ export default function DraftForm({
         <View className="px-4">
           <Label>{t('contributor.assets.title')}</Label>
         </View>
-        {assets.length || onAddAssets ? (
+        {assets.length || onAddAssets || onCaptureAsset ? (
           <AssetStrip
             assets={assets}
             coverAssetId={coverAssetId}
@@ -132,6 +134,7 @@ export default function DraftForm({
             onRemove={onRemoveAsset}
             onSetCover={onSetCover}
             onAdd={onAddAssets}
+            onCapture={onCaptureAsset}
             busy={disabled}
           />
         ) : (

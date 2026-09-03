@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { useGlobalSearchParams } from 'expo-router';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -10,7 +10,11 @@ import Colors from '@/constants/colors';
 /** Casa Media coverage for this fixture. */
 export default function MatchMediaTab() {
   const { t } = useTranslation();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  // Global, for the same reason as the Details tab: entering the match page at
+  // `/match/123` (every card outside the archive) addresses the `index` child,
+  // so this sibling would mount with no `id` and show the empty state for a
+  // match that does have coverage.
+  const { id } = useGlobalSearchParams<{ id: string }>();
   const matchId = Number.parseInt(id ?? '', 10);
 
   if (!Number.isFinite(matchId)) {

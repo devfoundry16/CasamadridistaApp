@@ -3,11 +3,19 @@ import WatchExclusiveBanner from "@/components/Media/Match/WatchExclusiveBanner"
 import { isFinishedStatus } from "@/components/Media/Match/MatchIdentityStrip";
 import { useMatchMedia } from "@/hooks/media/useMatchMedia";
 import { useEnvironment } from "@/hooks/useEnvironment";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useGlobalSearchParams, useRouter } from "expo-router";
 import { View } from "react-native";
 
 const MatchDetailScreen = () => {
-  const { id } = useLocalSearchParams();
+  // Global, not local. `[id]` is a segment of the parent route, and each tab
+  // child carries only the params of the URL that actually addressed it: enter
+  // at `/match/123/media` (which is what the archive card pushes) and this
+  // lazily-mounted sibling receives no `id` at all. The widget below then asks
+  // API-Sports for game `undefined`, never gets an answer, and the WebView sits
+  // on its startInLoadingState spinner forever — while the identity strip above
+  // looks perfectly fine, because that is rendered by the layout, which reads
+  // its own params. The layout hit the same scoping trap with `tab`.
+  const { id } = useGlobalSearchParams();
   const router = useRouter();
   const { apiSports } = useEnvironment();
 
@@ -65,7 +73,7 @@ const MatchDetailScreen = () => {
             }
           />
         ) : null}
-        <CustomWebView size={800} title="Match Details" statsHtml={statsHtml} />
+        <CustomWebView size={800} statsHtml={statsHtml} />
       </View>
     </>
   );
