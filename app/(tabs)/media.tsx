@@ -4,6 +4,7 @@ import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, RefreshControl, ScrollView, View } from 'react-native';
 
+import CollectionGrid from '@/components/Media/CollectionGrid';
 import HubHeader from '@/components/Media/HubHeader';
 import MediaRail from '@/components/Media/MediaRail';
 import StoriesRow from '@/components/Media/Stories/StoriesRow';
@@ -40,11 +41,46 @@ export default function MediaHubScreen() {
     );
   }
 
+  /**
+   * Static navigation: it needs no hub payload, so it renders both when the
+   * hub is empty and when the hub request failed. Five of the six destinations
+   * query `/items` directly; `latest-match` reads the hub and falls back to the
+   * archive, landing on its own resolving state rather than an error.
+   */
+  const browse = (
+    <>
+      <View style={{ marginTop: 14, paddingHorizontal: 16 }}>
+        <SectionHeading title={t('casaMedia.browse')} />
+      </View>
+      <CollectionGrid />
+    </>
+  );
+
+  // A failed hub request costs the rails, not the tab: the header and the six
+  // collections stay reachable above the error. `ErrorState`'s default variant
+  // is `flex-1`, which collapses to nothing inside a ScrollView — hence
+  // `compact`, the variant written for exactly this position.
   if (isError || !data) {
     return (
-      <View style={styles.centered}>
-        <ErrorState title={t('casaMedia.loadFailed')} onRetry={refetch} />
-      </View>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: Colors.background.deepDark }}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            tintColor={Colors.darkGold}
+            colors={[Colors.darkGold]}
+          />
+        }
+      >
+        <HubHeader />
+        {browse}
+        <View style={{ marginTop: 28 }}>
+          <ErrorState compact title={t('casaMedia.loadFailed')} onRetry={refetch} />
+        </View>
+      </ScrollView>
     );
   }
 
@@ -70,6 +106,8 @@ export default function MediaHubScreen() {
       }
     >
       <HubHeader />
+
+      {browse}
 
       {data.stories.length ? <StoriesRow groups={data.stories} /> : null}
 
@@ -106,12 +144,13 @@ export default function MediaHubScreen() {
         </View>
       ) : null}
 
-      <MediaRail
-        title={t('casaMedia.featured')}
-        items={data.featured}
-        seeAllLabel={t('casaMedia.seeAll')}
-        onSeeAll={seeAll('exclusive')}
-      />
+      {/*
+        No "see all": the rail already renders every active featured placement
+        (the backend caps `media_home`/`featured` at 10 and returns all of
+        them), and the link used to point at `exclusive` — a different set than
+        what the rail shows. Exclusive has its own tile in the grid above.
+      */}
+      <MediaRail title={t('casaMedia.featured')} items={data.featured} />
 
       {data.categories.length ? (
         <View style={{ marginTop: 20, paddingHorizontal: 16 }}>
