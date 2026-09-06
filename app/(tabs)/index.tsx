@@ -9,6 +9,7 @@ import { Spinner } from "@/components/Spinner";
 import UpcomingForm from "@/components/UpcomingForm";
 import { useFootball } from "@/hooks/useFootball";
 import { useEnvironment } from "@/hooks/useEnvironment";
+import { useIsMatchWindow } from "@/hooks/media/useMatchWindow";
 
 import MatchService from "@/services/Football/MatchService";
 import { Match } from "@/types/soccer/match";
@@ -25,6 +26,9 @@ export default function HomeScreen() {
   const { teamInfoList, fetchProfileData, fetchLiveMatchData, isLoading } =
     useFootball();
   const { football } = useEnvironment();
+  // True for a fixture within ±24h of kickoff, not just one in play — see the
+  // hook's docstring before reading this as "a match is on right now".
+  const isMatchWindow = useIsMatchWindow();
   const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
   const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
   const RealMadridId = 541;
@@ -189,6 +193,20 @@ export default function HomeScreen() {
       onScroll={handleScroll}
       scrollEventThrottle={16}
     >
+      {/*
+        §18 — "during active match days this module can move higher on Home".
+        The match carousel lives *inside* the hero View below, so the module is
+        already the next thing after the hero; above it is the only genuinely
+        higher slot. Two guarded slots rather than a sortable section list,
+        which is the house pattern for conditional layout on this screen.
+
+        The module is mounted in one slot or the other, so flipping the window
+        unmounts and remounts it. That is cheap while it is purely query-backed
+        and cached — but anything stateful added inside it (an animation, a
+        scroll offset) would reset at the boundary.
+      */}
+      {isMatchWindow ? <ExclusiveFromMadridModule /> : null}
+
       <View className="items-center">
         <Image
           source={{
@@ -268,9 +286,11 @@ export default function HomeScreen() {
         />
       </View>
 
-      {/* Casa Media. Renders nothing when there is no exclusive content, so
-          Home never grows a permanently empty block. */}
-      <ExclusiveFromMadridModule />
+      {/* Casa Media in its default slot. Renders nothing when there is no
+          exclusive content, so Home never grows a permanently empty block —
+          and nothing while the payload is still loading, so it cannot appear
+          here and then jump above the hero when `live_match` arrives. */}
+      {!isMatchWindow ? <ExclusiveFromMadridModule /> : null}
 
       <LaLigaStandings />
       <StrengthSection

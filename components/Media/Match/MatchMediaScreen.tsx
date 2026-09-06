@@ -2,9 +2,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
+import StoriesRow from '@/components/Media/Stories/StoriesRow';
 import Chip from '@/components/Team/Chip';
 import Colors from '@/constants/colors';
 import { useMatchMedia } from '@/hooks/media/useMatchMedia';
+import { useStories } from '@/hooks/media/useStories';
 import { MEDIA_PHASES, type MediaItem, type MediaPhase } from '@/types/media/casaMedia';
 import MediaGridList from '../MediaGridList';
 import MediaRail from '../MediaRail';
@@ -50,6 +52,23 @@ export default function MatchMediaScreen({ matchId }: Props) {
   const pinned = useMemo(() => data?.pages[0]?.pinned ?? [], [data]);
   const counts = useMemo(() => data?.pages[0]?.phase_counts ?? {}, [data]);
 
+  /**
+   * This fixture's story bubble, taken from the global story set rather than a
+   * `/items?type=story&match_id=` query.
+   *
+   * That is deliberate and worth not "fixing": the viewer at
+   * `app/media/story/[groupId]` loads `useStories()` and pages through *that*
+   * set, and a group's id is the fixture id as a string
+   * (`groupStoriesByMatch`). Sourcing the row from a different query would let
+   * it show a bubble that opens onto nothing. Consistency with the viewer beats
+   * exactness here.
+   */
+  const { data: storyGroups } = useStories();
+  const matchStories = useMemo(
+    () => storyGroups?.find((g) => g.id === String(matchId)) ?? null,
+    [storyGroups, matchId],
+  );
+
   const options = useMemo(
     () =>
       PHASES.map((key) => ({
@@ -65,6 +84,24 @@ export default function MatchMediaScreen({ matchId }: Props) {
   const header = useCallback(
     () => (
       <View style={{ paddingBottom: 4 }}>
+        {/*
+          Stories first: they are not phase-filtered and they are the most
+          time-sensitive thing on the screen. Same -16 bleed as the pinned rail
+          below — StoriesRow carries its own 16pt content padding and the grid
+          adds a 16pt gutter, so without it the row is indented twice.
+
+          The grid still contains these stories as cards. That is intended: the
+          server computes `phase_counts` including them, so filtering them out
+          client-side would make the chip counts disagree with what is on
+          screen, and the grid pages, so such a filter would be leaky anyway.
+          The row is an extra affordance that opens the story *viewer*, not a
+          replacement for the cards.
+        */}
+        {matchStories ? (
+          <View style={{ marginHorizontal: -16 }}>
+            <StoriesRow groups={[matchStories]} compact />
+          </View>
+        ) : null}
         {/*
           Chips in a horizontal scroller, not a SegmentedToggle: there are seven
           options (six contract phases plus "All") and a segmented control
@@ -97,7 +134,7 @@ export default function MatchMediaScreen({ matchId }: Props) {
         ) : null}
       </View>
     ),
-    [options, phase, pinned, t],
+    [matchStories, options, phase, pinned, t],
   );
 
   return (
