@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  I18nManager,
   KeyboardAvoidingView,
   Platform,
   TextInput,
@@ -11,10 +12,16 @@ import {
 } from 'react-native';
 import { Text } from '@/components/Text';
 import { useRouter } from 'expo-router';
-import { ArrowDownLeft, ArrowUpRight, ChevronLeft } from 'lucide-react-native';
+import { ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import FanClubDashboardService, { RevenueTransaction } from '@/services/FanClubDashboardService';
 import { useTranslation } from 'react-i18next';
+
+/**
+ * These screens draw their own back row (`headerShown: false`), so nothing
+ * mirrors the glyph for them. Same branch the rest of the app uses.
+ */
+const BackChevron = I18nManager.isRTL ? ChevronRight : ChevronLeft;
 
 export default function DashboardRevenueScreen() {
   const router = useRouter();
@@ -96,8 +103,14 @@ export default function DashboardRevenueScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View className="flex-row items-center px-4 pt-14 pb-4 border-b border-border-default">
-        <TouchableOpacity onPress={() => router.back()} className="mr-3">
-          <ChevronLeft size={24} color={Colors.text.primary} />
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="me-3"
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+        >
+          {/* The glyph follows the direction of travel, so it flips under RTL. */}
+          <BackChevron size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-text-primary">{t("fanClubDashboard.revenuePayouts")}</Text>
       </View>

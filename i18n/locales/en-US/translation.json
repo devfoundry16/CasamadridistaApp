@@ -20,10 +20,9 @@
   "language": {
     "english": "English",
     "arabic": "العربية",
-    "reloadTitle": "Reload app",
-    "reloadMessage": "The app needs to reload to apply the new language and layout. Reload now?",
-    "reloadNow": "Reload now",
-    "reloadLater": "Later"
+    "restartTitle": "Restart to change language",
+    "restartMessage": "The new language and its layout direction are applied when the app next starts. Close the app completely and open it again.",
+    "restartConfirm": "Got it"
   },
   "nav": {
     "appName": "Casa Madridista",

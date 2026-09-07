@@ -50,7 +50,23 @@ const languageDetector = {
   },
 };
 
-/** Apply RTL for Arabic. Returns true if RTL state changed (app should reload). */
+/**
+ * Persist the layout direction for a language. Returns true when it changed.
+ *
+ * `allowRTL`/`forceRTL` write to native storage and are read once, at bridge
+ * init. They do NOT change `I18nManager.isRTL` in the running process, so the
+ * current session keeps rendering in the direction it started with — which is
+ * exactly what we want.
+ *
+ * There is deliberately NO reload here. `Updates.reloadAsync()` restarts the JS
+ * bundle but not the native process, and the header back chevron's direction
+ * lives in process-global `UIAppearance` proxies that react-native-screens sets
+ * once per process (`applySemanticContentAttributeIfNeededToNavCtrl:` in
+ * RNSScreenStackHeaderConfig.mm). Flipping the flag and reloading JS therefore
+ * left a half-applied process: LTR English strings next to a mirrored, forward
+ * pointing back chevron, for the rest of the process's life. Direction changes
+ * only take effect on a genuine cold start.
+ */
 function applyRTL(lng: string): boolean {
   const isRTL = lng === "ar-SA";
   if (I18nManager.isRTL !== isRTL) {
@@ -70,20 +86,24 @@ i18n.use(languageDetector).use(initReactI18next).init({
   },
 });
 
-// Don't apply RTL in init — detector runs async; apply in languageChanged so we reload once with correct RTL
+// Not applied in init: the detector is async, so the language is not known yet.
+//
+// This fires on the first detection of every cold start, and on any later
+// `changeLanguage`. It only persists the direction for the NEXT launch; it never
+// flips the running process. See `applyRTL` for why a reload is not used here.
+//
+// `pendingRestart` lets the UI tell the user their choice needs a relaunch. It is
+// read, not awaited — nothing blocks on it.
+let pendingRestart = false;
+
+/** True when the persisted direction no longer matches the running process. */
+export function needsRestartForDirection(): boolean {
+  return pendingRestart;
+}
 
 i18n.on("languageChanged", (lng) => {
   const normalizedLng = lng.startsWith("ar") ? "ar-SA" : "en-US";
-  const rtlChanged = applyRTL(normalizedLng);
-  if (rtlChanged) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports -- dynamic to avoid load when unavailable
-      const Updates = require("expo-updates");
-      if (Updates.reloadAsync) Updates.reloadAsync();
-    } catch {
-      // expo-updates not available
-    }
-  }
+  if (applyRTL(normalizedLng)) pendingRestart = true;
 });
 
 export default i18n;

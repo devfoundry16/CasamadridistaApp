@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import "@/i18n";
+import i18n, { needsRestartForDirection } from "@/i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MediaAuthSync from "@/components/Auth/MediaAuthSync";
 import { useNotificationRouting } from "@/hooks/useNotificationRouting";
@@ -29,7 +29,7 @@ import { Stack, router, usePathname } from "expo-router";
 import { useTranslation } from "react-i18next";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useRef } from "react";
-import { View, I18nManager } from "react-native";
+import { Alert, View, I18nManager } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { development } from "@/config/environment";
 import { StatusBar } from "expo-status-bar";
@@ -401,7 +401,9 @@ const DataInitializer = () => {
 };
 
 function RootLayoutInner() {
+  const { t } = useTranslation();
   const { loadEnvironment } = useEnvironment();
+  const restartPromptShown = useRef(false);
   usePasswordResetDeeplink();
   useAuthCallbackDeeplink();
   usePushRegistration();
@@ -423,6 +425,28 @@ function RootLayoutInner() {
       UploadManager.stop();
     };
   }, []);
+
+  // A launch whose stored language disagrees with the direction this process
+  // booted in — a fresh install on an Arabic device, or a language that was
+  // chosen but never relaunched into. `applyRTL` has persisted the correct
+  // direction for next time; it cannot change this process, so ask for the
+  // restart rather than leaving the layout and the strings disagreeing.
+  //
+  // The language detector is async, so the answer is not known at mount: check
+  // once now for the already-settled case, and once more when it settles.
+  useEffect(() => {
+    const promptIfNeeded = () => {
+      if (restartPromptShown.current || !needsRestartForDirection()) return;
+      restartPromptShown.current = true;
+      Alert.alert(t("language.restartTitle"), t("language.restartMessage"));
+    };
+
+    promptIfNeeded();
+    i18n.on("languageChanged", promptIfNeeded);
+    return () => {
+      i18n.off("languageChanged", promptIfNeeded);
+    };
+  }, [t]);
   if (!fontsLoaded) {
     return null;
   }

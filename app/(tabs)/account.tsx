@@ -78,36 +78,31 @@ export default function AccountScreen() {
       return;
     }
     const isRTL = lng === "ar-SA";
-    Alert.alert(
-      t("language.reloadTitle"),
-      t("language.reloadMessage"),
-      [
-        {
-          text: t("language.reloadLater"),
-          style: "cancel",
-          onPress: async () => {
-            setLanguageModalVisible(false);
-            await AsyncStorage.setItem(LANG_STORAGE_KEY, lng);
-          },
+
+    // English and Arabic differ in layout direction, and direction can only be
+    // changed safely at process start.
+    //
+    // `forceRTL` writes native storage that is read once at bridge init, so it
+    // takes effect on the next launch and leaves this session untouched. We
+    // deliberately do NOT call `reloadAsync()` or `i18n.changeLanguage()` here:
+    // reloading restarts the JS bundle but not the native process, and the
+    // header back chevron's direction lives in process-global UIAppearance
+    // proxies that survive it — which is what used to leave English text beside
+    // a mirrored, forward-pointing back arrow. Switching the strings without the
+    // layout would be the same mismatch one level up. So the session keeps the
+    // old language and the old direction, and both change together on relaunch.
+    Alert.alert(t("language.restartTitle"), t("language.restartMessage"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("language.restartConfirm"),
+        onPress: async () => {
+          setLanguageModalVisible(false);
+          await AsyncStorage.setItem(LANG_STORAGE_KEY, lng);
+          I18nManager.allowRTL(isRTL);
+          I18nManager.forceRTL(isRTL);
         },
-        {
-          text: t("language.reloadNow"),
-          onPress: async () => {
-            setLanguageModalVisible(false);
-            await AsyncStorage.setItem(LANG_STORAGE_KEY, lng);
-            I18nManager.allowRTL(isRTL);
-            I18nManager.forceRTL(isRTL);
-            try {
-              // eslint-disable-next-line @typescript-eslint/no-require-imports -- dynamic to avoid load when unavailable
-              const Updates = require("expo-updates");
-              if (Updates.reloadAsync) await Updates.reloadAsync();
-            } catch {
-              // expo-updates not available
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleChangePhoto = async () => {
