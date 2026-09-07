@@ -13,6 +13,7 @@ import { useUser } from '@/hooks/useUser';
 import AnalyticsService from '@/services/AnalyticsService';
 import type { MediaItem } from '@/types/media/casaMedia';
 import { setPendingReturnTo } from '@/utils/returnTo';
+import { useMediaSurface } from './MediaSurfaceContext';
 
 /**
  * One `locked_view` per item per app session. A user scrolling a rail past the
@@ -42,6 +43,7 @@ export default function LockedOverlay({ item, variant = 'card', compact = false 
   const { user } = useUser();
   const router = useRouter();
   const requireAuth = useRequireAuth();
+  const surface = useMediaSurface();
   const isPremiumWall = item.access_level === 'premium';
   const full = variant === 'full';
 
@@ -51,9 +53,10 @@ export default function LockedOverlay({ item, variant = 'card', compact = false 
     AnalyticsService.track('locked_view', {
       item_id: item.id,
       match_id: item.match_id ?? undefined,
+      surface,
       props: { access_level: item.access_level, variant },
     });
-  }, [item.id, item.access_level, item.match_id, variant]);
+  }, [item.id, item.access_level, item.match_id, variant, surface]);
 
   const handlePress = () => {
     const href = `/media/item/${item.id}`;
@@ -64,6 +67,7 @@ export default function LockedOverlay({ item, variant = 'card', compact = false 
       void setPendingReturnTo({ href, mediaId: item.id });
       AnalyticsService.track('signup_cta_click', {
         item_id: item.id,
+        surface,
         props: { mode: 'premium' },
       });
       router.push('/account/subscription');

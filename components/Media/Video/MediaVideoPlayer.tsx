@@ -1,9 +1,9 @@
 import { useVideoPlayer, VideoView, type VideoSource } from 'expo-video';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import { Maximize2, Pause, Play } from 'lucide-react-native';
+import { Maximize2, Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { AppState, type AppStateStatus, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 
@@ -11,6 +11,16 @@ import { Text } from '@/components/Text';
 import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import AnalyticsService from '@/services/AnalyticsService';
+import type { MediaSurface } from '@/types/media/casaMedia';
+import {
+  accumulate,
+  emptyWatchState,
+  markReported,
+  restart,
+  shouldFlush,
+  watchedSeconds,
+  type WatchState,
+} from '@/utils/watchTime.core';
 
 interface Props {
   itemId: string;
@@ -25,6 +35,8 @@ interface Props {
    * the player is only controlled by its own play/pause button.
    */
   paused?: boolean;
+  /** Which surface the viewer arrived from; rides on every event this player emits. */
+  surface?: MediaSurface;
 }
 
 /** Quartiles are what the content team reports on — nothing finer is stored. */
@@ -45,6 +57,7 @@ export default function MediaVideoPlayer({
   height,
   autoPlay = false,
   paused,
+  surface,
 }: Props) {
   const { t } = useTranslation();
   const viewRef = useRef<VideoView>(null);
@@ -54,60 +67,152 @@ export default function MediaVideoPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [trackWidth, setTrackWidth] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const [ended, setEnded] = useState(false);
 
-  const source: VideoSource = { uri };
+  // Watch time lives in a ref, not state: it updates once a second and nothing
+  // renders from it, so putting it in state would re-render the whole player on
+  // every tick for no visible change.
+  const watch = useRef<WatchState>(emptyWatchState());
+  const startedItem = useRef<string | null>(null);
+  const durationRef = useRef(0);
 
-  const player = useVideoPlayer(source, (instance) => {
+  const videoSource: VideoSource = { uri };
+
+  const player = useVideoPlayer(videoSource, (instance) => {
     instance.loop = false;
     instance.timeUpdateEventInterval = 1;
     if (autoPlay) instance.play();
   });
 
-  // One item's quartiles must not suppress the next one's. The ref survives a
-  // source swap (the story viewer reuses this component across stories), so it
-  // has to be cleared explicitly rather than relying on remount.
+  /**
+   * Ship the seconds accumulated since the last emission.
+   *
+   * Called on pause, on backgrounding, on unmount and at each quartile. The
+   * server sums per (item, session), so overlapping flushes are safe — but an
+   * empty one still costs a row, hence the `shouldFlush` floor.
+   */
+  const flushWatch = useCallback(
+    (percent?: number) => {
+      const state = watch.current;
+      if (percent === undefined && !shouldFlush(state)) return;
+      watch.current = markReported(state);
+      AnalyticsService.track('video_progress', {
+        item_id: itemId,
+        ...(surface ? { surface } : {}),
+        props: {
+          ...(percent === undefined ? {} : { percent }),
+          seconds: watchedSeconds(state),
+          duration: Math.round(durationRef.current),
+        },
+      });
+    },
+    [itemId, surface],
+  );
+
+  /**
+   * `video_start` has been in the server's event vocabulary since Casa Media
+   * shipped and has never once been sent, which is why `video_starts` is zero
+   * for every item and completion rate cannot be computed. Fire it on the first
+   * real playback of each item.
+   */
+  const emitStart = useCallback(() => {
+    if (startedItem.current === itemId) return;
+    startedItem.current = itemId;
+    AnalyticsService.track('video_start', {
+      item_id: itemId,
+      ...(surface ? { surface } : {}),
+    });
+  }, [itemId, surface]);
+
+  // One item's quartiles must not suppress the next one's. The refs survive a
+  // source swap (the story viewer reuses this component across stories), so they
+  // have to be cleared explicitly rather than relying on remount.
   useEffect(() => {
     reported.current.clear();
+    watch.current = emptyWatchState();
+    startedItem.current = null;
     setCurrentTime(0);
+    setEnded(false);
   }, [itemId]);
 
-  // Milestones + the clock both ride on one subscription.
+  // Whatever was watched is still owed to the server when this player goes away
+  // — swapping to the next story, or leaving the screen entirely. The cleanup
+  // closes over the outgoing item's `flushWatch`, which is what makes the event
+  // land against the right id.
   useEffect(() => {
+    return () => flushWatch();
+  }, [flushWatch]);
+
+  // Milestones, watch time and the clock all ride on one subscription.
+  useEffect(() => {
+    const playingSub = player.addListener('playingChange', ({ isPlaying }) => {
+      setPlaying(isPlaying);
+      if (isPlaying) {
+        setEnded(false);
+        emitStart();
+      } else {
+        // Pausing is the natural flush point — and the one that catches a user
+        // who watches half a video and never reaches the next quartile.
+        flushWatch();
+      }
+    });
+
     const timeSub = player.addListener('timeUpdate', ({ currentTime: time }) => {
       setCurrentTime(time);
+      watch.current = accumulate(watch.current, time);
       const total = player.duration;
       if (!total || total <= 0) return;
+      durationRef.current = total;
       setDuration(total);
       const percent = (time / total) * 100;
       for (const milestone of MILESTONES) {
         if (percent + 0.5 >= milestone && !reported.current.has(milestone)) {
           reported.current.add(milestone);
-          AnalyticsService.track('video_progress', {
-            item_id: itemId,
-            props: { percent: milestone },
-          });
+          flushWatch(milestone);
         }
       }
     });
 
     const statusSub = player.addListener('statusChange', () => {
-      if (player.duration > 0) setDuration(player.duration);
+      if (player.duration > 0) {
+        durationRef.current = player.duration;
+        setDuration(player.duration);
+      }
     });
 
     const endSub = player.addListener('playToEnd', () => {
       setPlaying(false);
+      setEnded(true);
       if (!reported.current.has(100)) {
         reported.current.add(100);
-        AnalyticsService.track('video_progress', { item_id: itemId, props: { percent: 100 } });
+        flushWatch(100);
+      } else {
+        flushWatch();
       }
+      AnalyticsService.track('video_complete', {
+        item_id: itemId,
+        ...(surface ? { surface } : {}),
+        props: { duration: Math.round(durationRef.current) },
+      });
     });
 
     return () => {
+      playingSub.remove();
       timeSub.remove();
       statusSub.remove();
       endSub.remove();
     };
-  }, [player, itemId]);
+  }, [player, itemId, surface, flushWatch, emitStart]);
+
+  // Backgrounding mid-video is the common way to lose watch time: the process
+  // may never come back, and the accumulator only lives in memory.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state: AppStateStatus) => {
+      if (state === 'background' || state === 'inactive') flushWatch();
+    });
+    return () => sub.remove();
+  }, [flushWatch]);
 
   // Honour an external pause request (story hold-to-pause) without fighting the
   // in-player button: only acts when `paused` is explicitly provided.
@@ -130,6 +235,27 @@ export default function MediaVideoPlayer({
       player.play();
       setPlaying(true);
     }
+  }, [player]);
+
+  const toggleMute = useCallback(() => {
+    const next = !player.muted;
+    player.muted = next;
+    setMuted(next);
+  }, [player]);
+
+  /**
+   * Replay. `playToEnd` leaves the position at the end and playback stopped, so
+   * pressing Play again is ambiguous across platforms — this makes restarting
+   * explicit. Watch time deliberately keeps accumulating: watching a clip twice
+   * is twice the watch time.
+   */
+  const replay = useCallback(() => {
+    watch.current = restart(watch.current);
+    reported.current.clear();
+    player.currentTime = 0;
+    setCurrentTime(0);
+    setEnded(false);
+    player.play();
   }, [player]);
 
   const seekToFraction = useCallback(
@@ -203,13 +329,21 @@ export default function MediaVideoPlayer({
 
       <View style={styles.controls} pointerEvents="box-none">
         <Touchable
-          onPress={togglePlay}
+          onPress={ended ? replay : togglePlay}
           accessibilityRole="button"
-          accessibilityLabel={playing ? t('casaMedia.pause') : t('casaMedia.play')}
+          accessibilityLabel={
+            ended
+              ? t('casaMedia.replay')
+              : playing
+                ? t('casaMedia.pause')
+                : t('casaMedia.play')
+          }
           hitSlop={10}
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1, padding: 4 })}
         >
-          {playing ? (
+          {ended ? (
+            <RotateCcw size={18} color={Colors.textWhite} />
+          ) : playing ? (
             <Pause size={18} color={Colors.textWhite} fill={Colors.textWhite} />
           ) : (
             <Play size={18} color={Colors.textWhite} fill={Colors.textWhite} />
@@ -234,6 +368,21 @@ export default function MediaVideoPlayer({
         <Text style={styles.clock}>
           {formatClock(currentTime)} / {formatClock(duration)}
         </Text>
+
+        <Touchable
+          onPress={toggleMute}
+          accessibilityRole="button"
+          accessibilityLabel={muted ? t('casaMedia.unmute') : t('casaMedia.mute')}
+          accessibilityState={{ selected: muted }}
+          hitSlop={10}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1, padding: 4 })}
+        >
+          {muted ? (
+            <VolumeX size={16} color={Colors.textWhite} />
+          ) : (
+            <Volume2 size={16} color={Colors.textWhite} />
+          )}
+        </Touchable>
 
         <Touchable
           onPress={handleFullscreen}

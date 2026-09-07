@@ -7,6 +7,7 @@ import MediaSearchBar from '@/components/Media/Search/MediaSearchBar';
 import Colors from '@/constants/colors';
 import { useMediaSearch } from '@/hooks/media/useMediaSearch';
 import AnalyticsService from '@/services/AnalyticsService';
+import { MediaSurfaceProvider } from '@/components/Media/MediaSurfaceContext';
 
 /** Full-text search across published media. */
 export default function MediaSearchScreen() {
@@ -30,29 +31,31 @@ export default function MediaSearchScreen() {
   // the debounced value.
   useEffect(() => {
     if (!enabled) return;
-    AnalyticsService.track('search', { props: { q: query } });
+    AnalyticsService.track('search', { surface: 'search', props: { q: query } });
   }, [enabled, query]);
 
   const items = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
-      <MediaSearchBar value={text} onChangeText={setText} />
-      <MediaGridList
-        items={enabled ? items : []}
-        isLoading={enabled && isLoading}
-        isError={isError}
-        errorTitle={t('casaMedia.loadFailed')}
-        onRetry={refetch}
-        emptyTitle={
-          enabled ? t('casaMedia.searchNoResults') : t('casaMedia.searchPrompt', { value: minLength })
-        }
-        emptyBody={enabled ? t('casaMedia.searchNoResultsBody') : undefined}
-        onEndReached={() => {
-          if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-        }}
-        isFetchingNextPage={isFetchingNextPage}
-      />
-    </View>
+    <MediaSurfaceProvider surface="search">
+      <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
+        <MediaSearchBar value={text} onChangeText={setText} />
+        <MediaGridList
+          items={enabled ? items : []}
+          isLoading={enabled && isLoading}
+          isError={isError}
+          errorTitle={t('casaMedia.loadFailed')}
+          onRetry={refetch}
+          emptyTitle={
+            enabled ? t('casaMedia.searchNoResults') : t('casaMedia.searchPrompt', { value: minLength })
+          }
+          emptyBody={enabled ? t('casaMedia.searchNoResultsBody') : undefined}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+          }}
+          isFetchingNextPage={isFetchingNextPage}
+        />
+      </View>
+    </MediaSurfaceProvider>
   );
 }

@@ -175,6 +175,7 @@ export default function StoryViewer({ groups, initialGroupId }: Props) {
       viewedItems.current.add(item.id);
       void CasaMediaService.storyView(item.id);
       AnalyticsService.track('story_view', {
+        surface: 'story',
         item_id: item.id,
         match_id: item.match_id ?? undefined,
       });
@@ -259,6 +260,7 @@ export default function StoryViewer({ groups, initialGroupId }: Props) {
               height={height}
               autoPlay
               paused={paused}
+              surface="story"
             />
           ) : (
             <Image

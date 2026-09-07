@@ -298,6 +298,34 @@ export type MediaEventType = (typeof MEDIA_EVENT_TYPES)[number];
  */
 export type MediaEventName = MediaEventType | 'signup_cta_click' | 'share_click';
 
+/**
+ * Which surface the user came from — `eventService.EVENT_SOURCES`, verbatim.
+ *
+ * Without this, "Community teaser → Media" (§41) and every per-surface question
+ * are unanswerable from the data as stored: an `item_view` records that an item
+ * was opened but not what led there. An unrecognised value is dropped
+ * server-side, so this list is the contract.
+ */
+export const MEDIA_SURFACES = [
+  'home',
+  'community',
+  'match',
+  'search',
+  'archive',
+  'story',
+  'push',
+  'deeplink',
+  'media',
+] as const;
+
+export type MediaSurface = (typeof MEDIA_SURFACES)[number];
+
+export function isMediaSurface(value: unknown): value is MediaSurface {
+  return (
+    typeof value === 'string' && (MEDIA_SURFACES as readonly string[]).includes(value)
+  );
+}
+
 /** One queued event, already in wire shape — the key is `event_type`. */
 export interface MediaAnalyticsEvent {
   event_type: MediaEventType;
@@ -306,6 +334,7 @@ export interface MediaAnalyticsEvent {
   campaign_id?: string;
   anon_id?: string;
   session_id?: string;
+  surface?: MediaSurface;
   occurred_at: string;
   props?: Record<string, string | number | boolean | null>;
 }

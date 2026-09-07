@@ -8,6 +8,7 @@ import Colors from '@/constants/colors';
 import type { MediaItem } from '@/types/media/casaMedia';
 import LockedOverlay from './LockedOverlay';
 import MediaCover from './MediaCover';
+import { useMediaSurface } from './MediaSurfaceContext';
 import { clockTime } from './time';
 
 interface Props {
@@ -27,11 +28,12 @@ const RAIL_WIDTH = 44;
  */
 function TimelineRow({ item, isLast = false }: Props) {
   const router = useRouter();
+  const surface = useMediaSurface();
   const time = clockTime(item.published_at);
 
   return (
     <Touchable
-      onPress={() => router.push(`/media/item/${item.id}`)}
+      onPress={() => router.push({ pathname: '/media/item/[id]', params: { id: item.id, surface } })}
       accessibilityRole="button"
       accessibilityLabel={item.title ?? undefined}
       style={({ pressed }) => ({

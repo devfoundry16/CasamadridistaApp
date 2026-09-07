@@ -19,7 +19,10 @@ export default function MediaUniversalLinkRoute() {
 
   return (
     <Redirect
-      href={{ pathname: '/media/item/[id]', params: { id, ...(c ? { c } : {}) } }}
+      href={{
+        pathname: '/media/item/[id]',
+        params: { id, surface: 'deeplink', ...(c ? { c } : {}) },
+      }}
     />
   );
 }

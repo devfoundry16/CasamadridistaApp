@@ -24,6 +24,7 @@ import Colors from '@/constants/colors';
 import { useMediaItem, useMediaPlayback } from '@/hooks/media/useMediaItem';
 import AnalyticsService from '@/services/AnalyticsService';
 import CasaMediaService from '@/services/CasaMediaService';
+import { isMediaSurface } from '@/types/media/casaMedia';
 import { isPlayableVideo, isViewableMediaPhoto } from '@/utils/mediaUrl';
 
 /**
@@ -38,7 +39,14 @@ export default function MediaItemScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { id, c: campaignId } = useLocalSearchParams<{ id: string; c?: string }>();
+  const { id, c: campaignId, surface } = useLocalSearchParams<{
+    id: string;
+    c?: string;
+    surface?: string;
+  }>();
+  // An unrecognised value is dropped rather than sent: the vocabulary is the
+  // contract, and the server would drop it anyway.
+  const eventSurface = isMediaSurface(surface) ? surface : undefined;
 
   const { data: item, isLoading, isError, refetch } = useMediaItem(id);
 
@@ -52,9 +60,10 @@ export default function MediaItemScreen() {
       item_id: item.id,
       match_id: item.match_id ?? undefined,
       campaign_id: campaignId,
+      ...(eventSurface ? { surface: eventSurface } : {}),
     });
     void CasaMediaService.recordViews([item.id]);
-  }, [item, campaignId]);
+  }, [item, campaignId, eventSurface]);
 
   const openViewer = useCallback(
     (index: number) =>
@@ -96,7 +105,12 @@ export default function MediaItemScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <View>
           {!item.locked && videoUri ? (
-            <MediaVideoPlayer itemId={item.id} uri={videoUri} height={coverHeight} />
+            <MediaVideoPlayer
+              itemId={item.id}
+              uri={videoUri}
+              height={coverHeight}
+              surface={eventSurface}
+            />
           ) : (
             <MediaCover item={item} width={width} height={coverHeight} radius={0} />
           )}

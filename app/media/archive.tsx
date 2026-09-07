@@ -9,6 +9,7 @@ import EmptyState from '@/components/Team/EmptyState';
 import ErrorState from '@/components/Team/ErrorState';
 import Colors from '@/constants/colors';
 import { useArchive, useArchiveFilters } from '@/hooks/media/useArchive';
+import { MediaSurfaceProvider } from '@/components/Media/MediaSurfaceContext';
 
 /** Match-by-match archive with season / competition / opponent filters. */
 export default function MediaArchiveScreen() {
@@ -30,51 +31,53 @@ export default function MediaArchiveScreen() {
   const entries = data?.pages.flatMap((page) => page.matches) ?? [];
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
-      <ArchiveFilters filters={filterOptions} value={filters} onChange={setFilters} />
+    <MediaSurfaceProvider surface="archive">
+      <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
+        <ArchiveFilters filters={filterOptions} value={filters} onChange={setFilters} />
 
-      {isLoading ? (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <ActivityIndicator size="large" color={Colors.darkGold} />
-        </View>
-      ) : isError ? (
-        <ErrorState title={t('casaMedia.loadFailed')} onRetry={refetch} />
-      ) : (
-        <FlatList
-          data={entries}
-          keyExtractor={(entry) => String(entry.match.id)}
-          renderItem={({ item }) => <ArchiveMatchCard entry={item} />}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40, flexGrow: 1 }}
-          onEndReached={() => {
-            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-          }}
-          onEndReachedThreshold={0.6}
-          windowSize={5}
-          removeClippedSubviews
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refetch}
-              tintColor={Colors.darkGold}
-              colors={[Colors.darkGold]}
-            />
-          }
-          ListEmptyComponent={
-            <EmptyState
-              icon={Library}
-              title={t('casaMedia.archiveEmptyTitle')}
-              body={t('casaMedia.archiveEmptyBody')}
-            />
-          }
-          ListFooterComponent={
-            isFetchingNextPage ? (
-              <View style={{ paddingVertical: 16, alignItems: 'center' }}>
-                <ActivityIndicator color={Colors.darkGold} />
-              </View>
-            ) : null
-          }
-        />
-      )}
-    </View>
+        {isLoading ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <ActivityIndicator size="large" color={Colors.darkGold} />
+          </View>
+        ) : isError ? (
+          <ErrorState title={t('casaMedia.loadFailed')} onRetry={refetch} />
+        ) : (
+          <FlatList
+            data={entries}
+            keyExtractor={(entry) => String(entry.match.id)}
+            renderItem={({ item }) => <ArchiveMatchCard entry={item} />}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40, flexGrow: 1 }}
+            onEndReached={() => {
+              if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+            }}
+            onEndReachedThreshold={0.6}
+            windowSize={5}
+            removeClippedSubviews
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                tintColor={Colors.darkGold}
+                colors={[Colors.darkGold]}
+              />
+            }
+            ListEmptyComponent={
+              <EmptyState
+                icon={Library}
+                title={t('casaMedia.archiveEmptyTitle')}
+                body={t('casaMedia.archiveEmptyBody')}
+              />
+            }
+            ListFooterComponent={
+              isFetchingNextPage ? (
+                <View style={{ paddingVertical: 16, alignItems: 'center' }}>
+                  <ActivityIndicator color={Colors.darkGold} />
+                </View>
+              ) : null
+            }
+          />
+        )}
+      </View>
+    </MediaSurfaceProvider>
   );
 }

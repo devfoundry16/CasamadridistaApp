@@ -10,6 +10,7 @@ import { useStories } from '@/hooks/media/useStories';
 import { MEDIA_PHASES, type MediaItem, type MediaPhase } from '@/types/media/casaMedia';
 import MediaGridList from '../MediaGridList';
 import MediaRail from '../MediaRail';
+import { MediaSurfaceProvider } from '@/components/Media/MediaSurfaceContext';
 
 interface Props {
   matchId: number;
@@ -138,23 +139,25 @@ export default function MatchMediaScreen({ matchId }: Props) {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
-      <MediaGridList
-        items={items}
-        isLoading={isLoading}
-        isError={isError}
-        errorTitle={t('casaMedia.loadFailed')}
-        onRetry={refetch}
-        emptyTitle={t('casaMedia.matchEmptyTitle')}
-        emptyBody={t('casaMedia.matchEmptyBody')}
-        onEndReached={() => {
-          if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-        }}
-        isFetchingNextPage={isFetchingNextPage}
-        isRefetching={isRefetching}
-        onRefresh={refetch}
-        ListHeaderComponent={header}
-      />
-    </View>
+    <MediaSurfaceProvider surface="match">
+      <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
+        <MediaGridList
+          items={items}
+          isLoading={isLoading}
+          isError={isError}
+          errorTitle={t('casaMedia.loadFailed')}
+          onRetry={refetch}
+          emptyTitle={t('casaMedia.matchEmptyTitle')}
+          emptyBody={t('casaMedia.matchEmptyBody')}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+          }}
+          isFetchingNextPage={isFetchingNextPage}
+          isRefetching={isRefetching}
+          onRefresh={refetch}
+          ListHeaderComponent={header}
+        />
+      </View>
+    </MediaSurfaceProvider>
   );
 }

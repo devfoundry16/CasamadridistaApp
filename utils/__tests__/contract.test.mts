@@ -43,6 +43,10 @@ import {
   toEventType,
 } from '../../services/media/wire.ts';
 import { normaliseMe } from '../../services/media/contributorMe.ts';
+import {
+  MEDIA_SURFACES,
+  isMediaSurface,
+} from '../../types/media/casaMedia.ts';
 import { transformCover } from '../mediaUrl.core.ts';
 
 /* ================================================================== */
@@ -677,6 +681,62 @@ describe('analytics batch body', () => {
       { event_type: 'item_view', occurred_at: 'x', anon_id: 'anon-42' },
     ]);
     assert.equal(body.events[0].anon_id, 'anon-42');
+  });
+
+  it('carries session_id, which is what sessions are grouped by', () => {
+    // Declared on the wire type since Casa Media shipped, normalised by
+    // `eventService.normaliseEvent`, and populated by nobody until now —
+    // which is why "sessions generated" and "average session duration" had
+    // no input at all.
+    const body = buildEventsBody([
+      { event_type: 'item_view', occurred_at: 'x', session_id: 'sess-7' },
+    ]);
+    assert.equal(body.events[0].session_id, 'sess-7');
+  });
+
+  it('carries surface, and offers exactly the vocabulary the server accepts', () => {
+    // `eventService.EVENT_SOURCES` verbatim. A value outside this list is
+    // dropped server-side, so a drift here is a silently-empty column.
+    assert.deepEqual([...MEDIA_SURFACES].sort(), [
+      'archive',
+      'community',
+      'deeplink',
+      'home',
+      'match',
+      'media',
+      'push',
+      'search',
+      'story',
+    ]);
+    const body = buildEventsBody([
+      { event_type: 'item_view', occurred_at: 'x', surface: 'community' },
+    ]);
+    assert.equal(body.events[0].surface, 'community');
+  });
+
+  it('recognises only vocabulary members as a surface', () => {
+    // The item screen reads this off a route param, which is user-supplied.
+    assert.equal(isMediaSurface('community'), true);
+    assert.equal(isMediaSurface('COMMUNITY'), false);
+    assert.equal(isMediaSurface('facebook'), false);
+    assert.equal(isMediaSurface(''), false);
+    assert.equal(isMediaSurface(undefined), false);
+    assert.equal(isMediaSurface(null), false);
+    assert.equal(isMediaSurface(7), false);
+  });
+
+  it('carries the video seconds that watch time is computed from', () => {
+    // Before this, `video_progress` carried `{ percent }` and nothing else, so
+    // no seconds existed anywhere in the product.
+    const body = buildEventsBody([
+      {
+        event_type: 'video_progress',
+        occurred_at: 'x',
+        item_id: WIRE_TEASER.id,
+        props: { percent: 50, seconds: 42, duration: 90 },
+      },
+    ]);
+    assert.deepEqual(body.events[0].props, { percent: 50, seconds: 42, duration: 90 });
   });
 });
 

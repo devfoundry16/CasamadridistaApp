@@ -7,6 +7,7 @@ import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import type { MediaItem } from '@/types/media/casaMedia';
 import LockedOverlay from './LockedOverlay';
+import { useMediaSurface } from './MediaSurfaceContext';
 import MediaCover from './MediaCover';
 import { relativeTime } from './time';
 
@@ -31,14 +32,18 @@ const ASPECT = 9 / 16;
  */
 function MediaCard({ item, variant = 'rail', width, onPress }: Props) {
   const router = useRouter();
+  const surface = useMediaSurface();
 
   const open = useCallback(() => {
     if (onPress) {
       onPress(item);
       return;
     }
-    router.push(`/media/item/${item.id}`);
-  }, [item, onPress, router]);
+    // `surface` rides on the route, not on a prop, so the item screen can stamp
+    // it on `item_view` however the user got there — including a cold start
+    // from a deep link, where no provider was ever mounted.
+    router.push({ pathname: '/media/item/[id]', params: { id: item.id, surface } });
+  }, [item, onPress, router, surface]);
 
   if (variant === 'row') {
     const thumbWidth = 116;

@@ -5,6 +5,12 @@ import { AppState, type AppStateStatus, Platform } from 'react-native';
 import { API_BASE_URL } from '@/config/supabase';
 import type { MediaAnalyticsEvent, MediaEventName } from '@/types/media/casaMedia';
 import { buildEventsBody, toEventType } from '@/services/media/wire';
+import {
+  SESSION_STORAGE_KEY,
+  parseSession,
+  resolveSession,
+  type SessionState,
+} from '@/utils/session.core';
 
 const QUEUE_KEY = 'casa_media_event_queue';
 const ANON_ID_KEY = 'casa_media_anon_id';
@@ -25,6 +31,7 @@ const MAX_QUEUE = 200; // hard ceiling so an offline device cannot grow forever
 class AnalyticsServiceClass {
   private queue: MediaAnalyticsEvent[] = [];
   private anonId: string | null = null;
+  private session: SessionState | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
   private appStateSub: { remove: () => void } | null = null;
   private flushing = false;
@@ -46,12 +53,19 @@ class AnalyticsServiceClass {
     // One last attempt before the listeners are gone. Anything still queued is
     // already mirrored to AsyncStorage, so a failure here only defers it to the
     // next launch.
+    void this.persistSession();
     void this.flush();
   }
 
   private handleAppState = (state: AppStateStatus) => {
-    // Backgrounding is the last chance to ship what is queued.
-    if (state === 'background' || state === 'inactive') void this.flush();
+    // Backgrounding is the last chance to ship what is queued, and the last
+    // chance to write down where the session got to — the app may not come back
+    // to this process, and an unpersisted `lastSeenAt` would restart the session
+    // on the next launch even if the user returns thirty seconds later.
+    if (state === 'background' || state === 'inactive') {
+      void this.persistSession();
+      void this.flush();
+    }
   };
 
   /**
@@ -96,6 +110,44 @@ class AnalyticsServiceClass {
     });
   }
 
+  /**
+   * Which visit this event belongs to. Rolled forward on every event, so the
+   * idle window is measured from the last thing the user did rather than from
+   * app launch. The decision itself lives in `utils/session.core.ts`; this is
+   * only the state and the storage around it.
+   */
+  private async currentSessionId(now: number): Promise<string> {
+    if (!this.session) {
+      try {
+        this.session = parseSession(await AsyncStorage.getItem(SESSION_STORAGE_KEY));
+      } catch {
+        this.session = null;
+      }
+    }
+    const { state, started } = resolveSession(this.session, now, Crypto.randomUUID());
+    this.session = state;
+    // Only touch storage when the session changed identity; otherwise every
+    // single event would cost a write.
+    if (started) {
+      try {
+        await AsyncStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        // In-memory state is still correct for this process.
+      }
+    }
+    return state.id;
+  }
+
+  /** Persist the rolled-forward session so a cold start inside the window resumes it. */
+  private async persistSession(): Promise<void> {
+    if (!this.session) return;
+    try {
+      await AsyncStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(this.session));
+    } catch {
+      // ignore
+    }
+  }
+
   private async enqueue(event: MediaAnalyticsEvent): Promise<void> {
     try {
       await this.hydrate();
@@ -103,6 +155,7 @@ class AnalyticsServiceClass {
       // `locked_view` to the new account by anon_id, and an event without one
       // can never be joined afterwards.
       event.anon_id = await this.getAnonId();
+      event.session_id = await this.currentSessionId(Date.parse(event.occurred_at) || Date.now());
       event.props = { platform: Platform.OS, ...(event.props ?? {}) };
       this.queue.push(event);
       if (this.queue.length > MAX_QUEUE) this.queue = this.queue.slice(-MAX_QUEUE);

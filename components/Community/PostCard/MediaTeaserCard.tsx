@@ -31,7 +31,9 @@ function MediaTeaserCard({ item }: Props) {
 
   return (
     <Touchable
-      onPress={() => router.push(`/media/item/${item.id}`)}
+      onPress={() =>
+        router.push({ pathname: '/media/item/[id]', params: { id: item.id, surface: 'community' } })
+      }
       accessibilityRole="button"
       accessibilityLabel={item.title ?? t('casaMedia.hubTitle')}
       style={({ pressed }) => ({

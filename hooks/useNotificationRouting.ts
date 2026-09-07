@@ -49,6 +49,7 @@ function handle(response: Notifications.NotificationResponse, seen: Set<string>)
   if (!payload) return;
 
   AnalyticsService.track('push_open', {
+    surface: 'push',
     item_id: payload.item_id,
     match_id: payload.match_id,
     campaign_id: payload.campaign_id,
