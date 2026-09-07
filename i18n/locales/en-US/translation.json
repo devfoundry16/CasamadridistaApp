@@ -1084,7 +1084,28 @@
       "latestMatch": "Latest match",
       "all": "All media"
     },
-    "commentsLocked": "Unlock this post to read and join the conversation."
+    "commentsLocked": "Unlock this post to read and join the conversation.",
+    "type": "Type",
+    "allTypes": "All types",
+    "allContributors": "All contributors",
+    "contributor": "Contributor",
+    "date": {
+      "title": "Date",
+      "all": "Any date",
+      "last30": "Last 30 days",
+      "last90": "Last 90 days",
+      "last365": "Last year"
+    },
+    "typeCount": {
+      "photo_one": "{{count}} Photo",
+      "photo_other": "{{count}} Photos",
+      "video_one": "{{count}} Video",
+      "video_other": "{{count}} Videos",
+      "story_one": "{{count}} Story",
+      "story_other": "{{count}} Stories",
+      "gallery_one": "{{count}} Gallery",
+      "gallery_other": "{{count}} Galleries"
+    }
   },
   "notifications": {
     "title": "Notifications",

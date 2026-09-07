@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import CasaMediaService from '@/services/CasaMediaService';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import CasaMediaService, { type MediaSearchQuery } from '@/services/CasaMediaService';
 import { mediaKeys } from './keys';
 
 const MIN_QUERY_LENGTH = 2;
@@ -22,13 +22,15 @@ export function useDebouncedValue<T>(value: T, delay = DEBOUNCE_MS): T {
  * Disabled below two characters: a one-letter `websearch_to_tsquery` matches
  * effectively everything and is pure server load for a result nobody wants.
  */
-export function useMediaSearch(rawQuery: string) {
+export function useMediaSearch(rawQuery: string, filters: MediaSearchQuery = {}) {
   const query = useDebouncedValue(rawQuery.trim());
   const enabled = query.length >= MIN_QUERY_LENGTH;
 
   const result = useInfiniteQuery({
-    queryKey: mediaKeys.search(query),
-    queryFn: ({ pageParam }) => CasaMediaService.search(query, pageParam ?? null),
+    // The filters are part of the key: without them, narrowing a search would
+    // serve the unfiltered results straight back out of the cache.
+    queryKey: mediaKeys.search(query, filters),
+    queryFn: ({ pageParam }) => CasaMediaService.search(query, pageParam ?? null, filters),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled,
@@ -36,4 +38,18 @@ export function useMediaSearch(rawQuery: string) {
   });
 
   return { ...result, query, enabled, minLength: MIN_QUERY_LENGTH };
+}
+
+/**
+ * The option lists behind the filter row.
+ *
+ * Long-lived: these change when content is published, not per keystroke, and
+ * the backend caches the response for five minutes anyway.
+ */
+export function useSearchFilterOptions() {
+  return useQuery({
+    queryKey: mediaKeys.searchFilters(),
+    queryFn: () => CasaMediaService.getSearchFilters(),
+    staleTime: 30 * 60_000,
+  });
 }

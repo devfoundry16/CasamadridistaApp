@@ -32,7 +32,11 @@ export const mediaKeys = {
     [...mediaKeys.all, 'archive', normalise(query)] as const,
   archiveFilters: () => [...mediaKeys.all, 'archiveFilters'] as const,
 
-  search: (q: string) => [...mediaKeys.all, 'search', q] as const,
+  // Object-keyed: the filters are part of the identity of a search, and a
+  // bare-string key would serve filtered results from an unfiltered cache.
+  search: (q: string, filters: object = {}) =>
+    [...mediaKeys.all, 'search', q, normalise(filters)] as const,
+  searchFilters: () => [...mediaKeys.all, 'searchFilters'] as const,
   saved: () => [...mediaKeys.all, 'saved'] as const,
 };
 

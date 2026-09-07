@@ -3,6 +3,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
 import type {
   MediaArchiveFilters,
+  MediaItemType,
   MediaArchivePage,
   MediaCategory,
   MediaHomePayload,
@@ -11,6 +12,7 @@ import type {
   MediaMatchPage,
   MediaPhase,
   MediaPlayback,
+  MediaSearchFilterOptions,
   MediaShareChannel,
   MediaStoryGroup,
   MediaTimelinePayload,
@@ -24,6 +26,7 @@ import {
   normaliseHome,
   normaliseItem,
   normaliseList,
+  normaliseSearchFilters,
   normaliseMatchPage,
   normalisePlayback,
   normaliseTimeline,
@@ -51,7 +54,29 @@ export interface MediaArchiveQuery {
   season?: number;
   league_id?: number;
   opponent_team_id?: number;
+  /** §21: a kickoff-date range. The archive is a list of matches, so "March"
+   *  means matches PLAYED in March, not items published then. */
+  from?: string;
+  to?: string;
+  /** §21: only matches that have at least one item of this type. */
+  type?: MediaItemType;
   cursor?: string | null;
+}
+
+/**
+ * §22's structured search. `q` is still required — this narrows a text search,
+ * it does not replace one.
+ */
+export interface MediaSearchQuery {
+  type?: MediaItemType;
+  contributor_id?: string;
+  category_id?: string;
+  match_id?: number;
+  league_id?: number;
+  season?: number;
+  opponent_team_id?: number;
+  from?: string;
+  to?: string;
 }
 
 /**
@@ -228,16 +253,30 @@ class CasaMediaServiceClass {
     }
   }
 
-  async search(q: string, cursor?: string | null): Promise<MediaListPage> {
+  async search(
+    q: string,
+    cursor?: string | null,
+    filters: MediaSearchQuery = {},
+  ): Promise<MediaListPage> {
     try {
       const headers = await this.getAuthHeader();
       const { data } = await axios.get(`${BASE}/search`, {
         headers,
-        params: this.params({ q, cursor }),
+        params: this.params({ q, cursor, ...filters }),
       });
       return normaliseList(data);
     } catch (error: any) {
       this.fail(error, 'Search failed');
+    }
+  }
+
+  async getSearchFilters(): Promise<MediaSearchFilterOptions> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.get(`${BASE}/search/filters`, { headers });
+      return normaliseSearchFilters(data);
+    } catch (error: any) {
+      this.fail(error, 'Failed to load search filters');
     }
   }
 

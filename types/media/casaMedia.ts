@@ -11,7 +11,11 @@
 
 export type MediaAccessLevel = 'public' | 'registered' | 'premium';
 
-export type MediaItemType = 'photo' | 'video' | 'gallery' | 'story';
+/** The four types a consumer can see. The item vocabulary on the backend is
+ *  wider (update, live, audio, interview) but none of those ship in V1. */
+export const MEDIA_ITEM_TYPES = ['photo', 'video', 'gallery', 'story'] as const;
+
+export type MediaItemType = (typeof MEDIA_ITEM_TYPES)[number];
 
 /**
  * Match-day phase an item belongs to. These six values are the contract — the
@@ -210,6 +214,8 @@ export interface MediaTimelinePayload {
 export interface MediaArchiveEntry {
   match: MediaMatchRef;
   media_count: number;
+  /** §21's card reads "54 Photos · 12 Videos · 8 Stories", not "74 items". */
+  type_counts: Record<MediaItemType, number>;
   cover_items: MediaItem[];
 }
 
@@ -222,6 +228,19 @@ export interface MediaArchiveFilters {
   seasons: number[];
   leagues: { id: number; name: string; logo: string | null }[];
   opponents: MediaTeamRef[];
+  /** Only the types that exist somewhere in the archive. */
+  types: { type: MediaItemType; count: number }[];
+}
+
+/**
+ * `GET /casa-media/search/filters` — the option lists behind §22's filter row.
+ *
+ * A superset of the archive facets: the backend reuses them and adds
+ * contributors and the media types a consumer can search for.
+ */
+export interface MediaSearchFilterOptions extends MediaArchiveFilters {
+  media_types: MediaItemType[];
+  contributors: { id: string; display_name: string | null }[];
 }
 
 export interface MediaPlaybackAsset {

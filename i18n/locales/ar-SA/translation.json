@@ -1084,7 +1084,44 @@
       "latestMatch": "آخر مباراة",
       "all": "كل الوسائط"
     },
-    "commentsLocked": "افتح هذا المنشور لقراءة التعليقات والمشاركة في النقاش."
+    "commentsLocked": "افتح هذا المنشور لقراءة التعليقات والمشاركة في النقاش.",
+    "type": "النوع",
+    "allTypes": "كل الأنواع",
+    "allContributors": "كل المراسلين",
+    "contributor": "مراسل",
+    "date": {
+      "title": "التاريخ",
+      "all": "أي تاريخ",
+      "last30": "آخر ٣٠ يوماً",
+      "last90": "آخر ٩٠ يوماً",
+      "last365": "آخر سنة"
+    },
+    "typeCount": {
+      "photo_zero": "لا صور",
+      "photo_one": "صورة واحدة",
+      "photo_two": "صورتان",
+      "photo_few": "{{count}} صور",
+      "photo_many": "{{count}} صورة",
+      "photo_other": "{{count}} صورة",
+      "video_zero": "لا مقاطع",
+      "video_one": "مقطع واحد",
+      "video_two": "مقطعان",
+      "video_few": "{{count}} مقاطع",
+      "video_many": "{{count}} مقطعاً",
+      "video_other": "{{count}} مقطع",
+      "story_zero": "لا قصص",
+      "story_one": "قصة واحدة",
+      "story_two": "قصتان",
+      "story_few": "{{count}} قصص",
+      "story_many": "{{count}} قصة",
+      "story_other": "{{count}} قصة",
+      "gallery_zero": "لا معارض",
+      "gallery_one": "معرض واحد",
+      "gallery_two": "معرضان",
+      "gallery_few": "{{count}} معارض",
+      "gallery_many": "{{count}} معرضاً",
+      "gallery_other": "{{count}} معرض"
+    }
   },
   "notifications": {
     "title": "الإشعارات",

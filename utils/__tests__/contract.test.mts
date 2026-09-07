@@ -26,6 +26,7 @@ import {
   groupStoriesByMatch,
   matchTitle,
   normaliseArchive,
+  normaliseArchiveFilters,
   normaliseCategories,
   normaliseCommentsPage,
   normaliseHome,
@@ -34,6 +35,7 @@ import {
   normaliseMatch,
   normaliseMatchPage,
   normalisePlayback,
+  normaliseSearchFilters,
   normaliseTimeline,
 } from '../../services/media/normalise.ts';
 import {
@@ -44,6 +46,7 @@ import {
 } from '../../services/media/wire.ts';
 import { normaliseMe } from '../../services/media/contributorMe.ts';
 import {
+  MEDIA_ITEM_TYPES,
   MEDIA_SURFACES,
   isMediaSurface,
 } from '../../types/media/casaMedia.ts';
@@ -811,5 +814,86 @@ describe('cover transforms', () => {
   it('is idempotent', () => {
     const once = transformCover(cover, 640, true);
     assert.equal(transformCover(once, 1080, true), once);
+  });
+});
+
+/* ================================================================== */
+
+describe('§21 / §22 filter payloads', () => {
+  it('archive entries carry per-type counts, and tolerate a backend without them', () => {
+    // §21's own example card reads "54 Photos · 12 Videos · 8 Stories".
+    // `media_count` alone could only ever say "74 items".
+    const withCounts = normaliseArchive({
+      matches: [
+        {
+          match: WIRE_MATCH_ROW,
+          media_count: 74,
+          type_counts: { photo: 54, video: 12, story: 8 },
+          cover_items: [],
+        },
+      ],
+      nextCursor: null,
+    });
+    assert.deepEqual(withCounts.matches[0].type_counts, {
+      photo: 54,
+      video: 12,
+      story: 8,
+      gallery: 0,
+    });
+
+    // An older backend sends no `type_counts`. Zeroes, so the card falls back
+    // to the plain item count rather than rendering "0 Photos".
+    const without = normaliseArchive({
+      matches: [{ match: WIRE_MATCH_ROW, media_count: 74, cover_items: [] }],
+      nextCursor: null,
+    });
+    assert.deepEqual(without.matches[0].type_counts, {
+      photo: 0,
+      video: 0,
+      story: 0,
+      gallery: 0,
+    });
+  });
+
+  it('archive filters carry the content-type facet', () => {
+    const filters = normaliseArchiveFilters({
+      seasons: [2026, 2025],
+      leagues: [{ id: 140, name: 'La Liga', logo: null }],
+      opponents: [{ id: 81, name: 'Barcelona', logo: null }],
+      types: [
+        { type: 'photo', count: 540 },
+        { type: 'video', count: 120 },
+      ],
+    });
+    assert.deepEqual(filters.types, [
+      { type: 'photo', count: 540 },
+      { type: 'video', count: 120 },
+    ]);
+  });
+
+  it('the inlined item vocabulary matches the exported one', () => {
+    // normalise.ts cannot import a runtime value (node --test loads it
+    // directly, and a value import would need a `.ts` extension the bundler
+    // rejects), so it inlines the list. This is what keeps the copy honest:
+    // every exported type must survive normalisation, and nothing else may.
+    const filters = normaliseSearchFilters({
+      media_types: [...MEDIA_ITEM_TYPES, 'live', 'audio', 'interview', 'nonsense'],
+      contributors: [],
+    });
+    assert.deepEqual(filters.media_types, [...MEDIA_ITEM_TYPES]);
+  });
+
+  it('search filter options drop a contributor with no id', () => {
+    // The id is what the filter sends; a row without one is an option that
+    // silently returns everything.
+    const filters = normaliseSearchFilters({
+      media_types: ['photo'],
+      contributors: [
+        { id: 'c-1', display_name: 'Nacho R.' },
+        { id: null, display_name: 'Broken' },
+        { display_name: 'Also broken' },
+      ],
+    });
+    assert.deepEqual(filters.contributors, [{ id: 'c-1', display_name: 'Nacho R.' }]);
   });
 });

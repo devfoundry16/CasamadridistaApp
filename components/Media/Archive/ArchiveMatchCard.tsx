@@ -21,6 +21,15 @@ interface Props {
  */
 function ArchiveMatchCard({ entry }: Props) {
   const { t } = useTranslation();
+
+  // "54 Photos · 12 Videos · 8 Stories" — §21's own example of an archive card.
+  // Null when the backend has no per-type counters yet, so the card falls back
+  // to the plain item count rather than rendering a row of zeroes.
+  const typeSummary =
+    (['photo', 'video', 'story', 'gallery'] as const)
+      .filter((type) => (entry.type_counts?.[type] ?? 0) > 0)
+      .map((type) => t(`casaMedia.typeCount.${type}`, { count: entry.type_counts[type] }))
+      .join(' · ') || null;
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
   const thumb = Math.floor((screenWidth - 32 - 2 - 16) / 3);
@@ -98,7 +107,7 @@ function ArchiveMatchCard({ entry }: Props) {
             {match.league?.name ?? ''}
           </Text>
           <Text className="text-[11px] font-semibold" style={{ color: Colors.darkGold }}>
-            {t('casaMedia.archiveCount', { value: entry.media_count })}
+            {typeSummary ?? t('casaMedia.archiveCount', { value: entry.media_count })}
           </Text>
         </View>
       </SurfaceCard>

@@ -30,11 +30,13 @@ import type {
   MediaCategory,
   MediaHomePayload,
   MediaItem,
+  MediaItemType,
   MediaListPage,
   MediaMatchPage,
   MediaMatchRef,
   MediaPhase,
   MediaPlayback,
+  MediaSearchFilterOptions,
   MediaStoryGroup,
   MediaTimelinePayload,
 } from '../../types/media/casaMedia';
@@ -163,6 +165,15 @@ export function normaliseCategory(raw: unknown): MediaCategory | null {
 /* ------------------------------------------------------------------ */
 /* Items                                                               */
 /* ------------------------------------------------------------------ */
+
+/**
+ * The consumer item types, inlined for the same reason as `PHASES` below: this
+ * module is loaded directly by `node --test` (see `utils/__tests__/*.test.mts`)
+ * and a runtime value import would need a `.ts` extension the bundler does not
+ * accept. `contract.test.mts` asserts this stays in step with
+ * `MEDIA_ITEM_TYPES`, which it CAN import.
+ */
+const ITEM_TYPES = new Set<string>(['photo', 'video', 'gallery', 'story']);
 
 const PHASES = new Set<string>([
   'pre_match',
@@ -321,9 +332,18 @@ export function normaliseArchive(raw: unknown): MediaArchivePage {
     const entry = asRecord(row);
     const match = normaliseMatch(entry.match);
     if (!match) continue;
+    const typeCounts = asRecord(entry.type_counts);
     matches.push({
       match,
       media_count: count(entry.media_count),
+      // Absent on an older backend; zeroes render as a plain item count rather
+      // than as "0 Photos".
+      type_counts: {
+        photo: count(typeCounts.photo),
+        video: count(typeCounts.video),
+        story: count(typeCounts.story),
+        gallery: count(typeCounts.gallery),
+      },
       cover_items: normaliseItems(entry.cover_items),
     });
   }
@@ -346,6 +366,23 @@ export function normaliseArchiveFilters(raw: unknown): MediaArchiveFilters {
       name: str(team.name) ?? '',
       logo: str(team.logo),
     })),
+    types: asArray(f.types)
+      .map((row) => ({ type: str(row.type) as MediaItemType, count: count(row.count) }))
+      .filter((row) => ITEM_TYPES.has(row.type)),
+  };
+}
+
+/** `GET /search/filters` — the archive facets plus contributors and types. */
+export function normaliseSearchFilters(raw: unknown): MediaSearchFilterOptions {
+  const f = asRecord(raw);
+  return {
+    ...normaliseArchiveFilters(raw),
+    media_types: asArray(f.media_types)
+      .map((value) => str(value) as MediaItemType)
+      .filter((value) => ITEM_TYPES.has(value)),
+    contributors: asArray(f.contributors)
+      .map((row) => ({ id: str(row.id) ?? '', display_name: str(row.display_name) }))
+      .filter((row) => row.id.length > 0),
   };
 }
 

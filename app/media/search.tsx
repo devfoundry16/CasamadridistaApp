@@ -4,15 +4,19 @@ import { View } from 'react-native';
 
 import MediaGridList from '@/components/Media/MediaGridList';
 import MediaSearchBar from '@/components/Media/Search/MediaSearchBar';
+import SearchFilters from '@/components/Media/Search/SearchFilters';
 import Colors from '@/constants/colors';
-import { useMediaSearch } from '@/hooks/media/useMediaSearch';
+import { useMediaSearch, useSearchFilterOptions } from '@/hooks/media/useMediaSearch';
 import AnalyticsService from '@/services/AnalyticsService';
 import { MediaSurfaceProvider } from '@/components/Media/MediaSurfaceContext';
+import type { MediaSearchQuery } from '@/services/CasaMediaService';
 
 /** Full-text search across published media. */
 export default function MediaSearchScreen() {
   const { t } = useTranslation();
   const [text, setText] = useState('');
+  const [filters, setFilters] = useState<MediaSearchQuery>({});
+  const { data: filterOptions } = useSearchFilterOptions();
 
   const {
     data,
@@ -25,14 +29,19 @@ export default function MediaSearchScreen() {
     query,
     enabled,
     minLength,
-  } = useMediaSearch(text);
+  } = useMediaSearch(text, filters);
 
   // One event per settled query string, not per keystroke — `query` is already
   // the debounced value.
   useEffect(() => {
     if (!enabled) return;
-    AnalyticsService.track('search', { surface: 'search', props: { q: query } });
-  }, [enabled, query]);
+    // The filters ride on the event: "what did people search for" and "what did
+    // they narrow it to" are different questions, and only one was answerable.
+    AnalyticsService.track('search', {
+      surface: 'search',
+      props: { q: query, ...(filters as Record<string, string | number>) },
+    });
+  }, [enabled, query, filters]);
 
   const items = data?.pages.flatMap((page) => page.items) ?? [];
 
@@ -40,6 +49,7 @@ export default function MediaSearchScreen() {
     <MediaSurfaceProvider surface="search">
       <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
         <MediaSearchBar value={text} onChangeText={setText} />
+        <SearchFilters options={filterOptions} value={filters} onChange={setFilters} />
         <MediaGridList
           items={enabled ? items : []}
           isLoading={enabled && isLoading}
