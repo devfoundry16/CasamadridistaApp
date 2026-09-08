@@ -27,6 +27,7 @@ import {
   matchTitle,
   normaliseArchive,
   normaliseArchiveFilters,
+  normaliseFollows,
   normaliseCategories,
   normaliseCommentsPage,
   normaliseHome,
@@ -895,5 +896,40 @@ describe('§21 / §22 filter payloads', () => {
       ],
     });
     assert.deepEqual(filters.contributors, [{ id: 'c-1', display_name: 'Nacho R.' }]);
+  });
+});
+
+/* ================================================================== */
+
+describe('§26 follows', () => {
+  it('reads string ids per kind, whatever the wire sends', () => {
+    // `media_follows.ref_id` is TEXT so one column carries both a fixture id
+    // and a category uuid. A fixture id that arrives as a JSON number must
+    // still compare equal to the string the toggle sends back.
+    const follows = normaliseFollows({
+      match: [900001, '900002'],
+      category: ['a1b2c3d4-1111-4111-8111-111111111111'],
+    });
+    assert.deepEqual(follows.match, ['900001', '900002']);
+    assert.deepEqual(follows.category, ['a1b2c3d4-1111-4111-8111-111111111111']);
+  });
+
+  it('always answers with both kinds, so a toggle never reads undefined', () => {
+    assert.deepEqual(normaliseFollows({}), { match: [], category: [] });
+    assert.deepEqual(normaliseFollows(null), { match: [], category: [] });
+    assert.deepEqual(normaliseFollows({ match: null }), { match: [], category: [] });
+  });
+
+  it('drops an unusable id rather than storing a blank follow', () => {
+    const follows = normaliseFollows({ match: ['900001', '', null, undefined, {}] });
+    assert.deepEqual(follows.match, ['900001']);
+  });
+
+  it('ignores a kind the client does not know about', () => {
+    // The vocabulary is the contract; a new kind added server-side must not
+    // appear in a payload the app then has no toggle for.
+    const follows = normaliseFollows({ match: ['1'], item: ['2'] }) as Record<string, string[]>;
+    assert.equal(follows.item, undefined);
+    assert.deepEqual(Object.keys(follows).sort(), ['category', 'match']);
   });
 });

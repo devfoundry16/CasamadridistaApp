@@ -38,6 +38,7 @@ export const mediaKeys = {
     [...mediaKeys.all, 'search', q, normalise(filters)] as const,
   searchFilters: () => [...mediaKeys.all, 'searchFilters'] as const,
   saved: () => [...mediaKeys.all, 'saved'] as const,
+  follows: () => [...mediaKeys.all, 'follows'] as const,
 };
 
 export const notificationKeys = {

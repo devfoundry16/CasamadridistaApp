@@ -1,7 +1,9 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
 
+import FollowButton from '@/components/Media/FollowButton';
 import MediaGridList from '@/components/Media/MediaGridList';
 import Colors from '@/constants/colors';
 import { collectionTitleKey, isMatchCollection } from '@/hooks/media/collections';
@@ -23,6 +25,8 @@ import { isMediaCollection, type MediaCollection } from '@/types/media/casaMedia
  *    falling back to the newest match in the archive.
  *  - everything else — a query over `/items` via `collectionToQuery`.
  */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default function MediaCollectionScreen() {
   const { t } = useTranslation();
   const { collection, category } = useLocalSearchParams<{
@@ -76,6 +80,12 @@ export default function MediaCollectionScreen() {
   const items = query.data?.pages.flatMap((page) => page.items) ?? [];
   const title = isSaved ? t('casaMedia.saved') : t(collectionTitleKey(resolved));
 
+  // §26 — following a category. `category` is "uuid **or** slug" (the backend
+  // resolves both), but a follow row stores an id, so the button only appears
+  // when we actually have one. A slug would be refused server-side and the
+  // toggle would flip back, which is worse than no toggle.
+  const categoryId = category && UUID_RE.test(category) ? category : null;
+
   return (
     <>
       <Stack.Screen
@@ -83,6 +93,13 @@ export default function MediaCollectionScreen() {
           title,
           headerStyle: { backgroundColor: Colors.darkGold },
           headerTintColor: Colors.textWhite,
+          headerRight: categoryId
+            ? () => (
+                <View style={{ marginEnd: 4 }}>
+                  <FollowButton kind="category" refId={categoryId} compact />
+                </View>
+              )
+            : undefined,
         }}
       />
       <MediaGridList

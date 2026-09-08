@@ -36,6 +36,7 @@ import type {
   MediaMatchRef,
   MediaPhase,
   MediaPlayback,
+  MediaFollows,
   MediaSearchFilterOptions,
   MediaStoryGroup,
   MediaTimelinePayload,
@@ -370,6 +371,16 @@ export function normaliseArchiveFilters(raw: unknown): MediaArchiveFilters {
       .map((row) => ({ type: str(row.type) as MediaItemType, count: count(row.count) }))
       .filter((row) => ITEM_TYPES.has(row.type)),
   };
+}
+
+/** `GET /follows` — string ids per kind; an unknown kind is ignored. */
+export function normaliseFollows(raw: unknown): MediaFollows {
+  const f = asRecord(raw);
+  const pick = (key: string) =>
+    asArray(f[key])
+      .map((value) => (typeof value === 'number' ? String(value) : str(value)))
+      .filter((value): value is string => !!value);
+  return { match: pick('match'), category: pick('category') };
 }
 
 /** `GET /search/filters` — the archive facets plus contributors and types. */

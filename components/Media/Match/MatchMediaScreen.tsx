@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
+import FollowButton from '@/components/Media/FollowButton';
 import StoriesRow from '@/components/Media/Stories/StoriesRow';
 import Chip from '@/components/Team/Chip';
 import Colors from '@/constants/colors';
@@ -109,6 +110,15 @@ export default function MatchMediaScreen({ matchId }: Props) {
           divides the width equally, which truncates every label on a phone.
           Negative margins let the strip bleed past the grid's 16pt gutter.
         */}
+        {/*
+          §26 — following this match is what makes "send only to users following
+          that match" mean anything. It sits above the phase chips rather than
+          inside the scroller: the chips scroll horizontally, and a control that
+          can scroll out of reach is one nobody finds.
+        */}
+        <View style={{ flexDirection: 'row', paddingBottom: 10 }}>
+          <FollowButton kind="match" refId={matchId} />
+        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -135,7 +145,7 @@ export default function MatchMediaScreen({ matchId }: Props) {
         ) : null}
       </View>
     ),
-    [matchStories, options, phase, pinned, t],
+    [matchStories, matchId, options, phase, pinned, t],
   );
 
   return (

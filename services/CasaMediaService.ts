@@ -11,6 +11,8 @@ import type {
   MediaListPage,
   MediaMatchPage,
   MediaPhase,
+  MediaFollowKind,
+  MediaFollows,
   MediaPlayback,
   MediaSearchFilterOptions,
   MediaShareChannel,
@@ -25,6 +27,7 @@ import {
   normaliseCategories,
   normaliseHome,
   normaliseItem,
+  normaliseFollows,
   normaliseList,
   normaliseSearchFilters,
   normaliseMatchPage,
@@ -277,6 +280,40 @@ class CasaMediaServiceClass {
       return normaliseSearchFilters(data);
     } catch (error: any) {
       this.fail(error, 'Failed to load search filters');
+    }
+  }
+
+  /**
+   * §26 follows. All three require an account — a follow belongs to a user, and
+   * an anonymous device has nothing to attach one to.
+   */
+  async getFollows(): Promise<MediaFollows> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.get(`${BASE}/follows`, { headers });
+      return normaliseFollows(data);
+    } catch (error: any) {
+      this.fail(error, 'Failed to load follows');
+    }
+  }
+
+  async follow(kind: MediaFollowKind, refId: string | number): Promise<void> {
+    try {
+      const headers = await this.getAuthHeader();
+      await axios.post(`${BASE}/follows`, { kind, ref_id: String(refId) }, { headers });
+    } catch (error: any) {
+      this.fail(error, 'Failed to follow');
+    }
+  }
+
+  async unfollow(kind: MediaFollowKind, refId: string | number): Promise<void> {
+    try {
+      const headers = await this.getAuthHeader();
+      await axios.delete(`${BASE}/follows/${kind}/${encodeURIComponent(String(refId))}`, {
+        headers,
+      });
+    } catch (error: any) {
+      this.fail(error, 'Failed to unfollow');
     }
   }
 

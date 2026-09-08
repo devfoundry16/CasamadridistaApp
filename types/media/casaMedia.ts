@@ -238,6 +238,22 @@ export interface MediaArchiveFilters {
  * A superset of the archive facets: the backend reuses them and adds
  * contributors and the media types a consumer can search for.
  */
+/**
+ * What a follow can be about (§26). Mirrors the CHECK constraint on
+ * `media_follows.kind`.
+ */
+export const MEDIA_FOLLOW_KINDS = ['match', 'category'] as const;
+
+export type MediaFollowKind = (typeof MEDIA_FOLLOW_KINDS)[number];
+
+/**
+ * `GET /casa-media/follows` — everything this account follows, by kind.
+ *
+ * Ids are strings on the wire because `media_follows.ref_id` is TEXT: one
+ * column carries both a fixture id and a category uuid.
+ */
+export type MediaFollows = Record<MediaFollowKind, string[]>;
+
 export interface MediaSearchFilterOptions extends MediaArchiveFilters {
   media_types: MediaItemType[];
   contributors: { id: string; display_name: string | null }[];

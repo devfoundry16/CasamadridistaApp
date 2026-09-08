@@ -1121,7 +1121,10 @@
       "gallery_few": "{{count}} معارض",
       "gallery_many": "{{count}} معرضاً",
       "gallery_other": "{{count}} معرض"
-    }
+    },
+    "follow": "نبّهني",
+    "following": "التنبيه مفعّل",
+    "followHint": "تلقَّ إشعاراً عند نشر محتوى جديد"
   },
   "notifications": {
     "title": "الإشعارات",

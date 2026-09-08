@@ -1105,7 +1105,10 @@
       "story_other": "{{count}} Stories",
       "gallery_one": "{{count}} Gallery",
       "gallery_other": "{{count}} Galleries"
-    }
+    },
+    "follow": "Notify me",
+    "following": "Notifying",
+    "followHint": "Get a notification when new content is published"
   },
   "notifications": {
     "title": "Notifications",
