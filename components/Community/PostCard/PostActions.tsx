@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Share,
   Animated,
   StyleSheet,
 } from "react-native";
@@ -11,6 +10,7 @@ import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react-native";
 import type { Post } from "@/services/FeedService";
 import PostService from "@/services/PostService";
 import Colors from "@/constants/colors";
+import PostShareSheet from "@/components/Social/PostShareSheet";
 
 interface Props {
   post: Post;
@@ -21,6 +21,7 @@ export default function PostActions({ post, onCommentPress }: Props) {
   const [liked, setLiked] = useState(post.liked_by_me);
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [bookmarked, setBookmarked] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const hasInteracted = useRef(false);
   const heartScale = useRef(new Animated.Value(1)).current;
 
@@ -60,17 +61,9 @@ export default function PostActions({ post, onCommentPress }: Props) {
     }
   };
 
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: post.body ?? "Check out this post on Casamadridista!",
-        url: `casamadridistaapp://community/post/${post.id}`,
-      });
-      await PostService.sharePost(post.id, "native_share");
-    } catch {
-      // dismissed
-    }
-  };
+  // §16: a sheet with "Send to a friend" and "Share elsewhere", instead of
+  // going straight to the system share sheet.
+  const handleShare = () => setShareOpen(true);
 
   const formatCount = (n: number) =>
     n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
@@ -136,6 +129,7 @@ export default function PostActions({ post, onCommentPress }: Props) {
           fill={bookmarked ? Colors.darkGold : "none"}
         />
       </TouchableOpacity>
+      <PostShareSheet visible={shareOpen} post={post} onClose={() => setShareOpen(false)} />
     </View>
   );
 }

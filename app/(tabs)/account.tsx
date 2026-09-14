@@ -33,7 +33,7 @@ import CountryFlag from "react-native-country-flag";
 import { LANG_STORAGE_KEY } from "@/i18n";
 import axios from "axios";
 import { API_BASE_URL } from "@/config/supabase";
-import { Clapperboard, LayoutDashboard, ShieldCheck } from "lucide-react-native";
+import { Clapperboard, LayoutDashboard, Send, ShieldCheck, UserRound, Users } from "lucide-react-native";
 
 type Locale = "en-US" | "ar-SA";
 
@@ -201,6 +201,28 @@ export default function AccountScreen() {
       </View>
 
       <View className="p-6">
+        {/* Casa Social: the social identity is this same account (§26). */}
+        {user?.id ? (
+          <View className="flex-row mb-3 gap-3">
+            {[
+              { key: "profile", icon: UserRound, label: t("social.account.myProfile"), href: `/user/${user.id}` },
+              { key: "friends", icon: Users, label: t("social.account.friends"), href: "/social/friends" },
+              { key: "messages", icon: Send, label: t("social.account.messages"), href: "/social/messages" },
+            ].map(({ key, icon: Icon, label, href }) => (
+              <TouchableOpacity
+                key={key}
+                className="flex-1 items-center bg-bg-card py-4 rounded-2xl border border-rm-gold gap-2"
+                onPress={() => router.push(href as any)}
+                accessibilityRole="button"
+                accessibilityLabel={label}
+              >
+                <Icon size={22} color={Colors.darkGold} />
+                <Text className="text-[13px] font-semibold text-text-primary" numberOfLines={1}>{label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : null}
+
         <TouchableOpacity
           className="flex-row items-center bg-rm-gold p-4 rounded-[25px] mb-3 gap-4"
           onPress={() => router.push("../account/wallet" as any)}

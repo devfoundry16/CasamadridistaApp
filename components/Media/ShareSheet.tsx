@@ -1,11 +1,12 @@
 import * as Clipboard from 'expo-clipboard';
-import { Check, Link2, MessageCircle, Share2, X } from 'lucide-react-native';
+import { Check, Link2, MessageCircle, Send, Share2, X } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Modal, Share, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Text';
+import FriendPicker from '@/components/Social/FriendPicker';
 import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import { mediaWebUrl } from '@/constants/media';
@@ -35,6 +36,7 @@ export default function ShareSheet({ visible, item, onClose }: Props) {
   const requireAuth = useRequireAuth();
   const [busy, setBusy] = useState<MediaShareChannel | null>(null);
   const [copied, setCopied] = useState(false);
+  const [picker, setPicker] = useState(false);
 
   const resolveUrl = useCallback(
     async (channel: MediaShareChannel): Promise<string> => {
@@ -70,6 +72,24 @@ export default function ShareSheet({ visible, item, onClose }: Props) {
     }
   };
 
+  /**
+   * §37 / §38: send the item to one or more friends inside the app. The share is
+   * counted like every other channel (`dm` is already in the backend's share
+   * vocabulary), and the friend receives the item as its access-checked teaser.
+   */
+  const handleFriend = () => {
+    if (!requireAuth({ href: `/media/item/${item.id}`, mediaId: item.id })) {
+      onClose();
+      return;
+    }
+    track('dm');
+    void CasaMediaService.share(item.id, 'dm').catch(() => {});
+    onClose();
+    // After the sheet has left: a second Modal presented while this one is
+    // still dismissing is dropped on iOS.
+    setTimeout(() => setPicker(true), 320);
+  };
+
   const handleCopy = async () => {
     setBusy('copy_link');
     try {
@@ -100,6 +120,7 @@ export default function ShareSheet({ visible, item, onClose }: Props) {
   };
 
   return (
+    <>
     <Modal
       visible={visible}
       transparent
@@ -146,6 +167,13 @@ export default function ShareSheet({ visible, item, onClose }: Props) {
         </View>
 
         <Row
+          icon={<Send size={20} color={Colors.darkGold} />}
+          label={t('social.share.toFriend')}
+          caption={t('social.share.toFriendCaption')}
+          busy={false}
+          onPress={handleFriend}
+        />
+        <Row
           icon={<MessageCircle size={20} color={Colors.darkGold} />}
           label={t('casaMedia.shareToCommunity')}
           caption={t('casaMedia.shareToCommunityCaption')}
@@ -173,6 +201,8 @@ export default function ShareSheet({ visible, item, onClose }: Props) {
         />
       </View>
     </Modal>
+    <FriendPicker visible={picker} onClose={() => setPicker(false)} kind="media_item" id={item.id} subject={item.title} />
+    </>
   );
 }
 

@@ -28,6 +28,13 @@ export function hrefFromPayloadWithScheme(
   const campaign = payload.campaign_id ? `?c=${encodeURIComponent(payload.campaign_id)}` : '';
 
   switch (payload.type) {
+    // Social ids become path segments, so they must be uuids — not merely
+    // encoded. A malformed id routes to the list screen instead.
+    case 'dm':
+      return isUuid(payload.conversation_id) ? `/social/chat/${payload.conversation_id}` : '/social/messages';
+    case 'friend_request':
+    case 'friend_accept':
+      return isUuid(payload.user_id) ? `/user/${payload.user_id}` : '/social/friends';
     case 'media_item':
       return payload.item_id
         ? `/media/item/${encodeURIComponent(payload.item_id)}${campaign}`
@@ -43,6 +50,12 @@ export function hrefFromPayloadWithScheme(
     default:
       return safePathFromUrl(payload.url, scheme);
   }
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isUuid(value: unknown): value is string {
+  return typeof value === 'string' && UUID_RE.test(value);
 }
 
 /**
@@ -74,5 +87,9 @@ export function parsePushPayload(data: unknown): PushPayload | null {
     campaign_id: typeof candidate.campaign_id === 'string' ? candidate.campaign_id : undefined,
     url: typeof candidate.url === 'string' ? candidate.url : undefined,
     web_url: typeof candidate.web_url === 'string' ? candidate.web_url : undefined,
+    // Social fields only when present, so a media payload keeps its exact shape.
+    ...(typeof candidate.user_id === 'string' ? { user_id: candidate.user_id } : {}),
+    ...(typeof candidate.conversation_id === 'string' ? { conversation_id: candidate.conversation_id } : {}),
+    ...(typeof candidate.actor_name === 'string' ? { actor_name: candidate.actor_name } : {}),
   };
 }

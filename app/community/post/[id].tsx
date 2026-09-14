@@ -8,7 +8,7 @@ import {
   Platform,
   StyleSheet,
 } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import PostService from '@/services/PostService';
@@ -32,6 +32,7 @@ import Colors from '@/constants/colors';
 export default function PostDetailPage() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [reportOpen, setReportOpen] = useState(false);
   const [replyTo, setReplyTo]       = useState<Comment | null>(null);
@@ -87,7 +88,11 @@ export default function PostDetailPage() {
     if (!post) return null;
     return (
       <View>
-        <PostHeader post={post} onReportPress={() => setReportOpen(true)} />
+        <PostHeader
+          post={post}
+          onReportPress={() => setReportOpen(true)}
+          onAuthorPress={post.author_type === 'user' && post.author_id ? () => router.push(`/user/${post.author_id}`) : undefined}
+        />
         <PostBody   post={post} truncate={false} />
         {post.media?.length > 0 && <PostMedia media={post.media} paused={false} />}
         <PostActions post={post} />
@@ -102,7 +107,7 @@ export default function PostDetailPage() {
         )}
       </View>
     );
-  }, [post, commentsLoading, t]);
+  }, [post, commentsLoading, t, router]);
 
   const screenOptions = (
     <Stack.Screen

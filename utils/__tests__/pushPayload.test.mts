@@ -92,6 +92,34 @@ describe('pushPayload.core — safePathFromUrl', () => {
   });
 });
 
+describe('pushPayload.core — social payloads', () => {
+  const CONV = 'c0000000-0000-4000-8000-000000000001';
+  const USER = '00000000-0000-4000-8000-00000000000b';
+
+  it('a DM push opens its conversation; a friend push opens the profile', () => {
+    assert.equal(href({ v: 1, type: 'dm', conversation_id: CONV }), `/social/chat/${CONV}`);
+    assert.equal(href({ v: 1, type: 'friend_request', user_id: USER }), `/user/${USER}`);
+    assert.equal(href({ v: 1, type: 'friend_accept', user_id: USER }), `/user/${USER}`);
+  });
+
+  it('a malformed social id lands on the list screen, never on a crafted path', () => {
+    assert.equal(href({ v: 1, type: 'dm', conversation_id: '../admin' }), '/social/messages');
+    assert.equal(href({ v: 1, type: 'dm' }), '/social/messages');
+    assert.equal(href({ v: 1, type: 'friend_request', user_id: 'x?y=1' }), '/social/friends');
+  });
+
+  it('ignores data.url for a social type, whatever it says', () => {
+    assert.equal(href({ v: 1, type: 'dm', conversation_id: CONV, url: 'casamadridistaapp://admin' }), `/social/chat/${CONV}`);
+  });
+
+  it('parses the social fields and drops wrongly-typed ones', () => {
+    const parsed = parsePushPayload({ type: 'dm', conversation_id: CONV, user_id: 7, actor_name: 'Ali' });
+    assert.equal(parsed?.conversation_id, CONV);
+    assert.equal(parsed?.user_id, undefined);
+    assert.equal(parsed?.actor_name, 'Ali');
+  });
+});
+
 describe('pushPayload.core — parsePushPayload', () => {
   it('coerces a well-formed bag', () => {
     assert.deepEqual(

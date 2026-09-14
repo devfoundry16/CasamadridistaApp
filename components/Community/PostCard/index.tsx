@@ -21,9 +21,16 @@ function PostCard({ post }: Props) {
     router.push(`/community/post/${post.id}`);
   }, [post.id, router]);
 
+  // A person's name opens their profile (§20). A fan club post has no personal
+  // profile behind it, so it keeps opening the post.
+  const goToAuthor = useCallback(() => {
+    if (post.author_type === 'user' && post.author_id) router.push(`/user/${post.author_id}`);
+    else goToPost();
+  }, [post.author_type, post.author_id, router, goToPost]);
+
   return (
     <Touchable onPress={goToPost} style={({ pressed }) => [styles.container, { opacity: pressed ? 0.85 : 1 }]}>
-      <PostHeader post={post} onAuthorPress={goToPost} />
+      <PostHeader post={post} onAuthorPress={goToAuthor} />
       <PostBody post={post} truncate />
       {post.kind === 'media_teaser' && post.media_item ? (
         <MediaTeaserCard item={post.media_item} />

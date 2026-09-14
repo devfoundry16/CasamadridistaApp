@@ -122,9 +122,24 @@ export default function MediaItemScreen() {
             {item.title ?? ''}
           </Text>
           <Text className="text-[11px]" style={{ color: Colors.text.tertiary, marginTop: 6 }}>
-            {[item.category?.name, item.contributor?.display_name, relativeTime(item.published_at)]
+            {[
+              item.category?.name,
+              item.contributor?.display_name ? (
+                // The contributor's byline opens their Casa profile (§20).
+                <Text
+                  key="contributor"
+                  className="text-[11px] font-semibold"
+                  style={{ color: Colors.darkGold }}
+                  onPress={item.contributor.id ? () => router.push(`/user/${item.contributor!.id}`) : undefined}
+                  accessibilityRole="link"
+                >
+                  {item.contributor.display_name}
+                </Text>
+              ) : null,
+              relativeTime(item.published_at),
+            ]
               .filter(Boolean)
-              .join(' · ')}
+              .flatMap((part, i) => (i === 0 ? [part] : [' · ', part]))}
           </Text>
           {item.description ? (
             <Text

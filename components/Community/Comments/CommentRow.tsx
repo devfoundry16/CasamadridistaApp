@@ -3,6 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Text } from '@/components/Text';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { Heart } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
 import type { Comment } from '@/services/CommentService';
@@ -24,6 +25,7 @@ const PLACEHOLDER = require('@/assets/images/placeholder_avatar.png');
 
 export default function CommentRow({ comment, onReply, targetKind = 'post' }: Props) {
   const { t } = useTranslation();
+  const router = useRouter();
   const [liked, setLiked]         = useState(false);
   const [likeCount, setLikeCount] = useState(comment.like_count);
 
@@ -44,17 +46,27 @@ export default function CommentRow({ comment, onReply, targetKind = 'post' }: Pr
     .filter(Boolean)
     .join(' ') || t('community.madridista');
 
+  // A commenter's name opens their profile (§20).
+  const authorId = comment.author?.id ?? comment.author_id ?? null;
+  const openAuthor = () => {
+    if (authorId) router.push(`/user/${authorId}`);
+  };
+
   return (
     <View className="flex-row px-4 py-3 border-b" style={{ borderColor: Colors.border.default }}>
-      <Image
-        source={comment.author?.avatar_url ? { uri: comment.author.avatar_url } : PLACEHOLDER}
-        style={{ width: 32, height: 32, borderRadius: 16 }}
-        contentFit="cover"
-      />
+      <TouchableOpacity onPress={openAuthor} activeOpacity={0.8} disabled={!authorId} accessibilityRole="button" accessibilityLabel={authorName}>
+        <Image
+          source={comment.author?.avatar_url ? { uri: comment.author.avatar_url } : PLACEHOLDER}
+          style={{ width: 32, height: 32, borderRadius: 16 }}
+          contentFit="cover"
+        />
+      </TouchableOpacity>
       {/* marginStart, not ml-2: the avatar must stay on the leading edge in RTL. */}
       <View className="flex-1" style={{ marginStart: 8 }}>
         <View className="flex-row items-center justify-between">
-          <Text className="font-semibold text-sm" style={{ color: Colors.text.primary }}>{authorName}</Text>
+          <TouchableOpacity onPress={openAuthor} activeOpacity={0.8} disabled={!authorId}>
+            <Text className="font-semibold text-sm" style={{ color: Colors.text.primary }}>{authorName}</Text>
+          </TouchableOpacity>
           <Text className="text-xs" style={{ color: Colors.text.muted }}>
             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
           </Text>

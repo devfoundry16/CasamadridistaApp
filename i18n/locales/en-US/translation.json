@@ -1322,5 +1322,254 @@
       "reserveFailedTitle": "Could not start every upload",
       "reserveFailedBody": "Your post was saved as a draft rather than published, so it cannot go live missing a file. Open it and retry the uploads."
     }
+  },
+  "social": {
+    "account": {
+      "myProfile": "My profile",
+      "friends": "Friends",
+      "messages": "Messages"
+    },
+    "actions": {
+      "addFriend": "Add friend",
+      "add": "Add",
+      "requested": "Requested",
+      "cancelRequestHint": "Cancels your friend request",
+      "accept": "Accept",
+      "decline": "Decline",
+      "friends": "Friends",
+      "message": "Message",
+      "remove": "Remove friend",
+      "block": "Block",
+      "blocked": "Blocked",
+      "unblock": "Unblock",
+      "unblockHint": "Unblocks this person",
+      "editProfile": "Edit profile"
+    },
+    "confirm": {
+      "removeTitle": "Remove {{name}}?",
+      "removeBody": "You will no longer be friends. Your conversation stays.",
+      "blockTitle": "Block {{name}}?",
+      "blockBody": "They won't be able to find your profile, send you requests or message you. They won't be told. Blocking also ends your friendship."
+    },
+    "profile": {
+      "title": "Profile",
+      "posts": "Posts",
+      "friends": "Friends",
+      "joined": "Joined",
+      "member": "Madridista member",
+      "verified": "Verified",
+      "more": "More options",
+      "report": "Report profile",
+      "unavailableTitle": "This profile isn't available",
+      "unavailableBody": "The account may have been removed, or you may not have access to it.",
+      "youBlocked": "You blocked {{name}}. Unblock to see their posts and message them.",
+      "noPosts": "{{name}} hasn't posted yet.",
+      "noPostsSelf": "Your posts in Community will appear here."
+    },
+    "presence": {
+      "online": "Online",
+      "activeMinutes_one": "Active {{count}} minute ago",
+      "activeMinutes_other": "Active {{count}} minutes ago",
+      "activeHours_one": "Active {{count}} hour ago",
+      "activeHours_other": "Active {{count}} hours ago",
+      "activeDays_one": "Active yesterday",
+      "activeDays_other": "Active {{count}} days ago"
+    },
+    "claim": {
+      "title": "Claim your @username",
+      "body": "So friends can find you. It only takes a second."
+    },
+    "edit": {
+      "title": "Edit profile",
+      "displayName": "Display name",
+      "username": "Username",
+      "usernameHint": "3–20 characters: letters, numbers, . and _",
+      "bio": "Bio",
+      "bioPlaceholder": "Tell Madridistas about yourself",
+      "showActivity": "Show activity status",
+      "showActivityHint": "When this is off, nobody sees when you're online or when you were last active — and you won't see theirs.",
+      "photoHint": "Change your photo from the Account tab."
+    },
+    "username": {
+      "required": "Choose a username.",
+      "too_short": "At least 3 characters.",
+      "too_long": "20 characters at most.",
+      "invalid_start": "Start with a letter.",
+      "invalid_characters": "Only letters, numbers, . and _.",
+      "consecutive_dots": "No two dots in a row.",
+      "trailing_dot": "Can't end with a dot.",
+      "reserved": "That username is reserved.",
+      "taken": "That username is taken."
+    },
+    "friends": {
+      "title": "Friends",
+      "searchPlaceholder": "Search by name or @username",
+      "clearSearch": "Clear search",
+      "myCountry": "My country",
+      "myFanClub": "My fan club",
+      "tabFriends": "Friends",
+      "tabRequests": "Requests",
+      "tabSuggested": "Suggested",
+      "section_incoming": "RECEIVED",
+      "section_outgoing": "SENT",
+      "mutual_one": "{{count}} mutual friend",
+      "mutual_other": "{{count}} mutual friends",
+      "reason_fan_club": "In your fan club",
+      "reason_country": "In your country",
+      "noResults": "No Madridistas found",
+      "empty_friends": "No friends yet",
+      "emptyBody_friends": "Find people you know, or someone from your fan club.",
+      "empty_requests": "No requests",
+      "emptyBody_requests": "Friend requests you send and receive appear here.",
+      "empty_suggested": "No suggestions yet",
+      "emptyBody_suggested": "Join a fan club or add friends and we'll suggest people you may know."
+    },
+    "inbox": {
+      "title": "Messages",
+      "tabInbox": "Inbox",
+      "tabRequests": "Requests",
+      "newMessage": "New message",
+      "requestsHint": "Messages from people who aren't your friends. They won't know you've seen them until you reply or accept.",
+      "emptyTitle": "No messages yet",
+      "emptyBody": "Start a conversation with a friend, or send them something from Casa Media.",
+      "emptyRequestsTitle": "No message requests",
+      "emptyRequestsBody": "When someone who isn't your friend messages you, it waits here.",
+      "findFriends": "Find friends",
+      "unreadCount_one": "{{count}} unread message",
+      "unreadCount_other": "{{count}} unread messages",
+      "buttonWithCount_one": "Messages, {{count}} unread",
+      "buttonWithCount_other": "Messages, {{count}} unread"
+    },
+    "preview": {
+      "you": "You: {{text}}",
+      "photo": "Photo",
+      "removed": "Message removed",
+      "empty": "",
+      "share_post": "Shared a post",
+      "share_media_item": "Shared from Casa Media",
+      "share_profile": "Shared a profile",
+      "share": "Shared something"
+    },
+    "receipt": {
+      "pending": "Sending",
+      "failed": "Not sent",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "seen": "Seen"
+    },
+    "thread": {
+      "typing": "typing…",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "emptyBody": "Say hello. Messages are private between the two of you.",
+      "requestBanner": "{{name}} wants to send you a message. Accept to reply — they won't know you've seen it until you do.",
+      "delete": "Delete",
+      "deleteRequestTitle": "Delete this request?",
+      "deleteRequestBody": "It will leave your requests. If they write again, it comes back.",
+      "youBlocked": "You blocked {{name}}. Unblock them from their profile to reply.",
+      "cannotReply": "You can't reply to this conversation.",
+      "removed": "This message was removed",
+      "notSent": "Not sent · tap to retry",
+      "retry": "Try again",
+      "discard": "Delete",
+      "copy": "Copy",
+      "report": "Report message",
+      "longPressHint": "Long press for options",
+      "openProfile": "Open {{name}}'s profile",
+      "unavailableTitle": "Conversation not available",
+      "unavailableBody": "It may have been removed."
+    },
+    "composer": {
+      "placeholder": "Message…",
+      "send": "Send",
+      "addPhoto": "Add photo",
+      "removePhoto": "Remove photo"
+    },
+    "embed": {
+      "post": "Community post",
+      "media_item": "Casa Media",
+      "profile": "Profile",
+      "exclusive": "Exclusive",
+      "unavailable": "{{kind}} no longer available"
+    },
+    "share": {
+      "title": "Send to friends",
+      "toFriend": "Send to a friend",
+      "toFriendCaption": "Share it privately in Messages",
+      "elsewhere": "Share elsewhere",
+      "searchFriends": "Search friends",
+      "notePlaceholder": "Add a note (optional)",
+      "pick": "Choose friends",
+      "send_one": "Send to {{count}} friend",
+      "send_other": "Send to {{count}} friends",
+      "sentTitle": "Sent",
+      "sentBody_one": "Sent to {{count}} friend.",
+      "sentBody_other": "Sent to {{count}} friends.",
+      "partialTitle": "Some weren't sent",
+      "partialBody": "Couldn't send to {{names}}. They're still selected so you can try again.",
+      "noFriends": "Add friends to share with them here.",
+      "noMatches": "No friends match.",
+      "postFallback": "Check out this post on Casa Madridista!"
+    },
+    "report": {
+      "titleMessage": "Report message",
+      "titleProfile": "Report profile",
+      "privacy": "They won't know who reported them. Our Trust & Safety team only sees the reported message and the few before it.",
+      "reasons": {
+        "spam": "Spam",
+        "harassment": "Harassment or bullying",
+        "hate": "Hate speech",
+        "sexual": "Sexual content",
+        "impersonation": "Impersonation",
+        "scam": "Scam or fraud",
+        "threat": "Threats or violence",
+        "other": "Something else"
+      },
+      "reasonHints": {
+        "spam": "Repeated, unwanted or promotional messages",
+        "harassment": "Insults, intimidation or targeting",
+        "hate": "Attacks on people for who they are",
+        "sexual": "Nudity or sexual messages",
+        "impersonation": "Pretending to be someone else, or the club",
+        "scam": "Fake offers, tickets or requests for money",
+        "threat": "Threats of harm to you or others",
+        "other": "Tell us what happened"
+      },
+      "detailsPlaceholder": "Anything else we should know? (optional)",
+      "detailsRequiredTitle": "Tell us more",
+      "detailsRequiredBody": "Please describe what happened so we can review it.",
+      "submit": "Submit report",
+      "doneTitle": "Thanks for telling us",
+      "doneBody": "We'll review it. You can also block this person."
+    },
+    "blocked": {
+      "title": "Blocked accounts",
+      "emptyTitle": "You haven't blocked anyone",
+      "emptyBody": "People you block appear here, so you can unblock them."
+    },
+    "notifications": {
+      "channelName": "Messages",
+      "friend_request": "{{name}} sent you a friend request",
+      "friend_accept": "{{name}} accepted your friend request"
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "network_error": "Check your connection and try again.",
+      "blocked": "You can't message this person.",
+      "not_found": "This isn't available anymore.",
+      "request_limit": "Wait for them to accept your request before sending more.",
+      "message_blocked": "This message can't be sent because it may break our community rules.",
+      "attachment_not_uploaded": "The photo didn't finish uploading. Try again.",
+      "attachment_too_large": "That photo is too large.",
+      "upload_failed": "The photo couldn't be uploaded. Try again.",
+      "invalid_embed": "That can't be shared.",
+      "too_many_recipients": "You can send to up to 20 friends at once.",
+      "friend_limit": "You've reached the friend limit.",
+      "not_allowed": "That isn't possible right now.",
+      "self": "You can't do that with your own account.",
+      "account_restricted": "Your account is restricted.",
+      "empty": "Write a message first.",
+      "body_too_long": "That message is too long."
+    }
   }
 }

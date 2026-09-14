@@ -1,5 +1,6 @@
 import { useRouter, type Href } from 'expo-router';
 import React, { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { relativeTime } from '@/components/Media/time';
@@ -18,7 +19,17 @@ interface Props {
 /** One inbox row. Unread rows carry a gold dot and a slightly lifted background. */
 function NotificationRow({ notification, onRead }: Props) {
   const router = useRouter();
+  const { t } = useTranslation();
   const unread = !notification.read_at;
+
+  // Social rows are localised from their payload; the stored title is English
+  // for clients that render it verbatim.
+  const type = notification.data?.type;
+  const actor = notification.data?.actor_name;
+  const title =
+    (type === 'friend_request' || type === 'friend_accept') && actor
+      ? t(`social.notifications.${type}`, { name: actor })
+      : notification.title ?? '';
 
   const handlePress = () => {
     if (unread) onRead(notification.id);
@@ -34,7 +45,7 @@ function NotificationRow({ notification, onRead }: Props) {
     <Touchable
       onPress={handlePress}
       accessibilityRole="button"
-      accessibilityLabel={notification.title ?? undefined}
+      accessibilityLabel={title || undefined}
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
@@ -71,7 +82,7 @@ function NotificationRow({ notification, onRead }: Props) {
           style={{ color: Colors.text.primary }}
           numberOfLines={2}
         >
-          {notification.title ?? ''}
+          {title}
         </Text>
         {notification.body ? (
           <Text

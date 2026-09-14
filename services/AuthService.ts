@@ -38,10 +38,39 @@ export interface LoginResponse {
   user: User;
 }
 
+type TokenListener = (accessToken: string | null) => void;
+
 class AuthServiceClass {
   private readonly AUTH_TOKEN_KEY = 'auth_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly USER_KEY = 'user_data';
+  private tokenListeners = new Set<TokenListener>();
+
+  /**
+   * Called whenever the access token changes: sign-in, refresh, sign-out.
+   *
+   * Casa Social's Realtime connection authenticates with this token directly
+   * (`supabase.realtime.setAuth`). It must NOT be handed to
+   * `supabase.auth.setSession`: that would start supabase-js refreshing the same
+   * rotating refresh token this service already refreshes through the backend,
+   * and whichever lost the race would sign the user out.
+   */
+  onTokenChange(listener: TokenListener): () => void {
+    this.tokenListeners.add(listener);
+    return () => {
+      this.tokenListeners.delete(listener);
+    };
+  }
+
+  private emitToken(token: string | null): void {
+    for (const listener of this.tokenListeners) {
+      try {
+        listener(token);
+      } catch {
+        // A listener must never break authentication.
+      }
+    }
+  }
 
   /**
    * Get authorization header
@@ -63,6 +92,7 @@ class AuthServiceClass {
       [this.REFRESH_TOKEN_KEY, refreshToken],
       [this.USER_KEY, JSON.stringify(user)],
     ]);
+    this.emitToken(accessToken);
   }
 
   /**
@@ -136,6 +166,7 @@ class AuthServiceClass {
       this.REFRESH_TOKEN_KEY,
       this.USER_KEY,
     ]);
+    this.emitToken(null);
   }
 
   /**
@@ -383,6 +414,7 @@ class AuthServiceClass {
         [this.AUTH_TOKEN_KEY, access_token],
         [this.REFRESH_TOKEN_KEY, new_refresh_token],
       ]);
+      this.emitToken(access_token);
 
       return access_token;
     } catch (error: any) {

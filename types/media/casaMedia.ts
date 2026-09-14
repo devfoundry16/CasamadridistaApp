@@ -296,7 +296,8 @@ export function isMediaCollection(value: string): value is MediaCollection {
   return (MEDIA_COLLECTIONS as readonly string[]).includes(value);
 }
 
-export type MediaShareChannel = 'community' | 'copy_link' | 'external';
+/** `engagementService.SHARE_CHANNELS`, verbatim. `dm` is "Send to a friend" (§37, §38). */
+export type MediaShareChannel = 'community' | 'copy_link' | 'external' | 'dm';
 
 /**
  * The server's event vocabulary — `eventService.EVENT_TYPES`, verbatim. An

@@ -11,6 +11,8 @@ import { buildDeviceBody } from '@/services/media/wire';
 
 const TOKEN_KEY = 'expo_push_token';
 const ANDROID_CHANNEL_ID = 'casa-media';
+/** Must equal `channelId` in backend/services/social/dmPushService.js. */
+const MESSAGES_CHANNEL_ID = 'messages';
 
 export type PushRegistrationOutcome =
   | 'registered'
@@ -71,6 +73,15 @@ class PushServiceClass {
       await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL_ID, {
         name: i18n.t('notifications.channelName'),
         importance: Notifications.AndroidImportance.DEFAULT,
+        lightColor: Colors.darkGold,
+      });
+      // Direct messages get their own channel so a person can silence match-day
+      // media without silencing friends, and so a message can use higher
+      // importance than a campaign. The id is what dmPushService sends as
+      // `channelId`; an unknown channel id is dropped silently on Android 8+.
+      await Notifications.setNotificationChannelAsync(MESSAGES_CHANNEL_ID, {
+        name: i18n.t('social.notifications.channelName'),
+        importance: Notifications.AndroidImportance.HIGH,
         lightColor: Colors.darkGold,
       });
     } catch {
@@ -146,7 +157,10 @@ class PushServiceClass {
         buildDeviceBody({
           expoPushToken: token,
           platform: Platform.OS === 'ios' ? 'ios' : Platform.OS === 'android' ? 'android' : 'web',
-          topics: ['media'],
+          // `dm`: direct-message pushes (backend dmPushService only sends to
+          // devices that registered it — a build that cannot open a
+          // conversation never does).
+          topics: ['media', 'dm'],
           locale: i18n.language,
           appVersion: Constants.expoConfig?.version ?? null,
           deviceName: Device.modelName ?? null,

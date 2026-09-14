@@ -2,6 +2,7 @@
 import i18n, { needsRestartForDirection } from "@/i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MediaAuthSync from "@/components/Auth/MediaAuthSync";
+import SocialRealtimeSync from "@/components/Social/SocialRealtimeSync";
 import { useNotificationRouting } from "@/hooks/useNotificationRouting";
 import { usePushRegistration } from "@/hooks/usePushRegistration";
 import AnalyticsService from "@/services/AnalyticsService";
@@ -67,6 +68,9 @@ function RootLayoutNav() {
   return (
     <>
       <StatusBar style="auto" />
+      {/* Inside the router tree: it reads the pathname to tell an open thread
+          from a background one. */}
+      <SocialRealtimeSync />
       <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
         <Stack.Screen
           name="(tabs)"
@@ -319,6 +323,31 @@ function RootLayoutNav() {
         <Stack.Screen
           name="notifications/index"
           options={{ title: t("notifications.title"), ...options }}
+        />
+        {/* Casa Social. Titles are set by each screen once its data loads. */}
+        <Stack.Screen
+          name="user/[id]"
+          options={{ title: t("social.profile.title"), ...options }}
+        />
+        <Stack.Screen
+          name="account/profile"
+          options={{ title: t("social.edit.title"), ...options }}
+        />
+        <Stack.Screen
+          name="social/friends"
+          options={{ title: t("social.friends.title"), ...options }}
+        />
+        <Stack.Screen
+          name="social/messages"
+          options={{ title: t("social.inbox.title"), ...options }}
+        />
+        <Stack.Screen
+          name="social/blocked"
+          options={{ title: t("social.blocked.title"), ...options }}
+        />
+        <Stack.Screen
+          name="social/chat/[id]"
+          options={{ title: "", ...options, headerTitleAlign: "left" }}
         />
         {/* Contributor area (Milestone E). Headers on, because these are
             editorial screens reached from Account, not immersive media. */}
