@@ -21,6 +21,7 @@ import {
   parseReturnTo,
 } from '../returnTo.core.ts';
 import { WIDTH_LADDER, appendWidth, isResizable, pickWidth } from '../mediaUrl.core.ts';
+import { followReturnHref } from '../../hooks/media/collections.ts';
 
 const NOW = 1_700_000_000_000;
 
@@ -125,6 +126,33 @@ describe('mediaUrl.core', () => {
     assert.equal(
       appendWidth('https://cdn.example/v/manifest.m3u8', 640),
       'https://cdn.example/v/manifest.m3u8',
+    );
+  });
+});
+
+describe('collections — followReturnHref', () => {
+  const UUID = '3f1a2b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b';
+
+  it('sends each follow kind back to the screen that offers the toggle', () => {
+    // A match follow is only offered on the match's media tab; a category
+    // follow only in the collection list's header. Two route shapes, which is
+    // what one hardcoded href could not be.
+    assert.equal(followReturnHref('match', '12345'), '/match/12345/media');
+    assert.equal(followReturnHref('category', UUID), `/media/list/all?category=${UUID}`);
+  });
+
+  it('produces a path returnTo will actually accept', () => {
+    // The value this replaced (`/media/match/<id>`) passed this check too and
+    // still led nowhere — isSafeReturnHref proves the shape, not the route — so
+    // assert the shape here and keep the route itself pinned above.
+    assert.equal(isSafeReturnHref(followReturnHref('match', '12345')), true);
+    assert.equal(isSafeReturnHref(followReturnHref('category', UUID)), true);
+  });
+
+  it('encodes the ref so it cannot open a second query param', () => {
+    assert.equal(
+      followReturnHref('category', 'a&surface=push'),
+      '/media/list/all?category=a%26surface%3Dpush',
     );
   });
 });

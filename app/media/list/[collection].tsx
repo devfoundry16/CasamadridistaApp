@@ -81,9 +81,12 @@ export default function MediaCollectionScreen() {
   const title = isSaved ? t('casaMedia.saved') : t(collectionTitleKey(resolved));
 
   // §26 — following a category. `category` is "uuid **or** slug" (the backend
-  // resolves both), but a follow row stores an id, so the button only appears
-  // when we actually have one. A slug would be refused server-side and the
-  // toggle would flip back, which is worse than no toggle.
+  // resolves both for filtering), but a follow row stores an id, so the button
+  // only appears when we actually have one. A slug would be refused server-side
+  // and the toggle would flip back, which is worse than no toggle.
+  //
+  // The hub chip sends the id, so this holds in practice; the guard stays for
+  // any future entry point that carries a slug.
   const categoryId = category && UUID_RE.test(category) ? category : null;
 
   return (

@@ -335,7 +335,8 @@ export type MediaEventType = (typeof MEDIA_EVENT_TYPES)[number];
 export type MediaEventName = MediaEventType | 'signup_cta_click' | 'share_click';
 
 /**
- * Which surface the user came from — `eventService.EVENT_SOURCES`, verbatim.
+ * Which surface the user came from —
+ * `backend/services/casaMedia/eventRules.js#EVENT_SURFACES`, verbatim.
  *
  * Without this, "Community teaser → Media" (§41) and every per-surface question
  * are unanswerable from the data as stored: an `item_view` records that an item

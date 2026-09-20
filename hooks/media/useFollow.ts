@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import CasaMediaService from '@/services/CasaMediaService';
 import type { MediaFollowKind, MediaFollows } from '@/types/media/casaMedia';
+import { followReturnHref } from './collections';
 import { mediaKeys } from './keys';
 
 const EMPTY: MediaFollows = { match: [], category: [] };
@@ -73,9 +74,9 @@ export function useFollow(kind: MediaFollowKind, refId: string | number | null |
     if (!ref) return;
     // A follow belongs to an account. Send an anonymous viewer through the auth
     // gate and back to where they were, the same way like and save do.
-    if (!requireAuth({ href: `/media/match/${ref}` })) return;
+    if (!requireAuth({ href: followReturnHref(kind, ref) })) return;
     mutation.mutate(!following);
-  }, [ref, requireAuth, mutation, following]);
+  }, [kind, ref, requireAuth, mutation, following]);
 
   return { following, toggle, isPending: mutation.isPending, enabled: !!ref };
 }

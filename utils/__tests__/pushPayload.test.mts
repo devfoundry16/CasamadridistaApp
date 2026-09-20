@@ -21,22 +21,49 @@ const href = (payload: any) => hrefFromPayloadWithScheme(payload, SCHEME);
 
 describe('pushPayload.core — hrefFromPayload', () => {
   it('routes a media item, and carries the campaign through', () => {
-    assert.equal(href({ v: 1, type: 'media_item', item_id: 'abc' }), '/media/item/abc');
+    assert.equal(
+      href({ v: 1, type: 'media_item', item_id: 'abc' }),
+      '/media/item/abc?surface=push',
+    );
     assert.equal(
       href({ v: 1, type: 'media_item', item_id: 'abc', campaign_id: 'c1' }),
-      '/media/item/abc?c=c1',
+      '/media/item/abc?c=c1&surface=push',
+    );
+  });
+
+  it('stamps the surface so a view that followed a push is attributable', () => {
+    // Without it the `item_view` lands with surface NULL and a push tap is
+    // indistinguishable from any other route in. The deeplink route (`/m/[id]`)
+    // has always done this; this branch was the asymmetry.
+    for (const payload of [
+      { v: 1, type: 'media_item', item_id: 'abc' },
+      { v: 1, type: 'media_item', item_id: 'abc', campaign_id: 'c1' },
+    ]) {
+      assert.match(href(payload)!, /[?&]surface=push$/);
+    }
+    // The campaign stays first, so existing links read the same up to the `&`.
+    assert.ok(
+      href({ v: 1, type: 'media_item', item_id: 'abc', campaign_id: 'c1' })!.startsWith(
+        '/media/item/abc?c=c1',
+      ),
     );
   });
 
   it('percent-encodes ids so a crafted id cannot inject a path or query', () => {
     assert.equal(
       href({ v: 1, type: 'media_item', item_id: '../../admin' }),
-      '/media/item/..%2F..%2Fadmin',
+      '/media/item/..%2F..%2Fadmin?surface=push',
     );
     assert.equal(
       href({ v: 1, type: 'media_item', item_id: 'a', campaign_id: 'x&y=1' }),
-      '/media/item/a?c=x%26y%3D1',
+      '/media/item/a?c=x%26y%3D1&surface=push',
     );
+  });
+
+  it('leaves a match push to the screen that owns its own surface', () => {
+    // MatchMediaScreen wraps itself in a `match` surface provider; stamping
+    // `push` on the href would take that identity away from the screen.
+    assert.equal(href({ v: 1, type: 'media_match', match_id: 7 }), '/match/7/media');
   });
 
   it('routes a match to its media tab', () => {
@@ -58,7 +85,7 @@ describe('pushPayload.core — hrefFromPayload', () => {
         item_id: 'abc',
         url: 'casamadridistaapp://account/wallet',
       }),
-      '/media/item/abc',
+      '/media/item/abc?surface=push',
     );
   });
 

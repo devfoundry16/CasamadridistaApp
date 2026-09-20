@@ -25,7 +25,18 @@ export function hrefFromPayloadWithScheme(
 ): string | null {
   if (!payload) return null;
 
-  const campaign = payload.campaign_id ? `?c=${encodeURIComponent(payload.campaign_id)}` : '';
+  /**
+   * `/media/item/[id]` is the only route that reads a `surface` param, so it is
+   * the only one stamped. A push into a fixture lands on `MatchMediaScreen`,
+   * which sets its own surface context (`match`), and overriding that from the
+   * href would take a screen's identity away from the screen.
+   */
+  const itemQuery = [
+    payload.campaign_id ? `c=${encodeURIComponent(payload.campaign_id)}` : '',
+    'surface=push',
+  ]
+    .filter(Boolean)
+    .join('&');
 
   switch (payload.type) {
     // Social ids become path segments, so they must be uuids — not merely
@@ -37,7 +48,7 @@ export function hrefFromPayloadWithScheme(
       return isUuid(payload.user_id) ? `/user/${payload.user_id}` : '/social/friends';
     case 'media_item':
       return payload.item_id
-        ? `/media/item/${encodeURIComponent(payload.item_id)}${campaign}`
+        ? `/media/item/${encodeURIComponent(payload.item_id)}?${itemQuery}`
         : null;
     case 'media_match':
       return payload.match_id ? `/match/${payload.match_id}/media` : null;

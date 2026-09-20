@@ -164,10 +164,15 @@ export default function MediaHubScreen() {
                 onPress={() =>
                   router.push({
                     pathname: '/media/list/[collection]',
-                    // The chip filters by category and nothing else — the
-                    // backend resolves the slug. Pairing it with `exclusive`
-                    // would AND the two filters and hide most of the category.
-                    params: { collection: 'all', category: category.slug },
+                    // The chip filters by category and nothing else. Pairing it
+                    // with `exclusive` would AND the two filters and hide most
+                    // of the category.
+                    //
+                    // The id, not the slug: `resolveCategoryId` accepts either
+                    // for filtering, but a follow row stores an id, so sending
+                    // the slug left the §26 "Notify me" toggle unable to render
+                    // on a screen that is its only home.
+                    params: { collection: 'all', category: category.id },
                   })
                 }
               />

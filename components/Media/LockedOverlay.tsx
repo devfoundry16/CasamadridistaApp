@@ -73,7 +73,10 @@ export default function LockedOverlay({ item, variant = 'card', compact = false 
       router.push('/account/subscription');
       return;
     }
-    requireAuth({ href, mediaId: item.id, mode: 'register' });
+    // `surface` passed explicitly: the gate is generic and deliberately has no
+    // default for it, so the teaser CTA would otherwise land with no surface at
+    // all — which is what made a push-originated signup unattributable.
+    requireAuth({ href, mediaId: item.id, mode: 'register', surface });
   };
 
   return (

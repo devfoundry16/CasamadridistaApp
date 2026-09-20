@@ -15,6 +15,7 @@ import EngagementBar from '@/components/Media/EngagementBar';
 import GalleryGrid from '@/components/Media/GalleryGrid';
 import LockedOverlay from '@/components/Media/LockedOverlay';
 import MediaCover from '@/components/Media/MediaCover';
+import { MediaSurfaceProvider } from '@/components/Media/MediaSurfaceContext';
 import { relativeTime } from '@/components/Media/time';
 import MediaVideoPlayer from '@/components/Media/Video/MediaVideoPlayer';
 import ErrorState from '@/components/Team/ErrorState';
@@ -54,16 +55,26 @@ export default function MediaItemScreen() {
   const wantsPlayback = !!item && !item.locked && item.type === 'video';
   const { data: playback } = useMediaPlayback(id, wantsPlayback);
 
+  // The view is keyed on these primitives, never on `item` itself: that is a
+  // React Query object, so every background refetch hands back a fresh
+  // reference and fires a second `item_view` plus a second `recordViews` for a
+  // single open. `locked` stays in the list on purpose — a teaser cached while
+  // signed out is replaced by the full payload once the user signs in, and that
+  // unlock is the first moment this open counts as a view.
+  const itemId = item?.id;
+  const itemLocked = item?.locked;
+  const itemMatchId = item?.match_id;
+
   useEffect(() => {
-    if (!item || item.locked) return;
+    if (!itemId || itemLocked) return;
     AnalyticsService.track('item_view', {
-      item_id: item.id,
-      match_id: item.match_id ?? undefined,
+      item_id: itemId,
+      match_id: itemMatchId ?? undefined,
       campaign_id: campaignId,
       ...(eventSurface ? { surface: eventSurface } : {}),
     });
-    void CasaMediaService.recordViews([item.id]);
-  }, [item, campaignId, eventSurface]);
+    void CasaMediaService.recordViews([itemId]);
+  }, [itemId, itemLocked, itemMatchId, campaignId, eventSurface]);
 
   const openViewer = useCallback(
     (index: number) =>
@@ -100,92 +111,98 @@ export default function MediaItemScreen() {
   const videoUri = playbackAsset?.hls_url ?? playbackAsset?.url ?? videoAsset?.hls_url ?? videoAsset?.url;
   const photos = item.locked ? [] : assets.filter(isViewableMediaPhoto);
 
+  // One surface for every descendant of this screen. Without this provider
+  // `LockedOverlay` reads the context default and a push landing on a locked
+  // item reports `media` — and a locked item has no `item_view`, so its
+  // `locked_view` is the only record of that arrival.
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <View>
-          {!item.locked && videoUri ? (
-            <MediaVideoPlayer
-              itemId={item.id}
-              uri={videoUri}
-              height={coverHeight}
-              surface={eventSurface}
-            />
-          ) : (
-            <MediaCover item={item} width={width} height={coverHeight} radius={0} />
-          )}
-          {item.locked ? <LockedOverlay item={item} variant="full" /> : null}
-        </View>
-
-        <View style={{ padding: 16 }}>
-          <Text className="text-[19px] font-bold" style={{ color: Colors.text.primary }}>
-            {item.title ?? ''}
-          </Text>
-          <Text className="text-[11px]" style={{ color: Colors.text.tertiary, marginTop: 6 }}>
-            {[
-              item.category?.name,
-              item.contributor?.display_name ? (
-                // The contributor's byline opens their Casa profile (§20).
-                <Text
-                  key="contributor"
-                  className="text-[11px] font-semibold"
-                  style={{ color: Colors.darkGold }}
-                  onPress={item.contributor.id ? () => router.push(`/user/${item.contributor!.id}`) : undefined}
-                  accessibilityRole="link"
-                >
-                  {item.contributor.display_name}
-                </Text>
-              ) : null,
-              relativeTime(item.published_at),
-            ]
-              .filter(Boolean)
-              .flatMap((part, i) => (i === 0 ? [part] : [' · ', part]))}
-          </Text>
-          {item.description ? (
-            <Text
-              className="text-[14px] leading-6"
-              style={{ color: Colors.text.secondary, marginTop: 12 }}
-            >
-              {item.description}
-            </Text>
-          ) : null}
-        </View>
-
-        <EngagementBar item={item} />
-
-        {!item.locked && photos.length > 0 ? (
-          <View style={{ marginTop: 16 }}>
-            <GalleryGrid assets={photos} onPressAsset={openViewer} />
+    <MediaSurfaceProvider surface={eventSurface ?? 'media'}>
+      <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+          <View>
+            {!item.locked && videoUri ? (
+              <MediaVideoPlayer
+                itemId={item.id}
+                uri={videoUri}
+                height={coverHeight}
+                surface={eventSurface}
+              />
+            ) : (
+              <MediaCover item={item} width={width} height={coverHeight} radius={0} />
+            )}
+            {item.locked ? <LockedOverlay item={item} variant="full" /> : null}
           </View>
-        ) : null}
-      </ScrollView>
 
-      <Touchable
-        onPress={() => (router.canGoBack() ? router.back() : router.replace('/media'))}
-        accessibilityRole="button"
-        accessibilityLabel={t('common.back')}
-        style={({ pressed }) => ({
-          position: 'absolute',
-          top: insets.top + 6,
-          // `start`, not `left`: the back affordance mirrors under RTL.
-          start: 10,
-          width: 38,
-          height: 38,
-          borderRadius: 19,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          opacity: pressed ? 0.7 : 1,
-        })}
-      >
-        {/* The glyph itself has a direction; `start` only mirrors its position. */}
-        {I18nManager.isRTL ? (
-          <ChevronRight size={22} color={Colors.textWhite} />
-        ) : (
-          <ChevronLeft size={22} color={Colors.textWhite} />
-        )}
-      </Touchable>
-    </View>
+          <View style={{ padding: 16 }}>
+            <Text className="text-[19px] font-bold" style={{ color: Colors.text.primary }}>
+              {item.title ?? ''}
+            </Text>
+            <Text className="text-[11px]" style={{ color: Colors.text.tertiary, marginTop: 6 }}>
+              {[
+                item.category?.name,
+                item.contributor?.display_name ? (
+                  // The contributor's byline opens their Casa profile (§20).
+                  <Text
+                    key="contributor"
+                    className="text-[11px] font-semibold"
+                    style={{ color: Colors.darkGold }}
+                    onPress={item.contributor.id ? () => router.push(`/user/${item.contributor!.id}`) : undefined}
+                    accessibilityRole="link"
+                  >
+                    {item.contributor.display_name}
+                  </Text>
+                ) : null,
+                relativeTime(item.published_at),
+              ]
+                .filter(Boolean)
+                .flatMap((part, i) => (i === 0 ? [part] : [' · ', part]))}
+            </Text>
+            {item.description ? (
+              <Text
+                className="text-[14px] leading-6"
+                style={{ color: Colors.text.secondary, marginTop: 12 }}
+              >
+                {item.description}
+              </Text>
+            ) : null}
+          </View>
+
+          <EngagementBar item={item} />
+
+          {!item.locked && photos.length > 0 ? (
+            <View style={{ marginTop: 16 }}>
+              <GalleryGrid assets={photos} onPressAsset={openViewer} />
+            </View>
+          ) : null}
+        </ScrollView>
+
+        <Touchable
+          onPress={() => (router.canGoBack() ? router.back() : router.replace('/media'))}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+          style={({ pressed }) => ({
+            position: 'absolute',
+            top: insets.top + 6,
+            // `start`, not `left`: the back affordance mirrors under RTL.
+            start: 10,
+            width: 38,
+            height: 38,
+            borderRadius: 19,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            opacity: pressed ? 0.7 : 1,
+          })}
+        >
+          {/* The glyph itself has a direction; `start` only mirrors its position. */}
+          {I18nManager.isRTL ? (
+            <ChevronRight size={22} color={Colors.textWhite} />
+          ) : (
+            <ChevronLeft size={22} color={Colors.textWhite} />
+          )}
+        </Touchable>
+      </View>
+    </MediaSurfaceProvider>
   );
 }
 
