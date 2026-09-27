@@ -784,6 +784,7 @@
     "selectFanClub": "Select Fan Club",
     "reply": "Reply",
     "madridista": "Madridista",
+    "casaAuthor": "Casa Madridista",
     "unknown": "Unknown",
     "defaultUser": "user",
     "postNotFound": "Post not found.",
@@ -831,7 +832,11 @@
     "reasonMisinformation": "Misinformation",
     "reasonMisinformationDesc": "False or misleading content",
     "reasonOther": "Other",
-    "reasonOtherDesc": "Another reason"
+    "reasonOtherDesc": "Another reason",
+    "accountRestricted": "Your account is restricted, so you can't post or comment right now. Contact support if you think this is a mistake.",
+    "postNotEditable": "This post can't be edited because it was removed or rejected.",
+    "useModerationRemove": "Use the moderation dashboard to remove other people's posts.",
+    "useModerationRemoveComment": "Use the moderation dashboard to remove other people's comments."
   },
   "membershipPackages": {
     "halaGold": {
@@ -906,7 +911,11 @@
     "payoutRequested": "Payout of ${{amount}} requested",
     "payoutFailed": "Payout request failed",
     "revenueShare": "Revenue Share",
-    "payout": "Payout"
+    "payout": "Payout",
+    "loadFailed": "Failed to load dashboard",
+    "switchClub": "Choose a club",
+    "unnamedClub": "Unnamed club",
+    "payoutNotAllowed": "Only club owners and admins can request payouts."
   },
   "admin": {
     "title": "Super Admin Panel",
@@ -1040,6 +1049,10 @@
     "shareToCommunityCaption": "Post it to the Madridista feed",
     "sharedToCommunityTitle": "Shared",
     "sharedToCommunityBody": "Your post is now in the community feed.",
+    "sharedToCommunityPendingTitle": "Sent for review",
+    "sharedToCommunityPendingBody": "Your post will appear in the community feed once it has been reviewed.",
+    "shareNotPublished": "This hasn't been published yet, so it can't be shared to the community.",
+    "shareNotShareable": "This item can't be shared to the community.",
     "copyLink": "Copy link",
     "linkCopied": "Link copied",
     "shareExternal": "Share elsewhere",

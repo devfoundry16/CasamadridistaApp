@@ -85,7 +85,13 @@ export default function DashboardRevenueScreen() {
             await loadRevenue(1);
             setIsLoading(false);
           } catch (e: any) {
-            Alert.alert(t("common.error"), e.message || t("fanClubDashboard.payoutFailed"));
+            const code = e?.response?.data?.error;
+            Alert.alert(
+              t("common.error"),
+              code === 'insufficient_club_role'
+                ? t("fanClubDashboard.payoutNotAllowed")
+                : e.message || t("fanClubDashboard.payoutFailed"),
+            );
           } finally {
             setIsRequesting(false);
           }
@@ -115,7 +121,12 @@ export default function DashboardRevenueScreen() {
         <Text className="text-xl font-bold text-text-primary">{t("fanClubDashboard.revenuePayouts")}</Text>
       </View>
 
-      {/* Payout Request Form */}
+      {/* Payout Request Form — owners and admins only; an editor sees why instead. */}
+      {!FanClubDashboardService.canRequestPayout ? (
+        <View className="mx-4 mt-4 mb-2 bg-bg-card rounded-2xl p-4">
+          <Text className="text-text-secondary">{t("fanClubDashboard.payoutNotAllowed")}</Text>
+        </View>
+      ) : (
       <View className="mx-4 mt-4 mb-2 bg-bg-card rounded-2xl p-4">
         <Text className="text-text-primary font-semibold mb-3">{t("fanClubDashboard.requestPayout")}</Text>
         <View className="flex-row gap-2">
@@ -140,6 +151,7 @@ export default function DashboardRevenueScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      )}
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">

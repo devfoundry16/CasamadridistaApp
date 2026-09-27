@@ -4,6 +4,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { Alert, Platform } from 'react-native';
 import i18n from '@/i18n';
 import { API_BASE_URL, supabase } from '@/config/supabase';
+import FanClubDashboardService from '@/services/FanClubDashboardService';
 
 // Interceptor-free axios instance used for auth endpoints (login, refresh) to avoid
 // the response interceptor triggering on these calls and causing circular refresh loops.
@@ -166,6 +167,10 @@ class AuthServiceClass {
       this.REFRESH_TOKEN_KEY,
       this.USER_KEY,
     ]);
+    // The fan club dashboard remembers which club it was showing. Dropped here,
+    // on every sign-out path (explicit or a failed refresh), so the next account
+    // never sends the previous one's club id.
+    FanClubDashboardService.selectClub(null);
     this.emitToken(null);
   }
 

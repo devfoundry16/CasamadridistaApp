@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
 import type { Post } from './FeedService';
+import i18n from '@/i18n';
 
 export interface CreatePostPayload {
   kind: 'text' | 'image' | 'video';
@@ -35,6 +36,11 @@ class PostServiceClass {
       const response = await axios.post<Post>(`${API_BASE_URL}posts`, payload, { headers });
       return response.data;
     } catch (error: any) {
+      // A restricted account is refused by the server; say so plainly rather
+      // than surfacing the raw `account_restricted` code.
+      if (error.response?.data?.error === 'account_restricted') {
+        throw new Error(i18n.t('community.accountRestricted'));
+      }
       throw new Error(error.response?.data?.error || 'Failed to create post');
     }
   }
@@ -45,6 +51,11 @@ class PostServiceClass {
       const response = await axios.patch<Post>(`${API_BASE_URL}posts/${id}`, payload, { headers });
       return response.data;
     } catch (error: any) {
+      // 409: the post was removed or rejected, and the backend no longer lets
+      // its author edit it back into the feed.
+      if (error.response?.data?.error === 'post_not_editable') {
+        throw new Error(i18n.t('community.postNotEditable'));
+      }
       throw new Error(error.response?.data?.error || 'Failed to update post');
     }
   }
@@ -54,6 +65,11 @@ class PostServiceClass {
       const headers = await this.getAuthHeader();
       await axios.delete(`${API_BASE_URL}posts/${id}`, { headers });
     } catch (error: any) {
+      // 409: a moderator deleting someone else's post from the app. Removing it
+      // is a moderation act with an audit note, done from the dashboard.
+      if (error.response?.data?.error === 'use_moderation_remove') {
+        throw new Error(i18n.t('community.useModerationRemove'));
+      }
       throw new Error(error.response?.data?.error || 'Failed to delete post');
     }
   }

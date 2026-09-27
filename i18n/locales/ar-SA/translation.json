@@ -784,6 +784,7 @@
     "selectFanClub": "اختر نادي المشجعين",
     "reply": "رد",
     "madridista": "مدريدستا",
+    "casaAuthor": "كاسا مدريديسا",
     "unknown": "مجهول",
     "defaultUser": "مستخدم",
     "postNotFound": "المنشور غير موجود.",
@@ -831,7 +832,11 @@
     "reasonMisinformation": "معلومات مضللة",
     "reasonMisinformationDesc": "محتوى كاذب أو مضلل",
     "reasonOther": "أخرى",
-    "reasonOtherDesc": "سبب آخر"
+    "reasonOtherDesc": "سبب آخر",
+    "accountRestricted": "حسابك مقيّد، لذا لا يمكنك النشر أو التعليق الآن. تواصل مع الدعم إذا كنت تعتقد أن هذا خطأ.",
+    "postNotEditable": "لا يمكن تعديل هذا المنشور لأنه أُزيل أو رُفض.",
+    "useModerationRemove": "استخدم لوحة الإشراف لإزالة منشورات الآخرين.",
+    "useModerationRemoveComment": "استخدم لوحة الإشراف لإزالة تعليقات الآخرين."
   },
   "membershipPackages": {
     "halaGold": {
@@ -906,7 +911,11 @@
     "payoutRequested": "تم طلب دفع ${{amount}}",
     "payoutFailed": "فشل طلب الدفع",
     "revenueShare": "حصة الإيرادات",
-    "payout": "دفع"
+    "payout": "دفع",
+    "loadFailed": "تعذّر تحميل لوحة التحكم",
+    "switchClub": "اختر ناديًا",
+    "unnamedClub": "نادٍ بلا اسم",
+    "payoutNotAllowed": "يمكن لمالكي النادي والمشرفين فقط طلب السحب."
   },
   "admin": {
     "title": "لوحة المشرف العام",
@@ -1040,6 +1049,10 @@
     "shareToCommunityCaption": "انشره في خلاصة المدريديستا",
     "sharedToCommunityTitle": "تمت المشاركة",
     "sharedToCommunityBody": "منشورك الآن في خلاصة المجتمع.",
+    "sharedToCommunityPendingTitle": "أُرسل للمراجعة",
+    "sharedToCommunityPendingBody": "سيظهر منشورك في خلاصة المجتمع بعد مراجعته.",
+    "shareNotPublished": "لم يُنشر هذا بعد، لذا لا يمكن مشاركته مع المجتمع.",
+    "shareNotShareable": "لا يمكن مشاركة هذا العنصر مع المجتمع.",
     "copyLink": "نسخ الرابط",
     "linkCopied": "تم نسخ الرابط",
     "shareExternal": "مشاركة في تطبيق آخر",

@@ -183,6 +183,8 @@ export interface MediaStoryGroup {
 
 export interface MediaHomePayload {
   featured: MediaItem[];
+  /** The `home_exclusive` placement surface: what the Home screen's Exclusive rail leads with. */
+  home_exclusive: MediaItem[];
   from_madrid_now: { match: MediaMatchRef | null; items: MediaItem[] } | null;
   latest: MediaItem[];
   stories: MediaStoryGroup[];
@@ -298,6 +300,17 @@ export function isMediaCollection(value: string): value is MediaCollection {
 
 /** `engagementService.SHARE_CHANNELS`, verbatim. `dm` is "Send to a friend" (§37, §38). */
 export type MediaShareChannel = 'community' | 'copy_link' | 'external' | 'dm';
+
+/**
+ * `POST /items/:id/share`. The community channel also answers with the teaser
+ * post it created (or the one already there from an earlier share): `approved`
+ * is in the feed now, anything else is waiting for review.
+ */
+export interface MediaShareResult {
+  share_url: string;
+  post_id?: string;
+  post_status?: 'approved' | 'pending' | 'rejected' | string;
+}
 
 /**
  * The server's event vocabulary — `eventService.EVENT_TYPES`, verbatim. An

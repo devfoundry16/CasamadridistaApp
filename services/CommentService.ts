@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
+import i18n from '@/i18n';
 
 export interface Comment {
   id: string;
@@ -60,6 +61,9 @@ class CommentServiceClass {
       );
       return response.data;
     } catch (error: any) {
+      if (error.response?.data?.error === 'account_restricted') {
+        throw new Error(i18n.t('community.accountRestricted'));
+      }
       throw new Error(error.response?.data?.error || 'Failed to create comment');
     }
   }
@@ -69,6 +73,11 @@ class CommentServiceClass {
       const headers = await this.getAuthHeader();
       await axios.delete(`${API_BASE_URL}comments/${id}`, { headers });
     } catch (error: any) {
+      // 409: a moderator deleting someone else's comment from the app. Removing
+      // it is a moderation act with an audit note, done from the dashboard.
+      if (error.response?.data?.error === 'use_moderation_remove') {
+        throw new Error(i18n.t('community.useModerationRemoveComment'));
+      }
       throw new Error(error.response?.data?.error || 'Failed to delete comment');
     }
   }

@@ -306,6 +306,8 @@ const WIRE_CATEGORIES = {
 /** `GET /home`. `stories` is a flat list of teasers, not groups. */
 const WIRE_HOME = {
   featured: [WIRE_TEASER],
+  // Its own placement surface since the v3 home payload.
+  home_exclusive: [WIRE_LOCKED_TEASER],
   from_madrid_now: { match: WIRE_MATCH_ROW, items: [WIRE_TEASER] },
   latest: [WIRE_TEASER, WIRE_LOCKED_TEASER],
   stories: WIRE_STORIES.items,
@@ -543,6 +545,15 @@ describe('envelopes', () => {
     assert.equal(home.live_match?.status_long, 'Match Finished');
     // Two fixtures among the three story teasers → two bubbles.
     assert.equal(home.stories.length, 2);
+  });
+
+  it('reads home_exclusive, and defaults it to [] for an older backend', () => {
+    const home = normaliseHome(WIRE_HOME);
+    assert.equal(home.home_exclusive.length, 1);
+    assert.equal(home.home_exclusive[0].id, WIRE_LOCKED_TEASER.id);
+
+    const older = { ...WIRE_HOME, home_exclusive: undefined };
+    assert.deepEqual(normaliseHome(older).home_exclusive, []);
   });
 
   it('reads playback assets and stamps the item id the caller asked for', () => {

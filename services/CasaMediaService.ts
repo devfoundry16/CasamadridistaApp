@@ -16,6 +16,7 @@ import type {
   MediaPlayback,
   MediaSearchFilterOptions,
   MediaShareChannel,
+  MediaShareResult,
   MediaStoryGroup,
   MediaTimelinePayload,
 } from '@/types/media/casaMedia';
@@ -368,11 +369,14 @@ class CasaMediaServiceClass {
     }
   }
 
-  /** `channel` lets the server attribute the share; it returns the canonical link. */
-  async share(id: string, channel: MediaShareChannel): Promise<{ share_url: string }> {
+  /**
+   * `channel` lets the server attribute the share; it returns the canonical
+   * link, and for `community` the teaser post it created.
+   */
+  async share(id: string, channel: MediaShareChannel): Promise<MediaShareResult> {
     try {
       const headers = await this.getAuthHeader();
-      const { data } = await axios.post<{ share_url: string }>(
+      const { data } = await axios.post<MediaShareResult>(
         `${BASE}/items/${id}/share`,
         { channel },
         { headers },

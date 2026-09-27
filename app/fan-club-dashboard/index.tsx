@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, I18nManager, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, I18nManager, ScrollView, TouchableOpacity, View } from 'react-native';
 import { Text } from '@/components/Text';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, ChevronRight, TrendingUp, Users, Wallet } from 'lucide-react-native';
 import Colors from '@/constants/colors';
-import FanClubDashboardService, { DashboardOverview } from '@/services/FanClubDashboardService';
+import FanClubDashboardService, {
+  AdministeredClub,
+  DashboardOverview,
+} from '@/services/FanClubDashboardService';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -17,15 +20,51 @@ export default function FanClubDashboardScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
+  const [clubs, setClubs] = useState<AdministeredClub[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    FanClubDashboardService.selectedClub?.id ?? null,
+  );
+  const [clubsResolved, setClubsResolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Someone who runs two clubs must pick one: the backend refuses to guess.
+  // Keep the previous choice when coming back to this screen.
   useEffect(() => {
-    FanClubDashboardService.getOverview()
-      .then(setOverview)
-      .catch(e => setError(e.message || 'Failed to load dashboard'))
-      .finally(() => setIsLoading(false));
+    FanClubDashboardService.getClubs()
+      .then(list => {
+        setClubs(list);
+        const current =
+          list.find(c => c.id === FanClubDashboardService.selectedClub?.id) ?? list[0] ?? null;
+        FanClubDashboardService.selectClub(current);
+        setSelectedId(current?.id ?? null);
+      })
+      // Without the list a single-club admin still works: the backend infers the club.
+      .catch(() => {})
+      .finally(() => setClubsResolved(true));
   }, []);
+
+  useEffect(() => {
+    if (!clubsResolved) return;
+    // Switching clubs quickly must not let the slower, older answer win.
+    let current = true;
+    setIsLoading(true);
+    setError(null);
+    FanClubDashboardService.getOverview()
+      .then(data => current && setOverview(data))
+      .catch(e => current && setError(e.message || t('fanClubDashboard.loadFailed')))
+      .finally(() => current && setIsLoading(false));
+    return () => {
+      current = false;
+    };
+  }, [clubsResolved, selectedId, t]);
+
+  const chooseClub = (club: AdministeredClub) => {
+    if (club.id === selectedId) return;
+    FanClubDashboardService.selectClub(club);
+    setOverview(null);
+    setSelectedId(club.id);
+  };
 
   return (
     <View className="flex-1 bg-bg-medium">
@@ -47,6 +86,33 @@ export default function FanClubDashboardScreen() {
           )}
         </View>
       </View>
+
+      {clubs.length > 1 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="flex-grow-0 border-b border-border-default"
+          contentContainerClassName="px-4 py-3 gap-2"
+          accessibilityLabel={t('fanClubDashboard.switchClub')}
+        >
+          {clubs.map(club => {
+            const active = club.id === selectedId;
+            return (
+              <TouchableOpacity
+                key={club.id}
+                onPress={() => chooseClub(club)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+                className={`rounded-full px-4 py-2 ${active ? 'bg-rm-gold' : 'bg-bg-card'}`}
+              >
+                <Text className={active ? 'text-text-dark font-semibold' : 'text-text-primary'}>
+                  {club.name ?? t('fanClubDashboard.unnamedClub')}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      )}
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">

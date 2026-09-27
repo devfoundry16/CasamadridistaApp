@@ -41,7 +41,8 @@ export interface PostMedia {
 export interface Post {
   id: string;
   author_id: string;
-  author_type: 'user' | 'fan_club';
+  /** `casa` is an official Casa Media teaser, posted from the admin dashboard. */
+  author_type: 'user' | 'fan_club' | 'casa';
   fan_club_id: string | null;
   /**
    * `media_teaser` is a Casa Media share posted into the feed. It carries

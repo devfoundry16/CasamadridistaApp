@@ -291,6 +291,9 @@ export function normaliseHome(raw: unknown): MediaHomePayload {
   const now = asRecord(home.from_madrid_now);
   return {
     featured: normaliseItems(home.featured),
+    // The Home screen's own curated rail. Absent from an older backend, which
+    // normaliseItems reads as [] — the module then falls back to `featured`.
+    home_exclusive: normaliseItems(home.home_exclusive),
     from_madrid_now: home.from_madrid_now
       ? { match: normaliseMatch(now.match), items: normaliseItems(now.items) }
       : null,

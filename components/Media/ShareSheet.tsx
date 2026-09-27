@@ -27,8 +27,10 @@ interface Props {
  * Presented in an RN `Modal` (same pattern as `Community/Moderation/ReportSheet`)
  * rather than an in-scene overlay, so it is never clipped by a pager or a tab
  * bar. Every channel round-trips through `POST /items/:id/share` first: the
- * server owns the canonical link and the share counter, and it is what creates
- * the community teaser post.
+ * server owns the canonical link and the share counter. For `community` it also
+ * creates the teaser post — one per user per item, so sharing again returns the
+ * same post — and moderates it; `post_status` says whether it is in the feed
+ * yet or waiting for review.
  */
 export default function ShareSheet({ visible, item, onClose }: Props) {
   const { t } = useTranslation();
@@ -61,12 +63,30 @@ export default function ShareSheet({ visible, item, onClose }: Props) {
     }
     setBusy('community');
     try {
-      await CasaMediaService.share(item.id, 'community');
+      const { post_status } = await CasaMediaService.share(item.id, 'community');
       track('community');
-      Alert.alert(t('casaMedia.sharedToCommunityTitle'), t('casaMedia.sharedToCommunityBody'));
+      // Only an approved post is in the feed. A non-subscriber's post can be
+      // held for review, and "now in the feed" would send them looking for it.
+      if (post_status === 'approved') {
+        Alert.alert(t('casaMedia.sharedToCommunityTitle'), t('casaMedia.sharedToCommunityBody'));
+      } else {
+        Alert.alert(
+          t('casaMedia.sharedToCommunityPendingTitle'),
+          t('casaMedia.sharedToCommunityPendingBody'),
+        );
+      }
       onClose();
     } catch (error: any) {
-      Alert.alert(t('common.error'), error?.message ?? t('casaMedia.shareFailed'));
+      // `not_published`: a staff preview of an unpublished item can be opened,
+      // but not posted to the feed. `not_shareable`: the item exists and is
+      // live, but the backend will not make a community post of it.
+      const message =
+        error?.message === 'not_published'
+          ? t('casaMedia.shareNotPublished')
+          : error?.message === 'not_shareable'
+            ? t('casaMedia.shareNotShareable')
+            : (error?.message ?? t('casaMedia.shareFailed'));
+      Alert.alert(t('common.error'), message);
     } finally {
       setBusy(null);
     }

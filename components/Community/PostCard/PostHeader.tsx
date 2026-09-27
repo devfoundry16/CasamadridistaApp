@@ -23,11 +23,18 @@ function authorAvatarUrl(post: Post): string | null {
 }
 
 const PLACEHOLDER = require('@/assets/images/placeholder_avatar.png');
+const CASA_LOGO = require('@/assets/icons/splash-icon-dark.png');
 
 export default function PostHeader({ post, onAuthorPress, onReportPress }: Props) {
   const { t } = useTranslation();
 
+  // An official Casa teaser. `author_id` is the manager who clicked "Add to
+  // Community", which is bookkeeping, not a byline: show the club's name and
+  // logo, never the manager's.
+  const isCasa = post.author_type === 'casa';
+
   const displayName = (() => {
+    if (isCasa) return t('community.casaAuthor');
     if (post.author_type === 'fan_club' && post.fan_club?.name) {
       return post.fan_club.name;
     }
@@ -37,11 +44,13 @@ export default function PostHeader({ post, onAuthorPress, onReportPress }: Props
   })();
 
   const avatarUrl   = authorAvatarUrl(post);
+  const avatar      = isCasa ? CASA_LOGO : avatarUrl ? { uri: avatarUrl } : PLACEHOLDER;
   const isFanClub   = post.author_type === 'fan_club';
-  const isVerified  = isFanClub
-    ? post.fan_club?.is_verified
-    : post.author?.role === 'moderator' || post.author?.role === 'admin';
-  const subtitle    = !isFanClub && post.author?.country_code
+  const isVerified  = isCasa
+    || (isFanClub
+      ? post.fan_club?.is_verified
+      : post.author?.role === 'moderator' || post.author?.role === 'admin');
+  const subtitle    = !isFanClub && !isCasa && post.author?.country_code
     ? post.author.country_code
     : null;
   const timeAgo     = formatDistanceToNow(new Date(post.created_at), { addSuffix: false });
@@ -50,8 +59,8 @@ export default function PostHeader({ post, onAuthorPress, onReportPress }: Props
     <View style={styles.container}>
       <TouchableOpacity onPress={onAuthorPress} activeOpacity={0.8}>
         <Image
-          source={avatarUrl ? { uri: avatarUrl } : PLACEHOLDER}
-          style={[styles.avatar, isFanClub && styles.avatarRing]}
+          source={avatar}
+          style={[styles.avatar, (isFanClub || isCasa) && styles.avatarRing]}
           contentFit="cover"
           transition={200}
         />

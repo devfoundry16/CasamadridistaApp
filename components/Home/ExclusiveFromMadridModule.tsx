@@ -30,9 +30,13 @@ export default function ExclusiveFromMadridModule() {
   const now = data.from_madrid_now;
   const hasNow = !!now && now.items.length > 0;
   const hasStories = data.stories.length > 0;
-  const hasFeatured = data.featured.length > 0;
+  // The rail is the `home_exclusive` placement surface when an editor has
+  // curated it, and the media home's featured rail when they have not — so the
+  // module never goes blank just because nobody placed anything here yet.
+  const exclusive = data.home_exclusive.length > 0 ? data.home_exclusive : data.featured;
+  const hasExclusive = exclusive.length > 0;
 
-  if (!hasNow && !hasStories && !hasFeatured) return null;
+  if (!hasNow && !hasStories && !hasExclusive) return null;
 
   return (
     <MediaSurfaceProvider surface="home">
@@ -64,10 +68,10 @@ export default function ExclusiveFromMadridModule() {
           </View>
         ) : null}
 
-        {hasFeatured ? (
+        {hasExclusive ? (
           <MediaRail
             title={t('casaMedia.exclusiveFromMadrid')}
-            items={data.featured}
+            items={exclusive}
             seeAllLabel={t('casaMedia.seeAll')}
             onSeeAll={() => router.push('/media')}
           />
