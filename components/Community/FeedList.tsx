@@ -9,20 +9,30 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import FeedService, { type FeedTab, type Post } from '@/services/FeedService';
+import FeedService, { type FeedPage, type FeedTab, type Post } from '@/services/FeedService';
 import PostCard from './PostCard';
 import Colors from '@/constants/colors';
 
-interface Props {
-  tab: FeedTab;
-}
+/**
+ * A Community feed tab, or any other list of posts in the feed's page shape
+ * (the hashtag feed). A `source` key must start with `'feed'`, so a like or a
+ * save patched into `['feed']` reaches it too (`PostActions`).
+ */
+type Props =
+  | { tab: FeedTab; source?: undefined; emptyText?: string; errorText?: string }
+  | {
+      tab?: undefined;
+      source: { key: readonly ['feed', ...unknown[]]; fetchPage: (cursor: string | null) => Promise<FeedPage> };
+      emptyText?: string;
+      errorText?: string;
+    };
 
 const VIEWABILITY_CONFIG = {
   itemVisiblePercentThreshold: 60,
   minimumViewTime: 300,
 };
 
-export default function FeedList({ tab }: Props) {
+export default function FeedList({ tab, source, emptyText, errorText }: Props) {
   const { t } = useTranslation();
   const visibleIds = useRef<Set<string>>(new Set());
 
@@ -36,8 +46,9 @@ export default function FeedList({ tab }: Props) {
     refetch,
     isRefetching,
   } = useInfiniteQuery({
-    queryKey: ['feed', tab],
-    queryFn: ({ pageParam }) => FeedService.getFeed(tab, pageParam ?? null),
+    queryKey: source ? source.key : ['feed', tab],
+    queryFn: ({ pageParam }) =>
+      source ? source.fetchPage(pageParam ?? null) : FeedService.getFeed(tab, pageParam ?? null),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     staleTime: 30_000,
@@ -82,7 +93,7 @@ export default function FeedList({ tab }: Props) {
     return (
       <View className="flex-1 items-center justify-center px-8" style={{ backgroundColor: Colors.background.medium }}>
         <Text className="text-center text-base" style={{ color: Colors.text.tertiary }}>
-          {t('community.feedFailed')}
+          {errorText ?? t('community.feedFailed')}
         </Text>
       </View>
     );
@@ -116,7 +127,7 @@ export default function FeedList({ tab }: Props) {
       }
       ListEmptyComponent={
         <View className="flex-1 items-center justify-center pt-20">
-          <Text style={{ color: Colors.text.tertiary }}>{t('community.noPostsYet')}</Text>
+          <Text style={{ color: Colors.text.tertiary }}>{emptyText ?? t('community.noPostsYet')}</Text>
         </View>
       }
     />

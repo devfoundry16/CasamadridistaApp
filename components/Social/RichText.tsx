@@ -1,8 +1,10 @@
+import { useRouter, type Href } from 'expo-router';
 import React, { useMemo } from 'react';
 import { Linking, Text, type TextProps } from 'react-native';
 
+import { Text as AppText } from '@/components/Text';
 import type { TypeStep } from '@/constants/type';
-import { isSafeUrl, tokenize } from '@/utils/richText.core';
+import { hrefForToken, isSafeUrl, tokenize } from '@/utils/richText.core';
 import T from './T';
 
 interface Props extends Omit<TextProps, 'children'> {
@@ -25,32 +27,48 @@ function openLink(url: string) {
  * User-written text with its links made tappable, on the Casa Social type
  * scale (`T`).
  *
- * Mentions and hashtags are recognised by `utils/richText.core.ts` but render
- * as plain text for now; Phase 2 links them to profiles and hashtag pages.
+ *   - a URL opens in the browser (http and https only);
+ *   - `@handle` opens that person's profile (`/user/@handle`);
+ *   - `#tag` opens the tag's Community feed (`/community/hashtag/[tag]`).
+ *
+ * Mentions and hashtags are set in semibold rather than underlined, the way
+ * people expect to see them. Each link is a nested `Text` with its own
+ * `onPress`: the touch lands on the innermost text, which takes it, so tapping
+ * a link inside a pressable card opens the link and not the card.
  *
  * Everything else is passed to the outer `T`, so `selectable`, `numberOfLines`
  * and `style` behave as they would on plain text. Links are nested `Text`, so
  * they inherit the font, size and direction.
  */
 export default function RichText({ text, linkColor, color, ...rest }: Props) {
+  const router = useRouter();
   const tokens = useMemo(() => tokenize(text), [text]);
+  const tint = linkColor ?? color;
 
   return (
     <T color={color} {...rest}>
-      {tokens.map((token, i) =>
-        token.type === 'url' ? (
-          <Text
-            key={i}
-            onPress={() => openLink(token.value)}
-            accessibilityRole="link"
-            style={{ color: linkColor ?? color, textDecorationLine: 'underline' }}
-          >
+      {tokens.map((token, i) => {
+        if (token.type === 'url') {
+          return (
+            <Text
+              key={i}
+              onPress={() => openLink(token.value)}
+              accessibilityRole="link"
+              style={{ color: tint, textDecorationLine: 'underline' }}
+            >
+              {token.value}
+            </Text>
+          );
+        }
+        const href = hrefForToken(token);
+        if (!href) return token.value;
+        // AppText, so Arabic gets Cairo's bold file rather than a synthesised bold.
+        return (
+          <AppText key={i} onPress={() => router.push(href as Href)} accessibilityRole="link" style={{ color: tint, fontWeight: '600' }}>
             {token.value}
-          </Text>
-        ) : (
-          token.value
-        ),
-      )}
+          </AppText>
+        );
+      })}
     </T>
   );
 }

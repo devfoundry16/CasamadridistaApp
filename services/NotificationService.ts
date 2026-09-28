@@ -10,6 +10,12 @@ import type {
 
 const BASE = `${API_BASE_URL}notifications`;
 
+/** The `topics` array of a device response, or null when it has none. */
+function topicsOf(data: unknown): string[] | null {
+  const topics = (data as { topics?: unknown } | null)?.topics;
+  return Array.isArray(topics) ? topics.filter((t): t is string => typeof t === 'string') : null;
+}
+
 /**
  * Device registry + notification inbox (plan §4.2 "Notifications").
  *
@@ -27,11 +33,13 @@ class NotificationServiceClass {
     throw new Error(error?.response?.data?.error || fallback);
   }
 
-  async registerDevice(registration: DeviceRegistration): Promise<void> {
+  /** Resolves to the topics the server stored, or null if it did not say. */
+  async registerDevice(registration: DeviceRegistration): Promise<string[] | null> {
     try {
       const headers = await this.getAuthHeader();
       // `registration` is already the wire body — see `buildDeviceBody`.
-      await axios.post(`${BASE}/devices`, registration, { headers });
+      const { data } = await axios.post(`${BASE}/devices`, registration, { headers });
+      return topicsOf(data);
     } catch (error: any) {
       this.fail(error, 'Failed to register for notifications');
     }
@@ -55,14 +63,16 @@ class NotificationServiceClass {
     }
   }
 
-  async updateTopics(token: string, topics: string[], anonId?: string): Promise<void> {
+  /** Replaces the device's topics; resolves to the topics the server stored. */
+  async updateTopics(token: string, topics: string[], anonId?: string): Promise<string[] | null> {
     try {
       const headers = await this.getAuthHeader();
-      await axios.patch(
+      const { data } = await axios.patch(
         `${BASE}/devices/${encodeURIComponent(token)}/topics`,
         { topics, ...(anonId ? { anon_id: anonId } : {}) },
         { headers: { ...headers, ...anonIdHeader(anonId) } },
       );
+      return topicsOf(data);
     } catch (error: any) {
       this.fail(error, 'Failed to update notification settings');
     }

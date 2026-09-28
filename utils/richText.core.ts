@@ -137,3 +137,57 @@ export function tokenize(text: string): RichToken[] {
   push(tokens, 'text', text.slice(cursor));
   return tokens;
 }
+
+/**
+ * The links, mentions and hashtags in a text, in order and without the plain
+ * text, up to `limit`. A row that is one accessible element exposes these as
+ * accessibility actions; a screen reader cannot reach the nested links.
+ */
+export function linkTokens(text: string, limit = 5): RichToken[] {
+  return tokenize(text)
+    .filter((token) => token.type !== 'text')
+    .slice(0, Math.max(0, limit));
+}
+
+const HASHTAG = new RegExp(`^[\\p{L}\\p{M}\\p{N}_]{1,${HASHTAG_MAX}}$`, 'u');
+
+/**
+ * A hashtag route param, cleaned: without its `#`, decoded if the router left
+ * it encoded, and null unless it is a valid tag. Case is kept so the screen's
+ * header reads the way the tag was written.
+ *
+ * A tag has no `%` in it, so decoding one that is already decoded is harmless.
+ */
+export function normaliseHashtag(raw: unknown): string | null {
+  let value = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof value !== 'string') return null;
+  if (value.includes('%')) {
+    try {
+      value = decodeURIComponent(value);
+    } catch {
+      return null;
+    }
+  }
+  const tag = value.startsWith('#') ? value.slice(1) : value;
+  return HASHTAG.test(tag) ? tag : null;
+}
+
+/**
+ * Where a mention or hashtag opens inside the app; null for plain text and for
+ * URLs, which leave the app.
+ *
+ * `/user/@handle` resolves the handle and replaces itself with the profile
+ * (`app/user/[id].tsx`). Both rules are checked again, so a token that did not
+ * come from `tokenize` can never be turned into an arbitrary path.
+ */
+export function hrefForToken(token: RichToken): string | null {
+  if (token.type === 'mention') {
+    const handle = token.value.slice(1).toLowerCase();
+    return USERNAME.test(handle) ? `/user/@${handle}` : null;
+  }
+  if (token.type === 'hashtag') {
+    const tag = normaliseHashtag(token.value);
+    return tag ? `/community/hashtag/${encodeURIComponent(tag)}` : null;
+  }
+  return null;
+}

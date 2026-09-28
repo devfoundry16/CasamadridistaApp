@@ -8,8 +8,18 @@ import { Text } from '@/components/Text';
 import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import NotificationService from '@/services/NotificationService';
-import type { InboxNotification } from '@/types/media/notifications';
+import type { InboxNotification, PushPayloadType } from '@/types/media/notifications';
 import { hrefFromPayload } from '@/utils/pushPayload';
+
+/** Payload types whose title is rebuilt from `actor_name` in the reader's language. */
+const LOCALISED_TYPES = new Set<PushPayloadType>([
+  'friend_request',
+  'friend_accept',
+  'post_like',
+  'post_comment',
+  'mention',
+  'tag',
+]);
 
 interface Props {
   notification: InboxNotification;
@@ -26,9 +36,17 @@ function NotificationRow({ notification, onRead }: Props) {
   // for clients that render it verbatim.
   const type = notification.data?.type;
   const actor = notification.data?.actor_name;
+  // A mention made in a comment says so; one in the post itself does not. A
+  // comment answering the recipient's own comment reads as a reply.
+  const key =
+    type === 'mention' && notification.data?.comment_id
+      ? 'mention_comment'
+      : type === 'post_comment' && notification.data?.reply === true
+        ? 'post_comment_reply'
+        : type;
   const title =
-    (type === 'friend_request' || type === 'friend_accept') && actor
-      ? t(`social.notifications.${type}`, { name: actor })
+    type && LOCALISED_TYPES.has(type) && actor
+      ? t(`social.notifications.${key}`, { name: actor })
       : notification.title ?? '';
 
   const handlePress = () => {

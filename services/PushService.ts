@@ -8,11 +8,21 @@ import Colors from '@/constants/colors';
 import NotificationService from '@/services/NotificationService';
 import AnalyticsService from '@/services/AnalyticsService';
 import { buildDeviceBody } from '@/services/media/wire';
+import {
+  parseSocialPref,
+  registrationTopics,
+  serialiseSocialPref,
+  SOCIAL_PREF_KEY,
+  SOCIAL_TOPIC,
+  withTopic,
+} from '@/utils/pushTopics.core';
 
 const TOKEN_KEY = 'expo_push_token';
 const ANDROID_CHANNEL_ID = 'casa-media';
 /** Must equal `channelId` in backend/services/social/dmPushService.js. */
 const MESSAGES_CHANNEL_ID = 'messages';
+/** Must equal the `channelId` the backend's social pushes (likes, comments, mentions, tags, friends) send. */
+const SOCIAL_CHANNEL_ID = 'social';
 
 export type PushRegistrationOutcome =
   | 'registered'
@@ -48,6 +58,8 @@ function resolveProjectId(): string | undefined {
  */
 class PushServiceClass {
   private token: string | null = null;
+  /** The topics the server last said this device has; null until it has said. */
+  private topics: string[] | null = null;
 
   /**
    * Foreground presentation. Registered once from the root layout — a banner is
@@ -78,10 +90,19 @@ class PushServiceClass {
       // Direct messages get their own channel so a person can silence match-day
       // media without silencing friends, and so a message can use higher
       // importance than a campaign. The id is what dmPushService sends as
-      // `channelId`; an unknown channel id is dropped silently on Android 8+.
+      // `channelId`. A push to a channel that does not exist is not dropped:
+      // expo-notifications falls back to its "Miscellaneous" channel, so it
+      // arrives, but without this channel's importance or its own switch.
       await Notifications.setNotificationChannelAsync(MESSAGES_CHANNEL_ID, {
         name: i18n.t('social.notifications.channelName'),
         importance: Notifications.AndroidImportance.HIGH,
+        lightColor: Colors.darkGold,
+      });
+      // Likes, comments, mentions, tags and friend requests: their own channel
+      // so they can be silenced without silencing messages.
+      await Notifications.setNotificationChannelAsync(SOCIAL_CHANNEL_ID, {
+        name: i18n.t('social.notifications.socialChannelName'),
+        importance: Notifications.AndroidImportance.DEFAULT,
         lightColor: Colors.darkGold,
       });
     } catch {
@@ -153,14 +174,16 @@ class PushServiceClass {
       // ignore
     }
     try {
-      await NotificationService.registerDevice(
+      const stored = await NotificationService.registerDevice(
         buildDeviceBody({
           expoPushToken: token,
           platform: Platform.OS === 'ios' ? 'ios' : Platform.OS === 'android' ? 'android' : 'web',
           // `dm`: direct-message pushes (backend dmPushService only sends to
           // devices that registered it — a build that cannot open a
-          // conversation never does).
-          topics: ['media', 'dm'],
+          // conversation never does). `social`: likes, comments, mentions, tags
+          // and friend requests, unless switched off in Account. Registration
+          // overwrites the row's topics, so the switch is read every time.
+          topics: registrationTopics(await this.isSocialEnabled()),
           locale: i18n.language,
           appVersion: Constants.expoConfig?.version ?? null,
           deviceName: Device.modelName ?? null,
@@ -170,6 +193,7 @@ class PushServiceClass {
           anonId: await AnalyticsService.getAnonId(),
         }),
       );
+      this.topics = stored;
     } catch {
       // Registration is retried on the next `user.id` change / app launch.
     }
@@ -187,10 +211,56 @@ class PushServiceClass {
     // already been cleared.
     await NotificationService.unregisterDevice(token, await AnalyticsService.getAnonId());
     this.token = null;
+    this.topics = null;
     try {
       await AsyncStorage.removeItem(TOKEN_KEY);
     } catch {
       // ignore
+    }
+  }
+
+  /**
+   * Whether the OS lets this app show notifications. When it does not, the
+   * Account switch cannot do anything, and says so. If the OS cannot be asked,
+   * assume it does rather than lock the switch.
+   */
+  async permissionGranted(): Promise<boolean> {
+    try {
+      return (await Notifications.getPermissionsAsync()).granted;
+    } catch {
+      return true;
+    }
+  }
+
+  /** The Account "Social activity" switch. On unless switched off. */
+  async isSocialEnabled(): Promise<boolean> {
+    try {
+      return parseSocialPref(await AsyncStorage.getItem(SOCIAL_PREF_KEY));
+    } catch {
+      return true;
+    }
+  }
+
+  /**
+   * Switch social pushes on or off for this device, keeping its other topics.
+   *
+   * The choice is stored first, so a device with no token yet (permission not
+   * granted, simulator) registers with it later. With a token, the server is
+   * told now; if that fails the stored choice is put back and the error thrown,
+   * so the switch can flip back rather than show a state the server lacks.
+   */
+  async setSocialEnabled(on: boolean): Promise<void> {
+    const previous = await this.isSocialEnabled();
+    await AsyncStorage.setItem(SOCIAL_PREF_KEY, serialiseSocialPref(on));
+    const token = await this.getStoredToken();
+    if (!token) return;
+    const next = withTopic(this.topics ?? registrationTopics(previous), SOCIAL_TOPIC, on);
+    try {
+      const stored = await NotificationService.updateTopics(token, next, await AnalyticsService.getAnonId());
+      this.topics = stored ?? next;
+    } catch (error) {
+      await AsyncStorage.setItem(SOCIAL_PREF_KEY, serialiseSocialPref(previous)).catch(() => {});
+      throw error;
     }
   }
 

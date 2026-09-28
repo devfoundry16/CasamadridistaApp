@@ -16,6 +16,8 @@ export interface CreatePostPayload {
   language?: string;
   /** Free text, at most 80 characters (`utils/post.core` normalises it). */
   location_name?: string;
+  /** People tagged in the post, at most 20 (`mentions.core` TAG_MAX). */
+  tagged_user_ids?: string[];
 }
 
 export interface SaveState {

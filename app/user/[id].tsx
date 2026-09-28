@@ -50,11 +50,26 @@ export default function UserProfileScreen() {
   const handle = raw?.startsWith('@') ? raw : null;
   const id = raw && isUuid(raw) ? raw : undefined;
 
+  // The handle that could not be resolved (no such account, or the request
+  // failed). Kept as the handle rather than a flag, so a new one starts over.
+  const [failedHandle, setFailedHandle] = useState<string | null>(null);
+  const unresolved = !!handle && failedHandle === handle;
+
   useEffect(() => {
     if (!handle) return;
-    void SocialService.resolveHandle(handle).then((resolved) => {
-      if (resolved) router.replace(`/user/${resolved}`);
-    });
+    let alive = true;
+    SocialService.resolveHandle(handle)
+      .then((resolved) => {
+        if (!alive) return;
+        if (resolved) router.replace(`/user/${resolved}`);
+        else setFailedHandle(handle);
+      })
+      .catch(() => {
+        if (alive) setFailedHandle(handle);
+      });
+    return () => {
+      alive = false;
+    };
   }, [handle, router]);
 
   useEffect(() => {
@@ -112,7 +127,8 @@ export default function UserProfileScreen() {
     />
   );
 
-  if ((isLoading && id) || handle) {
+  // An unresolved handle falls through to "not available" below.
+  if ((isLoading && id) || (handle && !unresolved)) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.background.medium }}>
         {header}

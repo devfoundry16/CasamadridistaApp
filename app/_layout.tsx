@@ -238,6 +238,11 @@ function RootLayoutNav() {
             },
           }}
         />
+        {/* The title is the tag, set by the screen. */}
+        <Stack.Screen
+          name="community/hashtag/[tag]"
+          options={{ title: "", ...options }}
+        />
         <Stack.Screen
           name="community/photo/[postId]"
           options={{

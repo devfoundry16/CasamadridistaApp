@@ -874,7 +874,31 @@
     "likeComment": "Like",
     "unlikeComment": "Unlike",
     "openCommentAuthor": "Open {{name}}'s profile",
-    "commentMoreOptions": "More options"
+    "commentMoreOptions": "More options",
+    "tagPeopleLabel": "Tag people",
+    "tagPeopleAdd": "Tag people",
+    "tagPeopleEdit": "Edit",
+    "tagPeopleTitle": "Tag people",
+    "tagPeopleSearch": "Search friends or people",
+    "tagPeopleCount": "{{count}} of {{max}} tagged",
+    "tagPeopleLimit": "You can tag up to {{max}} people.",
+    "tagPeopleDone": "Done",
+    "tagPeopleEmpty": "Search by name or @username to tag someone.",
+    "tagPeopleNoMatches": "No one matches.",
+    "untagPerson": "Remove {{name}}",
+    "mentionSuggestions": "People to mention",
+    "mentionPick": "Mention {{name}}, @{{handle}}",
+    "taggedWith": "with",
+    "listSeparator": ", ",
+    "taggedMore_one": "and {{count}} more",
+    "taggedMore_other": "and {{count}} more",
+    "hashtag": {
+      "title": "Hashtag",
+      "empty": "No posts with {{tag}} yet.",
+      "failed": "Couldn't load this hashtag.",
+      "invalidTitle": "Not a hashtag",
+      "invalidBody": "This link doesn't point to a hashtag."
+    }
   },
   "membershipPackages": {
     "halaGold": {
@@ -1624,7 +1648,19 @@
     "notifications": {
       "channelName": "Messages",
       "friend_request": "{{name}} sent you a friend request",
-      "friend_accept": "{{name}} accepted your friend request"
+      "friend_accept": "{{name}} accepted your friend request",
+      "socialChannelName": "Social activity",
+      "post_like": "{{name}} liked your post",
+      "post_comment": "{{name}} commented on your post",
+      "post_comment_reply": "{{name}} replied to your comment",
+      "mention": "{{name}} mentioned you",
+      "mention_comment": "{{name}} mentioned you in a comment",
+      "tag": "{{name}} tagged you in a post",
+      "socialSetting": "Social activity",
+      "socialSettingHint": "Likes, comments, mentions, tags and friend requests",
+      "settingFailed": "Couldn't change your notification settings. Please try again.",
+      "openSettings": "Turn on notifications in Settings",
+      "openSettingsHint": "Opens this app's settings"
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",

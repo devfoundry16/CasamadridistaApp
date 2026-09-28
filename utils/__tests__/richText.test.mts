@@ -10,7 +10,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { HASHTAG_MAX, isSafeUrl, tokenize, type RichToken } from '../richText.core.ts';
+import { HASHTAG_MAX, hrefForToken, isSafeUrl, linkTokens, normaliseHashtag, tokenize, type RichToken } from '../richText.core.ts';
 
 const round = (text: string) => tokenize(text).map((t) => t.value).join('');
 const kinds = (text: string) => tokenize(text).map((t) => [t.type, t.value]);
@@ -243,6 +243,31 @@ describe('tokenize: mixed', () => {
   });
 });
 
+describe('linkTokens', () => {
+  it('keeps links, mentions and hashtags in order and drops the text', () => {
+    assert.deepEqual(linkTokens('see https://casa.com with @ali_f #HalaMadrid'), [
+      { type: 'url', value: 'https://casa.com' },
+      { type: 'mention', value: '@ali_f' },
+      { type: 'hashtag', value: '#HalaMadrid' },
+    ]);
+  });
+
+  it('plain text and an empty string have none', () => {
+    assert.deepEqual(linkTokens('Hala Madrid'), []);
+    assert.deepEqual(linkTokens(''), []);
+  });
+
+  it('stops at five by default', () => {
+    const out = linkTokens('#a #b #c #d #e #f #g');
+    assert.deepEqual(out.map((t) => t.value), ['#a', '#b', '#c', '#d', '#e']);
+  });
+
+  it('takes a different limit', () => {
+    assert.deepEqual(linkTokens('#a #b #c', 2).map((t) => t.value), ['#a', '#b']);
+    assert.deepEqual(linkTokens('#a #b #c', 0), []);
+  });
+});
+
 describe('isSafeUrl', () => {
   it('only http and https', () => {
     assert.equal(isSafeUrl('https://a.com'), true);
@@ -251,5 +276,59 @@ describe('isSafeUrl', () => {
     assert.equal(isSafeUrl('casamadridistaapp://x'), false);
     assert.equal(isSafeUrl(' https://a.com'), false);
     assert.equal(isSafeUrl(''), false);
+  });
+});
+
+describe('hrefForToken', () => {
+  it('a mention opens the by-handle profile route, lower-cased', () => {
+    assert.equal(hrefForToken({ type: 'mention', value: '@Ali.F' }), '/user/@ali.f');
+  });
+
+  it('a hashtag opens the hashtag feed, without the # and percent-encoded', () => {
+    assert.equal(hrefForToken({ type: 'hashtag', value: '#HalaMadrid' }), '/community/hashtag/HalaMadrid');
+    assert.equal(
+      hrefForToken({ type: 'hashtag', value: '#ريال_مدريد' }),
+      `/community/hashtag/${encodeURIComponent('ريال_مدريد')}`,
+    );
+  });
+
+  it('a URL and plain text are not in-app routes', () => {
+    assert.equal(hrefForToken({ type: 'url', value: 'https://a.com' }), null);
+    assert.equal(hrefForToken({ type: 'text', value: 'hello' }), null);
+  });
+
+  it('every mention and hashtag the tokenizer emits gets a route', () => {
+    for (const token of tokenize('@ali_1 #Casa #مدريد @x.y.z')) {
+      if (token.type === 'mention' || token.type === 'hashtag') assert.ok(hrefForToken(token));
+    }
+  });
+
+  it('a malformed token never becomes a path', () => {
+    assert.equal(hrefForToken({ type: 'mention', value: '@../admin' }), null);
+    assert.equal(hrefForToken({ type: 'hashtag', value: '#a/b' }), null);
+  });
+});
+
+describe('normaliseHashtag', () => {
+  it('keeps the tag as written, without a leading #', () => {
+    assert.equal(normaliseHashtag('HalaMadrid'), 'HalaMadrid');
+    assert.equal(normaliseHashtag('#HalaMadrid'), 'HalaMadrid');
+    assert.equal(normaliseHashtag('ريال_مدريد'), 'ريال_مدريد');
+  });
+
+  it('decodes a still-encoded route param', () => {
+    assert.equal(normaliseHashtag(encodeURIComponent('ريال_مدريد')), 'ريال_مدريد');
+    assert.equal(normaliseHashtag('%23Casa'), 'Casa');
+  });
+
+  it('takes the first value of an array param', () => {
+    assert.equal(normaliseHashtag(['Casa', 'x']), 'Casa');
+  });
+
+  it('refuses anything that is not a tag', () => {
+    for (const bad of [undefined, null, '', '#', 'a b', 'a/b', 'a#b', '%E0%A4%A', 'a'.repeat(HASHTAG_MAX + 1), 42]) {
+      assert.equal(normaliseHashtag(bad as any), null, String(bad));
+    }
+    assert.equal(normaliseHashtag('a'.repeat(HASHTAG_MAX)), 'a'.repeat(HASHTAG_MAX));
   });
 });

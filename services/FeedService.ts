@@ -40,6 +40,14 @@ export interface PostMedia {
   position?: number;
 }
 
+/** Someone the author tagged in a post ("with @a, @b"). */
+export interface TaggedUser {
+  id: string;
+  username: string | null;
+  name: string;
+  avatar_url: string | null;
+}
+
 export interface Post {
   id: string;
   author_id: string;
@@ -79,6 +87,8 @@ export interface Post {
   save_count?: number;
   /** Only present when `kind === 'media_teaser'`. */
   media_item?: MediaItem | null;
+  /** People the author tagged, in the order they were tagged. Absent reads as none. */
+  tagged?: TaggedUser[];
 }
 
 export interface FeedPage {
@@ -102,6 +112,26 @@ class FeedServiceClass {
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to load feed');
+    }
+  }
+
+  /**
+   * Approved posts carrying `#tag`, newest first, the same shape as the feed.
+   * The tag is sent lower-cased, so `#HalaMadrid` and `#halamadrid` are one
+   * feed. A 400 `invalid_tag` is thrown with that code as its message.
+   */
+  async getHashtagFeed(tag: string, cursor?: string | null): Promise<FeedPage> {
+    try {
+      const headers = await this.getAuthHeader();
+      const params: Record<string, string> = {};
+      if (cursor) params.cursor = cursor;
+      const response = await axios.get<FeedPage>(`${API_BASE_URL}feed/hashtag/${encodeURIComponent(tag.toLowerCase())}`, {
+        headers,
+        params,
+      });
+      return { posts: response.data?.posts ?? [], nextCursor: response.data?.nextCursor ?? null };
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to load hashtag');
     }
   }
 

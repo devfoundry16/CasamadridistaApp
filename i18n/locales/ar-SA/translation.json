@@ -874,7 +874,35 @@
     "likeComment": "إعجاب",
     "unlikeComment": "إلغاء الإعجاب",
     "openCommentAuthor": "فتح ملف {{name}}",
-    "commentMoreOptions": "خيارات إضافية"
+    "commentMoreOptions": "خيارات إضافية",
+    "tagPeopleLabel": "الإشارة إلى أشخاص",
+    "tagPeopleAdd": "الإشارة إلى أشخاص",
+    "tagPeopleEdit": "تعديل",
+    "tagPeopleTitle": "الإشارة إلى أشخاص",
+    "tagPeopleSearch": "ابحث في الأصدقاء أو عن أشخاص",
+    "tagPeopleCount": "تمت الإشارة إلى {{count}} من {{max}}",
+    "tagPeopleLimit": "يمكنك الإشارة إلى {{max}} شخصاً كحد أقصى.",
+    "tagPeopleDone": "تم",
+    "tagPeopleEmpty": "ابحث بالاسم أو باسم المستخدم @ للإشارة إلى شخص.",
+    "tagPeopleNoMatches": "لا يوجد أحد مطابق.",
+    "untagPerson": "إزالة {{name}}",
+    "mentionSuggestions": "أشخاص للإشارة إليهم",
+    "mentionPick": "الإشارة إلى {{name}}، @{{handle}}",
+    "taggedWith": "مع",
+    "listSeparator": "، ",
+    "taggedMore_zero": "و{{count}} آخرين",
+    "taggedMore_one": "وشخص آخر",
+    "taggedMore_two": "وشخصين آخرين",
+    "taggedMore_few": "و{{count}} آخرين",
+    "taggedMore_many": "و{{count}} آخرين",
+    "taggedMore_other": "و{{count}} آخرين",
+    "hashtag": {
+      "title": "وسم",
+      "empty": "لا توجد منشورات بالوسم {{tag}} بعد.",
+      "failed": "تعذّر تحميل هذا الوسم.",
+      "invalidTitle": "ليس وسماً",
+      "invalidBody": "هذا الرابط لا يشير إلى وسم."
+    }
   },
   "membershipPackages": {
     "halaGold": {
@@ -1672,7 +1700,19 @@
     "notifications": {
       "channelName": "الرسائل",
       "friend_request": "أرسل لك {{name}} طلب صداقة",
-      "friend_accept": "قبل {{name}} طلب صداقتك"
+      "friend_accept": "قبل {{name}} طلب صداقتك",
+      "socialChannelName": "النشاط الاجتماعي",
+      "post_like": "أُعجب {{name}} بمنشورك",
+      "post_comment": "علّق {{name}} على منشورك",
+      "post_comment_reply": "ردّ {{name}} على تعليقك",
+      "mention": "ذكرك {{name}}",
+      "mention_comment": "ذكرك {{name}} في تعليق",
+      "tag": "أشار إليك {{name}} في منشور",
+      "socialSetting": "النشاط الاجتماعي",
+      "socialSettingHint": "الإعجابات والتعليقات والإشارات وطلبات الصداقة",
+      "settingFailed": "تعذّر تغيير إعدادات الإشعارات. يرجى المحاولة مرة أخرى.",
+      "openSettings": "فعّل الإشعارات من الإعدادات",
+      "openSettingsHint": "يفتح إعدادات التطبيق"
     },
     "errors": {
       "generic": "حدث خطأ ما. حاول مرة أخرى.",

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Alert, type AccessibilityActionEvent } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, TouchableOpacity, Alert, Linking, type AccessibilityActionEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Text } from '@/components/Text';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { Flag, Heart, Trash2 } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
@@ -17,8 +17,10 @@ import {
 import Colors from '@/constants/colors';
 import Touchable from '@/components/Touchable';
 import ActionSheet, { type SheetAction } from '@/components/Social/ActionSheet';
+import RichText from '@/components/Social/RichText';
 import ReportSheet from '@/components/Community/Moderation/ReportSheet';
 import { useUser } from '@/hooks/useUser';
+import { hrefForToken, isSafeUrl, linkTokens, type RichToken } from '@/utils/richText.core';
 
 interface Props {
   comment: Comment;
@@ -71,6 +73,21 @@ export default function CommentRow({ comment, onReply, targetKind = 'post' }: Pr
 
   const mine = !!user?.id && authorId === user.id;
 
+  // The links, @mentions and #hashtags in the body. RichText makes them
+  // tappable, but inside the row's single accessible element a screen reader
+  // cannot reach them, so they come back as actions too.
+  const links = useMemo(() => linkTokens(comment.body), [comment.body]);
+
+  const openToken = (token: RichToken) => {
+    if (token.type === 'url') {
+      // http(s) only, as RichText does.
+      if (isSafeUrl(token.value)) Linking.openURL(token.value).catch(() => {});
+      return;
+    }
+    const href = hrefForToken(token);
+    if (href) router.push(href as Href);
+  };
+
   const confirmDelete = () =>
     Alert.alert(t('community.deleteCommentTitle'), t('community.deleteCommentBody'), [
       { text: t('common.cancel'), style: 'cancel' },
@@ -106,6 +123,7 @@ export default function CommentRow({ comment, onReply, targetKind = 'post' }: Pr
     { name: 'like', label: liked ? t('community.unlikeComment') : t('community.likeComment') },
     ...(authorId ? [{ name: 'author', label: t('community.openCommentAuthor', { name: authorName }) }] : []),
     ...(actions.length ? [{ name: 'longpress', label: t('community.commentMoreOptions') }] : []),
+    ...links.map((token, i) => ({ name: `link:${i}`, label: token.value })),
   ];
 
   const onA11yAction = (event: AccessibilityActionEvent) => {
@@ -114,6 +132,11 @@ export default function CommentRow({ comment, onReply, targetKind = 'post' }: Pr
       case 'like':      handleLike(); break;
       case 'author':    openAuthor(); break;
       case 'longpress': if (actions.length) setMenu(true); break;
+      default: {
+        const [kind, index] = event.nativeEvent.actionName.split(':');
+        const token = kind === 'link' ? links[Number(index)] : undefined;
+        if (token) openToken(token);
+      }
     }
   };
 
@@ -152,7 +175,15 @@ export default function CommentRow({ comment, onReply, targetKind = 'post' }: Pr
               {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
             </Text>
           </View>
-          <Text className="text-sm mt-0.5" style={{ color: Colors.text.primary }}>{comment.body}</Text>
+          {/* Links, @mentions and #hashtags are tappable; a tap on one does not
+              reach the row's long-press. */}
+          <RichText
+            text={comment.body}
+            step="body"
+            color={Colors.text.primary}
+            linkColor={Colors.darkGold}
+            style={{ fontSize: 14, marginTop: 2 }}
+          />
           <View className="flex-row items-center mt-1 gap-3">
             <TouchableOpacity onPress={() => onReply?.(comment)} activeOpacity={0.7}>
               <Text className="text-xs" style={{ color: Colors.text.tertiary }}>{t('community.reply')}</Text>

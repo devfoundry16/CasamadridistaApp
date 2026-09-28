@@ -46,6 +46,13 @@ export function hrefFromPayloadWithScheme(
     case 'friend_request':
     case 'friend_accept':
       return isUuid(payload.user_id) ? `/user/${payload.user_id}` : '/social/friends';
+    // Activity on a post: a like, a comment, a mention (in the post or one of
+    // its comments) or a tag. All of them open the post.
+    case 'post_like':
+    case 'post_comment':
+    case 'mention':
+    case 'tag':
+      return isUuid(payload.post_id) ? `/community/post/${payload.post_id}` : null;
     case 'media_item':
       return payload.item_id
         ? `/media/item/${encodeURIComponent(payload.item_id)}?${itemQuery}`
@@ -102,5 +109,8 @@ export function parsePushPayload(data: unknown): PushPayload | null {
     ...(typeof candidate.user_id === 'string' ? { user_id: candidate.user_id } : {}),
     ...(typeof candidate.conversation_id === 'string' ? { conversation_id: candidate.conversation_id } : {}),
     ...(typeof candidate.actor_name === 'string' ? { actor_name: candidate.actor_name } : {}),
+    ...(typeof candidate.post_id === 'string' ? { post_id: candidate.post_id } : {}),
+    ...(typeof candidate.comment_id === 'string' ? { comment_id: candidate.comment_id } : {}),
+    ...(candidate.reply === true ? { reply: true } : {}),
   };
 }

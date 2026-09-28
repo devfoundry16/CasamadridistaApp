@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -18,14 +18,24 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostService from "@/services/PostService";
 import AuthService from "@/services/AuthService";
-import { MapPin, Shield } from "lucide-react-native";
+import { MapPin, Shield, UserPlus, X } from "lucide-react-native";
 import MediaService, { type UploadSlot } from "@/services/MediaService";
 import MediaPicker, { type PickedMedia } from "./MediaPicker";
 import TagPicker from "./TagPicker";
+import TagPeopleSheet from "./TagPeopleSheet";
+import MentionSuggestions from "./MentionSuggestions";
+import Avatar from "@/components/Social/Avatar";
+import type { PersonCard } from "@/types/social";
+import { activeMention, insertMention, TAG_MAX, type Caret } from "@/utils/mentions.core";
 import type { FanClubCountry, FanClub } from "@/services/FanClubService";
 import Colors from "@/constants/colors";
 import { LOCATION_MAX, normaliseLocation } from "@/utils/post.core";
 import { socialKeys } from "@/hooks/social/keys";
+
+type TextField = "title" | "body";
+
+const TITLE_MAX = 200;
+const BODY_MAX = 2000;
 
 export default function Composer() {
   const router = useRouter();
@@ -41,6 +51,47 @@ export default function Composer() {
   const [postAsFanClub, setPostAsFanClub] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
+  const [tagged, setTagged] = useState<PersonCard[]>([]);
+  const [tagSheet, setTagSheet] = useState(false);
+
+  // @-autocomplete: which text field has focus, where its caret is, and a
+  // caret to impose once after a mention is inserted (then released, so the
+  // inputs stay uncontrolled for selection while typing).
+  const [focused, setFocused] = useState<TextField | null>(null);
+  const [carets, setCarets] = useState<Record<TextField, Caret>>({
+    title: { start: 0, end: 0 },
+    body: { start: 0, end: 0 },
+  });
+  const [forcedCaret, setForcedCaret] = useState<{ field: TextField; caret: Caret } | null>(null);
+
+  const mention = useMemo(() => {
+    if (!focused || submitting) return null;
+    const range = activeMention(focused === "title" ? title : body, carets[focused]);
+    return range ? { field: focused, range } : null;
+  }, [focused, submitting, title, body, carets]);
+
+  const onCaret = (field: TextField) => (event: { nativeEvent: { selection: Caret } }) => {
+    const caret = event.nativeEvent.selection;
+    setCarets((current) => ({ ...current, [field]: caret }));
+    setForcedCaret((forced) => (forced?.field === field ? null : forced));
+  };
+
+  const pickMention = useCallback(
+    (person: PersonCard & { username: string }) => {
+      if (!mention) return;
+      const { field, range } = mention;
+      const current = field === "title" ? title : body;
+      const next = insertMention(current, range, person.username);
+      // Past the field's limit the mention would be cut; leave the text alone.
+      if (next.text.length > (field === "title" ? TITLE_MAX : BODY_MAX)) return;
+      if (field === "title") setTitle(next.text);
+      else setBody(next.text);
+      const caret = { start: next.caret, end: next.caret };
+      setCarets((c) => ({ ...c, [field]: caret }));
+      setForcedCaret({ field, caret });
+    },
+    [mention, title, body],
+  );
 
   const { data: roles } = useQuery({
     queryKey: ['myRoles'],
@@ -70,6 +121,7 @@ export default function Composer() {
         body: body.trim() || undefined,
         country_code: country?.country_code ?? undefined,
         ...(locationName ? { location_name: locationName } : {}),
+        ...(tagged.length ? { tagged_user_ids: tagged.slice(0, TAG_MAX).map((p) => p.id) } : {}),
         ...(postAsFanClub && roles?.fanClubId
           ? { fan_club_id: roles.fanClubId }
           : { tagged_fan_club_id: fanClub?.id ?? undefined }),
@@ -113,7 +165,7 @@ export default function Composer() {
       setSubmitting(false);
       setUploadProgress("");
     }
-  }, [canPost, title, body, media, location, country, fanClub, postAsFanClub, roles, queryClient, router, t]);
+  }, [canPost, title, body, media, location, tagged, country, fanClub, postAsFanClub, roles, queryClient, router, t]);
 
   return (
     <KeyboardAvoidingView
@@ -136,11 +188,16 @@ export default function Composer() {
             onChangeText={setTitle}
             placeholder={t('community.titlePlaceholder')}
             placeholderTextColor={Colors.text.muted}
-            maxLength={200}
+            maxLength={TITLE_MAX}
             style={styles.titleInput}
             editable={!submitting}
             returnKeyType="next"
+            onFocus={() => setFocused("title")}
+            onBlur={() => setFocused((f) => (f === "title" ? null : f))}
+            onSelectionChange={onCaret("title")}
+            selection={forcedCaret?.field === "title" ? forcedCaret.caret : undefined}
           />
+          {mention?.field === "title" ? <MentionSuggestions query={mention.range.query} onPick={pickMention} /> : null}
 
           <View style={styles.divider} />
 
@@ -154,10 +211,15 @@ export default function Composer() {
             placeholder={t('community.contentPlaceholder')}
             placeholderTextColor={Colors.text.muted}
             multiline
-            maxLength={2000}
+            maxLength={BODY_MAX}
             style={styles.bodyInput}
             editable={!submitting}
+            onFocus={() => setFocused("body")}
+            onBlur={() => setFocused((f) => (f === "body" ? null : f))}
+            onSelectionChange={onCaret("body")}
+            selection={forcedCaret?.field === "body" ? forcedCaret.caret : undefined}
           />
+          {mention?.field === "body" ? <MentionSuggestions query={mention.range.query} onPick={pickMention} /> : null}
 
           <View style={styles.divider} />
 
@@ -186,6 +248,45 @@ export default function Composer() {
               returnKeyType="done"
               accessibilityLabel={t('community.locationLabel')}
             />
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* ── Tag people ── */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>{t('community.tagPeopleLabel')}</Text>
+          </View>
+          <View style={styles.chips}>
+            {tagged.map((person) => (
+              <View key={person.id} style={styles.chip}>
+                <Avatar uri={person.avatar_url} name={person.name} size={22} />
+                <Text style={styles.chipText} numberOfLines={1}>
+                  {person.username ? `@${person.username}` : person.name}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setTagged((list) => list.filter((p) => p.id !== person.id))}
+                  disabled={submitting}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('community.untagPerson', { name: person.name })}
+                >
+                  <X size={14} color={Colors.text.tertiary} />
+                </TouchableOpacity>
+              </View>
+            ))}
+            <TouchableOpacity
+              onPress={() => setTagSheet(true)}
+              disabled={submitting}
+              style={styles.tagButton}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={t('community.tagPeopleAdd')}
+            >
+              <UserPlus size={16} color={Colors.darkGold} />
+              <Text style={styles.tagButtonText}>
+                {tagged.length ? t('community.tagPeopleEdit') : t('community.tagPeopleAdd')}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {isFanClubAdmin && (
@@ -227,6 +328,8 @@ export default function Composer() {
           )}
 
         </View>
+
+        <TagPeopleSheet visible={tagSheet} selected={tagged} onChange={setTagged} onClose={() => setTagSheet(false)} />
 
         {uploadProgress ? (
           <Text style={styles.progress}>{uploadProgress}</Text>
@@ -316,6 +419,48 @@ const styles = StyleSheet.create({
     fontSize: 15,
     paddingVertical: 0,
     textAlign: I18nManager.isRTL ? 'right' : 'left',
+  },
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    maxWidth: '100%',
+    paddingVertical: 4,
+    paddingStart: 4,
+    paddingEnd: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.border.default,
+    backgroundColor: Colors.background.medium,
+  },
+  chipText: {
+    flexShrink: 1,
+    color: Colors.text.primary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  tagButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.darkGold,
+  },
+  tagButtonText: {
+    color: Colors.darkGold,
+    fontSize: 13,
+    fontWeight: '600',
   },
   toggleRow: {
     flexDirection: 'row',

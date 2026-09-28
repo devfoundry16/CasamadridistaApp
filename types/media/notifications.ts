@@ -11,7 +11,11 @@ export type PushPayloadType =
   // Casa Social (`backend/services/notifications/payload.js` SOCIAL_TYPES).
   | 'friend_request'
   | 'friend_accept'
-  | 'dm';
+  | 'dm'
+  | 'post_like'
+  | 'post_comment'
+  | 'mention'
+  | 'tag';
 
 export interface PushPayload {
   v: number;
@@ -19,12 +23,18 @@ export interface PushPayload {
   item_id?: string;
   match_id?: number;
   campaign_id?: string;
-  /** Social: the person a friend notification is about, or a DM's sender. */
+  /** Social: the person a notification is about (who liked, commented, mentioned…), or a DM's sender. */
   user_id?: string;
   /** Social: the conversation a DM push opens. */
   conversation_id?: string;
   /** Social: the name to localise "X sent you a friend request" with. */
   actor_name?: string;
+  /** Social: the post a like, comment, mention or tag is about. */
+  post_id?: string;
+  /** Social: the comment, for a comment or a mention made in one. */
+  comment_id?: string;
+  /** Social: a post_comment that answers the recipient's own comment. */
+  reply?: boolean;
   /** casamadridistaapp://media/item/<uuid>?c=<campaign_id> */
   url?: string;
   /** https://<MEDIA_LINK_DOMAIN>/m/<uuid> */

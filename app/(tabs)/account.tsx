@@ -5,6 +5,7 @@ import { useUser } from "@/hooks/useUser";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import {
+  Bell,
   Camera,
   Check,
   ChevronRight,
@@ -22,9 +23,11 @@ import {
   Alert,
   I18nManager,
   Image,
+  Linking,
   Modal,
   Pressable,
   ScrollView,
+  Switch,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -33,6 +36,7 @@ import CountryFlag from "react-native-country-flag";
 import { LANG_STORAGE_KEY } from "@/i18n";
 import axios from "axios";
 import { API_BASE_URL } from "@/config/supabase";
+import { useSocialPushSetting } from "@/hooks/notifications/useSocialPushSetting";
 import { Clapperboard, LayoutDashboard, Send, ShieldCheck, UserRound, Users } from "lucide-react-native";
 
 type Locale = "en-US" | "ar-SA";
@@ -51,6 +55,13 @@ export default function AccountScreen() {
   // Casa Media contributor grant. `mediaContributor` is null for everyone
   // else; a manager gets the same area through `mediaManager`.
   const [isContributor, setIsContributor] = useState(false);
+  const socialPush = useSocialPushSetting();
+
+  const toggleSocialPush = async (on: boolean) => {
+    if (!(await socialPush.set(on))) {
+      Alert.alert(t("common.error"), t("social.notifications.settingFailed"));
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -268,6 +279,39 @@ export default function AccountScreen() {
             </View>
           </View>
         </TouchableOpacity>
+
+        {/* Notifications: pushes for likes, comments, mentions, tags and
+            friend requests on this device. Messages and Casa Media are not
+            affected. */}
+        <View
+          className="flex-row items-center bg-bg-card p-4 rounded-[25px] mb-3 gap-4 border border-rm-gold"
+        >
+          <Bell size={24} color={Colors.darkGold} />
+          <View className="flex-1">
+            <Text className="text-base font-semibold text-text-primary">{t("social.notifications.socialSetting")}</Text>
+            <Text className="text-xs text-text-secondary mt-0.5">{t("social.notifications.socialSettingHint")}</Text>
+            {/* Without OS permission the switch would move and change nothing. */}
+            {socialPush.permitted === false ? (
+              <TouchableOpacity
+                onPress={() => Linking.openSettings().catch(() => {})}
+                accessibilityRole="link"
+                accessibilityHint={t("social.notifications.openSettingsHint")}
+                className="mt-1"
+              >
+                <Text className="text-xs font-semibold text-rm-gold underline">{t("social.notifications.openSettings")}</Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+          <Switch
+            value={socialPush.value ?? true}
+            onValueChange={toggleSocialPush}
+            disabled={socialPush.value === null || socialPush.saving || socialPush.permitted === false}
+            trackColor={{ true: Colors.darkGold, false: Colors.background.light }}
+            thumbColor={Colors.text.primary}
+            accessibilityLabel={t("social.notifications.socialSetting")}
+            accessibilityHint={t("social.notifications.socialSettingHint")}
+          />
+        </View>
 
         {isSuperAdmin && (
           <TouchableOpacity

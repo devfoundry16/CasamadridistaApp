@@ -147,6 +147,53 @@ describe('pushPayload.core — social payloads', () => {
   });
 });
 
+describe('pushPayload.core — post activity payloads', () => {
+  const POST = 'a0000000-0000-4000-8000-000000000001';
+  const COMMENT = 'c0000000-0000-4000-8000-000000000002';
+  const USER = '00000000-0000-4000-8000-00000000000b';
+
+  it('a like, comment, mention or tag opens the post', () => {
+    for (const type of ['post_like', 'post_comment', 'mention', 'tag']) {
+      assert.equal(href({ v: 1, type, post_id: POST, user_id: USER }), `/community/post/${POST}`, type);
+    }
+  });
+
+  it('a mention in a comment still opens the post', () => {
+    assert.equal(href({ v: 1, type: 'mention', post_id: POST, comment_id: COMMENT }), `/community/post/${POST}`);
+  });
+
+  it('a malformed or missing post id goes nowhere, whatever data.url says', () => {
+    assert.equal(href({ v: 1, type: 'post_like', post_id: '../admin' }), null);
+    assert.equal(href({ v: 1, type: 'tag' }), null);
+    assert.equal(href({ v: 1, type: 'mention', url: 'casamadridistaapp://account/wallet' }), null);
+    assert.equal(
+      href({ v: 1, type: 'post_comment', post_id: POST, url: 'casamadridistaapp://account/wallet' }),
+      `/community/post/${POST}`,
+    );
+  });
+
+  it('parses post_id and comment_id, and only as strings', () => {
+    const parsed = parsePushPayload({ type: 'post_comment', post_id: POST, comment_id: COMMENT, user_id: USER, actor_name: 'Ali' });
+    assert.equal(parsed?.type, 'post_comment');
+    assert.equal(parsed?.post_id, POST);
+    assert.equal(parsed?.comment_id, COMMENT);
+    assert.equal(parsed?.user_id, USER);
+    assert.equal(parsed?.actor_name, 'Ali');
+
+    const bad = parsePushPayload({ type: 'post_like', post_id: 5, comment_id: {} });
+    assert.equal(bad?.post_id, undefined);
+    assert.equal(bad?.comment_id, undefined);
+    assert.ok(!('post_id' in bad!));
+  });
+
+  it('keeps reply only when it is exactly true', () => {
+    assert.equal(parsePushPayload({ type: 'post_comment', post_id: POST, reply: true })?.reply, true);
+    for (const reply of ['true', 1, false, undefined]) {
+      assert.ok(!('reply' in parsePushPayload({ type: 'post_comment', post_id: POST, reply })!), String(reply));
+    }
+  });
+});
+
 describe('pushPayload.core — parsePushPayload', () => {
   it('coerces a well-formed bag', () => {
     assert.deepEqual(
