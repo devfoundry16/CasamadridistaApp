@@ -19,7 +19,7 @@ import {
 
 const BACKEND_BASE = (
   development.DEFAULT_BACKEND_API_URL ||
-  "https://casamadridista-backend.vercel.app/api/"
+  "https://api.casamadridista.com/api/"
 ).replace(/\/api\/$/, "");
 
 const PRODUCT_LABELS: Record<string, { nameKey: string; billingKey: string }> = {

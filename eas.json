@@ -15,13 +15,17 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "APP_VARIANT": "preview"
+        "APP_VARIANT": "preview",
+        "EXPO_PUBLIC_BACKEND_API_URL": "https://api.casamadridista.com/api/"
       },
       "autoIncrement": true,
       "channel": "preview"
     },
     "production": {
-      "autoIncrement": false,
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_BACKEND_API_URL": "https://api.casamadridista.com/api/"
+      },
       "channel": "production"
     }
   },
