@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, FlatList, Pressable, StyleSheet, Dimensions } from 'react-native';
+import { View, FlatList, Pressable, StyleSheet, Dimensions, I18nManager } from 'react-native';
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useRouter } from 'expo-router';
@@ -8,6 +8,7 @@ import { Play } from 'lucide-react-native';
 import type { PostMedia as PostMediaType } from '@/services/FeedService';
 import Colors from '@/constants/colors';
 import Touchable from '@/components/Touchable';
+import { carouselIndex } from '@/utils/post.core';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FEED_HEIGHT = 250;
@@ -79,7 +80,8 @@ function VideoThumbnail({ media, onPlay }: { media: PostMediaType; onPlay: () =>
   );
 }
 
-function DotIndicator({ count, activeIndex }: { count: number; activeIndex: number }) {
+/** `activeIndex` is logical; the row itself mirrors under RTL. Shared with `PostMedia`. */
+export function DotIndicator({ count, activeIndex }: { count: number; activeIndex: number }) {
   return (
     <View style={styles.dots}>
       {Array.from({ length: count }).map((_, i) => (
@@ -117,9 +119,15 @@ function Carousel({
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         extraData={playingId}
+        // Up to ten full-width photos per post: mount the visible one and its
+        // neighbours, not all ten, for every card in the feed.
+        initialNumToRender={1}
+        windowSize={3}
+        maxToRenderPerBatch={2}
         onMomentumScrollEnd={(e) => {
-          const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-          setCurrentIndex(index);
+          // Under RTL `contentOffset.x` counts from the last item, so the raw
+          // quotient is inverted; `carouselIndex` turns it back.
+          setCurrentIndex(carouselIndex(e.nativeEvent.contentOffset.x, SCREEN_WIDTH, items.length, I18nManager.isRTL));
         }}
         renderItem={({ item }) =>
           item.kind === 'video' ? (
@@ -148,8 +156,8 @@ export default function PostMediaPreview({ media }: Props) {
 
   const openPhoto = useCallback(
     (m: PostMediaType) => {
-      // Pass the media id rather than an index: PostMediaPreview's own index
-      // tracking is derived from contentOffset.x, which inverts under RTL.
+      // Pass the media id rather than an index: the viewer lays its pages out
+      // in its own (mirrored under RTL) order.
       router.push({
         pathname: '/community/photo/[postId]',
         params: { postId: m.post_id, mediaId: m.id },

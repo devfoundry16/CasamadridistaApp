@@ -71,6 +71,32 @@ export interface ProfileUser extends PersonCard {
   show_activity?: boolean;
   display_name?: string | null;
   fan_club_id?: string | null;
+  /** The fan club the person is registered with, shown to every viewer. */
+  fan_club: ProfileFanClub | null;
+}
+
+export interface ProfileFanClub {
+  id: string;
+  name: string;
+  logo_url: string | null;
+}
+
+/**
+ * One cell of the profile grid (`layout=grid`): enough to draw a thumbnail and
+ * its badge, nothing more. `thumb_url` is null for a text post.
+ */
+export interface ProfileGridItem {
+  id: string;
+  kind: 'text' | 'image' | 'video' | 'media_teaser';
+  thumb_url: string | null;
+  media_count: number;
+  is_video: boolean;
+  created_at: string | null;
+}
+
+export interface ProfileGridPage {
+  items: ProfileGridItem[];
+  nextCursor: string | null;
 }
 
 export interface SocialProfile {

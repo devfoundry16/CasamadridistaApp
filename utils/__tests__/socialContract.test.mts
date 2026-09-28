@@ -16,6 +16,7 @@ import {
   INLINED_VOCABULARIES,
   normaliseConversationHeader,
   normaliseEmbed,
+  normaliseGridPage,
   normaliseInbox,
   normaliseMessage,
   normaliseMessages,
@@ -83,6 +84,19 @@ describe('profile', () => {
   it('an account without a name still renders, by handle', () => {
     const p = normaliseProfile({ ...WIRE_PROFILE, user: { ...WIRE_PROFILE.user, name: null } })!;
     assert.equal(p.user.name, 'alifayad');
+  });
+
+  it('carries the fan club to every viewer, or null', () => {
+    const club = { id: 'f0000000-0000-4000-8000-000000000001', name: 'Peña Madridista Beirut', logo_url: 'https://x/logo.png' };
+    const p = normaliseProfile({ ...WIRE_PROFILE, user: { ...WIRE_PROFILE.user, fan_club: club } })!;
+    assert.deepEqual(p.user.fan_club, club);
+    assert.equal(normaliseProfile(WIRE_PROFILE)!.user.fan_club, null, 'absent reads as none');
+    assert.equal(normaliseProfile({ ...WIRE_PROFILE, user: { ...WIRE_PROFILE.user, fan_club: null } })!.user.fan_club, null);
+    assert.equal(normaliseProfile({ ...WIRE_PROFILE, user: { ...WIRE_PROFILE.user, fan_club: { name: 'no id' } } })!.user.fan_club, null);
+    assert.deepEqual(
+      normaliseProfile({ ...WIRE_PROFILE, user: { ...WIRE_PROFILE.user, fan_club: { id: 'f1', name: 'Club', logo_url: null } } })!.user.fan_club,
+      { id: 'f1', name: 'Club', logo_url: null },
+    );
   });
 
   it('a profile with no user is null, so the screen shows not-available', () => {
@@ -159,5 +173,31 @@ describe('small envelopes', () => {
   it('a username check keeps only the keys the server sent', () => {
     assert.deepEqual(normaliseUsernameCheck({ username: 'ali', available: false, reason: 'taken' }), { username: 'ali', available: false, reason: 'taken' });
     assert.deepEqual(normaliseUsernameCheck({ current: null, suggestions: ['a', 2, 'b'] }), { current: null, suggestions: ['a', 'b'] });
+  });
+});
+
+// GET social/users/:id/posts?layout=grid and GET posts/saved?layout=grid: the
+// same `{ posts, nextCursor }` envelope as the full posts list, with light rows.
+const WIRE_GRID = {"posts":[{"id":"p1","kind":"image","thumb_url":"https://x/t1.jpg","media_count":3,"is_video":false,"created_at":"2026-09-20T10:00:00Z"},{"id":"p2","kind":"video","thumb_url":"https://x/t2.jpg","media_count":1,"is_video":true,"created_at":"2026-09-19T10:00:00Z"},{"id":"p3","kind":"text","thumb_url":null,"media_count":0,"is_video":false,"created_at":"2026-09-18T10:00:00Z"}],"nextCursor":"2026-09-18T10:00:00Z"};
+
+describe('profile grid', () => {
+  it('folds the light rows and keeps the cursor', () => {
+    const page = normaliseGridPage(WIRE_GRID);
+    assert.equal(page.nextCursor, '2026-09-18T10:00:00Z');
+    assert.deepEqual(page.items[0], { id: 'p1', kind: 'image', thumb_url: 'https://x/t1.jpg', media_count: 3, is_video: false, created_at: '2026-09-20T10:00:00Z' });
+    assert.equal(page.items[1].is_video, true);
+    assert.equal(page.items[2].thumb_url, null, 'a text post has no thumbnail');
+  });
+
+  it('drops rows without an id, and survives a missing envelope', () => {
+    assert.equal(normaliseGridPage({ posts: [{ kind: 'image' }, null, 'x'] }).items.length, 0);
+    assert.deepEqual(normaliseGridPage(null), { items: [], nextCursor: null });
+  });
+
+  it('an unknown kind reads as text; a missing count as 0', () => {
+    const [row] = normaliseGridPage({ posts: [{ id: 'p', kind: 'reel' }] }).items;
+    assert.equal(row.kind, 'text');
+    assert.equal(row.media_count, 0);
+    assert.equal(row.is_video, false);
   });
 });

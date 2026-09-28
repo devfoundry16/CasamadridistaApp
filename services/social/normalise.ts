@@ -23,6 +23,9 @@ import type {
   MessageKind,
   MessagesPage,
   PersonCard,
+  ProfileFanClub,
+  ProfileGridItem,
+  ProfileGridPage,
   ProfileUser,
   ReceiptState,
   RelationshipState,
@@ -93,6 +96,7 @@ export function normaliseProfile(raw: unknown): SocialProfile | null {
     ...('show_activity' in u ? { show_activity: u.show_activity !== false } : {}),
     ...('display_name' in u ? { display_name: str(u.display_name) } : {}),
     ...('fan_club_id' in u ? { fan_club_id: str(u.fan_club_id) } : {}),
+    fan_club: normaliseFanClub(u.fan_club),
   };
   const stats = (w.stats ?? {}) as Wire;
   const rel = (w.relationship ?? {}) as Wire;
@@ -108,6 +112,39 @@ export function normaliseProfile(raw: unknown): SocialProfile | null {
       can_message: bool(rel.can_message),
     },
   };
+}
+
+function normaliseFanClub(raw: unknown): ProfileFanClub | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const w = raw as Wire;
+  const id = str(w.id);
+  const name = str(w.name);
+  return id && name ? { id, name, logo_url: str(w.logo_url) } : null;
+}
+
+const GRID_KINDS: readonly string[] = ['text', 'image', 'video', 'media_teaser'];
+
+/**
+ * The profile grid and the Saved tab (`layout=grid`). The envelope keeps the
+ * full list's key names — `posts` and `nextCursor` — with light rows inside.
+ */
+export function normaliseGridPage(raw: unknown): ProfileGridPage {
+  const w = (raw ?? {}) as Wire;
+  const items = list(w.posts)
+    .map((row): ProfileGridItem | null => {
+      const id = str(row.id);
+      if (!id) return null;
+      return {
+        id,
+        kind: (GRID_KINDS.includes(row.kind) ? row.kind : 'text') as ProfileGridItem['kind'],
+        thumb_url: str(row.thumb_url),
+        media_count: num(row.media_count),
+        is_video: bool(row.is_video),
+        created_at: str(row.created_at),
+      };
+    })
+    .filter((row): row is ProfileGridItem => row !== null);
+  return { items, nextCursor: str(w.nextCursor) };
 }
 
 export function normaliseSearch(raw: unknown): SearchResult[] {

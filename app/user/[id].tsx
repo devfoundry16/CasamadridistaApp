@@ -1,15 +1,17 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { AtSign, Ban, Flag, MoreHorizontal, UserX } from 'lucide-react-native';
+import { AtSign, Ban, Flag, MoreHorizontal, Send, UserX } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, View, useWindowDimensions } from 'react-native';
 
-import PostCard from '@/components/Community/PostCard';
 import EmptyState from '@/components/Team/EmptyState';
 import Touchable from '@/components/Touchable';
-import ActionSheet from '@/components/Social/ActionSheet';
+import ActionSheet, { type SheetAction } from '@/components/Social/ActionSheet';
+import FriendPicker from '@/components/Social/FriendPicker';
+import ProfileGridCell from '@/components/Social/ProfileGridCell';
 import ProfileHeader from '@/components/Social/ProfileHeader';
+import ProfileTabs from '@/components/Social/ProfileTabs';
 import SocialReportSheet from '@/components/Social/SocialReportSheet';
 import T from '@/components/Social/T';
 import Colors from '@/constants/colors';
@@ -17,7 +19,10 @@ import { socialKeys } from '@/hooks/social/keys';
 import { useProfile, useRelationshipAction } from '@/hooks/social/useProfile';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useUser } from '@/hooks/useUser';
+import PostService from '@/services/PostService';
 import SocialService, { SocialApiError } from '@/services/SocialService';
+import type { ProfileGridItem, ProfileGridPage } from '@/types/social';
+import { GRID_COLUMNS, GRID_GAP, gridCellSize, type ProfileTab } from '@/utils/profileGrid.core';
 import { isUuid } from '@/utils/pushPayload.core';
 
 /**
@@ -37,6 +42,10 @@ export default function UserProfileScreen() {
   const requireAuth = useRequireAuth();
   const [menu, setMenu] = useState(false);
   const [report, setReport] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [tab, setTab] = useState<ProfileTab>('posts');
+  const { width } = useWindowDimensions();
+  const cell = gridCellSize(width);
 
   const handle = raw?.startsWith('@') ? raw : null;
   const id = raw && isUuid(raw) ? raw : undefined;
@@ -55,14 +64,24 @@ export default function UserProfileScreen() {
   const { data: profile, isLoading, refetch, isRefetching } = useProfile(id);
   const block = useRelationshipAction(id ?? '');
 
-  const posts = useInfiniteQuery({
-    queryKey: [...socialKeys.profile(id ?? ''), 'posts'],
-    queryFn: ({ pageParam }) => SocialService.userPosts(id!, pageParam),
+  const isSelf = profile?.relationship.state === 'self';
+  const blocking = profile?.relationship.state === 'blocking';
+  // Saved is private; a stale `saved` from another profile falls back to Posts.
+  const shownTab: ProfileTab = tab === 'saved' && !isSelf ? 'posts' : tab;
+
+  // One infinite query per tab: each keeps its own pages and cursor, so
+  // switching back to a tab is instant.
+  const grid = useInfiniteQuery({
+    queryKey: shownTab === 'saved' ? socialKeys.saved() : socialKeys.profileGrid(id ?? '', shownTab),
+    queryFn: ({ pageParam }): Promise<ProfileGridPage | null> =>
+      shownTab === 'saved' ? PostService.savedGrid(pageParam) : SocialService.userGrid(id!, shownTab, pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last?.nextCursor ?? undefined,
-    enabled: !!id && !!profile,
+    enabled: !!id && !!profile && !blocking,
   });
-  const postList = posts.data?.pages.flatMap((p) => p?.posts ?? []) ?? [];
+  const cells = grid.data?.pages.flatMap((p) => p?.items ?? []) ?? [];
+
+  const openPost = useCallback((item: ProfileGridItem) => router.push(`/community/post/${item.id}`), [router]);
 
   const openChat = useCallback(async () => {
     if (!id) return;
@@ -75,7 +94,6 @@ export default function UserProfileScreen() {
     }
   }, [id, router, t]);
 
-  const isSelf = profile?.relationship.state === 'self';
   const name = profile?.user.name ?? '';
 
   const header = (
@@ -83,7 +101,7 @@ export default function UserProfileScreen() {
       options={{
         title: profile?.user.username ? `@${profile.user.username}` : t('social.profile.title'),
         headerRight:
-          profile && !isSelf
+          profile
             ? () => (
                 <Touchable onPress={() => setMenu(true)} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('social.profile.more')} style={{ padding: 6 }}>
                   <MoreHorizontal size={22} color={Colors.text.primary} />
@@ -112,16 +130,49 @@ export default function UserProfileScreen() {
     );
   }
 
+  const emptyText =
+    shownTab === 'saved'
+      ? t('social.profile.empty.saved')
+      : isSelf
+        ? t(`social.profile.empty.${shownTab}Self`)
+        : t(`social.profile.empty.${shownTab}`, { name });
+
+  const menuActions: SheetAction[] = [
+    { key: 'share', label: t('social.profile.share'), icon: <Send size={20} color={Colors.darkGold} />, onPress: () => setSharing(true) },
+    ...(isSelf
+      ? []
+      : [
+          { key: 'report', label: t('social.profile.report'), icon: <Flag size={20} color={Colors.status.error} />, destructive: true, onPress: () => setReport(true) },
+          ...(blocking
+            ? []
+            : [
+                {
+                  key: 'block',
+                  label: t('social.actions.block'),
+                  icon: <Ban size={20} color={Colors.status.error} />,
+                  destructive: true,
+                  onPress: () =>
+                    Alert.alert(t('social.confirm.blockTitle', { name }), t('social.confirm.blockBody', { name }), [
+                      { text: t('common.cancel'), style: 'cancel' },
+                      { text: t('social.actions.block'), style: 'destructive', onPress: () => block.mutate('block') },
+                    ]),
+                },
+              ]),
+        ]),
+  ];
+
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background.medium }}>
       {header}
       <FlatList
-        data={postList}
-        keyExtractor={(p) => p.id}
-        renderItem={({ item }) => <PostCard post={item} />}
-        onEndReached={() => posts.hasNextPage && !posts.isFetchingNextPage && posts.fetchNextPage()}
+        data={blocking ? [] : cells}
+        keyExtractor={(item) => item.id}
+        numColumns={GRID_COLUMNS}
+        renderItem={({ item }) => <ProfileGridCell item={item} size={cell} onPress={openPost} />}
+        columnWrapperStyle={{ gap: GRID_GAP }}
+        onEndReached={() => grid.hasNextPage && !grid.isFetchingNextPage && grid.fetchNextPage()}
         onEndReachedThreshold={0.6}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => { void refetch(); void posts.refetch(); }} tintColor={Colors.darkGold} colors={[Colors.darkGold]} />}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => { void refetch(); void grid.refetch(); }} tintColor={Colors.darkGold} colors={[Colors.darkGold]} />}
         ListHeaderComponent={
           <>
             {isSelf && !profile.user.username ? (
@@ -141,55 +192,48 @@ export default function UserProfileScreen() {
                 </View>
               </Touchable>
             ) : null}
-            <ProfileHeader profile={profile} onMessage={openChat} />
-            {profile.relationship.state === 'blocking' ? (
+            <ProfileHeader profile={profile} onMessage={openChat} onCreate={isSelf ? () => router.push('/community/compose') : undefined} />
+            {blocking ? (
               <T step="footnote" color={Colors.text.tertiary} align="center" style={{ padding: 24 }}>
                 {t('social.profile.youBlocked', { name })}
               </T>
-            ) : null}
+            ) : (
+              <ProfileTabs active={shownTab} onSelect={setTab} isSelf={isSelf} />
+            )}
           </>
         }
         ListEmptyComponent={
-          profile.relationship.state === 'blocking' ? null : posts.isLoading ? (
+          blocking ? null : grid.isLoading ? (
             <ActivityIndicator color={Colors.darkGold} style={{ marginTop: 32 }} />
+          ) : grid.isError ? (
+            <T step="footnote" color={Colors.text.tertiary} align="center" style={{ padding: 32 }}>
+              {t('social.errors.generic')}
+            </T>
           ) : (
             <T step="footnote" color={Colors.text.tertiary} align="center" style={{ padding: 32 }}>
-              {isSelf ? t('social.profile.noPostsSelf') : t('social.profile.noPosts', { name })}
+              {emptyText}
             </T>
           )
         }
-        ListFooterComponent={posts.isFetchingNextPage ? <ActivityIndicator color={Colors.darkGold} style={{ margin: 16 }} /> : null}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        ListFooterComponent={grid.isFetchingNextPage ? <ActivityIndicator color={Colors.darkGold} style={{ margin: 16 }} /> : null}
+        contentContainerStyle={{ gap: GRID_GAP, paddingBottom: 32 }}
       />
 
-      <ActionSheet
-        visible={menu}
-        onClose={() => setMenu(false)}
-        cancelLabel={t('common.cancel')}
-        actions={[
-          { key: 'report', label: t('social.profile.report'), icon: <Flag size={20} color={Colors.status.error} />, destructive: true, onPress: () => setReport(true) },
-          ...(profile.relationship.state === 'blocking'
-            ? []
-            : [
-                {
-                  key: 'block',
-                  label: t('social.actions.block'),
-                  icon: <Ban size={20} color={Colors.status.error} />,
-                  destructive: true,
-                  onPress: () =>
-                    Alert.alert(t('social.confirm.blockTitle', { name }), t('social.confirm.blockBody', { name }), [
-                      { text: t('common.cancel'), style: 'cancel' },
-                      { text: t('social.actions.block'), style: 'destructive', onPress: () => block.mutate('block') },
-                    ]),
-                },
-              ]),
-        ]}
-      />
+      <ActionSheet visible={menu} onClose={() => setMenu(false)} cancelLabel={t('common.cancel')} actions={menuActions} />
+      {id ? (
+        <FriendPicker
+          visible={sharing}
+          onClose={() => setSharing(false)}
+          kind="profile"
+          id={id}
+          subject={profile.user.username ? `@${profile.user.username}` : name}
+        />
+      ) : null}
       <SocialReportSheet
         visible={report}
         target={id ? { kind: 'profile', id } : null}
         onClose={() => setReport(false)}
-        onBlock={profile.relationship.state === 'blocking' ? undefined : () => block.mutate('block')}
+        onBlock={blocking ? undefined : () => block.mutate('block')}
       />
     </View>
   );

@@ -1,25 +1,15 @@
 import * as ImagePicker from 'expo-image-picker';
 
-import type { ContributorLimits } from '@/types/media/contributor';
+import {
+  applyLimits,
+  type PickLimits,
+  type PickResult,
+  type PickedAsset,
+} from '@/utils/mediaPick.core';
 
-export interface PickedAsset {
-  uri: string;
-  kind: 'image' | 'video';
-  mime: string;
-  width: number | null;
-  height: number | null;
-  durationMs: number | null;
-  sizeBytes: number | null;
-}
-
-export interface PickResult {
-  assets: PickedAsset[];
-  /** Files the picker returned but the limits reject, already explained. */
-  rejected: { name: string; reason: 'video_bytes' | 'image_bytes' | 'video_duration' }[];
-  cancelled: boolean;
-  /** Set when the OS refused the permission outright. */
-  denied?: 'library' | 'camera';
-}
+// Re-exported so the contributor screens keep importing from here.
+export { applyLimits };
+export type { PickLimits, PickResult, PickedAsset };
 
 function toPicked(asset: ImagePicker.ImagePickerAsset): PickedAsset {
   const isVideo = asset.type === 'video';
@@ -35,56 +25,17 @@ function toPicked(asset: ImagePicker.ImagePickerAsset): PickedAsset {
   };
 }
 
-function fileName(asset: PickedAsset): string {
-  const tail = asset.uri.split('/').pop();
-  return tail && tail.length ? tail : asset.kind;
-}
-
-/**
- * Apply the contributor's server-stated ceilings.
- *
- * Checked here rather than at upload time so the rejection lands next to the
- * picker, while the correspondent is still looking at the file they chose —
- * failing 180 MB into an upload at a stadium is the worst possible moment to
- * learn about a size cap.
- *
- * A missing `sizeBytes`/`durationMs` passes: the picker does not always report
- * either, and refusing an unmeasurable file would block valid uploads.
- */
-export function applyLimits(assets: PickedAsset[], limits: ContributorLimits): PickResult {
-  const accepted: PickedAsset[] = [];
-  const rejected: PickResult['rejected'] = [];
-
-  for (const asset of assets) {
-    if (asset.kind === 'video') {
-      if (asset.sizeBytes != null && asset.sizeBytes > limits.maxVideoBytes) {
-        rejected.push({ name: fileName(asset), reason: 'video_bytes' });
-        continue;
-      }
-      if (
-        asset.durationMs != null &&
-        asset.durationMs > limits.maxVideoDurationSec * 1000
-      ) {
-        rejected.push({ name: fileName(asset), reason: 'video_duration' });
-        continue;
-      }
-    } else if (asset.sizeBytes != null && asset.sizeBytes > limits.maxImageBytes) {
-      // Photos are downscaled to a 3000 px JPEG before upload, so this only
-      // catches something pathological — a 100 MP RAW, a mislabelled file.
-      rejected.push({ name: fileName(asset), reason: 'image_bytes' });
-      continue;
-    }
-    accepted.push(asset);
-  }
-
-  return { assets: accepted, rejected, cancelled: false };
-}
-
 export interface PickOptions {
-  limits: ContributorLimits;
+  /** A contributor's server-stated `ContributorLimits`, or `POST_MEDIA_LIMITS`. */
+  limits: PickLimits;
   /** Fewer than `limits.maxGalleryAssets` when the item already holds some. */
   selectionLimit?: number;
   mediaTypes?: ImagePicker.MediaType[];
+  /**
+   * Offer the system crop. The OS can only crop a single file, so this turns
+   * multi-select off.
+   */
+  allowsEditing?: boolean;
 }
 
 /**
@@ -100,11 +51,13 @@ export async function pickFromLibrary(options: PickOptions): Promise<PickResult>
   if (!permission.granted) return { assets: [], rejected: [], cancelled: true, denied: 'library' };
 
   const limit = Math.max(1, options.selectionLimit ?? options.limits.maxGalleryAssets);
+  const crop = !!options.allowsEditing;
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: options.mediaTypes ?? ['images', 'videos'],
-    allowsMultipleSelection: true,
-    selectionLimit: limit,
+    allowsMultipleSelection: !crop,
+    selectionLimit: crop ? 1 : limit,
+    allowsEditing: crop,
     orderedSelection: true,
     quality: 1,
     exif: false,
@@ -124,6 +77,8 @@ export async function captureWithCamera(
 
   const result = await ImagePicker.launchCameraAsync({
     mediaTypes: options.video ? ['videos'] : ['images'],
+    // Crop applies to stills only.
+    allowsEditing: !options.video && !!options.allowsEditing,
     quality: 1,
     exif: false,
     videoMaxDuration: options.limits.maxVideoDurationSec,

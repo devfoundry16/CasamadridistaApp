@@ -11,18 +11,21 @@ import {
   Platform,
   StyleSheet,
   Switch,
+  I18nManager,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostService from "@/services/PostService";
 import AuthService from "@/services/AuthService";
-import { Shield } from "lucide-react-native";
-import MediaService from "@/services/MediaService";
+import { MapPin, Shield } from "lucide-react-native";
+import MediaService, { type UploadSlot } from "@/services/MediaService";
 import MediaPicker, { type PickedMedia } from "./MediaPicker";
 import TagPicker from "./TagPicker";
 import type { FanClubCountry, FanClub } from "@/services/FanClubService";
 import Colors from "@/constants/colors";
+import { LOCATION_MAX, normaliseLocation } from "@/utils/post.core";
+import { socialKeys } from "@/hooks/social/keys";
 
 export default function Composer() {
   const router = useRouter();
@@ -31,7 +34,8 @@ export default function Composer() {
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [media, setMedia] = useState<PickedMedia | null>(null);
+  const [media, setMedia] = useState<PickedMedia[]>([]);
+  const [location, setLocation] = useState("");
   const [country, setCountry] = useState<FanClubCountry | null>(null);
   const [fanClub, setFanClub] = useState<FanClub | null>(null);
   const [postAsFanClub, setPostAsFanClub] = useState(false);
@@ -46,43 +50,70 @@ export default function Composer() {
 
   const isFanClubAdmin = roles?.fanClubAdmin ?? false;
 
-  const canPost = !submitting && title.trim().length > 0 && (body.trim().length > 0 || !!media);
+  const canPost = !submitting && title.trim().length > 0 && (body.trim().length > 0 || media.length > 0);
 
   const handlePost = useCallback(async () => {
     if (!canPost) return;
     setSubmitting(true);
 
+    // Set once the post exists: anything failing after that deletes it again,
+    // so there is never a half-posted post and a retry starts clean.
+    let createdId: string | null = null;
     try {
-      const kind: "text" | "image" | "video" = media?.kind ?? "text";
+      // One video, or up to ten photos: MediaPicker never mixes them.
+      const kind: "text" | "image" | "video" = media[0]?.kind ?? "text";
+      const locationName = normaliseLocation(location);
 
       const post = await PostService.createPost({
         kind,
         title: title.trim(),
         body: body.trim() || undefined,
         country_code: country?.country_code ?? undefined,
+        ...(locationName ? { location_name: locationName } : {}),
         ...(postAsFanClub && roles?.fanClubId
           ? { fan_club_id: roles.fanClubId }
           : { tagged_fan_club_id: fanClub?.id ?? undefined }),
       });
+      createdId = post.id;
 
-      if (media) {
-        setUploadProgress(t('community.uploadingMedia'));
-        if (media.kind === "image") {
-          await MediaService.uploadImage(media.uri, post.id);
+      // Reserve every slot before any upload completes. The post stays pending
+      // until its last reserved item completes, and the backend refuses new
+      // slots (409 media_locked) once one has.
+      if (media.length > 0) setUploadProgress(t('community.uploadingMedia'));
+      const slots: UploadSlot[] = [];
+      for (let position = 0; position < media.length; position++) {
+        slots.push(await MediaService.requestUploadSlot(media[position].kind, post.id, position));
+      }
+
+      // One at a time, each with its place in the carousel: a stadium
+      // connection shared by ten parallel uploads finishes none of them.
+      for (let position = 0; position < media.length; position++) {
+        const item = media[position];
+        setUploadProgress(
+          media.length > 1
+            ? t('community.uploadingMediaCount', { current: position + 1, total: media.length })
+            : t('community.uploadingMedia'),
+        );
+        if (item.kind === "image") {
+          await MediaService.uploadImage(item.uri, post.id, position, slots[position]);
         } else {
-          await MediaService.uploadVideo(media.uri, post.id);
+          await MediaService.uploadVideo(item.uri, post.id, position, slots[position]);
         }
       }
 
       queryClient.invalidateQueries({ queryKey: ["feed"] });
+      // Your profile's grid and post count, if you came here from "+ Create".
+      queryClient.invalidateQueries({ queryKey: [...socialKeys.all, "profile"] });
       router.back();
     } catch (err: any) {
+      // Best-effort: the composer keeps its state, so the user can retry.
+      if (createdId) PostService.deletePost(createdId).catch(() => {});
       Alert.alert(t('common.error'), err.message ?? t('community.failedToPost'));
     } finally {
       setSubmitting(false);
       setUploadProgress("");
     }
-  }, [canPost, title, body, media, country, fanClub, queryClient, router, t]);
+  }, [canPost, title, body, media, location, country, fanClub, postAsFanClub, roles, queryClient, router, t]);
 
   return (
     <KeyboardAvoidingView
@@ -134,7 +165,28 @@ export default function Composer() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionLabel}>{t('community.mediaLabel')}</Text>
           </View>
-          <MediaPicker media={media} onPick={setMedia} />
+          <MediaPicker media={media} onChange={setMedia} disabled={submitting} />
+
+          <View style={styles.divider} />
+
+          {/* ── Location ── */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>{t('community.locationLabel')}</Text>
+          </View>
+          <View style={styles.locationRow}>
+            <MapPin size={16} color={Colors.darkGold} />
+            <TextInput
+              value={location}
+              onChangeText={setLocation}
+              placeholder={t('community.locationPlaceholder')}
+              placeholderTextColor={Colors.text.muted}
+              maxLength={LOCATION_MAX}
+              style={styles.locationInput}
+              editable={!submitting}
+              returnKeyType="done"
+              accessibilityLabel={t('community.locationLabel')}
+            />
+          </View>
 
           {isFanClubAdmin && (
             <>
@@ -250,6 +302,20 @@ const styles = StyleSheet.create({
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: Colors.border.default,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    gap: 8,
+  },
+  locationInput: {
+    flex: 1,
+    color: Colors.text.primary,
+    fontSize: 15,
+    paddingVertical: 0,
+    textAlign: I18nManager.isRTL ? 'right' : 'left',
   },
   toggleRow: {
     flexDirection: 'row',

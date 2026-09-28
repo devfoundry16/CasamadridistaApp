@@ -36,6 +36,8 @@ export interface PostMedia {
   duration_ms: number | null;
   size_bytes: number | null;
   status: 'uploading' | 'processing' | 'ready' | 'failed';
+  /** The item's place in the carousel, 0–9. `media[]` arrives sorted by it. */
+  position?: number;
 }
 
 export interface Post {
@@ -54,6 +56,8 @@ export interface Post {
   language: string;
   country_code: string | null;
   tagged_fan_club_id: string | null;
+  /** Free text the author typed, at most 80 characters. */
+  location_name?: string | null;
   status: string;
   like_count: number;
   comment_count: number;
@@ -70,6 +74,9 @@ export interface Post {
   tagged_fan_club: PostFanClub | null;
   media: PostMedia[];
   liked_by_me: boolean;
+  /** Feed and detail responses carry it; absent reads as not saved. */
+  saved_by_me?: boolean;
+  save_count?: number;
   /** Only present when `kind === 'media_teaser'`. */
   media_item?: MediaItem | null;
 }

@@ -2,11 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 import { API_BASE_URL } from '@/config/supabase';
-import type { Post } from '@/services/FeedService';
 import {
   normaliseBlocked,
   normaliseConversationHeader,
   normaliseFriends,
+  normaliseGridPage,
   normaliseInbox,
   normaliseMessage,
   normaliseMessages,
@@ -28,6 +28,7 @@ import type {
   InboxPage,
   MessagesPage,
   PersonCard,
+  ProfileGridPage,
   RelationshipState,
   SearchResult,
   ShareResult,
@@ -126,11 +127,13 @@ class SocialServiceClass {
     }
   }
 
-  /** A profile's posts, in the feed's own Post shape so `PostCard` renders them. */
-  async userPosts(userId: string, cursor?: string | null): Promise<{ posts: Post[]; nextCursor: string | null } | null> {
+  /**
+   * A profile tab as grid cells (`layout=grid`). Saved is not here: it is your
+   * own list, `PostService.savedGrid`. Null when the profile is not visible.
+   */
+  async userGrid(userId: string, tab: 'posts' | 'videos' | 'tagged', cursor?: string | null): Promise<ProfileGridPage | null> {
     try {
-      const data = await this.get<{ posts?: Post[]; nextCursor?: string | null }>(`/users/${encodeURIComponent(userId)}/posts`, { cursor });
-      return { posts: Array.isArray(data?.posts) ? data.posts : [], nextCursor: data?.nextCursor ?? null };
+      return normaliseGridPage(await this.get(`/users/${encodeURIComponent(userId)}/posts`, { tab, layout: 'grid', cursor }));
     } catch (error) {
       if (error instanceof SocialApiError && error.status === 404) return null;
       throw error;

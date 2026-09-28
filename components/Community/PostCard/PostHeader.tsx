@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
-import { MoreHorizontal } from 'lucide-react-native';
+import { MapPin, MoreHorizontal } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
 import type { Post } from '@/services/FeedService';
 import VerifiedBadge from '../VerifiedBadge';
@@ -53,6 +53,7 @@ export default function PostHeader({ post, onAuthorPress, onReportPress }: Props
   const subtitle    = !isFanClub && !isCasa && post.author?.country_code
     ? post.author.country_code
     : null;
+  const location    = post.location_name?.trim() || null;
   const timeAgo     = formatDistanceToNow(new Date(post.created_at), { addSuffix: false });
 
   return (
@@ -75,7 +76,22 @@ export default function PostHeader({ post, onAuthorPress, onReportPress }: Props
           </TouchableOpacity>
           <Text style={styles.time} numberOfLines={1}>· {timeAgo}</Text>
         </View>
-        {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+        {subtitle || location ? (
+          <View style={styles.subRow}>
+            {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+            {subtitle && location ? <Text style={styles.subtitle}> · </Text> : null}
+            {location ? (
+              <View
+                style={styles.location}
+                accessible
+                accessibilityLabel={t('community.locationA11y', { location })}
+              >
+                <MapPin size={11} color={Colors.text.tertiary} />
+                <Text style={[styles.subtitle, styles.locationText]} numberOfLines={1}>{location}</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
       </View>
 
       {onReportPress && (
@@ -131,7 +147,20 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 12,
     color: Colors.text.tertiary,
+  },
+  subRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 1,
+  },
+  location: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
+  },
+  locationText: {
+    marginStart: 3,
+    flexShrink: 1,
   },
   moreButton: {
     paddingLeft: 8,

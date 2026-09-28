@@ -6,6 +6,7 @@ import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import type { MediaAsset } from '@/types/media/casaMedia';
 import { assetPreviewUri, sizedUri } from '@/utils/mediaUrl';
+import { gridCellSize } from '@/utils/profileGrid.core';
 
 interface Props {
   assets: MediaAsset[];
@@ -26,7 +27,8 @@ const GAP = 2;
  */
 export default function GalleryGrid({ assets, onPressAsset, edge = 16 }: Props) {
   const { width: screenWidth } = useWindowDimensions();
-  const cell = Math.floor((screenWidth - edge * 2 - GAP * (COLUMNS - 1)) / COLUMNS);
+  // Shared with the profile grid (`components/Social/ProfileGridCell`).
+  const cell = gridCellSize(screenWidth, edge, GAP, COLUMNS);
   const stride = cell + GAP;
 
   const renderItem = useCallback(

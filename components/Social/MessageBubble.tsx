@@ -13,6 +13,7 @@ import { clockTime } from '@/components/Media/time';
 import ActionSheet, { type SheetAction } from './ActionSheet';
 import EmbedCard from './EmbedCard';
 import ReceiptGlyph from './ReceiptGlyph';
+import RichText from './RichText';
 import T from './T';
 
 interface Props {
@@ -115,9 +116,7 @@ function MessageBubble({ message, layout, onRetry, onDiscard, onReport, onOpenPh
               </View>
             ) : null}
             {message.body ? (
-              <T step="body" color={fg} selectable style={{ paddingHorizontal: 12, paddingTop: 8, paddingBottom: 8 }}>
-                {message.body}
-              </T>
+              <RichText text={message.body} step="body" color={fg} selectable style={{ paddingHorizontal: 12, paddingTop: 8, paddingBottom: 8 }} />
             ) : null}
           </>
         )}

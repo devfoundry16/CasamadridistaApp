@@ -836,7 +836,45 @@
     "accountRestricted": "حسابك مقيّد، لذا لا يمكنك النشر أو التعليق الآن. تواصل مع الدعم إذا كنت تعتقد أن هذا خطأ.",
     "postNotEditable": "لا يمكن تعديل هذا المنشور لأنه أُزيل أو رُفض.",
     "useModerationRemove": "استخدم لوحة الإشراف لإزالة منشورات الآخرين.",
-    "useModerationRemoveComment": "استخدم لوحة الإشراف لإزالة تعليقات الآخرين."
+    "useModerationRemoveComment": "استخدم لوحة الإشراف لإزالة تعليقات الآخرين.",
+    "library": "المعرض",
+    "camera": "الكاميرا",
+    "addMore": "إضافة المزيد",
+    "takePhoto": "التقاط صورة",
+    "recordVideo": "تسجيل فيديو",
+    "photoNumber": "الصورة {{number}}",
+    "removeVideo": "إزالة الفيديو",
+    "photoCount": "الصور: {{current}}/{{max}}",
+    "mediaLimitTitle": "صور أو فيديو واحد",
+    "mediaLimitBody": "يمكن أن يحتوي المنشور على ما يصل إلى 10 صور، أو فيديو واحد فقط.",
+    "mediaRejectedTitle": "تعذّرت إضافة بعض الملفات",
+    "mediaRejected": {
+      "video_bytes": "حجم الفيديو كبير جداً",
+      "image_bytes": "حجم الصورة كبير جداً",
+      "video_duration": "يجب ألا تتجاوز مدة الفيديو دقيقة واحدة"
+    },
+    "uploadingMediaCount": "جاري رفع {{current}} من {{total}}…",
+    "locationLabel": "الموقع",
+    "locationPlaceholder": "أضف موقعاً (اختياري)",
+    "locationA11y": "الموقع: {{location}}",
+    "savePost": "حفظ المنشور",
+    "unsavePost": "إزالة من المحفوظات",
+    "reportComment": "الإبلاغ عن التعليق",
+    "reportDescribeRequired": "أخبرنا بما حدث (مطلوب)",
+    "reportErrors": {
+      "invalid_reason": "اختر أحد الأسباب ثم حاول مجدداً.",
+      "details_required": "يرجى وصف ما حدث حتى نتمكن من مراجعته.",
+      "already_reported": "لقد أبلغت عن هذا من قبل. سيراجعه فريقنا."
+    },
+    "deleteComment": "حذف التعليق",
+    "deleteCommentTitle": "حذف هذا التعليق؟",
+    "deleteCommentBody": "سيُحذف للجميع ولا يمكن التراجع عن ذلك.",
+    "deleteCommentFailed": "تعذّر حذف التعليق. حاول مجدداً.",
+    "commentLongPressHint": "اضغط مطولاً لمزيد من الخيارات",
+    "likeComment": "إعجاب",
+    "unlikeComment": "إلغاء الإعجاب",
+    "openCommentAuthor": "فتح ملف {{name}}",
+    "commentMoreOptions": "خيارات إضافية"
   },
   "membershipPackages": {
     "halaGold": {
@@ -1392,8 +1430,31 @@
       "unavailableTitle": "هذا الملف غير متاح",
       "unavailableBody": "ربما حُذف الحساب أو ليس لديك إذن بالوصول إليه.",
       "youBlocked": "لقد حظرت {{name}}. ألغِ الحظر لرؤية منشوراته ومراسلته.",
-      "noPosts": "لم ينشر {{name}} شيئاً بعد.",
-      "noPostsSelf": "ستظهر هنا منشوراتك في المجتمع."
+      "create": "إنشاء",
+      "share": "مشاركة الملف الشخصي",
+      "openStory": "فتح القصة",
+      "fanClubA11y": "نادي المشجعين: {{name}}",
+      "tabs": {
+        "posts": "المنشورات",
+        "videos": "الفيديوهات",
+        "tagged": "الإشارات",
+        "saved": "المحفوظات"
+      },
+      "grid": {
+        "video": "منشور فيديو",
+        "photos": "منشور بعدة صور",
+        "photo": "منشور صورة",
+        "text": "منشور نصي"
+      },
+      "empty": {
+        "posts": "لم ينشر {{name}} شيئاً بعد.",
+        "postsSelf": "ستظهر هنا منشوراتك في المجتمع.",
+        "videos": "لم ينشر {{name}} أي فيديو بعد.",
+        "videosSelf": "ستظهر هنا منشوراتك التي تحتوي على فيديو.",
+        "tagged": "لا توجد منشورات تشير إلى {{name}} بعد.",
+        "taggedSelf": "ستظهر هنا المنشورات التي أُشير إليك فيها.",
+        "saved": "اضغط على علامة الحفظ في أي منشور ليظهر هنا. لا يرى محفوظاتك أحد غيرك."
+      }
     },
     "presence": {
       "online": "متصل الآن",

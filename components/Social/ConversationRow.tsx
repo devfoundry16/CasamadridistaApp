@@ -28,12 +28,14 @@ function ConversationRow({ conversation, myId }: Props) {
 
   const preview = last ? previewText(last.preview, t) : '';
   const line = mine && last?.status !== 'removed' ? t('social.preview.you', { text: preview }) : preview;
+  // The handle tells two people with the same display name apart (PersonRow's pattern).
+  const handle = conversation.other.username ? `@${conversation.other.username}` : null;
 
   return (
     <Touchable
       onPress={() => router.push(`/social/chat/${conversation.id}`)}
       accessibilityRole="button"
-      accessibilityLabel={[conversation.other.name, line, unread ? t('social.inbox.unreadCount', { count: conversation.unread_count }) : null].filter(Boolean).join(', ')}
+      accessibilityLabel={[conversation.other.name, handle, line, unread ? t('social.inbox.unreadCount', { count: conversation.unread_count }) : null].filter(Boolean).join(', ')}
       style={({ pressed }) => [styles.row, pressed && { backgroundColor: Colors.background.card }]}
     >
       <Avatar uri={conversation.other.avatar_url} name={conversation.other.name} size={52} online={presence?.key === 'online'} />
@@ -46,6 +48,11 @@ function ConversationRow({ conversation, myId }: Props) {
             {relativeTime(conversation.last_message_at) ?? ''}
           </T>
         </View>
+        {handle ? (
+          <T step="caption" color={Colors.text.tertiary} numberOfLines={1} style={{ marginTop: 1 }}>
+            {handle}
+          </T>
+        ) : null}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
           {mine && last?.receipt ? (
             <View style={{ marginEnd: 4 }}>

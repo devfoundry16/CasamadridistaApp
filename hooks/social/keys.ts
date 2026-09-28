@@ -6,6 +6,9 @@ export const socialKeys = {
   all: ['social'] as const,
   me: () => [...socialKeys.all, 'me'] as const,
   profile: (userId: string) => [...socialKeys.all, 'profile', userId] as const,
+  profileGrid: (userId: string, tab: 'posts' | 'videos' | 'tagged') => [...socialKeys.profile(userId), 'grid', tab] as const,
+  /** Your own saved posts, the Saved tab. */
+  saved: () => [...socialKeys.all, 'saved'] as const,
   search: (q: string, country: string | null, fanClubId: string | null) =>
     [...socialKeys.all, 'search', q, country, fanClubId] as const,
   friends: () => [...socialKeys.all, 'friends'] as const,

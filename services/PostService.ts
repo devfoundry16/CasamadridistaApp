@@ -3,6 +3,8 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
 import type { Post } from './FeedService';
 import i18n from '@/i18n';
+import { normaliseGridPage } from '@/services/social/normalise';
+import type { ProfileGridPage } from '@/types/social';
 
 export interface CreatePostPayload {
   kind: 'text' | 'image' | 'video';
@@ -12,6 +14,13 @@ export interface CreatePostPayload {
   tagged_fan_club_id?: string;
   fan_club_id?: string;
   language?: string;
+  /** Free text, at most 80 characters (`utils/post.core` normalises it). */
+  location_name?: string;
+}
+
+export interface SaveState {
+  saved: boolean;
+  save_count: number;
 }
 
 class PostServiceClass {
@@ -89,6 +98,39 @@ class PostServiceClass {
       await axios.delete(`${API_BASE_URL}posts/${id}/like`, { headers });
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to unlike post');
+    }
+  }
+
+  async savePost(id: string): Promise<SaveState> {
+    try {
+      const headers = await this.getAuthHeader();
+      const response = await axios.post<SaveState>(`${API_BASE_URL}posts/${id}/save`, {}, { headers });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to save post');
+    }
+  }
+
+  async unsavePost(id: string): Promise<SaveState> {
+    try {
+      const headers = await this.getAuthHeader();
+      const response = await axios.delete<SaveState>(`${API_BASE_URL}posts/${id}/save`, { headers });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to unsave post');
+    }
+  }
+
+  /** Your saved posts, newest save first, as grid cells for the profile's Saved tab. */
+  async savedGrid(cursor?: string | null): Promise<ProfileGridPage> {
+    try {
+      const headers = await this.getAuthHeader();
+      const params: Record<string, string> = { layout: 'grid' };
+      if (cursor) params.cursor = cursor;
+      const response = await axios.get(`${API_BASE_URL}posts/saved`, { headers, params });
+      return normaliseGridPage(response.data);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to load saved posts');
     }
   }
 

@@ -836,7 +836,45 @@
     "accountRestricted": "Your account is restricted, so you can't post or comment right now. Contact support if you think this is a mistake.",
     "postNotEditable": "This post can't be edited because it was removed or rejected.",
     "useModerationRemove": "Use the moderation dashboard to remove other people's posts.",
-    "useModerationRemoveComment": "Use the moderation dashboard to remove other people's comments."
+    "useModerationRemoveComment": "Use the moderation dashboard to remove other people's comments.",
+    "library": "Library",
+    "camera": "Camera",
+    "addMore": "Add more",
+    "takePhoto": "Take photo",
+    "recordVideo": "Record video",
+    "photoNumber": "Photo {{number}}",
+    "removeVideo": "Remove video",
+    "photoCount": "Photos: {{current}}/{{max}}",
+    "mediaLimitTitle": "Photos or one video",
+    "mediaLimitBody": "A post can have up to 10 photos, or one video on its own.",
+    "mediaRejectedTitle": "Some files can't be added",
+    "mediaRejected": {
+      "video_bytes": "the video is too large",
+      "image_bytes": "the photo is too large",
+      "video_duration": "videos can be up to 1 minute"
+    },
+    "uploadingMediaCount": "Uploading {{current}} of {{total}}…",
+    "locationLabel": "Location",
+    "locationPlaceholder": "Add a location (optional)",
+    "locationA11y": "Location: {{location}}",
+    "savePost": "Save post",
+    "unsavePost": "Remove from saved",
+    "reportComment": "Report comment",
+    "reportDescribeRequired": "Tell us what happened (required)",
+    "reportErrors": {
+      "invalid_reason": "Choose one of the reasons and try again.",
+      "details_required": "Please describe what happened so we can review it.",
+      "already_reported": "You've already reported this. Our team will review it."
+    },
+    "deleteComment": "Delete comment",
+    "deleteCommentTitle": "Delete this comment?",
+    "deleteCommentBody": "It will be removed for everyone. This can't be undone.",
+    "deleteCommentFailed": "The comment couldn't be deleted. Try again.",
+    "commentLongPressHint": "Long press for more options",
+    "likeComment": "Like",
+    "unlikeComment": "Unlike",
+    "openCommentAuthor": "Open {{name}}'s profile",
+    "commentMoreOptions": "More options"
   },
   "membershipPackages": {
     "halaGold": {
@@ -1376,8 +1414,31 @@
       "unavailableTitle": "This profile isn't available",
       "unavailableBody": "The account may have been removed, or you may not have access to it.",
       "youBlocked": "You blocked {{name}}. Unblock to see their posts and message them.",
-      "noPosts": "{{name}} hasn't posted yet.",
-      "noPostsSelf": "Your posts in Community will appear here."
+      "create": "Create",
+      "share": "Share profile",
+      "openStory": "Open story",
+      "fanClubA11y": "Fan club: {{name}}",
+      "tabs": {
+        "posts": "Posts",
+        "videos": "Videos",
+        "tagged": "Tagged",
+        "saved": "Saved"
+      },
+      "grid": {
+        "video": "Video post",
+        "photos": "Post with several photos",
+        "photo": "Photo post",
+        "text": "Text post"
+      },
+      "empty": {
+        "posts": "{{name}} hasn't posted yet.",
+        "postsSelf": "Your posts in Community will appear here.",
+        "videos": "{{name}} hasn't posted a video yet.",
+        "videosSelf": "Your video posts will appear here.",
+        "tagged": "No posts tag {{name}} yet.",
+        "taggedSelf": "Posts you're tagged in will appear here.",
+        "saved": "Tap the bookmark on a post to save it here. Only you can see what you save."
+      }
     },
     "presence": {
       "online": "Online",

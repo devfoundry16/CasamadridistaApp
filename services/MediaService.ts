@@ -64,12 +64,16 @@ class MediaServiceClass {
 
   // ---- Upload slot ----
 
-  async requestUploadSlot(kind: 'image' | 'video', postId: string): Promise<UploadSlot> {
+  /**
+   * `position` is the item's place in the post's carousel (0–9); the backend
+   * returns `media[]` sorted by it.
+   */
+  async requestUploadSlot(kind: 'image' | 'video', postId: string, position?: number): Promise<UploadSlot> {
     try {
       const headers = await this.getAuthHeader();
       const response = await axios.post<UploadSlot>(
         `${API_BASE_URL}media/uploads`,
-        { kind, post_id: postId },
+        { kind, post_id: postId, ...(position !== undefined ? { position } : {}) },
         { headers }
       );
       return response.data;
@@ -112,25 +116,29 @@ class MediaServiceClass {
 
   // ---- Full image upload flow ----
 
-  async uploadImage(localUri: string, postId: string): Promise<UploadedMedia> {
+  /**
+   * Pass `slot` when it was reserved up front (see `Composer`): the post stays
+   * pending until its last reserved item completes, and the backend refuses
+   * new slots (409 `media_locked`) once any item has completed.
+   */
+  async uploadImage(localUri: string, postId: string, position = 0, slot?: UploadSlot): Promise<UploadedMedia> {
     // 1. Compress
     const compressed = await this.compressImage(localUri);
 
-    // 2. Get upload slot
-    const slot = await this.requestUploadSlot('image', postId);
+    // 2. Get upload slot, unless one was reserved already
+    const uploadSlot = slot ?? await this.requestUploadSlot('image', postId, position);
 
     // 3. Upload bytes
-    await this.uploadToSignedUrl(slot.uploadUrl, compressed.uri, 'image/jpeg');
+    await this.uploadToSignedUrl(uploadSlot.uploadUrl, compressed.uri, 'image/jpeg');
 
-    // 4. Complete
-    await this.completeUpload(slot.mediaId, {
+    // 4. Complete. The backend derives image URLs from the storage key.
+    await this.completeUpload(uploadSlot.mediaId, {
       width: compressed.width,
       height: compressed.height,
-      thumbnail_url: undefined, // backend derives from storage_key
     });
 
     return {
-      mediaId:      slot.mediaId,
+      mediaId:      uploadSlot.mediaId,
       localUri:     compressed.uri,
       kind:         'image',
       width:        compressed.width,
@@ -142,43 +150,46 @@ class MediaServiceClass {
   // For Cloudflare Stream (TUS), the uploadUrl is a TUS endpoint.
   // For Supabase, it's a signed URL (plain PUT).
 
-  async uploadVideo(localUri: string, postId: string): Promise<UploadedMedia> {
+  /** `slot`: as for `uploadImage`. */
+  async uploadVideo(localUri: string, postId: string, position = 0, slot?: UploadSlot): Promise<UploadedMedia> {
     console.log('[MediaService] uploadVideo start', { postId });
 
     // 1. Generate local thumbnail for compose preview
     const thumbnailUri = await this.generateVideoThumbnail(localUri);
     console.log('[MediaService] thumbnail generated:', thumbnailUri ? 'yes' : 'no');
 
-    // 2. Get upload slot — backend returns signed URLs for both video and thumbnail
-    const slot = await this.requestUploadSlot('video', postId);
-    console.log('[MediaService] upload slot received, mediaId:', slot.mediaId,
-      'hasThumbSlot:', !!slot.thumbnailUploadUrl);
+    // 2. Get upload slot, unless one was reserved already — backend returns
+    //    signed URLs for both video and thumbnail
+    const uploadSlot = slot ?? await this.requestUploadSlot('video', postId, position);
+    console.log('[MediaService] upload slot ready, mediaId:', uploadSlot.mediaId,
+      'hasThumbSlot:', !!uploadSlot.thumbnailUploadUrl);
 
     // 3. Upload video bytes to Supabase signed URL
     console.log('[MediaService] uploading video bytes...');
-    await this.uploadToSignedUrl(slot.uploadUrl, localUri, 'video/mp4');
+    await this.uploadToSignedUrl(uploadSlot.uploadUrl, localUri, 'video/mp4');
     console.log('[MediaService] video bytes uploaded');
 
     // 4. Upload thumbnail image to Supabase and get its public URL
     let publicThumbnailUrl: string | undefined;
-    if (thumbnailUri && slot.thumbnailUploadUrl && slot.thumbnailPublicUrl) {
+    if (thumbnailUri && uploadSlot.thumbnailUploadUrl && uploadSlot.thumbnailPublicUrl) {
       try {
-        await this.uploadToSignedUrl(slot.thumbnailUploadUrl, thumbnailUri, 'image/jpeg');
-        publicThumbnailUrl = slot.thumbnailPublicUrl;
+        await this.uploadToSignedUrl(uploadSlot.thumbnailUploadUrl, thumbnailUri, 'image/jpeg');
+        publicThumbnailUrl = uploadSlot.thumbnailPublicUrl;
         console.log('[MediaService] thumbnail uploaded, publicUrl:', publicThumbnailUrl);
       } catch (e) {
         console.warn('[MediaService] thumbnail upload failed (non-fatal):', e);
       }
     }
 
-    // 5. Notify backend — pass the real public thumbnail URL, not a local file URI
-    await this.completeUpload(slot.mediaId, {
+    // 5. Notify backend — pass the server-issued thumbnail slot's public URL,
+    //    never a local file URI (the backend accepts nothing else)
+    await this.completeUpload(uploadSlot.mediaId, {
       thumbnail_url: publicThumbnailUrl,
     });
     console.log('[MediaService] completeUpload done');
 
     return {
-      mediaId:      slot.mediaId,
+      mediaId:      uploadSlot.mediaId,
       localUri,
       kind:         'video',
       thumbnailUri,
