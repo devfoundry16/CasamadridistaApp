@@ -23,7 +23,19 @@ export default function MessagesScreen() {
   const { user } = useUser();
   const [box, setBox] = useState<'inbox' | 'requests'>('inbox');
   const inbox = useInbox(box);
-  const { data: unread } = useUnreadMessages();
+  const { data: unread, refetch: refetchUnread } = useUnreadMessages();
+  // Driven by the pull alone. Bound to `isRefetching`, every background
+  // invalidation (the open chat acknowledging a read, a realtime event) flipped
+  // it while this screen was covered, and iOS left the indicator stuck on.
+  const [pulling, setPulling] = useState(false);
+  const onRefresh = async () => {
+    setPulling(true);
+    try {
+      await Promise.all([inbox.refetch(), refetchUnread()]);
+    } finally {
+      setPulling(false);
+    }
+  };
 
   const conversations = inbox.data?.pages.flatMap((p) => p.conversations) ?? [];
 
@@ -60,7 +72,7 @@ export default function MessagesScreen() {
           renderItem={({ item }) => <ConversationRow conversation={item} myId={user?.id ?? ''} />}
           onEndReached={() => inbox.hasNextPage && !inbox.isFetchingNextPage && inbox.fetchNextPage()}
           onEndReachedThreshold={0.5}
-          refreshControl={<RefreshControl refreshing={inbox.isRefetching} onRefresh={() => inbox.refetch()} tintColor={Colors.darkGold} colors={[Colors.darkGold]} />}
+          refreshControl={<RefreshControl refreshing={pulling} onRefresh={onRefresh} tintColor={Colors.darkGold} colors={[Colors.darkGold]} />}
           ListEmptyComponent={
             <EmptyState
               icon={MessageCircle}
