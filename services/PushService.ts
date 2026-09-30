@@ -127,7 +127,6 @@ class PushServiceClass {
   async register(): Promise<PushRegistrationOutcome> {
     // A simulator has no APNs/FCM token; asking would only produce an error.
     if (!Device.isDevice) {
-      // TEMP(sim-push-test): register with iOS so `simctl push` banners show. Revert.
       if (__DEV__) await Notifications.requestPermissionsAsync().catch(() => {});
       return 'unsupported';
     }
