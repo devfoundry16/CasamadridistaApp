@@ -29,6 +29,7 @@ import {
   captureWithCamera,
   inferItemType,
   pickFromLibrary,
+  videoFormatFor,
   type PickResult,
   type PickedAsset,
 } from '@/services/upload/pickMedia';
@@ -168,8 +169,12 @@ function QuickPost({ me }: { me: ContributorMe }) {
 
     setBusy(true);
     try {
+      const type = inferItemType(assets);
       const item = await create.mutateAsync({
-        type: inferItemType(assets),
+        type,
+        // A lone clip is filed by its shape, so a vertical one gets a tall
+        // player instead of a letterboxed 16:9 frame.
+        ...(type === 'video' ? { video_format: videoFormatFor(assets[0]) } : {}),
         match_id: matchId,
         category_id: categoryId,
         caption: caption.trim() || null,

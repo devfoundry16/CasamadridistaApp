@@ -7,7 +7,7 @@ import { View } from 'react-native';
 import { Text } from '@/components/Text';
 import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
-import type { ContributorItem } from '@/types/media/contributor';
+import { CONTRIBUTOR_ITEM_TYPES, type ContributorItem } from '@/types/media/contributor';
 import StatusBadge from './StatusBadge';
 import { itemThumbnail, matchLabel } from './labels';
 
@@ -20,9 +20,9 @@ interface Props {
 const THUMB_W = 84;
 const THUMB_H = 47; // 16:9
 
-/** Only the four types the app can create have a label; `update`, `live`,
- *  `audio` and `interview` are desk formats created in the admin. */
-const LABELLED_TYPES = new Set(['photo', 'video', 'gallery', 'story']);
+/** Only the types the app can create have a label; `live`, `audio` and
+ *  `interview` are desk formats created in the admin. */
+const LABELLED_TYPES = new Set<string>(CONTRIBUTOR_ITEM_TYPES);
 
 function TypeIcon({ type }: { type: string }) {
   const size = 16;

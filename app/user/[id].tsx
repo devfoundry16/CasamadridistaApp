@@ -19,10 +19,17 @@ import { socialKeys } from '@/hooks/social/keys';
 import { useProfile, useRelationshipAction } from '@/hooks/social/useProfile';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useUser } from '@/hooks/useUser';
+import CasaMediaService from '@/services/CasaMediaService';
 import PostService from '@/services/PostService';
 import SocialService, { SocialApiError } from '@/services/SocialService';
 import type { ProfileGridItem, ProfileGridPage } from '@/types/social';
-import { GRID_COLUMNS, GRID_GAP, gridCellSize, type ProfileTab } from '@/utils/profileGrid.core';
+import {
+  GRID_COLUMNS,
+  GRID_GAP,
+  gridCellSize,
+  mediaGridCell,
+  type ProfileTab,
+} from '@/utils/profileGrid.core';
 import { isUuid } from '@/utils/pushPayload.core';
 
 /**
@@ -81,22 +88,36 @@ export default function UserProfileScreen() {
 
   const isSelf = profile?.relationship.state === 'self';
   const blocking = profile?.relationship.state === 'blocking';
-  // Saved is private; a stale `saved` from another profile falls back to Posts.
-  const shownTab: ProfileTab = tab === 'saved' && !isSelf ? 'posts' : tab;
+  const isContributor = profile?.user.is_media_contributor === true;
+  // Saved is private and Media is a contributor's; a stale tab carried over
+  // from another profile falls back to Posts.
+  const shownTab: ProfileTab =
+    (tab === 'saved' && !isSelf) || (tab === 'media' && !isContributor) ? 'posts' : tab;
 
   // One infinite query per tab: each keeps its own pages and cursor, so
   // switching back to a tab is instant.
   const grid = useInfiniteQuery({
     queryKey: shownTab === 'saved' ? socialKeys.saved() : socialKeys.profileGrid(id ?? '', shownTab),
-    queryFn: ({ pageParam }): Promise<ProfileGridPage | null> =>
-      shownTab === 'saved' ? PostService.savedGrid(pageParam) : SocialService.userGrid(id!, shownTab, pageParam),
+    queryFn: async ({ pageParam }): Promise<ProfileGridPage | null> => {
+      if (shownTab === 'saved') return PostService.savedGrid(pageParam);
+      if (shownTab === 'media') {
+        // What this contributor published in Casa Media, drawn in the same grid.
+        const page = await CasaMediaService.list({ contributor_id: id!, cursor: pageParam });
+        return { items: page.items.map(mediaGridCell), nextCursor: page.nextCursor };
+      }
+      return SocialService.userGrid(id!, shownTab, pageParam);
+    },
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last?.nextCursor ?? undefined,
     enabled: !!id && !!profile && !blocking,
   });
   const cells = grid.data?.pages.flatMap((p) => p?.items ?? []) ?? [];
 
-  const openPost = useCallback((item: ProfileGridItem) => router.push(`/community/post/${item.id}`), [router]);
+  const openPost = useCallback(
+    (item: ProfileGridItem) =>
+      router.push(shownTab === 'media' ? `/media/item/${item.id}` : `/community/post/${item.id}`),
+    [router, shownTab],
+  );
 
   const openChat = useCallback(async () => {
     if (!id) return;
@@ -214,7 +235,7 @@ export default function UserProfileScreen() {
                 {t('social.profile.youBlocked', { name })}
               </T>
             ) : (
-              <ProfileTabs active={shownTab} onSelect={setTab} isSelf={isSelf} />
+              <ProfileTabs active={shownTab} onSelect={setTab} isSelf={isSelf} isContributor={isContributor} />
             )}
           </>
         }

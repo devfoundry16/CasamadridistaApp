@@ -34,6 +34,8 @@ import {
   normaliseItem,
   normaliseList,
   normaliseMatch,
+  matchCategoryFilters,
+  matchTypeFilters,
   normaliseMatchPage,
   normalisePlayback,
   normaliseSearchFilters,
@@ -47,6 +49,7 @@ import {
 } from '../../services/media/wire.ts';
 import { normaliseMe } from '../../services/media/contributorMe.ts';
 import {
+  MATCH_TYPE_FILTERS,
   MEDIA_ITEM_TYPES,
   MEDIA_SURFACES,
   isMediaSurface,
@@ -221,6 +224,8 @@ const WIRE_MATCH_PAGE = {
     post_match: 5,
     all: 42,
   },
+  type_counts: { photo: 12, video: 5, gallery: 0, update: 0 },
+  category_counts: { 'dddddddd-1111-4222-8333-444444444444': 7 },
   pinned: [WIRE_TEASER],
 };
 
@@ -515,6 +520,68 @@ describe('envelopes', () => {
     // The locked item in the list is still normalised, not dropped.
     assert.equal(page.items[1].locked, true);
     assert.deepEqual(page.items[1].assets, []);
+  });
+
+  it('keeps the match page type counts, and tolerates a backend without them', () => {
+    assert.deepEqual(normaliseMatchPage(WIRE_MATCH_PAGE).type_counts, {
+      photo: 12,
+      video: 5,
+      gallery: 0,
+      update: 0,
+    });
+    assert.deepEqual(normaliseMatchPage({ items: [] }).type_counts, {});
+  });
+
+  it('offers a type chip only for types the match has, in a fixed order', () => {
+    assert.deepEqual(matchTypeFilters({ video: 5, photo: 12, gallery: 0, update: 0 }), [
+      'photo',
+      'video',
+    ]);
+    assert.deepEqual(matchTypeFilters({ update: 1, gallery: 2, video: 1 }), [
+      'video',
+      'gallery',
+      'update',
+    ]);
+  });
+
+  it('keeps the type chip order in step with MATCH_TYPE_FILTERS', () => {
+    assert.deepEqual(
+      matchTypeFilters({ photo: 1, video: 1, gallery: 1, update: 1 }),
+      [...MATCH_TYPE_FILTERS],
+    );
+  });
+
+  it('offers a category chip only for categories the match has items in', () => {
+    const page = normaliseMatchPage(WIRE_MATCH_PAGE);
+    const categories = normaliseCategories(WIRE_CATEGORIES);
+    assert.deepEqual(
+      matchCategoryFilters(categories, page.category_counts).map((c) => c.slug),
+      ['match-day'],
+    );
+    assert.deepEqual(matchCategoryFilters(categories, {}), []);
+    assert.deepEqual(normaliseMatchPage({ items: [] }).category_counts, {});
+  });
+
+  it('treats a short update as a consumer type', () => {
+    assert.ok((MEDIA_ITEM_TYPES as readonly string[]).includes('update'));
+    assert.equal(normaliseItem({ ...WIRE_TEASER, type: 'update' }).type, 'update');
+    assert.deepEqual(
+      normaliseSearchFilters({ media_types: ['photo', 'update', 'live'] }).media_types,
+      ['photo', 'update'],
+    );
+  });
+
+  it('search filters carry the matches that have media', () => {
+    // `serializeMatch` rows, the shape an item's embedded match has.
+    const filters = normaliseSearchFilters({ matches: [WIRE_TEASER.match, { nonsense: true }] });
+    assert.deepEqual(filters.matches.map((m) => m.id), [WIRE_TEASER.match.id]);
+    assert.ok(matchTitle(filters.matches[0]));
+    assert.deepEqual(normaliseSearchFilters({}).matches, []);
+  });
+
+  it('offers no type chips when one type is all the match has', () => {
+    assert.deepEqual(matchTypeFilters({ photo: 9, video: 0 }), []);
+    assert.deepEqual(matchTypeFilters({}), []);
   });
 
   it('reads from-madrid-now as { match, items, nextCursor, is_live }', () => {

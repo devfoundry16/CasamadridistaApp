@@ -97,6 +97,7 @@ export function normaliseProfile(raw: unknown): SocialProfile | null {
     ...('display_name' in u ? { display_name: str(u.display_name) } : {}),
     ...('fan_club_id' in u ? { fan_club_id: str(u.fan_club_id) } : {}),
     fan_club: normaliseFanClub(u.fan_club),
+    is_media_contributor: bool(u.is_media_contributor),
   };
   const stats = (w.stats ?? {}) as Wire;
   const rel = (w.relationship ?? {}) as Wire;

@@ -73,6 +73,8 @@ export interface ProfileUser extends PersonCard {
   fan_club_id?: string | null;
   /** The fan club the person is registered with, shown to every viewer. */
   fan_club: ProfileFanClub | null;
+  /** An active Casa Media contributor: their profile gets a Media tab. */
+  is_media_contributor: boolean;
 }
 
 export interface ProfileFanClub {

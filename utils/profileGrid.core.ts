@@ -6,11 +6,52 @@
  * `components/Media/GalleryGrid.tsx`.
  */
 
-export type ProfileTab = 'posts' | 'videos' | 'tagged' | 'saved';
+export type ProfileTab = 'posts' | 'videos' | 'tagged' | 'media' | 'saved';
 
-/** Saved is private: it only exists on your own profile. */
-export function profileTabs(isSelf: boolean): ProfileTab[] {
-  return isSelf ? ['posts', 'videos', 'tagged', 'saved'] : ['posts', 'videos', 'tagged'];
+/**
+ * Media is what a Casa Media contributor published there, so it only exists on
+ * a contributor's profile. Saved is private: it only exists on your own.
+ */
+export function profileTabs(isSelf: boolean, isContributor = false): ProfileTab[] {
+  return [
+    'posts',
+    'videos',
+    'tagged',
+    ...(isContributor ? (['media'] as const) : []),
+    ...(isSelf ? (['saved'] as const) : []),
+  ];
+}
+
+/** A grid cell, as the profile grid draws one (`ProfileGridItem`). */
+export interface GridCell {
+  id: string;
+  kind: 'text' | 'image' | 'video' | 'media_teaser';
+  thumb_url: string | null;
+  media_count: number;
+  is_video: boolean;
+  created_at: string | null;
+}
+
+/**
+ * A Casa Media item as a profile grid cell, for the Media tab. An item whose
+ * asset count is zero still stands for one item.
+ */
+export function mediaGridCell(item: {
+  id: string;
+  type: string;
+  cover_url: string | null;
+  asset_count: number;
+  published_at: string | null;
+}): GridCell {
+  const isVideo = item.type === 'video';
+  return {
+    id: item.id,
+    kind: isVideo ? 'video' : 'image',
+    thumb_url: item.cover_url,
+    media_count: Math.max(1, item.asset_count),
+    is_video: isVideo,
+    created_at: item.published_at,
+  };
 }
 
 export const GRID_COLUMNS = 3;

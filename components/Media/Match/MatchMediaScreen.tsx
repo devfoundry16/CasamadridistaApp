@@ -6,9 +6,16 @@ import FollowButton from '@/components/Media/FollowButton';
 import StoriesRow from '@/components/Media/Stories/StoriesRow';
 import Chip from '@/components/Team/Chip';
 import Colors from '@/constants/colors';
+import { useMediaCategories } from '@/hooks/media/useHome';
 import { useMatchMedia } from '@/hooks/media/useMatchMedia';
 import { useStories } from '@/hooks/media/useStories';
-import { MEDIA_PHASES, type MediaItem, type MediaPhase } from '@/types/media/casaMedia';
+import { matchCategoryFilters, matchTypeFilters } from '@/services/media/normalise';
+import {
+  MEDIA_PHASES,
+  type MatchTypeFilter,
+  type MediaItem,
+  type MediaPhase,
+} from '@/types/media/casaMedia';
 import MediaGridList from '../MediaGridList';
 import MediaRail from '../MediaRail';
 import { MediaSurfaceProvider } from '@/components/Media/MediaSurfaceContext';
@@ -19,6 +26,26 @@ interface Props {
 
 type PhaseFilter = 'all' | MediaPhase;
 
+/**
+ * The second chip row: one selection across the media types and the
+ * admin-managed categories, the way the brief lists a match page's sections
+ * (Photos, Videos, Fan Reactions, ...) as one flat list. It combines with the
+ * phase row above it.
+ */
+type SectionFilter =
+  | { kind: 'all' }
+  | { kind: 'type'; type: MatchTypeFilter }
+  | { kind: 'category'; slug: string };
+
+const ALL_SECTIONS: SectionFilter = { kind: 'all' };
+
+const TYPE_LABEL_KEY: Record<MatchTypeFilter, string> = {
+  photo: 'casaMedia.collection.photos',
+  video: 'casaMedia.collection.videos',
+  gallery: 'casaMedia.collection.galleries',
+  update: 'casaMedia.collection.updates',
+};
+
 // Derived from the contract's phase list so a schema change cannot leave a
 // filter behind. Six phases plus "All" is why the toggle scrolls horizontally.
 const PHASES: PhaseFilter[] = ['all', ...MEDIA_PHASES];
@@ -26,13 +53,24 @@ const PHASES: PhaseFilter[] = ['all', ...MEDIA_PHASES];
 /**
  * The "Media" tab of the match page.
  *
- * Phase is a client-side filter *parameter*, not a client-side filter: each
- * phase is its own paged query, because a big match has far more assets than
- * one page and filtering after the fact would silently hide items.
+ * Phase and section are client-side filter *parameters*, not client-side
+ * filters: each combination is its own paged query, because a big match has
+ * far more assets than one page and filtering after the fact would silently
+ * hide items.
  */
 export default function MatchMediaScreen({ matchId }: Props) {
   const { t } = useTranslation();
   const [phase, setPhase] = useState<PhaseFilter>('all');
+  const [section, setSection] = useState<SectionFilter>(ALL_SECTIONS);
+
+  const query = useMemo(
+    () => ({
+      ...(phase === 'all' ? {} : { phase }),
+      ...(section.kind === 'type' ? { type: section.type } : {}),
+      ...(section.kind === 'category' ? { category: section.slug } : {}),
+    }),
+    [phase, section],
+  );
 
   const {
     data,
@@ -43,7 +81,7 @@ export default function MatchMediaScreen({ matchId }: Props) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useMatchMedia(matchId, phase === 'all' ? {} : { phase });
+  } = useMatchMedia(matchId, query);
 
   const items: MediaItem[] = useMemo(
     () => data?.pages.flatMap((page) => page.items) ?? [],
@@ -53,6 +91,9 @@ export default function MatchMediaScreen({ matchId }: Props) {
   // and invalidate the header's useCallback / the options useMemo below.
   const pinned = useMemo(() => data?.pages[0]?.pinned ?? [], [data]);
   const counts = useMemo(() => data?.pages[0]?.phase_counts ?? {}, [data]);
+  const typeCounts = useMemo(() => data?.pages[0]?.type_counts ?? {}, [data]);
+  const categoryCounts = useMemo(() => data?.pages[0]?.category_counts ?? {}, [data]);
+  const { data: categories } = useMediaCategories();
 
   /**
    * This fixture's story bubble, taken from the global story set rather than a
@@ -82,6 +123,25 @@ export default function MatchMediaScreen({ matchId }: Props) {
       })),
     [counts, t],
   );
+
+  // Section chips: the types and categories this match actually has. The counts
+  // are per match, not per phase, so a chip can open onto an empty phase — the
+  // empty state covers that.
+  const sections = useMemo(() => {
+    const types = matchTypeFilters(typeCounts).map((type) => ({
+      key: `type:${type}`,
+      label: t(TYPE_LABEL_KEY[type]),
+      value: { kind: 'type', type } as SectionFilter,
+      active: section.kind === 'type' && section.type === type,
+    }));
+    const cats = matchCategoryFilters(categories ?? [], categoryCounts).map((category) => ({
+      key: `category:${category.id}`,
+      label: category.name,
+      value: { kind: 'category', slug: category.slug } as SectionFilter,
+      active: section.kind === 'category' && section.slug === category.slug,
+    }));
+    return [...types, ...cats];
+  }, [typeCounts, categories, categoryCounts, section, t]);
 
   const header = useCallback(
     () => (
@@ -134,6 +194,28 @@ export default function MatchMediaScreen({ matchId }: Props) {
             />
           ))}
         </ScrollView>
+        {sections.length || section.kind !== 'all' ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
+            style={{ marginHorizontal: -16, marginTop: 8 }}
+          >
+            <Chip
+              label={t('casaMedia.collection.all')}
+              active={section.kind === 'all'}
+              onPress={() => setSection(ALL_SECTIONS)}
+            />
+            {sections.map((option) => (
+              <Chip
+                key={option.key}
+                label={option.label}
+                active={option.active}
+                onPress={() => setSection(option.value)}
+              />
+            ))}
+          </ScrollView>
+        ) : null}
         {pinned.length ? (
           <View style={{ marginHorizontal: -16 }}>
             <MediaRail
@@ -145,7 +227,7 @@ export default function MatchMediaScreen({ matchId }: Props) {
         ) : null}
       </View>
     ),
-    [matchStories, matchId, options, phase, pinned, t],
+    [matchStories, matchId, options, phase, pinned, section, sections, t],
   );
 
   return (

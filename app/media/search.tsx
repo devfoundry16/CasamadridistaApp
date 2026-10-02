@@ -11,7 +11,7 @@ import AnalyticsService from '@/services/AnalyticsService';
 import { MediaSurfaceProvider } from '@/components/Media/MediaSurfaceContext';
 import type { MediaSearchQuery } from '@/services/CasaMediaService';
 
-/** Full-text search across published media. */
+/** Search across published media, by keyword and/or the filter row. */
 export default function MediaSearchScreen() {
   const { t } = useTranslation();
   const [text, setText] = useState('');

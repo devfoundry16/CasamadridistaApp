@@ -9,7 +9,10 @@
  * stops a consumer component being handed an editorial row by accident.
  */
 
+import type { VideoFormat } from '../../utils/mediaPick.core';
 import type { MediaAccessLevel, MediaPhase } from './casaMedia';
+
+export type { VideoFormat };
 
 /* ------------------------------------------------------------------ */
 /* Item                                                                */
@@ -52,10 +55,10 @@ export function isEditableStatus(status: string | null | undefined): boolean {
 /**
  * Item types a contributor may create from the app.
  *
- * The schema allows `update | live | audio | interview` too, but there is no
- * mobile capture path for them — they are desk formats, created in the admin.
+ * The schema allows `live | audio | interview` too, but there is no mobile
+ * capture path for them — they are desk formats, created in the admin.
  */
-export const CONTRIBUTOR_ITEM_TYPES = ['photo', 'video', 'gallery', 'story'] as const;
+export const CONTRIBUTOR_ITEM_TYPES = ['photo', 'video', 'gallery', 'story', 'update'] as const;
 
 export type ContributorItemType = (typeof CONTRIBUTOR_ITEM_TYPES)[number];
 
@@ -127,6 +130,7 @@ export interface ContributorItem {
   id: string;
   type: ContributorItemType | string;
   status: ContributorItemStatus | string;
+  video_format?: VideoFormat | string | null;
   title: string | null;
   short_description: string | null;
   caption: string | null;
@@ -171,7 +175,12 @@ export interface ContributorItemInput {
   caption?: string | null;
   access_level?: MediaAccessLevel;
   tags?: string[];
+  /** Video items only; null clears it. */
+  video_format?: VideoFormat | null;
 }
+
+/** `media_items.video_format`, in the order the editor offers them. */
+export const VIDEO_FORMATS: readonly VideoFormat[] = ['vertical_short', 'horizontal', 'long'];
 
 /* ------------------------------------------------------------------ */
 /* Upload slots                                                        */

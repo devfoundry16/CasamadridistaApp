@@ -18,13 +18,20 @@ import { useAssetMutations, useContributorItem, useContributorItemMutations } fr
 import { contributorKeys } from '@/hooks/media/keys';
 import { useItemUploadReadiness, useItemUploads } from '@/hooks/media/useUploadQueue';
 import UploadManager from '@/services/upload/UploadManager';
-import { captureWithCamera, pickFromLibrary, type PickResult } from '@/services/upload/pickMedia';
+import {
+  captureWithCamera,
+  pickFromLibrary,
+  videoFormatFor,
+  type PickResult,
+} from '@/services/upload/pickMedia';
 import type { MediaAccessLevel } from '@/types/media/casaMedia';
 import {
+  VIDEO_FORMATS,
   isEditableStatus,
   type ContributorItem,
   type ContributorItemType,
   type ContributorMe,
+  type VideoFormat,
 } from '@/types/media/contributor';
 
 const AUTOSAVE_MS = 900;
@@ -60,6 +67,7 @@ function defaultAccessLevel(me: ContributorMe): MediaAccessLevel | 'internal' {
 function emptyValue(me: ContributorMe): DraftFormValue {
   return {
     type: 'photo',
+    video_format: null,
     match_id: me.todayMatch?.id ?? me.allowedMatches[0]?.id ?? null,
     match_phase: null,
     category_id: null,
@@ -83,6 +91,9 @@ function fromItem(item: ContributorItem): DraftFormValue {
     : '';
   return {
     type: (item.type as ContributorItemType) ?? 'photo',
+    video_format: VIDEO_FORMATS.includes(item.video_format as VideoFormat)
+      ? (item.video_format as VideoFormat)
+      : null,
     match_id: item.match_id ?? null,
     match_phase: item.match_phase ?? null,
     category_id: item.category_id ?? null,
@@ -184,6 +195,8 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
   const toInput = useCallback(
     (next: DraftFormValue) => ({
       type: next.type,
+      // Only a video has a format; any other type clears a stale one.
+      video_format: next.type === 'video' ? next.video_format : null,
       match_id: next.match_id ?? undefined,
       match_phase: next.match_phase,
       category_id: next.category_id,
@@ -309,6 +322,13 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
       }
       if (!result.assets.length) return;
 
+      // File a video by the shape of its clip, unless the contributor already
+      // chose a format by hand.
+      if (role === 'content' && value.type === 'video' && !value.video_format) {
+        const format = result.assets.map(videoFormatFor).find(Boolean);
+        if (format) onChange({ video_format: format });
+      }
+
       await UploadManager.enqueue(
         result.assets.map((asset, index) => ({
           itemId: id,
@@ -325,7 +345,7 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
       );
       void item.refetch();
     },
-    [contentAssets.length, item, me.limits, persist, t, value],
+    [contentAssets.length, item, me.limits, onChange, persist, t, value],
   );
 
   /* ------------------------------ actions ------------------------ */

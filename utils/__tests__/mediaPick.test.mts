@@ -14,6 +14,7 @@ import {
   cameraOptions,
   libraryRequest,
   mergePostMedia,
+  videoFormatFor,
   type PickLimits,
   type PickedAsset,
 } from '../mediaPick.core.ts';
@@ -159,5 +160,30 @@ describe('cameraOptions', () => {
   it('full, or holding a video: neither', () => {
     assert.deepEqual(cameraOptions(Array.from({ length: 10 }, (_, i) => photo(i))), { photo: false, video: false });
     assert.deepEqual(cameraOptions([video(1)]), { photo: false, video: false });
+  });
+});
+
+describe('videoFormatFor', () => {
+  it('a clip taller than it is wide is a vertical short', () => {
+    assert.equal(videoFormatFor(video(1, { width: 1080, height: 1920, durationMs: 20_000 })), 'vertical_short');
+  });
+
+  it('a landscape or square clip is horizontal', () => {
+    assert.equal(videoFormatFor(video(1, { width: 1920, height: 1080, durationMs: 20_000 })), 'horizontal');
+    assert.equal(videoFormatFor(video(1, { width: 1080, height: 1080, durationMs: 20_000 })), 'horizontal');
+  });
+
+  it('a landscape clip over three minutes is long', () => {
+    assert.equal(videoFormatFor(video(1, { width: 1920, height: 1080, durationMs: 180_001 })), 'long');
+    assert.equal(videoFormatFor(video(1, { width: 1920, height: 1080, durationMs: 180_000 })), 'horizontal');
+  });
+
+  it('a tall clip stays a vertical short however long it runs', () => {
+    assert.equal(videoFormatFor(video(1, { width: 1080, height: 1920, durationMs: 600_000 })), 'vertical_short');
+  });
+
+  it('says nothing for a photo or a clip the picker could not measure', () => {
+    assert.equal(videoFormatFor(photo(1)), null);
+    assert.equal(videoFormatFor(video(1, { width: null, height: null })), null);
   });
 });

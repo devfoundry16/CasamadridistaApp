@@ -4,6 +4,7 @@ import { ScrollView, View } from 'react-native';
 
 import PickerPill, { type PickerOption } from '@/components/Team/PickerPill';
 import type { MediaSearchQuery } from '@/services/CasaMediaService';
+import { matchTitle } from '@/services/media/normalise';
 import type { MediaItemType, MediaSearchFilterOptions } from '@/types/media/casaMedia';
 
 interface Props {
@@ -20,6 +21,7 @@ const TYPE_LABEL_KEY: Record<MediaItemType, string> = {
   video: 'casaMedia.collection.videos',
   story: 'casaMedia.collection.stories',
   gallery: 'casaMedia.collection.galleries',
+  update: 'casaMedia.collection.updates',
 };
 
 /** Relative windows, computed at render so they cannot go stale. */
@@ -33,7 +35,8 @@ const DATE_PRESETS = [
 type DatePresetKey = (typeof DATE_PRESETS)[number]['key'];
 
 /**
- * §22's filter row: type, competition, season, opponent, contributor, date.
+ * §22's filter row: type, match, competition, season, opponent, contributor,
+ * date. Any one of them is a search by itself; a keyword is optional.
  *
  * Same `PickerPill` recipe as `Archive/ArchiveFilters` — the options open in an
  * RN `Modal` rather than an in-scene overlay, because this row sits above a
@@ -80,6 +83,18 @@ export default function SearchFilters({ options, value, onChange }: Props) {
       .map((team) => ({ value: team.id, label: team.name, iconUri: team.logo ?? undefined })),
   ];
 
+  // The recent matches that have media; older ones are reached through the
+  // season and opponent pills.
+  const matchOptions: PickerOption<number>[] = [
+    { value: ALL_NUMBER, label: t('casaMedia.allMatches') },
+    ...(options?.matches ?? []).map((match) => ({
+      value: match.id,
+      label: matchTitle(match) ?? `#${match.id}`,
+      caption: match.kickoff_at ? match.kickoff_at.slice(0, 10) : undefined,
+      iconUri: match.league?.logo ?? undefined,
+    })),
+  ];
+
   const contributorOptions: PickerOption<string>[] = [
     { value: ALL, label: t('casaMedia.allContributors') },
     ...(options?.contributors ?? []).map((person) => ({
@@ -107,6 +122,9 @@ export default function SearchFilters({ options, value, onChange }: Props) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      // A ScrollView grows by default; in this column that splits the screen
+      // with the result grid and pushes the results halfway down.
+      style={{ flexGrow: 0 }}
       contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingBottom: 10 }}
     >
       <PickerPill
@@ -117,6 +135,13 @@ export default function SearchFilters({ options, value, onChange }: Props) {
           onChange({ ...value, type: next === ALL ? undefined : (next as MediaItemType) })
         }
         maxWidth={160}
+      />
+      <PickerPill
+        title={t('casaMedia.match')}
+        options={matchOptions}
+        value={value.match_id ?? ALL_NUMBER}
+        onChange={(next) => setNumber('match_id', next)}
+        maxWidth={220}
       />
       <PickerPill
         title={t('casaMedia.competition')}

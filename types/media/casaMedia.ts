@@ -11,9 +11,10 @@
 
 export type MediaAccessLevel = 'public' | 'registered' | 'premium';
 
-/** The four types a consumer can see. The item vocabulary on the backend is
- *  wider (update, live, audio, interview) but none of those ship in V1. */
-export const MEDIA_ITEM_TYPES = ['photo', 'video', 'gallery', 'story'] as const;
+/** The types a consumer can see. The item vocabulary on the backend is wider
+ *  (live, audio, interview) but none of those ship in V1. `update` is the
+ *  Short Update: media with a short text, read as a post rather than watched. */
+export const MEDIA_ITEM_TYPES = ['photo', 'video', 'gallery', 'story', 'update'] as const;
 
 export type MediaItemType = (typeof MEDIA_ITEM_TYPES)[number];
 
@@ -204,7 +205,17 @@ export interface MediaMatchPage {
   nextCursor: string | null;
   pinned: MediaItem[];
   phase_counts: Partial<Record<MediaPhase, number>>;
+  /** Items per type on this match, for the type chips. First page only. */
+  type_counts: Partial<Record<MatchTypeFilter, number>>;
+  /** Items per category id on this match; categories with none are absent. */
+  category_counts: Record<string, number>;
 }
+
+/** The types a match page can be narrowed to, in chip order. Stories are not
+ *  here: they have their own row above the chips. */
+export const MATCH_TYPE_FILTERS = ['photo', 'video', 'gallery', 'update'] as const;
+
+export type MatchTypeFilter = (typeof MATCH_TYPE_FILTERS)[number];
 
 export interface MediaTimelinePayload {
   match: MediaMatchRef | null;
@@ -216,8 +227,9 @@ export interface MediaTimelinePayload {
 export interface MediaArchiveEntry {
   match: MediaMatchRef;
   media_count: number;
-  /** §21's card reads "54 Photos · 12 Videos · 8 Stories", not "74 items". */
-  type_counts: Record<MediaItemType, number>;
+  /** §21's card reads "54 Photos · 12 Videos · 8 Stories", not "74 items".
+   *  The archive counts four types; a short update has no counter column. */
+  type_counts: Record<Exclude<MediaItemType, 'update'>, number>;
   cover_items: MediaItem[];
 }
 
@@ -258,6 +270,8 @@ export type MediaFollows = Record<MediaFollowKind, string[]>;
 
 export interface MediaSearchFilterOptions extends MediaArchiveFilters {
   media_types: MediaItemType[];
+  /** Recent matches that have media, newest first. */
+  matches: MediaMatchRef[];
   contributors: { id: string; display_name: string | null }[];
 }
 

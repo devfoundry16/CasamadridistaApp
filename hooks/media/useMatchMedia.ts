@@ -1,16 +1,17 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import CasaMediaService from '@/services/CasaMediaService';
-import type { MediaPhase } from '@/types/media/casaMedia';
+import type { MatchTypeFilter, MediaPhase } from '@/types/media/casaMedia';
 import { mediaKeys } from './keys';
 
 interface Options {
   phase?: MediaPhase;
   category?: string;
+  type?: MatchTypeFilter;
 }
 
 /**
  * Media attached to one fixture. Paged, because a big match produces hundreds
- * of assets; the phase counts and pinned items ride on the first page only, so
+ * of assets; the chip counts and pinned items ride on the first page only, so
  * always read them from `data.pages[0]`.
  */
 export function useMatchMedia(matchId: number | undefined, options: Options = {}) {

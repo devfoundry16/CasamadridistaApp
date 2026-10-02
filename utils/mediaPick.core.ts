@@ -160,3 +160,21 @@ export function cameraOptions(
     video: current.length === 0,
   };
 }
+
+/** `media_items.video_format`: how a video item is shaped, so the player can
+ *  give a vertical clip a tall frame instead of letterboxing it at 16:9. */
+export type VideoFormat = 'vertical_short' | 'horizontal' | 'long';
+
+/** A landscape clip longer than this is a "longer video" rather than a clip. */
+const LONG_VIDEO_MS = 3 * 60 * 1000;
+
+/**
+ * The format a picked video should be filed as. Null for a photo, or when the
+ * picker reported no dimensions — the item is then left for the contributor to
+ * set by hand rather than guessed.
+ */
+export function videoFormatFor(asset: PickedAsset): VideoFormat | null {
+  if (asset.kind !== 'video' || !asset.width || !asset.height) return null;
+  if (asset.height > asset.width) return 'vertical_short';
+  return (asset.durationMs ?? 0) > LONG_VIDEO_MS ? 'long' : 'horizontal';
+}

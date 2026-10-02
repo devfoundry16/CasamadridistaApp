@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import CasaMediaService, { type MediaSearchQuery } from '@/services/CasaMediaService';
+import { MIN_QUERY_LENGTH, canSearch } from '@/utils/mediaSearch.core';
 import { mediaKeys } from './keys';
 
-const MIN_QUERY_LENGTH = 2;
 const DEBOUNCE_MS = 300;
 
 /** Debounce here rather than in the screen so every caller gets the same delay. */
@@ -17,14 +17,14 @@ export function useDebouncedValue<T>(value: T, delay = DEBOUNCE_MS): T {
 }
 
 /**
- * Full-text search across published media.
+ * Search across published media: by keyword, by the filter row alone, or both.
  *
- * Disabled below two characters: a one-letter `websearch_to_tsquery` matches
- * effectively everything and is pure server load for a result nobody wants.
+ * `canSearch` decides when it runs — a keyword of two characters or more, or
+ * no keyword and at least one filter.
  */
 export function useMediaSearch(rawQuery: string, filters: MediaSearchQuery = {}) {
   const query = useDebouncedValue(rawQuery.trim());
-  const enabled = query.length >= MIN_QUERY_LENGTH;
+  const enabled = canSearch(query, filters as Record<string, unknown>);
 
   const result = useInfiniteQuery({
     // The filters are part of the key: without them, narrowing a search would

@@ -91,6 +91,12 @@ describe('profile', () => {
     const p = normaliseProfile({ ...WIRE_PROFILE, user: { ...WIRE_PROFILE.user, fan_club: club } })!;
     assert.deepEqual(p.user.fan_club, club);
     assert.equal(normaliseProfile(WIRE_PROFILE)!.user.fan_club, null, 'absent reads as none');
+    assert.equal(normaliseProfile(WIRE_PROFILE)!.user.is_media_contributor, false, 'absent reads as no');
+    assert.equal(
+      normaliseProfile({ ...WIRE_PROFILE, user: { ...WIRE_PROFILE.user, is_media_contributor: true } })!.user
+        .is_media_contributor,
+      true,
+    );
     assert.equal(normaliseProfile({ ...WIRE_PROFILE, user: { ...WIRE_PROFILE.user, fan_club: null } })!.user.fan_club, null);
     assert.equal(normaliseProfile({ ...WIRE_PROFILE, user: { ...WIRE_PROFILE.user, fan_club: { name: 'no id' } } })!.user.fan_club, null);
     assert.deepEqual(

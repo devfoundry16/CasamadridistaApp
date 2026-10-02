@@ -26,10 +26,11 @@ import { useMediaItem, useMediaPlayback } from '@/hooks/media/useMediaItem';
 import AnalyticsService from '@/services/AnalyticsService';
 import CasaMediaService from '@/services/CasaMediaService';
 import { isMediaSurface } from '@/types/media/casaMedia';
+import { itemTexts, needsPlayback, playerHeight } from '@/utils/mediaItem.core';
 import { isPlayableVideo, isViewableMediaPhoto } from '@/utils/mediaUrl';
 
 /**
- * A single media item: video, photo or gallery.
+ * A single media item: video, photo, gallery or short update.
  *
  * `headerShown: false` (declared in `app/_layout.tsx`) — the cover is
  * full-bleed and a native header would sit on top of it, so the back affordance
@@ -39,7 +40,7 @@ export default function MediaItemScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width, height: screenHeight } = useWindowDimensions();
   const { id, c: campaignId, surface } = useLocalSearchParams<{
     id: string;
     c?: string;
@@ -52,7 +53,7 @@ export default function MediaItemScreen() {
   const { data: item, isLoading, isError, refetch } = useMediaItem(id);
 
   // Fresh signed URLs, but only for content this viewer may actually play.
-  const wantsPlayback = !!item && !item.locked && item.type === 'video';
+  const wantsPlayback = needsPlayback(item);
   const { data: playback } = useMediaPlayback(id, wantsPlayback);
 
   // The view is keyed on these primitives, never on `item` itself: that is a
@@ -101,7 +102,7 @@ export default function MediaItemScreen() {
     );
   }
 
-  const coverHeight = Math.round(width * (9 / 16));
+  const coverHeight = playerHeight({ width, height: screenHeight }, item);
   // A locked item is served as a *teaser*, which has no `assets` key at all —
   // the normaliser fills in `[]`, and this fallback covers a cache entry seeded
   // from an older payload. Nothing below may assume the array exists.
@@ -157,14 +158,15 @@ export default function MediaItemScreen() {
                 .filter(Boolean)
                 .flatMap((part, i) => (i === 0 ? [part] : [' · ', part]))}
             </Text>
-            {item.description ? (
+            {itemTexts(item).map((text) => (
               <Text
+                key={text}
                 className="text-[14px] leading-6"
                 style={{ color: Colors.text.secondary, marginTop: 12 }}
               >
-                {item.description}
+                {text}
               </Text>
-            ) : null}
+            ))}
           </View>
 
           <EngagementBar item={item} />

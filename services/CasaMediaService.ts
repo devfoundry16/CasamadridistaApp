@@ -5,6 +5,7 @@ import type {
   MediaArchiveFilters,
   MediaItemType,
   MediaArchivePage,
+  MatchTypeFilter,
   MediaCategory,
   MediaHomePayload,
   MediaItem,
@@ -46,6 +47,8 @@ export interface MediaListQuery {
   type?: string;
   phase?: MediaPhase;
   match_id?: number;
+  /** One contributor's published items (the Media tab on their profile). */
+  contributor_id?: string;
   /** `access_level <> 'public'`. Serialised as `exclusive=1`. */
   exclusive?: boolean;
   /** `trending` = last 30 days by view count. */
@@ -68,8 +71,8 @@ export interface MediaArchiveQuery {
 }
 
 /**
- * §22's structured search. `q` is still required — this narrows a text search,
- * it does not replace one.
+ * §22's structured search. Any one of these is a search by itself; with a
+ * keyword it narrows the text search.
  */
 export interface MediaSearchQuery {
   type?: MediaItemType;
@@ -192,7 +195,12 @@ class CasaMediaServiceClass {
 
   async getMatchMedia(
     matchId: number,
-    options: { phase?: MediaPhase; category?: string; cursor?: string | null } = {},
+    options: {
+      phase?: MediaPhase;
+      category?: string;
+      type?: MatchTypeFilter;
+      cursor?: string | null;
+    } = {},
   ): Promise<MediaMatchPage> {
     try {
       const headers = await this.getAuthHeader();

@@ -32,6 +32,7 @@ import type {
   MediaItem,
   MediaItemType,
   MediaListPage,
+  MatchTypeFilter,
   MediaMatchPage,
   MediaMatchRef,
   MediaPhase,
@@ -174,7 +175,7 @@ export function normaliseCategory(raw: unknown): MediaCategory | null {
  * accept. `contract.test.mts` asserts this stays in step with
  * `MEDIA_ITEM_TYPES`, which it CAN import.
  */
-const ITEM_TYPES = new Set<string>(['photo', 'video', 'gallery', 'story']);
+const ITEM_TYPES = new Set<string>(['photo', 'video', 'gallery', 'story', 'update']);
 
 const PHASES = new Set<string>([
   'pre_match',
@@ -315,7 +316,31 @@ export function normaliseMatchPage(raw: unknown): MediaMatchPage {
     nextCursor: str(page.nextCursor),
     pinned: normaliseItems(page.pinned),
     phase_counts: asRecord(page.phase_counts) as MediaMatchPage['phase_counts'],
+    type_counts: asRecord(page.type_counts) as MediaMatchPage['type_counts'],
+    category_counts: asRecord(page.category_counts) as MediaMatchPage['category_counts'],
   };
+}
+
+/** The category chips a match page should offer: the categories it has items
+ *  in, in the order the admin arranged them. */
+export function matchCategoryFilters(
+  categories: MediaCategory[],
+  counts: MediaMatchPage['category_counts'],
+): MediaCategory[] {
+  return categories.filter((category) => (counts[category.id] ?? 0) > 0);
+}
+
+/**
+ * The type chips a match page should offer: the types it actually has, in a
+ * fixed order. Nothing when only one type has content — a lone chip next to
+ * "All" is not a choice worth a row.
+ */
+export function matchTypeFilters(counts: MediaMatchPage['type_counts']): MatchTypeFilter[] {
+  // Spelled out for the same reason as ITEM_TYPES above: this module cannot
+  // import a runtime value. Keep in step with `MATCH_TYPE_FILTERS`.
+  const order: MatchTypeFilter[] = ['photo', 'video', 'gallery', 'update'];
+  const present = order.filter((type) => (counts[type] ?? 0) > 0);
+  return present.length > 1 ? present : [];
 }
 
 /** `GET /matches/:id/from-madrid-now` → `{ match, items, nextCursor, is_live }`. */
@@ -394,6 +419,9 @@ export function normaliseSearchFilters(raw: unknown): MediaSearchFilterOptions {
     media_types: asArray(f.media_types)
       .map((value) => str(value) as MediaItemType)
       .filter((value) => ITEM_TYPES.has(value)),
+    matches: asArray(f.matches)
+      .map((row) => normaliseMatch(row))
+      .filter((match): match is MediaMatchRef => match !== null),
     contributors: asArray(f.contributors)
       .map((row) => ({ id: str(row.id) ?? '', display_name: str(row.display_name) }))
       .filter((row) => row.id.length > 0),

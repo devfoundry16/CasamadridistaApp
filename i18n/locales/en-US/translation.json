@@ -1081,7 +1081,7 @@
     "loadFailed": "We couldn't load this right now.",
     "search": "Search",
     "searchPlaceholder": "Search photos, videos and stories",
-    "searchPrompt": "Type at least {{value}} characters to search.",
+    "searchPrompt": "Type at least {{value}} characters, or pick a filter.",
     "searchNoResults": "No results",
     "searchNoResultsBody": "Try a different word, a player name or an opponent.",
     "archive": "Archive",
@@ -1154,6 +1154,7 @@
       "photos": "Photos",
       "stories": "Stories",
       "galleries": "Galleries",
+      "updates": "Updates",
       "exclusive": "Exclusive",
       "trending": "Trending",
       "latestMatch": "Latest match",
@@ -1183,7 +1184,9 @@
     },
     "follow": "Notify me",
     "following": "Notifying",
-    "followHint": "Get a notification when new content is published"
+    "followHint": "Get a notification when new content is published",
+    "match": "Match",
+    "allMatches": "All matches"
   },
   "notifications": {
     "title": "Notifications",
@@ -1264,7 +1267,8 @@
       "delete": "Delete post",
       "deleteTitle": "Delete this post?",
       "deleteBody": "Drafts are removed permanently. Published posts are taken down and kept for the audit trail.",
-      "discard": "Discard"
+      "discard": "Discard",
+      "videoFormat": "Video format"
     },
     "assets": {
       "title": "Files",
@@ -1337,7 +1341,8 @@
       "photo": "Photo",
       "video": "Video",
       "gallery": "Gallery",
-      "story": "Story"
+      "story": "Story",
+      "update": "Short update"
     },
     "access": {
       "public": "Everyone",
@@ -1396,6 +1401,11 @@
       "prepareFailedBody": "Your post was saved as a draft so nothing is lost. Open it to remove the file that failed and try again.",
       "reserveFailedTitle": "Could not start every upload",
       "reserveFailedBody": "Your post was saved as a draft rather than published, so it cannot go live missing a file. Open it and retry the uploads."
+    },
+    "videoFormat": {
+      "vertical_short": "Vertical short",
+      "horizontal": "Horizontal",
+      "long": "Long video"
     }
   },
   "social": {
@@ -1446,7 +1456,8 @@
         "posts": "Posts",
         "videos": "Videos",
         "tagged": "Tagged",
-        "saved": "Saved"
+        "saved": "Saved",
+        "media": "Media"
       },
       "grid": {
         "video": "Video post",
@@ -1461,7 +1472,9 @@
         "videosSelf": "Your video posts will appear here.",
         "tagged": "No posts tag {{name}} yet.",
         "taggedSelf": "Posts you're tagged in will appear here.",
-        "saved": "Tap the bookmark on a post to save it here. Only you can see what you save."
+        "saved": "Tap the bookmark on a post to save it here. Only you can see what you save.",
+        "media": "{{name}} hasn't published in Casa Media yet.",
+        "mediaSelf": "What you publish in Casa Media will appear here."
       }
     },
     "presence": {

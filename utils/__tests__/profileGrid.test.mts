@@ -6,7 +6,14 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { GRID_COLUMNS, GRID_GAP, gridBadge, gridCellSize, profileTabs } from '../profileGrid.core.ts';
+import {
+  GRID_COLUMNS,
+  GRID_GAP,
+  gridBadge,
+  gridCellSize,
+  mediaGridCell,
+  profileTabs,
+} from '../profileGrid.core.ts';
 
 describe('profileTabs', () => {
   it('anyone: Posts, Videos, Tagged', () => {
@@ -15,6 +22,46 @@ describe('profileTabs', () => {
 
   it('your own profile adds Saved, last', () => {
     assert.deepEqual(profileTabs(true), ['posts', 'videos', 'tagged', 'saved']);
+  });
+
+  it('a Casa Media contributor gets a Media tab, before Saved', () => {
+    assert.deepEqual(profileTabs(false, true), ['posts', 'videos', 'tagged', 'media']);
+    assert.deepEqual(profileTabs(true, true), ['posts', 'videos', 'tagged', 'media', 'saved']);
+  });
+});
+
+describe('mediaGridCell', () => {
+  const item = {
+    id: 'm1',
+    type: 'gallery',
+    cover_url: 'https://cdn/cover.jpg',
+    asset_count: 6,
+    published_at: '2026-03-01T19:00:00Z',
+  };
+
+  it('a Casa Media item becomes a grid cell with its cover and asset count', () => {
+    assert.deepEqual(mediaGridCell(item), {
+      id: 'm1',
+      kind: 'image',
+      thumb_url: 'https://cdn/cover.jpg',
+      media_count: 6,
+      is_video: false,
+      created_at: '2026-03-01T19:00:00Z',
+    });
+  });
+
+  it('a video item is badged as a video', () => {
+    const cell = mediaGridCell({ ...item, type: 'video', asset_count: 1 });
+    assert.equal(cell.kind, 'video');
+    assert.equal(cell.is_video, true);
+    assert.equal(gridBadge(cell), 'video');
+  });
+
+  it('an item with no cover and no asset count still counts as one', () => {
+    const cell = mediaGridCell({ ...item, type: 'photo', asset_count: 0, cover_url: null });
+    assert.equal(cell.thumb_url, null);
+    assert.equal(cell.media_count, 1);
+    assert.equal(gridBadge(cell), null);
   });
 });
 

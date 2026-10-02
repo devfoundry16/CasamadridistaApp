@@ -2,13 +2,14 @@ import * as ImagePicker from 'expo-image-picker';
 
 import {
   applyLimits,
+  videoFormatFor,
   type PickLimits,
   type PickResult,
   type PickedAsset,
 } from '@/utils/mediaPick.core';
 
 // Re-exported so the contributor screens keep importing from here.
-export { applyLimits };
+export { applyLimits, videoFormatFor };
 export type { PickLimits, PickResult, PickedAsset };
 
 function toPicked(asset: ImagePicker.ImagePickerAsset): PickedAsset {

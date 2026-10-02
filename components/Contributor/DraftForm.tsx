@@ -9,10 +9,12 @@ import Colors from '@/constants/colors';
 import { MEDIA_PHASES, type MediaAccessLevel, type MediaPhase } from '@/types/media/casaMedia';
 import {
   CONTRIBUTOR_ITEM_TYPES,
+  VIDEO_FORMATS,
   type ContributorAsset,
   type ContributorItemType,
   type ContributorMe,
   type MediaNotifyMode,
+  type VideoFormat,
 } from '@/types/media/contributor';
 import AssetStrip from './AssetStrip';
 import SchedulePicker from './SchedulePicker';
@@ -20,6 +22,8 @@ import { matchDateLabel, matchLabel } from './labels';
 
 export interface DraftFormValue {
   type: ContributorItemType;
+  /** Video items only. Set from the picked clip, and correctable by hand. */
+  video_format: VideoFormat | null;
   match_id: number | null;
   match_phase: MediaPhase | null;
   category_id: string | null;
@@ -157,6 +161,23 @@ export default function DraftForm({
                 label={t(`contributor.type.${type}`)}
                 active={value.type === type}
                 onPress={() => onChange({ type })}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
+
+      {/* ── Video format ───────────────────────────────────────── */}
+      {value.type === 'video' ? (
+        <View className="px-4 pt-4">
+          <Label>{t('contributor.create.videoFormat')}</Label>
+          <View className="flex-row flex-wrap gap-2">
+            {VIDEO_FORMATS.map((format) => (
+              <Chip
+                key={format}
+                label={t(`contributor.videoFormat.${format}`)}
+                active={value.video_format === format}
+                onPress={() => onChange({ video_format: format })}
               />
             ))}
           </View>
