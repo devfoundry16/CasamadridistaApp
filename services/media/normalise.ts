@@ -139,6 +139,13 @@ export function normaliseMatch(raw: unknown): MediaMatchRef | null {
   };
 }
 
+/** Statuses API-Football reports for a match that is currently being played. */
+const LIVE_STATUSES = new Set(['1H', '2H', 'HT', 'ET', 'P', 'BT', 'LIVE']);
+
+export function isLiveStatus(status: string | null | undefined): boolean {
+  return !!status && LIVE_STATUSES.has(status);
+}
+
 /** `"Real Madrid vs Barcelona"` — the story-group label from the addendum. */
 export function matchTitle(match: MediaMatchRef | null): string | null {
   if (!match) return null;
@@ -496,6 +503,7 @@ export function groupStoriesByMatch(items: MediaItem[]): MediaStoryGroup[] {
       cover_url: item.cover_url,
       cover_blurhash: item.cover_blurhash,
       viewed: !!item.viewed,
+      is_live: isLiveStatus(item.match?.status_short),
       items: [item],
     });
   }
@@ -515,8 +523,27 @@ export function allStoriesGroup(items: MediaItem[]): MediaStoryGroup | null {
     cover_url: items[0].cover_url,
     cover_blurhash: items[0].cover_blurhash,
     viewed: items.every((item) => !!item.viewed),
+    is_live: items.some((item) => isLiveStatus(item.match?.status_short)),
     items,
   };
+}
+
+/**
+ * What the Home module's header leads with: the first thing to watch and the
+ * match it belongs to. The head of From Madrid Now (a pin, else the newest
+ * drop) when the correspondent is publishing, else the head of the exclusive
+ * rail. Null when there is nothing
+ * to watch, so Home shows no header over an empty module.
+ */
+export function homeHeadline(
+  home: MediaHomePayload,
+): { item: MediaItem; match: MediaMatchRef | null } | null {
+  const now = home.from_madrid_now;
+  const exclusive = home.home_exclusive.length ? home.home_exclusive : home.featured;
+  const item = now?.items[0] ?? exclusive[0] ?? home.latest[0];
+  if (!item) return null;
+  const match = (now?.items.length ? now.match : null) ?? item.match ?? home.live_match ?? null;
+  return { item, match };
 }
 
 /* ------------------------------------------------------------------ */

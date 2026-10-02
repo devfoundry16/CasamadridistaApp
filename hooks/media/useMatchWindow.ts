@@ -11,7 +11,7 @@ import { useMediaHome } from './useHome';
  * rather than `LiveMatch` for that reason.
  *
  * If a caller ever needs the narrow signal — the ball is actually moving —
- * `isLiveStatus(status_short)` in `components/Media/Match/MatchIdentityStrip`
+ * `isLiveStatus(status_short)` in `services/media/normalise`
  * is that test, and `live_match.status_short` carries the input for it.
  *
  * Free to call: this reads the same React Query key as every other

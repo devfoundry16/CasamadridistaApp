@@ -13,6 +13,8 @@ import type { MediaItem } from '@/types/media/casaMedia';
 
 interface Props {
   item: MediaItem;
+  /** Show the item's short description. Off when the post body already says it. */
+  preview?: boolean;
 }
 
 /**
@@ -23,7 +25,7 @@ interface Props {
  * content would double the decode cost while giving the item away for free.
  * Tapping goes to the media item screen, where the access check happens.
  */
-function MediaTeaserCard({ item }: Props) {
+function MediaTeaserCard({ item, preview = true }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
@@ -35,7 +37,9 @@ function MediaTeaserCard({ item }: Props) {
         router.push({ pathname: '/media/item/[id]', params: { id: item.id, surface: 'community' } })
       }
       accessibilityRole="button"
-      accessibilityLabel={item.title ?? t('casaMedia.hubTitle')}
+      accessibilityLabel={[t('casaMedia.exclusiveLabel'), item.title, t('casaMedia.watchInCasaMedia')]
+        .filter(Boolean)
+        .join(', ')}
       style={({ pressed }) => ({
         marginHorizontal: 16,
         marginTop: 8,
@@ -57,22 +61,53 @@ function MediaTeaserCard({ item }: Props) {
         {item.locked ? <LockedOverlay item={item} variant="card" /> : null}
       </View>
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', padding: 12 }}>
-        <Clapperboard size={16} color={Colors.darkGold} />
-        <View style={{ flex: 1, marginStart: 10 }}>
+      <View style={{ padding: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Clapperboard size={14} color={Colors.darkGold} />
           <Text
             className="text-[11px] font-bold"
-            style={{ color: Colors.darkGold }}
+            style={{ color: Colors.darkGold, marginStart: 6 }}
             numberOfLines={1}
           >
-            {t('casaMedia.hubTitle')}
+            {t('casaMedia.exclusiveLabel')}
           </Text>
+        </View>
+        {item.title ? (
           <Text
             className="text-[14px] font-semibold"
-            style={{ color: Colors.text.primary, marginTop: 2 }}
+            style={{ color: Colors.text.primary, marginTop: 4 }}
             numberOfLines={2}
           >
-            {item.title ?? ''}
+            {item.title}
+          </Text>
+        ) : null}
+        {/* The short preview text (§16): the public teaser line, the same one a
+            locked item shows. */}
+        {preview && item.description ? (
+          <Text
+            className="text-[13px] leading-5"
+            style={{ color: Colors.text.secondary, marginTop: 4 }}
+            numberOfLines={2}
+          >
+            {item.description}
+          </Text>
+        ) : null}
+        {/* Drawn as a button, but the whole card is the control: a second
+            touchable inside it would be a nested press target. */}
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            marginTop: 10,
+            paddingHorizontal: 14,
+            height: 32,
+            borderRadius: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: Colors.darkGold,
+          }}
+        >
+          <Text className="text-[12px] font-bold" style={{ color: Colors.text.dark }} numberOfLines={1}>
+            {t('casaMedia.watchInCasaMedia')}
           </Text>
         </View>
       </View>

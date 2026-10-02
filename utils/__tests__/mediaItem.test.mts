@@ -7,7 +7,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { isPreview, itemTexts, needsPlayback, playerHeight } from '../mediaItem.core.ts';
+import {
+  compactCount,
+  isPreview,
+  itemTexts,
+  needsPlayback,
+  playerHeight,
+} from '../mediaItem.core.ts';
 
 describe('needsPlayback', () => {
   it('a video and a short update ask for fresh playback URLs', () => {
@@ -87,5 +93,27 @@ describe('isPreview', () => {
   it('an older payload without a status is treated as published', () => {
     assert.equal(isPreview({ status: null }), false);
     assert.equal(isPreview(undefined), false);
+  });
+});
+
+describe('compactCount', () => {
+  it('shows a small number as it is', () => {
+    assert.equal(compactCount(0), '0');
+    assert.equal(compactCount(999), '999');
+  });
+
+  it('abbreviates thousands and millions, with one decimal while it adds something', () => {
+    assert.equal(compactCount(1000), '1K');
+    assert.equal(compactCount(1250), '1.2K');
+    assert.equal(compactCount(15_300), '15K');
+    assert.equal(compactCount(999_999), '999K');
+    assert.equal(compactCount(1_200_000), '1.2M');
+    assert.equal(compactCount(25_000_000), '25M');
+  });
+
+  it('treats a missing or broken count as zero', () => {
+    assert.equal(compactCount(undefined), '0');
+    assert.equal(compactCount(Number.NaN), '0');
+    assert.equal(compactCount(-5), '0');
   });
 });

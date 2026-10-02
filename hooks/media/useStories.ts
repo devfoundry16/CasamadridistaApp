@@ -11,12 +11,15 @@ import { mediaKeys } from './keys';
  * marked viewed stays viewed across devices and reinstalls.
  *
  * Short staleTime: a story expiring while the rail is on screen should
- * disappear on the next focus, not linger for minutes.
+ * disappear on the next focus, not linger for minutes. While a group's match
+ * is live the rail refetches every minute, so the LIVE pill goes at full time
+ * on a tab that stays mounted.
  */
 export function useStories() {
   return useQuery({
     queryKey: mediaKeys.stories(),
     queryFn: () => CasaMediaService.getStories(),
     staleTime: 60_000,
+    refetchInterval: (query) => (query.state.data?.some((group) => group.is_live) ? 60_000 : false),
   });
 }

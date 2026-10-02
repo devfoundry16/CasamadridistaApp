@@ -182,6 +182,8 @@ export interface MediaStoryGroup {
   cover_url: string | null;
   cover_blurhash: string | null;
   viewed: boolean;
+  /** The group's match is being played right now ("LIVE FROM MADRID"). */
+  is_live: boolean;
   items: MediaItem[];
 }
 

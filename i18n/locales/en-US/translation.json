@@ -1188,7 +1188,15 @@
     "match": "Match",
     "allMatches": "All matches",
     "previewBanner": "Preview — not published yet. Fans can't see this.",
-    "previewProcessing": "Some media is still uploading or processing and isn't shown yet."
+    "previewProcessing": "Some media is still uploading or processing and isn't shown yet.",
+    "viewCount_one": "{{value}} view",
+    "viewCount_other": "{{value}} views",
+    "liveFromMadrid": "LIVE FROM MADRID",
+    "liveBadge": "LIVE",
+    "newFromBernabeu": "New from the Bernabéu",
+    "watchNow": "WATCH NOW",
+    "watchInCasaMedia": "WATCH IN CASA MEDIA",
+    "exclusiveLabel": "EXCLUSIVE FROM MADRID"
   },
   "notifications": {
     "title": "Notifications",
@@ -1237,7 +1245,8 @@
       "submit": "Submit for review",
       "addMore": "Add more",
       "camera": "Camera",
-      "backgroundHint": "Uploads keep running in the background. The post goes live once every file is ready."
+      "backgroundHint": "Uploads keep running in the background. The post goes live once every file is ready.",
+      "preparingHint": "Preparing your media. A large video can take a minute; keep the app open."
     },
     "create": {
       "type": "Type",

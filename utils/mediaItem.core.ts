@@ -65,3 +65,17 @@ export function isPreview(item: { status?: string | null } | null | undefined): 
   const status = item?.status;
   return !!status && !PUBLIC_STATUSES.includes(status);
 }
+
+/**
+ * A count short enough for a meta line: 999, 1.2K, 15K, 1.2M. One decimal only
+ * below ten of a unit, where it still says something. Truncated, never
+ * rounded up — 999,999 views is not yet a million.
+ */
+export function compactCount(value: number | null | undefined): string {
+  const n = typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+  if (n < 1000) return String(n);
+  const [unit, suffix] = n < 1_000_000 ? [1000, 'K'] : [1_000_000, 'M'];
+  const scaled = n / unit;
+  const shown = scaled < 10 ? Math.floor(scaled * 10) / 10 : Math.floor(scaled);
+  return `${shown}${suffix}`;
+}

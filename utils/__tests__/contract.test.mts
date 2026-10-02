@@ -24,6 +24,8 @@ import { describe, it } from 'node:test';
 import {
   allStoriesGroup,
   groupStoriesByMatch,
+  homeHeadline,
+  isLiveStatus,
   matchTitle,
   normaliseArchive,
   normaliseArchiveFilters,
@@ -568,6 +570,31 @@ describe('envelopes', () => {
     assert.equal(normaliseItem({ ...WIRE_TEASER, status: undefined }).status, null);
   });
 
+  it('reads the Community feed\'s embedded media row, which is flat and unserialized', () => {
+    // FEED_POST_SELECT embeds raw media_items columns, not the teaser
+    // serializer's shape: `short_description`, `cover_url`, no `locked`.
+    const row = {
+      id: '44444444-4444-4444-8444-444444444444',
+      type: 'video',
+      video_format: null,
+      status: 'published',
+      title: 'Bernabéu tunnel',
+      short_description: 'Before kick-off',
+      cover_url: 'https://cdn/c.jpg',
+      cover_blurhash: null,
+      access_level: 'registered',
+      match_id: 1035041,
+      rights_expires_at: null,
+      expires_at: null,
+    };
+    const item = normaliseItem(row);
+    assert.equal(item.description, 'Before kick-off');
+    assert.equal(item.cover_url, 'https://cdn/c.jpg');
+    assert.equal(item.title, 'Bernabéu tunnel');
+    assert.equal(item.match_id, 1035041);
+    assert.deepEqual(item.assets, []);
+  });
+
   it('treats a short update as a consumer type', () => {
     assert.ok((MEDIA_ITEM_TYPES as readonly string[]).includes('update'));
     assert.equal(normaliseItem({ ...WIRE_TEASER, type: 'update' }).type, 'update');
@@ -652,6 +679,30 @@ describe('envelopes', () => {
 });
 
 /* ================================================================== */
+/* Home headline                                                       */
+/* ================================================================== */
+
+describe('home headline', () => {
+  it('leads with the newest From Madrid Now drop and its match', () => {
+    const headline = homeHeadline(normaliseHome(WIRE_HOME))!;
+    assert.equal(headline.item.id, WIRE_TEASER.id);
+    assert.equal(headline.match?.id, WIRE_MATCH_ROW.id);
+  });
+
+  it('falls back to the exclusive rail, then to the item\'s own match', () => {
+    const home = normaliseHome({ ...WIRE_HOME, from_madrid_now: null, live_match: null });
+    const headline = homeHeadline(home)!;
+    assert.equal(headline.item.id, WIRE_LOCKED_TEASER.id);
+    assert.equal(headline.match?.id ?? null, home.home_exclusive[0].match?.id ?? null);
+  });
+
+  it('is nothing when there is nothing to watch', () => {
+    const empty = normaliseHome({ featured: [], home_exclusive: [], latest: [], stories: [], categories: [] });
+    assert.equal(homeHeadline(empty), null);
+  });
+});
+
+/* ================================================================== */
 /* Stories                                                             */
 /* ================================================================== */
 
@@ -688,6 +739,28 @@ describe('story grouping', () => {
     // instead of every story.
     assert.equal(orphan[0].id, 'no-match');
     assert.notEqual(orphan[0].id, 'all');
+  });
+
+  it('marks a group live while its match is being played', () => {
+    const live = groupStoriesByMatch(
+      normaliseItems([{ ...WIRE_TEASER, match: { ...WIRE_TEASER.match, status_short: '2H' } }]),
+    );
+    const finished = groupStoriesByMatch(
+      normaliseItems([{ ...WIRE_TEASER, match: { ...WIRE_TEASER.match, status_short: 'FT' } }]),
+    );
+    const orphan = groupStoriesByMatch(normaliseItems([{ ...WIRE_TEASER, match: null }]));
+    assert.equal(live[0].is_live, true);
+    assert.equal(finished[0].is_live, false);
+    assert.equal(orphan[0].is_live, false);
+  });
+
+  it('knows which match statuses mean the match is being played', () => {
+    for (const status of ['1H', 'HT', '2H', 'ET', 'P', 'BT', 'LIVE']) {
+      assert.equal(isLiveStatus(status), true, status);
+    }
+    for (const status of ['NS', 'FT', 'AET', 'PEN', 'PST', null, undefined]) {
+      assert.equal(isLiveStatus(status), false, String(status));
+    }
   });
 
   it('collapses everything into one group for /media/story/all', () => {

@@ -1,7 +1,8 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { Post } from '@/services/FeedService';
+import { normaliseItem } from '@/services/media/normalise';
 import PostHeader from './PostHeader';
 import PostBody from './PostBody';
 import PostMediaPreview from './PostMediaPreview';
@@ -28,12 +29,24 @@ function PostCard({ post }: Props) {
     else goToPost();
   }, [post.author_type, post.author_id, router, goToPost]);
 
+  // The feed embeds the raw media_items row (`short_description`, flat cover
+  // columns), not the teaser the Casa Media endpoints serialize. Normalised
+  // here, once per post, so the card reads the same `MediaItem` everything
+  // else does.
+  const teaser = useMemo(
+    () => (post.kind === 'media_teaser' && post.media_item ? normaliseItem(post.media_item) : null),
+    [post.kind, post.media_item],
+  );
+  // An official Casa teaser already carries the item's short description as
+  // its post body, shown just above the card; a fan's share has no body.
+  const showPreview = !!teaser?.description && teaser.description.trim() !== (post.body ?? '').trim();
+
   return (
     <Touchable onPress={goToPost} style={({ pressed }) => [styles.container, { opacity: pressed ? 0.85 : 1 }]}>
       <PostHeader post={post} onAuthorPress={goToAuthor} />
       <PostBody post={post} truncate />
-      {post.kind === 'media_teaser' && post.media_item ? (
-        <MediaTeaserCard item={post.media_item} />
+      {teaser ? (
+        <MediaTeaserCard item={teaser} preview={showPreview} />
       ) : (
         post.media?.length > 0 && <PostMediaPreview media={post.media} />
       )}

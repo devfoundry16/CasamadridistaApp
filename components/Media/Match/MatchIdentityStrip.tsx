@@ -4,6 +4,7 @@ import { View } from 'react-native';
 
 import { Text } from '@/components/Text';
 import Colors from '@/constants/colors';
+import { isLiveStatus } from '@/services/media/normalise';
 import type { MediaMatchRef } from '@/types/media/casaMedia';
 
 interface Props {
@@ -11,12 +12,6 @@ interface Props {
   fallbackTitle: string;
 }
 
-/** Statuses API-Football reports for a match that is currently being played. */
-const LIVE_STATUSES = new Set(['1H', '2H', 'HT', 'ET', 'P', 'BT', 'LIVE']);
-
-export function isLiveStatus(status: string | null | undefined): boolean {
-  return !!status && LIVE_STATUSES.has(status);
-}
 
 export function isFinishedStatus(status: string | null | undefined): boolean {
   return !!status && (status === 'FT' || status === 'AET' || status === 'PEN');

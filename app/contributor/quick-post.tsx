@@ -465,7 +465,9 @@ function QuickPost({ me }: { me: ContributorMe }) {
           </Text>
         </Touchable>
         <Text className="text-[11px] text-center mt-2" style={{ color: Colors.text.muted }}>
-          {t('contributor.quickPost.backgroundHint')}
+          {/* Preparing can mean re-encoding a big clip, which takes a while and
+              only runs while the app is open; say so while the button spins. */}
+          {busy ? t('contributor.quickPost.preparingHint') : t('contributor.quickPost.backgroundHint')}
         </Text>
       </View>
     </KeyboardAvoidingView>

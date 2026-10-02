@@ -27,7 +27,13 @@ import { useItemUploadReadiness } from '@/hooks/media/useUploadQueue';
 import AnalyticsService from '@/services/AnalyticsService';
 import CasaMediaService from '@/services/CasaMediaService';
 import { isMediaSurface } from '@/types/media/casaMedia';
-import { isPreview, itemTexts, needsPlayback, playerHeight } from '@/utils/mediaItem.core';
+import {
+  compactCount,
+  isPreview,
+  itemTexts,
+  needsPlayback,
+  playerHeight,
+} from '@/utils/mediaItem.core';
 import { isPlayableVideo, isViewableMediaPhoto } from '@/utils/mediaUrl';
 
 /**
@@ -181,6 +187,14 @@ export default function MediaItemScreen() {
                   </Text>
                 ) : null,
                 relativeTime(item.published_at),
+                // A preview has no audience yet, and "0 views" on a draft reads
+                // as a verdict.
+                preview
+                  ? null
+                  : t('casaMedia.viewCount', {
+                      count: item.view_count,
+                      value: compactCount(item.view_count),
+                    }),
               ]
                 .filter(Boolean)
                 .flatMap((part, i) => (i === 0 ? [part] : [' · ', part]))}

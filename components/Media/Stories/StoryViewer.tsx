@@ -16,6 +16,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/Text';
 import Touchable from '@/components/Touchable';
+import VerifiedBadge from '@/components/Community/VerifiedBadge';
+import { CASA_LOGO } from '@/components/Media/casaLogo';
 import Colors from '@/constants/colors';
 import AnalyticsService from '@/services/AnalyticsService';
 import CasaMediaService from '@/services/CasaMediaService';
@@ -288,13 +290,31 @@ export default function StoryViewer({ groups, initialGroupId }: Props) {
           progress={progress}
         />
         <View style={styles.headerRow}>
-          <Text
-            className="text-[13px] font-semibold"
-            style={{ flex: 1, color: Colors.textWhite }}
-            numberOfLines={1}
-          >
-            {item.title ?? group.title ?? ''}
-          </Text>
+          {/* The official story identity (§19): the club's mark and name, not
+              the correspondent's. The match, and whether it is live, sit
+              under it. */}
+          <Image source={CASA_LOGO} style={styles.identityMark} contentFit="cover" />
+          <View style={{ flex: 1, marginStart: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Text
+                className="text-[13px] font-bold"
+                style={{ color: Colors.textWhite, flexShrink: 1 }}
+                numberOfLines={1}
+              >
+                {t('community.casaAuthor')}
+              </Text>
+              <VerifiedBadge size={13} />
+            </View>
+            <Text className="text-[11px]" style={{ color: Colors.textWhite, opacity: 0.85 }} numberOfLines={1}>
+              {group.is_live ? (
+                <Text className="text-[11px] font-bold" style={{ color: Colors.status.error }}>
+                  {t('casaMedia.liveFromMadrid')}
+                  {'  '}
+                </Text>
+              ) : null}
+              {item.title ?? group.title ?? ''}
+            </Text>
+          </View>
           <Touchable
             onPress={() => setReportOpen(true)}
             hitSlop={10}
@@ -352,6 +372,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   headerRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
+  identityMark: { width: 30, height: 30, borderRadius: 15 },
   footer: {
     position: 'absolute',
     bottom: 0,

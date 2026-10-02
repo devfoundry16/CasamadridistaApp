@@ -1208,7 +1208,19 @@
     "match": "المباراة",
     "allMatches": "كل المباريات",
     "previewBanner": "معاينة — لم يُنشر بعد. لا يراه المشجعون.",
-    "previewProcessing": "بعض الوسائط ما زالت قيد الرفع أو المعالجة ولم تظهر بعد."
+    "previewProcessing": "بعض الوسائط ما زالت قيد الرفع أو المعالجة ولم تظهر بعد.",
+    "viewCount_zero": "لا مشاهدات",
+    "viewCount_one": "مشاهدة واحدة",
+    "viewCount_two": "مشاهدتان",
+    "viewCount_few": "{{value}} مشاهدات",
+    "viewCount_many": "{{value}} مشاهدة",
+    "viewCount_other": "{{value}} مشاهدة",
+    "liveFromMadrid": "مباشر من مدريد",
+    "liveBadge": "مباشر",
+    "newFromBernabeu": "جديد من البرنابيو",
+    "watchNow": "شاهد الآن",
+    "watchInCasaMedia": "شاهد في كاسا ميديا",
+    "exclusiveLabel": "حصري من مدريد"
   },
   "notifications": {
     "title": "الإشعارات",
@@ -1257,7 +1269,8 @@
       "submit": "إرسال للمراجعة",
       "addMore": "إضافة المزيد",
       "camera": "الكاميرا",
-      "backgroundHint": "يستمر الرفع في الخلفية. يُنشر المحتوى بمجرد جاهزية كل الملفات."
+      "backgroundHint": "يستمر الرفع في الخلفية. يُنشر المحتوى بمجرد جاهزية كل الملفات.",
+      "preparingHint": "جارٍ تجهيز الوسائط. قد يستغرق الفيديو الكبير دقيقة؛ أبقِ التطبيق مفتوحًا."
     },
     "create": {
       "type": "النوع",

@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as VideoThumbnails from 'expo-video-thumbnails';
-import { AppState, type AppStateStatus } from 'react-native';
+import { AppState, TurboModuleRegistry, type AppStateStatus } from 'react-native';
 
 import ContributorMediaService from '@/services/ContributorMediaService';
 import { store } from '@/store/store';
@@ -40,6 +40,11 @@ import {
   shouldUseTus,
   tusProgress,
 } from '@/utils/tusUpload.core';
+import {
+  compressionPlan,
+  scaledDimensions,
+  type CompressionPlan,
+} from '@/utils/videoCompression.core';
 
 export type { UploadEntry, UploadEntryStatus } from './uploadPolicy.core';
 
@@ -205,7 +210,13 @@ class UploadManagerClass {
     store.dispatch(entriesUpserted(created.map((entry) => ({ ...entry }))));
     await this.persist();
 
-    await Promise.all(created.map((entry) => this.prepare(entry.id)));
+    // Photos are prepared together; videos one at a time, because preparing a
+    // big clip can mean re-encoding it and two encoders at once fight for the
+    // phone's single hardware encoder.
+    await Promise.all(
+      created.filter((entry) => entry.kind === 'image').map((entry) => this.prepare(entry.id)),
+    );
+    for (const entry of created.filter((e) => e.kind === 'video')) await this.prepare(entry.id);
     if (options.autoStart !== false) this.pump();
     return created.map((entry) => entry.id);
   }
@@ -218,6 +229,9 @@ class UploadManagerClass {
   private async prepare(entryId: string): Promise<void> {
     const entry = this.entries.get(entryId);
     if (!entry) return;
+
+    // The encoder's output, in the cache. Removed whatever happens below.
+    let compressedUri: string | null = null;
 
     try {
       await FileSystem.makeDirectoryAsync(UPLOAD_DIR, { intermediates: true });
@@ -250,11 +264,36 @@ class UploadManagerClass {
         mime = 'image/jpeg';
       }
 
+      // A big, high-bitrate clip is re-encoded on the phone first: the upload
+      // is the slow part at a stadium. Any failure uploads the original.
+      if (entry.kind === 'video') {
+        const plan = compressionPlan({
+          sizeBytes: entry.sizeBytes,
+          durationMs: entry.durationMs,
+          width,
+          height,
+        });
+        compressedUri = plan ? await this.compressVideo(entryId, sourceUri, plan) : null;
+        if (compressedUri && plan) {
+          sourceUri = compressedUri;
+          mime = 'video/mp4';
+          ({ width, height } = scaledDimensions(width, height, plan.maxSize));
+        }
+      }
+
       const target = `${UPLOAD_DIR}${entry.id}.${extensionFor(entry.kind, mime)}`;
       // A re-prepare (rare, but possible after a crash mid-copy) must not hit
       // "file exists".
       await FileSystem.deleteAsync(target, { idempotent: true });
       await FileSystem.copyAsync({ from: sourceUri, to: target });
+
+      // Cancelled while the file was being prepared (an encode can take a
+      // while): `update` below would be a no-op, and the copy would be left in
+      // the documents directory with nothing pointing at it.
+      if (!this.entries.has(entryId)) {
+        await FileSystem.deleteAsync(target, { idempotent: true }).catch(() => {});
+        return;
+      }
 
       const info = await FileSystem.getInfoAsync(target);
       const sizeBytes = info.exists && typeof info.size === 'number' ? info.size : entry.sizeBytes;
@@ -270,6 +309,9 @@ class UploadManagerClass {
         height,
         sizeBytes: sizeBytes ?? null,
         status: 'queued',
+        // The encoder reported its own progress into this bar; the upload
+        // starts it again from nothing.
+        progress: 0,
         error: null,
       });
     } catch (error: any) {
@@ -280,6 +322,44 @@ class UploadManagerClass {
         attempts: Number.MAX_SAFE_INTEGER,
         error: error?.message || 'Could not read the selected file',
       });
+    } finally {
+      if (compressedUri) {
+        await FileSystem.deleteAsync(compressedUri, { idempotent: true }).catch(() => {});
+      }
+    }
+  }
+
+  /**
+   * Re-encode a video to the plan, returning the new file's URI, or null when
+   * it could not be done — the encoder is a native module, so a build made
+   * before it was added has none, and a codec it cannot read fails too. Null
+   * means "upload the original", never "fail the upload".
+   *
+   * The native side is probed BEFORE the library is imported. Both libraries
+   * throw while their module is being evaluated when the native half is
+   * missing, and Metro reports a throw at that point as a fatal error before
+   * any `catch` here could see it.
+   */
+  private async compressVideo(
+    entryId: string,
+    uri: string,
+    plan: CompressionPlan,
+  ): Promise<string | null> {
+    if (TurboModuleRegistry.get('NitroModules') == null) return null;
+    try {
+      const { NitroModules } = await import('react-native-nitro-modules');
+      if (!NitroModules.hasHybridObject('Compressor')) return null;
+
+      const { Video } = await import('react-native-compressor');
+      const output = await Video.compress(
+        uri,
+        { compressionMethod: 'manual', maxSize: plan.maxSize, bitrate: plan.bitrate },
+        (progress) => this.reportProgress(entryId, progress),
+      );
+      const info = await FileSystem.getInfoAsync(output);
+      return info.exists ? output : null;
+    } catch {
+      return null;
     }
   }
 
