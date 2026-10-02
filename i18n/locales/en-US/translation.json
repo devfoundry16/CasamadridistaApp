@@ -1009,7 +1009,13 @@
     "remove": "Remove",
     "failedToRemoveAdmin": "Failed to remove admin",
     "invalidPercentage": "Enter a valid percentage between 0 and 100",
-    "failedToUpdateRevenue": "Failed to update revenue percentage"
+    "failedToUpdateRevenue": "Failed to update revenue percentage",
+    "refusal": {
+      "sessionEnded": "Your admin session has ended. Sign out and sign in again to continue.",
+      "reauth": "For security, this change needs a recent sign-in. Sign out and sign in again, then retry — or make the change in the web dashboard.",
+      "mfa": "Admin actions need two-step sign-in. Set it up in the web dashboard under Account security.",
+      "finance": "Only a super admin can make this change."
+    }
   },
   "royalInvestor": {
     "programTitle": "Royal Investor Program",

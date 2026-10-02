@@ -21,6 +21,7 @@ import SuperAdminService, {
   UserSearchResult,
 } from '@/services/SuperAdminService';
 import { useTranslation } from 'react-i18next';
+import { staffRefusalKey } from '@/utils/staffRefusal.core';
 
 type Tab = 'admins' | 'clubs';
 
@@ -33,6 +34,12 @@ const BackChevron = I18nManager.isRTL ? ChevronRight : ChevronLeft;
 export default function AdminPanelScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  // A staff refusal (ended admin session, recent sign-in needed, second factor,
+  // finance permission) gets a sentence the admin can act on.
+  const adminError = (e: unknown, fallbackKey: string) => {
+    const refusal = staffRefusalKey(e);
+    return t(refusal ?? fallbackKey);
+  };
   const [tab, setTab] = useState<Tab>('admins');
 
   // --- Admins tab state ---
@@ -57,7 +64,8 @@ export default function AdminPanelScreen() {
       const data = await SuperAdminService.listAdmins();
       setAdmins(data);
     } catch (e: any) {
-      const msg = e?.response?.data?.error || e?.message || 'Unknown error';
+      const refusal = staffRefusalKey(e);
+      const msg = refusal ? t(refusal) : e?.response?.data?.error || e?.message || 'Unknown error';
       Alert.alert(t("admin.failedToLoadAdmins"), msg);
     } finally {
       setIsLoadingAdmins(false);
@@ -69,8 +77,8 @@ export default function AdminPanelScreen() {
       const data = await SuperAdminService.listFanClubs();
       setFanClubs(data);
       if (data.length > 0) setSelectedClubId(prev => prev || data[0].id);
-    } catch {
-      Alert.alert(t("common.error"), t("admin.failedToLoadFanClubs"));
+    } catch (e) {
+      Alert.alert(t("common.error"), adminError(e, "admin.failedToLoadFanClubs"));
     }
   }, []);
 
@@ -85,8 +93,8 @@ export default function AdminPanelScreen() {
     try {
       const results = await SuperAdminService.searchUsers(searchQuery.trim());
       setSearchResults(results);
-    } catch {
-      Alert.alert(t("common.error"), t("admin.searchFailed"));
+    } catch (e) {
+      Alert.alert(t("common.error"), adminError(e, "admin.searchFailed"));
     } finally {
       setIsSearching(false);
     }
@@ -106,7 +114,8 @@ export default function AdminPanelScreen() {
       setSearchQuery('');
       await loadAdmins();
     } catch (e: any) {
-      const msg = e?.response?.data?.error || e?.message || t("admin.assignmentFailed");
+      const refusal = staffRefusalKey(e);
+      const msg = refusal ? t(refusal) : e?.response?.data?.error || e?.message || t("admin.assignmentFailed");
       Alert.alert(t("common.error"), msg);
     } finally {
       setIsAssigning(false);
@@ -126,8 +135,8 @@ export default function AdminPanelScreen() {
             try {
               await SuperAdminService.removeAdmin(admin.user_id, admin.fan_club_id);
               await loadAdmins();
-            } catch {
-              Alert.alert(t("common.error"), t("admin.failedToRemoveAdmin"));
+            } catch (e) {
+              Alert.alert(t("common.error"), adminError(e, "admin.failedToRemoveAdmin"));
             }
           },
         },
@@ -146,8 +155,8 @@ export default function AdminPanelScreen() {
       const updated = await SuperAdminService.updateFanClub(club.id, pct);
       setFanClubs(prev => prev.map(c => (c.id === updated.id ? updated : c)));
       setEditingClub(null);
-    } catch {
-      Alert.alert(t("common.error"), t("admin.failedToUpdateRevenue"));
+    } catch (e) {
+      Alert.alert(t("common.error"), adminError(e, "admin.failedToUpdateRevenue"));
     } finally {
       setIsSavingClub(false);
     }

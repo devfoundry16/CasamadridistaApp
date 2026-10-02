@@ -5,6 +5,7 @@ import { Alert, Platform } from 'react-native';
 import i18n from '@/i18n';
 import { API_BASE_URL, supabase } from '@/config/supabase';
 import FanClubDashboardService from '@/services/FanClubDashboardService';
+import { isStaffSessionRefusal } from '@/utils/staffRefusal.core';
 
 // Interceptor-free axios instance used for auth endpoints (login, refresh) to avoid
 // the response interceptor triggering on these calls and causing circular refresh loops.
@@ -550,6 +551,13 @@ class AuthServiceClass {
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
         if (error.response?.status !== 401 || originalRequest._retry) {
+          return Promise.reject(error);
+        }
+
+        // A closed staff session (admin routes only) is not an expired token:
+        // refreshing keeps the same session and would be refused again. The
+        // admin screen explains it instead.
+        if (isStaffSessionRefusal(error.response?.status, error.response?.data?.error)) {
           return Promise.reject(error);
         }
 
