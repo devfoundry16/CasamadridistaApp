@@ -25,6 +25,11 @@
     "reloadNow": "Reload now",
     "reloadLater": "Later"
   },
+  "maintenance": {
+    "title": "We'll be right back",
+    "message": "Casa Madridista is under maintenance. Please try again in a little while.",
+    "retry": "Try again"
+  },
   "nav": {
     "appName": "Casa Madridista",
     "home": "Home",

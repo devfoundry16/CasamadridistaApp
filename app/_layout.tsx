@@ -2,6 +2,7 @@
 import "@/i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontProvider, useFont } from "@/contexts/FontContext";
+import MaintenanceScreen from "@/components/MaintenanceScreen";
 import { useFootball } from "@/hooks/useFootball";
 import { useUser } from "@/hooks/useUser";
 import { useEnvironment } from "@/hooks/useEnvironment";
@@ -24,7 +25,7 @@ import { Stack, router, usePathname } from "expo-router";
 import { useTranslation } from "react-i18next";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useRef } from "react";
-import { View, I18nManager } from "react-native";
+import { AppState, View, I18nManager } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { development } from "@/config/environment";
 import { StatusBar } from "expo-status-bar";
@@ -290,17 +291,17 @@ const DataInitializer = () => {
   return null;
 };
 
-function RootLayoutInner() {
-  const { loadEnvironment } = useEnvironment();
+/**
+ * The app itself: navigation, deep links and the data loaders.
+ * Mounted only while the backend is open — see RootLayoutInner.
+ */
+function AppShell() {
   usePasswordResetDeeplink();
   useAuthCallbackDeeplink();
   const [fontsLoaded] = useFonts({
     Cairo_400Regular,
     Cairo_700Bold,
   });
-  useEffect(() => {
-    loadEnvironment();
-  }, []);
   if (!fontsLoaded) {
     return null;
   }
@@ -320,6 +321,34 @@ function RootLayoutInner() {
       </GestureHandlerRootView>
     </StripeProvider>
   );
+}
+
+function RootLayoutInner() {
+  const { loadEnvironment, recheckMaintenance, maintenance } = useEnvironment();
+
+  useEffect(() => {
+    loadEnvironment();
+  }, []);
+
+  // Maintenance can start or end while the app sits in the background.
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") recheckMaintenance();
+    });
+    return () => subscription.remove();
+  }, [recheckMaintenance]);
+
+  // The backend is refusing every request. AppShell is not mounted at all, so
+  // no screen fetches into the refusal and no deep link tries to navigate a
+  // router that is not there.
+  if (maintenance.active) {
+    return (
+      <FontProvider>
+        <MaintenanceScreen />
+      </FontProvider>
+    );
+  }
+  return <AppShell />;
 }
 
 export default function RootLayout() {
