@@ -10,6 +10,7 @@ import { Spinner } from '@/components/Spinner';
 import { Text } from '@/components/Text';
 import Colors from '@/constants/colors';
 import { useUser } from '@/hooks/useUser';
+import AnalyticsService from '@/services/AnalyticsService';
 import { buildAttributionPayload } from '@/utils/finishAuthRedirect';
 
 export type AuthMode = 'login' | 'register';
@@ -62,6 +63,29 @@ export default function AuthForm({
     notified.current = true;
     onSuccess?.();
   }, [user?.id, onSuccess]);
+
+  /**
+   * "Registration started" (§40): the step between tapping the sign-up prompt
+   * on a locked Casa Media item and finishing. Reported once, on the first
+   * keystroke in the register form, and only when a Media item brought the
+   * person here, because the event opens that item's funnel. The Google and
+   * Apple buttons are shown in sign-in mode only, where a tap may well be a
+   * returning user, so they do not count.
+   */
+  const startReported = useRef(false);
+  const reportStarted = () => {
+    if (startReported.current || isLogin || !attributionMediaId) return;
+    startReported.current = true;
+    AnalyticsService.track('signup_start', {
+      item_id: attributionMediaId,
+      campaign_id: attributionCampaignId,
+    });
+  };
+  /** Wrap a field setter so the first keystroke reports the start. */
+  const typing = (set: (value: string) => void) => (value: string) => {
+    reportStarted();
+    set(value);
+  };
 
   const handleSubmit = async () => {
     if (isLogin) {
@@ -116,21 +140,21 @@ export default function AuthForm({
               label={t('auth.firstName')}
               icon={User}
               value={firstName}
-              onChangeText={setFirstName}
+              onChangeText={typing(setFirstName)}
               placeholder={t('auth.enterFirstName')}
             />
             <Field
               label={t('auth.lastName')}
               icon={User}
               value={lastName}
-              onChangeText={setLastName}
+              onChangeText={typing(setLastName)}
               placeholder={t('auth.enterLastName')}
             />
             <Field
               label={t('auth.phone')}
               icon={Phone}
               value={phone}
-              onChangeText={setPhone}
+              onChangeText={typing(setPhone)}
               placeholder={t('auth.enterPhone')}
               keyboardType="phone-pad"
             />
@@ -141,7 +165,7 @@ export default function AuthForm({
           label={t('auth.emailAddress')}
           icon={Mail}
           value={email}
-          onChangeText={setEmail}
+          onChangeText={typing(setEmail)}
           placeholder={t('auth.enterEmail')}
           keyboardType="email-address"
           autoCapitalize="none"
@@ -152,7 +176,7 @@ export default function AuthForm({
             label={t('auth.password')}
             icon={Lock}
             value={password}
-            onChangeText={setPassword}
+            onChangeText={typing(setPassword)}
             placeholder={t('auth.enterPassword')}
             secureTextEntry
             noMargin

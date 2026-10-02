@@ -3,6 +3,7 @@ import i18n, { needsRestartForDirection } from "@/i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MediaAuthSync from "@/components/Auth/MediaAuthSync";
 import SocialRealtimeSync from "@/components/Social/SocialRealtimeSync";
+import { useDeferredLink } from "@/hooks/useDeferredLink";
 import { useNotificationRouting } from "@/hooks/useNotificationRouting";
 import { usePushRegistration } from "@/hooks/usePushRegistration";
 import AnalyticsService from "@/services/AnalyticsService";
@@ -444,6 +445,8 @@ function RootLayoutInner() {
   // Must be inside the router tree: it waits for useRootNavigationState().key
   // before navigating, otherwise a cold-start push tap is silently dropped.
   useNotificationRouting();
+  // A fresh install that came from a shared Casa Media link opens that link.
+  useDeferredLink();
   const [fontsLoaded] = useFonts({
     Cairo_400Regular,
     Cairo_700Bold,

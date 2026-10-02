@@ -355,6 +355,7 @@ export const MEDIA_EVENT_TYPES = [
   'push_open',
   'search',
   'signup_attributed',
+  'signup_start',
 ] as const;
 
 export type MediaEventType = (typeof MEDIA_EVENT_TYPES)[number];

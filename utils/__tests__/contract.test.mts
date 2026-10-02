@@ -52,6 +52,7 @@ import {
 import { normaliseMe } from '../../services/media/contributorMe.ts';
 import {
   MATCH_TYPE_FILTERS,
+  MEDIA_EVENT_TYPES,
   MEDIA_ITEM_TYPES,
   MEDIA_SURFACES,
   isMediaSurface,
@@ -828,6 +829,9 @@ describe('analytics batch body', () => {
 
   it('maps the two legacy call-site names onto the server vocabulary', () => {
     assert.equal(toEventType('signup_cta_click'), 'cta_click');
+    // "Registration started" is its own server event, not an alias of the tap.
+    assert.ok((MEDIA_EVENT_TYPES as readonly string[]).includes('signup_start'));
+    assert.equal(toEventType('signup_start'), 'signup_start');
     assert.equal(toEventType('share_click'), 'share');
   });
 
