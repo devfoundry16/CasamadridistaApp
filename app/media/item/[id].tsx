@@ -23,10 +23,11 @@ import { Text } from '@/components/Text';
 import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import { useMediaItem, useMediaPlayback } from '@/hooks/media/useMediaItem';
+import { useItemUploadReadiness } from '@/hooks/media/useUploadQueue';
 import AnalyticsService from '@/services/AnalyticsService';
 import CasaMediaService from '@/services/CasaMediaService';
 import { isMediaSurface } from '@/types/media/casaMedia';
-import { itemTexts, needsPlayback, playerHeight } from '@/utils/mediaItem.core';
+import { isPreview, itemTexts, needsPlayback, playerHeight } from '@/utils/mediaItem.core';
 import { isPlayableVideo, isViewableMediaPhoto } from '@/utils/mediaUrl';
 
 /**
@@ -51,6 +52,8 @@ export default function MediaItemScreen() {
   const eventSurface = isMediaSurface(surface) ? surface : undefined;
 
   const { data: item, isLoading, isError, refetch } = useMediaItem(id);
+  // This device's own upload queue for the item: what a preview is missing.
+  const uploads = useItemUploadReadiness(id);
 
   // Fresh signed URLs, but only for content this viewer may actually play.
   const wantsPlayback = needsPlayback(item);
@@ -65,9 +68,12 @@ export default function MediaItemScreen() {
   const itemId = item?.id;
   const itemLocked = item?.locked;
   const itemMatchId = item?.match_id;
+  // A contributor (or an editor) looking at an item that is not public yet.
+  // Nothing about that visit is a view.
+  const preview = isPreview(item);
 
   useEffect(() => {
-    if (!itemId || itemLocked) return;
+    if (!itemId || itemLocked || preview) return;
     AnalyticsService.track('item_view', {
       item_id: itemId,
       match_id: itemMatchId ?? undefined,
@@ -75,7 +81,7 @@ export default function MediaItemScreen() {
       ...(eventSurface ? { surface: eventSurface } : {}),
     });
     void CasaMediaService.recordViews([itemId]);
-  }, [itemId, itemLocked, itemMatchId, campaignId, eventSurface]);
+  }, [itemId, itemLocked, itemMatchId, campaignId, eventSurface, preview]);
 
   const openViewer = useCallback(
     (index: number) =>
@@ -127,12 +133,33 @@ export default function MediaItemScreen() {
                 uri={videoUri}
                 height={coverHeight}
                 surface={eventSurface}
+                analytics={!preview}
               />
             ) : (
               <MediaCover item={item} width={width} height={coverHeight} radius={0} />
             )}
             {item.locked ? <LockedOverlay item={item} variant="full" /> : null}
           </View>
+
+          {preview ? (
+            <View
+              accessibilityRole="alert"
+              style={{ paddingHorizontal: 16, paddingVertical: 10, backgroundColor: 'rgba(188,144,69,0.14)' }}
+            >
+              <Text className="text-[13px] font-semibold" style={{ color: Colors.darkGold }}>
+                {t('casaMedia.previewBanner')}
+              </Text>
+              {/* Only ready assets are served, so a file still uploading or
+                  transcoding is simply absent below. Say so, or the preview
+                  looks like it lost the file. The server's asset count is of
+                  ready assets too, so this device's queue is what knows. */}
+              {uploads.pending + uploads.processing > 0 ? (
+                <Text className="text-[12px]" style={{ color: Colors.text.tertiary, marginTop: 2 }}>
+                  {t('casaMedia.previewProcessing')}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
 
           <View style={{ padding: 16 }}>
             <Text className="text-[19px] font-bold" style={{ color: Colors.text.primary }}>
@@ -169,7 +196,7 @@ export default function MediaItemScreen() {
             ))}
           </View>
 
-          <EngagementBar item={item} />
+          {preview ? null : <EngagementBar item={item} />}
 
           {!item.locked && photos.length > 0 ? (
             <View style={{ marginTop: 16 }}>

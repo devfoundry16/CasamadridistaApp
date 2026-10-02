@@ -78,8 +78,14 @@ export interface UploadEntry {
   attempts: number;
   error: string | null;
   provider: UploadProviderName | null;
+  /**
+   * `tus` for a video sent in resumable chunks: its upload URL can be asked how
+   * many bytes it holds, so a failure carries on rather than starting over.
+   * Null or `direct` is a one-shot upload.
+   */
+  transport: 'direct' | 'tus' | null;
   uploadUrl: string | null;
-  method: 'PUT' | 'POST' | null;
+  method: 'PUT' | 'POST' | 'PATCH' | null;
   /** ISO timestamp from the slot response. */
   expiresAt: string | null;
   /** Epoch ms; a queued entry is not runnable before this. */
@@ -120,6 +126,11 @@ export function resumeStatus(entry: UploadEntry): 'queued' | 'uploaded' {
   return hasDeliveredBytes(entry) ? 'uploaded' : 'queued';
 }
 
+/** True while an interrupted upload can carry on from where the server got to. */
+export function isResumable(entry: UploadEntry): boolean {
+  return entry.transport === 'tus';
+}
+
 /** True once the bytes are on the server, whatever happened afterwards. */
 export function hasDeliveredBytes(entry: UploadEntry): boolean {
   return entry.status === 'uploaded' || entry.status === 'completing';
@@ -143,8 +154,9 @@ export function planFailure(entry: UploadEntry, now: number, message: string): U
     attempts: entry.attempts + 1,
     error: message,
     // A failed *completion* has not lost any bytes, so its progress bar stays
-    // full; a failed upload restarts from zero.
-    progress: resume === 'uploaded' ? 1 : 0,
+    // full; a resumable upload keeps what the server already holds; a one-shot
+    // upload restarts from zero.
+    progress: resume === 'uploaded' ? 1 : isResumable(entry) ? entry.progress : 0,
     status: delay === null ? 'failed' : resume,
     nextAttemptAt: delay === null ? null : now + delay,
     updatedAt: now,
@@ -160,7 +172,7 @@ export function planManualRetry(entry: UploadEntry, now: number): UploadEntry {
     ...entry,
     status: resumeStatus(entry),
     attempts: 0,
-    progress: hasDeliveredBytes(entry) ? 1 : 0,
+    progress: hasDeliveredBytes(entry) ? 1 : isResumable(entry) ? entry.progress : 0,
     error: null,
     nextAttemptAt: null,
     updatedAt: now,
@@ -208,12 +220,16 @@ export type SlotAction = 'create' | 'retry' | 'reuse' | 'complete-only';
  *                     would orphan the first asset row and inflate
  *                     `asset_count`.
  *   'reuse'         — the slot we already hold is still good.
+ *
+ * A resumable URL is never judged by the clock. Its expiry is the server's to
+ * enforce, the upload starts by asking it for the offset, and replacing a live
+ * URL would re-send every byte already delivered.
  */
 export function slotAction(entry: UploadEntry, now: number): SlotAction {
   if (hasDeliveredBytes(entry) && entry.assetId) return 'complete-only';
   if (!entry.assetId) return 'create';
   if (!entry.uploadUrl) return 'retry';
-  if (isSlotExpired(entry.expiresAt, now)) return 'retry';
+  if (!isResumable(entry) && isSlotExpired(entry.expiresAt, now)) return 'retry';
   return 'reuse';
 }
 
@@ -317,13 +333,18 @@ export const QUEUE_ENTRY_TTL_MS = 7 * 24 * 60 * 60 * 1000;
  *                           a completion call that is all that is missing)
  *
  * The upload URL is dropped for the first two on purpose: it may well have
- * expired while the app was dead.
+ * expired while the app was dead. A resumable upload is the exception — its
+ * URL is what lets it carry on from the server's offset, and the upload drops
+ * it itself if the server no longer knows it.
  */
 export function rehydrateEntry(entry: UploadEntry): UploadEntry {
   if (entry.status === 'completing') {
     return { ...entry, status: 'uploaded', progress: 1, nextAttemptAt: null };
   }
   if (entry.status !== 'preparing' && entry.status !== 'uploading') return entry;
+  if (entry.status === 'uploading' && isResumable(entry)) {
+    return { ...entry, status: 'queued', nextAttemptAt: null };
+  }
   return {
     ...entry,
     status: 'queued',
@@ -389,8 +410,13 @@ export function parseEntry(raw: unknown): UploadEntry | null {
     error: isNonEmptyString(r.error) ? r.error : null,
     provider:
       r.provider === 'supabase' || r.provider === 'cloudflare_stream' ? r.provider : null,
+    transport: r.transport === 'tus' || r.transport === 'direct' ? r.transport : null,
     uploadUrl: isNonEmptyString(r.uploadUrl) ? r.uploadUrl : null,
-    method: r.method === 'PUT' || r.method === 'POST' ? r.method : null,
+    // PATCH only means something on a resumable upload.
+    method:
+      r.method === 'PUT' || r.method === 'POST' || (r.method === 'PATCH' && r.transport === 'tus')
+        ? r.method
+        : null,
     expiresAt: isNonEmptyString(r.expiresAt) ? r.expiresAt : null,
     nextAttemptAt: numberOrNull(r.nextAttemptAt),
     createdAt: numberOrNull(r.createdAt) ?? 0,

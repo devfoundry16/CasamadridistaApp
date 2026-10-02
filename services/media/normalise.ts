@@ -210,6 +210,7 @@ export function normaliseItem(raw: unknown): MediaItem {
   return {
     id,
     type: (i.type ?? 'photo') as MediaItem['type'],
+    status: str(i.status),
     title: str(i.title),
     // `short_description` on the wire; every screen says `description`.
     description: str(i.short_description) ?? str(i.description),

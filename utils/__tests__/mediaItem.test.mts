@@ -7,7 +7,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { itemTexts, needsPlayback, playerHeight } from '../mediaItem.core.ts';
+import { isPreview, itemTexts, needsPlayback, playerHeight } from '../mediaItem.core.ts';
 
 describe('needsPlayback', () => {
   it('a video and a short update ask for fresh playback URLs', () => {
@@ -69,5 +69,23 @@ describe('itemTexts', () => {
   it('a caption alone is shown; nothing at all is nothing', () => {
     assert.deepEqual(itemTexts({ description: null, caption: 'Only a caption' }), ['Only a caption']);
     assert.deepEqual(itemTexts({ description: '', caption: null }), []);
+  });
+});
+
+describe('isPreview', () => {
+  it('an item that is not public yet is a preview for the person who can open it', () => {
+    for (const status of ['draft', 'pending_review', 'changes_requested', 'approved', 'scheduled', 'rejected']) {
+      assert.equal(isPreview({ status }), true, status);
+    }
+  });
+
+  it('a published or archived item is the real thing', () => {
+    assert.equal(isPreview({ status: 'published' }), false);
+    assert.equal(isPreview({ status: 'archived' }), false);
+  });
+
+  it('an older payload without a status is treated as published', () => {
+    assert.equal(isPreview({ status: null }), false);
+    assert.equal(isPreview(undefined), false);
   });
 });

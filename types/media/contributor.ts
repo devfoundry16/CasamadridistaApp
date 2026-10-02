@@ -197,7 +197,9 @@ export interface UploadSlot {
   assetId: string;
   provider: UploadProvider;
   uploadUrl: string;
-  method: 'PUT' | 'POST';
+  /** `PATCH` with `transport: 'tus'`: a resumable upload sent in chunks. */
+  method: 'PUT' | 'POST' | 'PATCH';
+  transport?: 'direct' | 'tus';
   expiresAt?: string | null;
   thumbnailUploadUrl?: string | null;
   tusEndpoint?: string | null;

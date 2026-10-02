@@ -37,6 +37,11 @@ interface Props {
   paused?: boolean;
   /** Which surface the viewer arrived from; rides on every event this player emits. */
   surface?: MediaSurface;
+  /**
+   * False for playback that must not be measured — a contributor previewing
+   * their own unpublished item. Start, progress and completion are not sent.
+   */
+  analytics?: boolean;
 }
 
 /** Quartiles are what the content team reports on — nothing finer is stored. */
@@ -58,6 +63,7 @@ export default function MediaVideoPlayer({
   autoPlay = false,
   paused,
   surface,
+  analytics = true,
 }: Props) {
   const { t } = useTranslation();
   const viewRef = useRef<VideoView>(null);
@@ -79,6 +85,13 @@ export default function MediaVideoPlayer({
 
   const videoSource: VideoSource = { uri };
 
+  const track = useCallback<typeof AnalyticsService.track>(
+    (...args) => {
+      if (analytics) AnalyticsService.track(...args);
+    },
+    [analytics],
+  );
+
   const player = useVideoPlayer(videoSource, (instance) => {
     instance.loop = false;
     instance.timeUpdateEventInterval = 1;
@@ -97,7 +110,7 @@ export default function MediaVideoPlayer({
       const state = watch.current;
       if (percent === undefined && !shouldFlush(state)) return;
       watch.current = markReported(state);
-      AnalyticsService.track('video_progress', {
+      track('video_progress', {
         item_id: itemId,
         ...(surface ? { surface } : {}),
         props: {
@@ -107,7 +120,7 @@ export default function MediaVideoPlayer({
         },
       });
     },
-    [itemId, surface],
+    [itemId, surface, track],
   );
 
   /**
@@ -119,11 +132,11 @@ export default function MediaVideoPlayer({
   const emitStart = useCallback(() => {
     if (startedItem.current === itemId) return;
     startedItem.current = itemId;
-    AnalyticsService.track('video_start', {
+    track('video_start', {
       item_id: itemId,
       ...(surface ? { surface } : {}),
     });
-  }, [itemId, surface]);
+  }, [itemId, surface, track]);
 
   // One item's quartiles must not suppress the next one's. The refs survive a
   // source swap (the story viewer reuses this component across stories), so they
@@ -190,7 +203,7 @@ export default function MediaVideoPlayer({
       } else {
         flushWatch();
       }
-      AnalyticsService.track('video_complete', {
+      track('video_complete', {
         item_id: itemId,
         ...(surface ? { surface } : {}),
         props: { duration: Math.round(durationRef.current) },
@@ -203,7 +216,7 @@ export default function MediaVideoPlayer({
       statusSub.remove();
       endSub.remove();
     };
-  }, [player, itemId, surface, flushWatch, emitStart]);
+  }, [player, itemId, surface, flushWatch, emitStart, track]);
 
   // Backgrounding mid-video is the common way to lose watch time: the process
   // may never come back, and the accumulator only lives in memory.

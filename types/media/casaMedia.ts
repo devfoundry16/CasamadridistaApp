@@ -115,6 +115,9 @@ export interface MediaContributorRef {
 export interface MediaItem {
   id: string;
   type: MediaItemType;
+  /** `published` for nearly every viewer; an owner or editor can also open an
+   *  item that is not public yet, which the item screen shows as a preview. */
+  status: string | null;
   title: string | null;
   description: string | null;
   access_level: MediaAccessLevel;

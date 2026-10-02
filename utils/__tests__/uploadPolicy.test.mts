@@ -66,6 +66,7 @@ function entry(patch: Partial<UploadEntry> = {}): UploadEntry {
     attempts: 0,
     error: null,
     provider: null,
+    transport: null,
     uploadUrl: null,
     method: null,
     expiresAt: null,
@@ -507,5 +508,71 @@ describe('publish-when-ready readiness', () => {
     assert.equal(itemReadiness(entries, 'item-1').allReady, true);
     assert.equal(itemReadiness(entries, 'item-2').failed, 1);
     assert.equal(itemReadiness(entries, 'item-3').total, 0);
+  });
+});
+
+describe('resumable (tus) uploads', () => {
+  const tus = (patch: Partial<UploadEntry> = {}) =>
+    entry({
+      kind: 'video',
+      mime: 'video/mp4',
+      sizeBytes: 60 * 1024 * 1024,
+      assetId: 'asset-1',
+      provider: 'cloudflare_stream',
+      transport: 'tus',
+      method: 'PATCH',
+      uploadUrl: 'https://upload.videodelivery.net/tus/abc',
+      expiresAt: new Date(NOW + 30 * 60_000).toISOString(),
+      status: 'uploading',
+      progress: 0.4,
+      ...patch,
+    });
+
+  it('a failed chunk keeps its progress: the next attempt carries on from the server offset', () => {
+    const failed = planFailure(tus(), NOW, 'network');
+    assert.equal(failed.status, 'queued');
+    assert.equal(failed.progress, 0.4);
+    // A one-shot upload still restarts from zero.
+    assert.equal(planFailure(tus({ transport: 'direct', method: 'POST' }), NOW, 'network').progress, 0);
+  });
+
+  it('a manual retry keeps the progress too', () => {
+    const retried = planManualRetry({ ...tus(), status: 'failed', attempts: MAX_ATTEMPTS }, NOW);
+    assert.equal(retried.progress, 0.4);
+    assert.equal(retried.attempts, 0);
+  });
+
+  it('survives an app kill with its upload URL, so it resumes instead of restarting', () => {
+    const back = rehydrateEntry(tus());
+    assert.equal(back.status, 'queued');
+    assert.equal(back.uploadUrl, 'https://upload.videodelivery.net/tus/abc');
+    assert.equal(back.progress, 0.4);
+    assert.equal(slotAction(back, NOW), 'reuse');
+    // A one-shot upload's URL is still dropped: it cannot be replayed.
+    assert.equal(rehydrateEntry(tus({ transport: 'direct', method: 'POST' })).uploadUrl, null);
+  });
+
+  it('does not throw a resumable URL away by the clock: the server says whether it is alive', () => {
+    const stale = rehydrateEntry(tus({ expiresAt: new Date(NOW - 1000).toISOString() }));
+    assert.equal(slotAction(stale, NOW), 'reuse');
+    // A one-shot URL past its expiry is still replaced up front.
+    assert.equal(
+      slotAction(entry({ assetId: 'a', uploadUrl: 'https://u', expiresAt: new Date(NOW - 1000).toISOString() }), NOW),
+      'retry',
+    );
+  });
+
+  it('asks for a new slot once the upload URL has been dropped', () => {
+    assert.equal(slotAction(tus({ status: 'queued', uploadUrl: null }), NOW), 'retry');
+  });
+
+  it('the transport and the PATCH method survive a round trip through storage', () => {
+    const [back] = deserializeQueue(serializeQueue([tus({ status: 'queued' })]), NOW);
+    assert.equal(back.transport, 'tus');
+    assert.equal(back.method, 'PATCH');
+    // An entry written before the field existed is a one-shot upload.
+    const legacy = JSON.parse(serializeQueue([entry({ method: 'POST' })]));
+    delete legacy[0].transport;
+    assert.equal(parseEntry(legacy[0])?.transport, null);
   });
 });

@@ -1186,7 +1186,9 @@
     "following": "Notifying",
     "followHint": "Get a notification when new content is published",
     "match": "Match",
-    "allMatches": "All matches"
+    "allMatches": "All matches",
+    "previewBanner": "Preview — not published yet. Fans can't see this.",
+    "previewProcessing": "Some media is still uploading or processing and isn't shown yet."
   },
   "notifications": {
     "title": "Notifications",

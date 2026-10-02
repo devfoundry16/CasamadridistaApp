@@ -178,13 +178,25 @@ class ContributorMediaServiceClass {
 
   async requestUpload(
     itemId: string,
-    input: { kind: 'image' | 'video'; role?: 'content' | 'cover'; position?: number },
+    input: {
+      kind: 'image' | 'video';
+      role?: 'content' | 'cover';
+      position?: number;
+      /** `tus` asks for a resumable slot, which needs the exact file size. */
+      transport?: 'tus';
+      size_bytes?: number;
+    },
   ): Promise<UploadSlot> {
     try {
       const headers = await this.getAuthHeader();
       const { data } = await axios.post<UploadSlot>(
         `${BASE}/items/${itemId}/assets`,
-        { kind: input.kind, role: input.role ?? 'content', position: input.position ?? 0 },
+        {
+          kind: input.kind,
+          role: input.role ?? 'content',
+          position: input.position ?? 0,
+          ...(input.transport ? { transport: input.transport, size_bytes: input.size_bytes } : {}),
+        },
         { headers },
       );
       return data;
@@ -250,12 +262,16 @@ class ContributorMediaServiceClass {
    * SAME `assetId`; never call `requestUpload` to recover from a failure or the
    * item ends up with an orphaned asset row.
    */
-  async retryUpload(itemId: string, assetId: string): Promise<UploadSlot> {
+  async retryUpload(
+    itemId: string,
+    assetId: string,
+    options: { transport?: 'tus'; size_bytes?: number } = {},
+  ): Promise<UploadSlot> {
     try {
       const headers = await this.getAuthHeader();
       const { data } = await axios.post<UploadSlot>(
         `${BASE}/items/${itemId}/assets/${assetId}/retry`,
-        {},
+        options.transport ? { transport: options.transport, size_bytes: options.size_bytes } : {},
         { headers },
       );
       return data;

@@ -562,6 +562,12 @@ describe('envelopes', () => {
     assert.deepEqual(normaliseMatchPage({ items: [] }).category_counts, {});
   });
 
+  it('carries the item status, so an unpublished item can be shown as a preview', () => {
+    assert.equal(normaliseItem(WIRE_TEASER).status, 'published');
+    assert.equal(normaliseItem({ ...WIRE_TEASER, status: 'draft' }).status, 'draft');
+    assert.equal(normaliseItem({ ...WIRE_TEASER, status: undefined }).status, null);
+  });
+
   it('treats a short update as a consumer type', () => {
     assert.ok((MEDIA_ITEM_TYPES as readonly string[]).includes('update'));
     assert.equal(normaliseItem({ ...WIRE_TEASER, type: 'update' }).type, 'update');

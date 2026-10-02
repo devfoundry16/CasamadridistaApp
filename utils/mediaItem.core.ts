@@ -49,3 +49,19 @@ export function itemTexts(item: { description?: string | null; caption?: string 
   const caption = item.caption?.trim() ?? '';
   return [description, caption !== description ? caption : ''].filter((text) => text.length > 0);
 }
+
+/** The statuses every allowed viewer sees as the real item. */
+const PUBLIC_STATUSES = ['published', 'archived'];
+
+/**
+ * Is this the owner's (or an editor's) look at an item that is not public yet?
+ *
+ * The server only serves such an item to its owner and to staff, so a status
+ * outside the public ones means "preview": no view is counted, and the
+ * engagement bar — which would let the owner like or share a draft — is hidden.
+ * A payload with no status predates the field and is the published item.
+ */
+export function isPreview(item: { status?: string | null } | null | undefined): boolean {
+  const status = item?.status;
+  return !!status && !PUBLIC_STATUSES.includes(status);
+}

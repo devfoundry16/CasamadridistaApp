@@ -30,6 +30,16 @@ import {
   type SlotAction,
   type UploadEntry,
 } from './uploadPolicy.core';
+import {
+  TUS_HEADERS,
+  headSaysGone,
+  isUploadGone,
+  needsResumableSlot,
+  nextChunk,
+  readOffset,
+  shouldUseTus,
+  tusProgress,
+} from '@/utils/tusUpload.core';
 
 export type { UploadEntry, UploadEntryStatus } from './uploadPolicy.core';
 
@@ -141,9 +151,10 @@ class UploadManagerClass {
   }
 
   private onAppStateChange = (state: AppStateStatus) => {
-    // A backgrounded iOS upload keeps running in its BACKGROUND session, but a
-    // connection that died while we were away leaves entries parked in
-    // `queued`. Coming back to the foreground is the natural moment to retry.
+    // A backgrounded one-shot upload keeps running in its BACKGROUND session
+    // (a chunked one only finishes the chunk in flight), but a connection that
+    // died while we were away leaves entries parked in `queued`. Coming back to
+    // the foreground is the natural moment to retry.
     if (state === 'active') this.pump();
   };
 
@@ -181,6 +192,7 @@ class UploadManagerClass {
       attempts: 0,
       error: null,
       provider: null,
+      transport: null,
       uploadUrl: null,
       method: null,
       expiresAt: null,
@@ -359,11 +371,14 @@ class UploadManagerClass {
         entry = this.update(entryId, {
           assetId: slot.assetId,
           provider: slot.provider,
+          transport: slot.transport ?? null,
           uploadUrl: slot.uploadUrl,
           method: slot.method,
           expiresAt: slot.expiresAt ?? null,
           status: 'uploading',
-          progress: 0,
+          // A resumed chunked upload keeps its bar; the server's offset corrects
+          // it as soon as the upload starts.
+          progress: action === 'reuse' && slot.transport === 'tus' ? entry.progress : 0,
           error: null,
         });
         if (!entry) return;
@@ -433,10 +448,21 @@ class UploadManagerClass {
 
   /** `create` a slot, `retry` for a fresh one, or reuse what we hold. */
   private async ensureSlot(entry: UploadEntry, action: SlotAction): Promise<UploadSlot> {
+    // A big video whose one-shot upload failed comes back as a resumable one,
+    // on the same asset row: its old URL cannot be resumed, so it is replaced
+    // rather than reused.
+    if (entry.assetId && needsResumableSlot(entry)) {
+      return ContributorMediaService.retryUpload(entry.itemId, entry.assetId, {
+        transport: 'tus',
+        size_bytes: entry.sizeBytes as number,
+      });
+    }
+
     if (action === 'reuse' && entry.assetId && entry.uploadUrl && entry.method) {
       return {
         assetId: entry.assetId,
         provider: entry.provider ?? 'supabase',
+        transport: entry.transport ?? undefined,
         uploadUrl: entry.uploadUrl,
         method: entry.method,
         expiresAt: entry.expiresAt,
@@ -444,17 +470,119 @@ class UploadManagerClass {
     }
 
     if (action === 'retry' && entry.assetId) {
-      return ContributorMediaService.retryUpload(entry.itemId, entry.assetId);
+      return ContributorMediaService.retryUpload(
+        entry.itemId,
+        entry.assetId,
+        shouldUseTus(entry) ? { transport: 'tus', size_bytes: entry.sizeBytes as number } : {},
+      );
     }
 
-    return ContributorMediaService.requestUpload(entry.itemId, {
+    return ContributorMediaService.requestUpload(entry.itemId, this.slotRequest(entry));
+  }
+
+  /**
+   * What to ask the server for. A resumable slot (a big video, after a failed
+   * attempt) needs the exact size of the file `prepare` copied.
+   */
+  private slotRequest(entry: UploadEntry) {
+    return {
       kind: entry.kind,
       role: entry.role,
       position: entry.position,
-    });
+      ...(shouldUseTus(entry)
+        ? { transport: 'tus' as const, size_bytes: entry.sizeBytes as number }
+        : {}),
+    };
+  }
+
+  /**
+   * A resumable upload: ask the server how many bytes it holds, then send the
+   * rest a chunk at a time, so a dropped connection costs at most one chunk —
+   * the next attempt starts by asking for the offset again and carries on from
+   * there. Each chunk is started from here, so the upload only advances while
+   * the app is running.
+   */
+  private async pushTus(entry: UploadEntry): Promise<void> {
+    const url = entry.uploadUrl as string;
+    const total = entry.sizeBytes ?? 0;
+    const chunkUri = `${UPLOAD_DIR}${entry.id}.chunk`;
+
+    const gone = () => {
+      // The URL names no upload any more. Drop it, so the retry asks for a new
+      // slot instead of knocking on the same dead one.
+      this.update(entry.id, { uploadUrl: null, progress: 0 });
+      return new Error('The upload expired and has to start again');
+    };
+
+    const head = await fetch(url, { method: 'HEAD', headers: TUS_HEADERS });
+    if (headSaysGone(head.status)) {
+      // Every chunk was acknowledged and the app died before saying so: the
+      // server may have retired a finished upload's URL. The bytes are there;
+      // go on to the completion call rather than sending the file again.
+      if (entry.progress >= 1) return;
+      throw gone();
+    }
+    if (!head.ok) throw new Error(`Upload failed (HTTP ${head.status})`);
+    let offset = readOffset({ 'upload-offset': head.headers.get('upload-offset') }) ?? 0;
+    this.update(entry.id, { progress: tusProgress(offset, 0, total) });
+
+    try {
+      for (let chunk = nextChunk(offset, total); chunk; chunk = nextChunk(offset, total)) {
+        // Cancelled between chunks: there was no task in flight to cancel, so
+        // this is the only place the loop can notice.
+        if (!this.entries.has(entry.id)) throw new Error('Upload was cancelled');
+        const sent = chunk.position;
+        const bytes = await FileSystem.readAsStringAsync(entry.localUri, {
+          encoding: FileSystem.EncodingType.Base64,
+          position: chunk.position,
+          length: chunk.length,
+        });
+        await FileSystem.writeAsStringAsync(chunkUri, bytes, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        const task = FileSystem.createUploadTask(
+          url,
+          chunkUri,
+          {
+            httpMethod: 'PATCH',
+            uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+            headers: {
+              ...TUS_HEADERS,
+              'Upload-Offset': String(chunk.position),
+              'Content-Type': 'application/offset+octet-stream',
+            },
+            sessionType: FileSystem.FileSystemSessionType.BACKGROUND,
+          },
+          ({ totalBytesSent }) => {
+            this.reportProgress(entry.id, tusProgress(sent, totalBytesSent, total));
+          },
+        );
+
+        this.tasks.set(entry.id, task);
+        const result = await task.uploadAsync();
+        if (!result) throw new Error('Upload was cancelled');
+        if (isUploadGone(result.status)) throw gone();
+        if (result.status >= 300) throw new Error(`Upload failed (HTTP ${result.status})`);
+
+        // The server's own count, not ours: if it took fewer bytes than were
+        // sent, the next chunk starts where it actually got to.
+        offset = readOffset(result.headers) ?? chunk.position + chunk.length;
+        // An acknowledgement that moves nothing would loop forever.
+        if (offset <= chunk.position) throw new Error('Upload made no progress');
+        // Stored, not just displayed, so a failure on the next chunk keeps the bar.
+        this.update(entry.id, { progress: tusProgress(offset, 0, total) });
+      }
+    } finally {
+      this.tasks.delete(entry.id);
+      this.lastProgressAt.delete(entry.id);
+      await FileSystem.deleteAsync(chunkUri, { idempotent: true }).catch(() => {});
+    }
   }
 
   private async pushBytes(entry: UploadEntry): Promise<void> {
+    if (entry.transport === 'tus') return this.pushTus(entry);
+
     const isMultipart = entry.method === 'POST';
 
     const options: FileSystem.FileSystemUploadOptions = isMultipart
@@ -514,9 +642,9 @@ class UploadManagerClass {
     // a dispatch is frozen by immer, and `entry.progress = …` threw on the
     // first tick of every upload, so progress never moved.
     this.entries.set(entryId, { ...entry, progress });
-    // Progress is deliberately not persisted: it is meaningless after a
-    // restart (the native task is gone) and it would mean an AsyncStorage
-    // write per 100 kB.
+    // Not persisted from here: a tick is meaningless after a restart (the
+    // native task is gone) and it would mean an AsyncStorage write per 100 kB.
+    // A chunked upload stores its progress once per acknowledged chunk instead.
     store.dispatch(entryProgressed({ id: entryId, progress }));
   }
 
@@ -699,14 +827,14 @@ class UploadManagerClass {
       await Promise.all(
         pending.slice(i, i + concurrency).map(async (entry) => {
           try {
-            const slot = await ContributorMediaService.requestUpload(entry.itemId, {
-              kind: entry.kind,
-              role: entry.role,
-              position: entry.position,
-            });
+            const slot = await ContributorMediaService.requestUpload(
+              entry.itemId,
+              this.slotRequest(entry),
+            );
             this.update(entry.id, {
               assetId: slot.assetId,
               provider: slot.provider,
+              transport: slot.transport ?? null,
               uploadUrl: slot.uploadUrl,
               method: slot.method,
               expiresAt: slot.expiresAt ?? null,
@@ -726,9 +854,9 @@ class UploadManagerClass {
 
   /* ------------------------------ plumbing ------------------------ */
 
-  /** The copied original and its poster, if we made one. */
+  /** The copied original, its poster, and a chunk left behind by a kill. */
   private async deleteLocalFiles(entry: UploadEntry): Promise<void> {
-    for (const uri of [entry.localUri, entry.posterUri]) {
+    for (const uri of [entry.localUri, entry.posterUri, `${UPLOAD_DIR}${entry.id}.chunk`]) {
       if (!uri) continue;
       await FileSystem.deleteAsync(uri, { idempotent: true }).catch(() => {});
     }

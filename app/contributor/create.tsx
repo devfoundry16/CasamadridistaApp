@@ -15,7 +15,7 @@ import { Text } from '@/components/Text';
 import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import { useAssetMutations, useContributorItem, useContributorItemMutations } from '@/hooks/media/useMyContent';
-import { contributorKeys } from '@/hooks/media/keys';
+import { contributorKeys, mediaKeys } from '@/hooks/media/keys';
 import { useItemUploadReadiness, useItemUploads } from '@/hooks/media/useUploadQueue';
 import UploadManager from '@/services/upload/UploadManager';
 import {
@@ -460,9 +460,17 @@ function ItemEditor({ me, itemId: initialId }: { me: ContributorMe; itemId?: str
                 ? t('contributor.create.unsaved')
                 : t('contributor.create.saved')}
           </Text>
-          {item.data.status === 'published' ? (
+          {contentAssets.length || item.data.status === 'published' ? (
             <Touchable
-              onPress={() => router.push(`/media/item/${item.data!.id}`)}
+              // The item screen shows an unpublished item to its owner as a
+              // preview. Save first, so it shows what is in the form now.
+              onPress={async () => {
+                if (editable && dirty) await persist(value);
+                // The item screen caches an item for five minutes; a second
+                // preview has to show this save, not the last one.
+                await queryClient.invalidateQueries({ queryKey: mediaKeys.item(item.data!.id) });
+                router.push(`/media/item/${item.data!.id}`);
+              }}
               accessibilityRole="button"
               hitSlop={8}
               style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
