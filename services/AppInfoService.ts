@@ -1,4 +1,5 @@
 import { development } from "@/config/environment";
+import { MaintenanceError, readMaintenance } from "@/utils/maintenance.core";
 export type AppInfoResponse = {
   success?: boolean;
   data?: {
@@ -42,6 +43,10 @@ export async function fetchAppInfo(
 
   if (!res.ok) {
     const text = await res.text();
+    // A deployment closed for maintenance says so in the body; the caller
+    // shows the maintenance screen for this and nothing else.
+    const notice = readMaintenance(res.status, text);
+    if (notice) throw new MaintenanceError(notice);
     throw new Error(`Failed to fetch app info: ${res.status} ${text}`);
   }
 

@@ -2,6 +2,7 @@
 import i18n, { needsRestartForDirection } from "@/i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MediaAuthSync from "@/components/Auth/MediaAuthSync";
+import MaintenanceScreen from "@/components/MaintenanceScreen";
 import SocialRealtimeSync from "@/components/Social/SocialRealtimeSync";
 import { useDeferredLink } from "@/hooks/useDeferredLink";
 import { useNotificationRouting } from "@/hooks/useNotificationRouting";
@@ -31,7 +32,7 @@ import { Stack, router, usePathname } from "expo-router";
 import { useTranslation } from "react-i18next";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useRef } from "react";
-import { Alert, View, I18nManager } from "react-native";
+import { Alert, AppState, View, I18nManager } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { development } from "@/config/environment";
 import { StatusBar } from "expo-status-bar";
@@ -435,9 +436,12 @@ const DataInitializer = () => {
   return null;
 };
 
-function RootLayoutInner() {
+/**
+ * The app itself: navigation, deep links, push and the background services.
+ * Mounted only while the backend is open — see RootLayoutInner.
+ */
+function AppShell() {
   const { t } = useTranslation();
-  const { loadEnvironment } = useEnvironment();
   const restartPromptShown = useRef(false);
   usePasswordResetDeeplink();
   useAuthCallbackDeeplink();
@@ -452,7 +456,6 @@ function RootLayoutInner() {
     Cairo_700Bold,
   });
   useEffect(() => {
-    loadEnvironment();
     AnalyticsService.start();
     // Rehydrates the persisted contributor upload queue and resumes anything
     // that was in flight when the app was last killed. Idempotent.
@@ -505,6 +508,34 @@ function RootLayoutInner() {
       </GestureHandlerRootView>
     </StripeProvider>
   );
+}
+
+function RootLayoutInner() {
+  const { loadEnvironment, recheckMaintenance, maintenance } = useEnvironment();
+
+  useEffect(() => {
+    loadEnvironment();
+  }, []);
+
+  // Maintenance can start or end while the app sits in the background.
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") recheckMaintenance();
+    });
+    return () => subscription.remove();
+  }, [recheckMaintenance]);
+
+  // The backend is refusing every request. AppShell is not mounted at all, so
+  // no screen fetches into the refusal and no deep link or push tap tries to
+  // navigate a router that is not there.
+  if (maintenance.active) {
+    return (
+      <FontProvider>
+        <MaintenanceScreen />
+      </FontProvider>
+    );
+  }
+  return <AppShell />;
 }
 
 export default function RootLayout() {

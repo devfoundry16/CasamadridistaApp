@@ -24,6 +24,11 @@
     "restartMessage": "The new language and its layout direction are applied when the app next starts. Close the app completely and open it again.",
     "restartConfirm": "Got it"
   },
+  "maintenance": {
+    "title": "We'll be right back",
+    "message": "Casa Madridista is under maintenance. Please try again in a little while.",
+    "retry": "Try again"
+  },
   "nav": {
     "appName": "Casa Madridista",
     "home": "Home",

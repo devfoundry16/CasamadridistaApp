@@ -1,6 +1,7 @@
 // store/slices/environmentSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { CURRENT_FOOTBALL_SEASON } from "@/constants/football";
+import { MaintenanceState, NO_MAINTENANCE } from "@/utils/maintenance.core";
 
 interface EnvironmentState {
   auth: {
@@ -33,6 +34,9 @@ interface EnvironmentState {
   };
   isLoading: boolean;
   error: string | null;
+  // Set while the backend is refusing requests for maintenance. The root
+  // layout shows the maintenance screen instead of the app while it is active.
+  maintenance: MaintenanceState;
 }
 
 const initialState: EnvironmentState = {
@@ -66,6 +70,7 @@ const initialState: EnvironmentState = {
   },
   isLoading: false,
   error: null,
+  maintenance: NO_MAINTENANCE,
 };
 
 const environmentSlice = createSlice({
@@ -84,10 +89,13 @@ const environmentSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    setMaintenance: (state, action: PayloadAction<MaintenanceState>) => {
+      state.maintenance = action.payload;
+    },
   },
 });
 
-export const { setEnvironment, setLoading, setError } =
+export const { setEnvironment, setLoading, setError, setMaintenance } =
   environmentSlice.actions;
 
 export default environmentSlice.reducer;

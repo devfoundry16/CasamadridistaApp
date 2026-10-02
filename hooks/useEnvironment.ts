@@ -1,5 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
-import { fetchEnvironment } from "@/store/thunks/environmentThunks";
+import {
+  checkMaintenance,
+  fetchEnvironment,
+} from "@/store/thunks/environmentThunks";
 import { AppDispatch, RootState } from "@/store/store";
 import { useCallback } from "react";
 
@@ -7,7 +10,10 @@ export const useEnvironment = () => {
   const dispatch = useDispatch<AppDispatch>();
   const environment = useSelector((state: RootState) => state.environment);
   const loadEnvironment = useCallback(() => {
-    dispatch(fetchEnvironment());
+    return dispatch(fetchEnvironment());
+  }, [dispatch]);
+  const recheckMaintenance = useCallback(() => {
+    return dispatch(checkMaintenance());
   }, [dispatch]);
   return {
     auth: environment.auth,
@@ -18,6 +24,8 @@ export const useEnvironment = () => {
     revenueCat: environment.revenueCat,
     isLoading: environment.isLoading,
     error: environment.error,
+    maintenance: environment.maintenance,
     loadEnvironment,
+    recheckMaintenance,
   } as const;
 };
