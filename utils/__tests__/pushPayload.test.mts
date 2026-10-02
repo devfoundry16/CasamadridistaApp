@@ -89,6 +89,15 @@ describe('pushPayload.core — hrefFromPayload', () => {
     );
   });
 
+  it('opens the contributor area for an invitation', () => {
+    assert.equal(href({ v: 1, type: 'contributor_invite' }), '/contributor');
+    // The url is ignored for a type the app knows: the route is fixed.
+    assert.equal(
+      href({ v: 1, type: 'contributor_invite', url: 'casamadridistaapp://account/delete' }),
+      '/contributor',
+    );
+  });
+
   it('falls back to the url only for custom, and only for our own scheme', () => {
     assert.equal(
       href({ v: 1, type: 'custom', url: 'casamadridistaapp://media/archive' }),

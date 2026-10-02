@@ -37,6 +37,7 @@ import { LANG_STORAGE_KEY } from "@/i18n";
 import axios from "axios";
 import { API_BASE_URL } from "@/config/supabase";
 import { useSocialPushSetting } from "@/hooks/notifications/useSocialPushSetting";
+import { showsContributorEntry } from "@/utils/contributorGate.core";
 import { Clapperboard, LayoutDashboard, Send, ShieldCheck, UserRound, Users } from "lucide-react-native";
 
 type Locale = "en-US" | "ar-SA";
@@ -72,9 +73,8 @@ export default function AccountScreen() {
         .then(res => {
           setIsSuperAdmin(res.data.superAdmin ?? false);
           setIsFanClubAdmin(res.data.fanClubAdmin ?? false);
-          setIsContributor(
-            res.data.mediaContributor?.status === 'active' || res.data.mediaManager === true,
-          );
+          // An invited account sees the entry too: that is where it accepts.
+          setIsContributor(showsContributorEntry(res.data));
         })
         .catch(() => {});
     });

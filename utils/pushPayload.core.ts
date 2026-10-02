@@ -64,6 +64,10 @@ export function hrefFromPayloadWithScheme(
       // A digest that names a fixture should still land on that fixture's media
       // rather than the generic hub.
       return payload.match_id ? `/match/${payload.match_id}/media` : '/media';
+    // An invitation to contribute is accepted in the contributor area. The
+    // route is fixed; nothing in the payload can change it.
+    case 'contributor_invite':
+      return '/contributor';
     case 'custom':
     default:
       return safePathFromUrl(payload.url, scheme);

@@ -55,6 +55,8 @@ export const notificationKeys = {
 export const contributorKeys = {
   all: ['contributorMedia'] as const,
   me: () => [...contributorKeys.all, 'me'] as const,
+  /** The caller's own invitation; read only when `me` was refused. */
+  invite: () => [...contributorKeys.all, 'invite'] as const,
   matches: () => [...contributorKeys.all, 'matches'] as const,
   items: () => [...contributorKeys.all, 'items'] as const,
   /**

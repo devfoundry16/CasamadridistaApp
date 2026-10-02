@@ -1233,6 +1233,15 @@
       "notContributorBody": "Your account is not a Casa Media contributor. Contact the media team if you think this is wrong.",
       "loadFailed": "Could not load your contributor profile."
     },
+    "invite": {
+      "title": "You are invited to contribute",
+      "body": "The Casa Media team has invited you to post from the stadium. Accept to open the contributor area. Your posts are reviewed before they go live until the team says otherwise.",
+      "accept": "Accept invitation",
+      "decline": "Decline",
+      "declineTitle": "Decline the invitation?",
+      "declineBody": "You will not get contributor access. The Casa Media team can invite you again.",
+      "failed": "Could not send your answer. Please try again."
+    },
     "home": {
       "todayMatch": "Today: {{match}} · {{date}}",
       "noMatch": "No match assigned for today.",

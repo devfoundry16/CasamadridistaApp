@@ -17,6 +17,7 @@ import type {
   UploadSlot,
 } from '@/types/media/contributor';
 import { normaliseMe } from '@/services/media/contributorMe';
+import type { ContributorInvite } from '@/utils/contributorGate.core';
 
 // `normaliseMe` and the fallback limits live in a pure module so the recorded
 // `/contributor/me` response can be replayed under `node --test`.
@@ -90,6 +91,45 @@ class ContributorMediaServiceClass {
       return normaliseMe(data);
     } catch (error: any) {
       this.fail(error, 'Failed to load your contributor profile');
+    }
+  }
+
+  /* ------------------------------ invite ---------------------------- */
+  //
+  // Reachable by an account that is NOT a contributor yet — an invited one is
+  // refused by every other route in this file. Each acts on the signed-in
+  // user's own invitation; nothing here takes a user id.
+
+  /** The caller's own contributor grant, or null if they were never invited. */
+  async getInvite(): Promise<ContributorInvite | null> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.get<{ invite: ContributorInvite | null }>(`${BASE}/invite`, {
+        headers,
+      });
+      return data?.invite ?? null;
+    } catch (error: any) {
+      this.fail(error, 'Failed to load your invitation');
+    }
+  }
+
+  async acceptInvite(): Promise<ContributorInvite> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.post<ContributorInvite>(`${BASE}/invite/accept`, {}, { headers });
+      return data;
+    } catch (error: any) {
+      this.fail(error, 'Failed to accept the invitation');
+    }
+  }
+
+  async declineInvite(): Promise<ContributorInvite> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.post<ContributorInvite>(`${BASE}/invite/decline`, {}, { headers });
+      return data;
+    } catch (error: any) {
+      this.fail(error, 'Failed to decline the invitation');
     }
   }
 

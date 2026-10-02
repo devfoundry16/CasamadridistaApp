@@ -8,6 +8,8 @@ export type PushPayloadType =
   | 'media_match'
   | 'media_digest'
   | 'custom'
+  // A manager invited this account to contribute to Casa Media.
+  | 'contributor_invite'
   // Casa Social (`backend/services/notifications/payload.js` SOCIAL_TYPES).
   | 'friend_request'
   | 'friend_accept'

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import ContributorMediaService from '@/services/ContributorMediaService';
 import { useUser } from '@/hooks/useUser';
@@ -22,6 +22,40 @@ export function useContributorMe() {
     enabled: !!user?.id,
     staleTime: 5 * 60_000,
     retry: false,
+  });
+}
+
+/**
+ * The caller's own contributor invitation.
+ *
+ * Asked only once `/contributor/me` has refused: an active contributor never
+ * needs it, and an invited account is refused there exactly like a stranger.
+ */
+export function useContributorInvite(enabled: boolean) {
+  return useQuery({
+    queryKey: contributorKeys.invite(),
+    queryFn: () => ContributorMediaService.getInvite(),
+    enabled,
+    staleTime: 60_000,
+    retry: false,
+  });
+}
+
+/**
+ * Accept or decline the invitation.
+ *
+ * Accepting makes the account a contributor, so everything under the
+ * contributor key is stale at once — `me` above all, which is what lets the
+ * gate open without leaving the screen.
+ */
+export function useRespondToInvite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (response: 'accept' | 'decline') =>
+      response === 'accept'
+        ? ContributorMediaService.acceptInvite()
+        : ContributorMediaService.declineInvite(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: contributorKeys.all }),
   });
 }
 
