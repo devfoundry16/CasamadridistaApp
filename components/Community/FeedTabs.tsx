@@ -49,6 +49,7 @@ export default function FeedTabs({ active, onSelect }: Props) {
 const styles = StyleSheet.create({
   scroll: {
     flexGrow: 0,
+    flexShrink: 0,
     backgroundColor: Colors.background.medium,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border.default,

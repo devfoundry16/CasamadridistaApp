@@ -24,7 +24,9 @@ export default function UserStoriesRow({ viewerId, viewerName, viewerAvatar }: {
   const others = groups.filter((g) => g.author_id !== viewerId);
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 14, paddingVertical: 8 }}>
+    // Sized by its content: above the feed list a scroll view would otherwise
+    // be squeezed, clipping the names under the bubbles.
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, flexShrink: 0 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 14, paddingVertical: 8 }}>
       <Pressable
         onPress={() => router.push((mine ? `/stories/${viewerId}?from=row` : '/stories/create') as any)}
         onLongPress={() => router.push('/stories/create' as any)}

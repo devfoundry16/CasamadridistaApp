@@ -73,7 +73,9 @@ export default function FriendsScreen() {
   const incoming = useMemo(() => requests.data?.incoming ?? [], [requests.data]);
 
   const sections = useMemo(() => {
-    if (searching) return [{ key: 'results', data: (search.data ?? []).map((p) => ({ person: p as PersonCard, state: p.relationship, detail: null as string | null })) }];
+    // A section with no rows is left out everywhere: the list shows its empty
+    // state only when there are no sections at all.
+    if (searching) return [{ key: 'results', data: (search.data ?? []).map((p) => ({ person: p as PersonCard, state: p.relationship, detail: null as string | null })) }].filter((s) => s.data.length);
     if (segment === 'requests') {
       return [
         { key: 'incoming', data: incoming.map((p) => ({ person: p, state: 'request_received' as RelationshipState, detail: null })) },
@@ -88,7 +90,7 @@ export default function FriendsScreen() {
           state: 'none' as RelationshipState,
           detail: p.reason === 'mutual' ? t('social.friends.mutual', { count: p.mutual_count }) : t(`social.friends.reason_${p.reason}`),
         })),
-      }];
+      }].filter((s) => s.data.length);
     }
     const { online, rest } = splitOnline(friends.data ?? [], now, live);
     const row = (p: (typeof online)[number]) => {

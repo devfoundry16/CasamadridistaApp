@@ -189,7 +189,7 @@ function MessageBubble({ message, layout, myId, otherName, onRetry, onDiscard, o
               </View>
             ) : null}
             {message.body ? (
-              <RichText text={message.body} step="body" color={fg} selectable style={{ paddingHorizontal: 12, paddingTop: 8, paddingBottom: 8 }} />
+              <RichText text={message.body} step="body" color={fg} style={{ paddingHorizontal: 12, paddingTop: 8, paddingBottom: 8 }} />
             ) : null}
           </>
         )}
