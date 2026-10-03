@@ -1758,6 +1758,7 @@
     "errors": {
       "generic": "Something went wrong. Please try again.",
       "network_error": "Check your connection and try again.",
+      "not_confirmed": "Couldn't confirm that. Check your connection and try again.",
       "blocked": "You can't message this person.",
       "not_found": "This isn't available anymore.",
       "request_limit": "Wait for them to accept your request before sending more.",

@@ -15,7 +15,7 @@ import {
   applyReceipts,
   dropForMe,
   enforceRetractions,
-  outcomeUnknown,
+  takeBackFollowUp,
   freshPage,
   undoDrop,
   undoRetract,
@@ -119,6 +119,10 @@ export function useThread(conversationId: string | undefined, myId: string | und
   // that no longer exists.
   const generationRef = useRef(0);
   const freshInFlightRef = useRef(0);
+  // An older page asked for while a fresh start was in flight: asked again
+  // once it lands, since the list may not grow and so never ask by itself.
+  const wantOlderRef = useRef(false);
+  const loadOlderRef = useRef<() => Promise<void>>(async () => {});
   const messagesRef = useRef(messages);
   const lastReadAckRef = useRef<string | null>(null);
   const lastTypingSentRef = useRef<number | null>(null);
@@ -190,11 +194,19 @@ export function useThread(conversationId: string | undefined, myId: string | und
     } finally {
       if (fresh) freshInFlightRef.current -= 1;
       setLoading(false);
+      if (fresh && freshInFlightRef.current === 0 && wantOlderRef.current) {
+        wantOlderRef.current = false;
+        void loadOlderRef.current();
+      }
     }
   }, [conversationId, merge, commit]);
 
   const loadOlder = useCallback(async () => {
-    if (!conversationId || loadingOlder || freshInFlightRef.current > 0 || exhaustedRef.current || !cursorRef.current) return;
+    if (freshInFlightRef.current > 0) {
+      wantOlderRef.current = true;
+      return;
+    }
+    if (!conversationId || loadingOlder || exhaustedRef.current || !cursorRef.current) return;
     setLoadingOlder(true);
     const generation = generationRef.current;
     try {
@@ -211,6 +223,7 @@ export function useThread(conversationId: string | undefined, myId: string | und
       setLoadingOlder(false);
     }
   }, [conversationId, loadingOlder, merge]);
+  loadOlderRef.current = loadOlder;
 
   useEffect(() => {
     void loadNewest(true);
@@ -442,13 +455,14 @@ export function useThread(conversationId: string | undefined, myId: string | und
     } catch (e) {
       hiddenRef.current.delete(message.id);
       commit(undoDrop(messagesRef.current, before, message.id, goneRef.current.get(message.id) ?? null));
-      const code = e instanceof SocialApiError ? e.code : 'network_error';
-      setError(code);
+      const api = e instanceof SocialApiError ? e : null;
+      const next = takeBackFollowUp(messagesRef.current, message.id, api?.status ?? null, api?.code ?? 'network_error');
+      setError(next.code);
       // It may have gone through all the same: the server has the last word.
-      if (!(e instanceof SocialApiError) || outcomeUnknown(e.status)) {
+      if (next.reread) {
         await loadNewest(true);
         // The reload clears the error; it stands if the message is still there.
-        if (messagesRef.current.some((m) => m.id === message.id)) setError(code);
+        if (messagesRef.current.some((m) => m.id === message.id)) setError(next.code);
       }
     }
   }, [commit, loadNewest]);
@@ -464,13 +478,15 @@ export function useThread(conversationId: string | undefined, myId: string | und
       // Only our own optimistic tombstone is undone: a removal that arrived
       // meanwhile stays.
       commit(undoRetract(messagesRef.current, before, message.id));
-      const code = e instanceof SocialApiError ? e.code : 'network_error';
-      setError(code);
+      const api = e instanceof SocialApiError ? e : null;
+      // "Not found" here means the server already has it unsent or removed.
+      const next = takeBackFollowUp(messagesRef.current, message.id, api?.status ?? null, api?.code ?? 'network_error', { goneOn404: true });
+      setError(next.code);
       // It may have gone through all the same: the server has the last word.
-      if (!(e instanceof SocialApiError) || outcomeUnknown(e.status)) {
+      if (next.reread) {
         await loadNewest(true);
         // The reload clears the error; it stands if the message is still there.
-        if (messagesRef.current.some((m) => m.id === message.id && m.status === 'visible')) setError(code);
+        if (messagesRef.current.some((m) => m.id === message.id && m.status === 'visible')) setError(next.code);
       }
     }
   }, [commit, queryClient, loadNewest]);

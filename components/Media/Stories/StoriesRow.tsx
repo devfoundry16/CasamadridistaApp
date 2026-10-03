@@ -96,6 +96,8 @@ export default function StoriesRow({ groups, compact = false }: Props) {
     <FlatList
       data={groups}
       horizontal
+      // Sized by its content: above a feed list it would otherwise be squeezed.
+      style={{ flexGrow: 0, flexShrink: 0 }}
       showsHorizontalScrollIndicator={false}
       keyExtractor={(item) => item.id}
       renderItem={renderItem}

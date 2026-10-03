@@ -20,6 +20,7 @@ import {
   needsFetch,
   nextRate,
   outcomeUnknown,
+  takeBackFollowUp,
   recordingOutcome,
   retract,
   REACTIONS,
@@ -377,5 +378,26 @@ describe('a take-back the server never answered', () => {
     const restored = [msg({ id: 'x' }), msg({ id: 'y', created_at: '2026-10-03T10:01:00Z' })];
     const out = freshPage(restored, [msg({ id: 'y', created_at: '2026-10-03T10:01:00Z' })]);
     assert.deepEqual(out.map((m) => m.id), ['y']);
+  });
+});
+
+describe('what to do after a take-back failed', () => {
+  const thread = Array.from({ length: 30 }, (_, i) => msg({ id: `m${i}`, created_at: new Date(Date.UTC(2026, 9, 3, 10, 59 - i)).toISOString() }));
+  it('no answer on a recent message: ask the server again, and say it was not confirmed', () => {
+    assert.deepEqual(takeBackFollowUp(thread, 'm3', null, 'network_error'), { reread: true, code: 'not_confirmed' });
+  });
+  it('a server failure on a recent message: ask again, keep its own error', () => {
+    assert.deepEqual(takeBackFollowUp(thread, 'm3', 500, 'internal_error'), { reread: true, code: 'internal_error' });
+  });
+  it('a refusal is certain: no second read', () => {
+    assert.deepEqual(takeBackFollowUp(thread, 'm3', 403, 'forbidden'), { reread: false, code: 'forbidden' });
+  });
+  it('"not found" on an unsend means it is already gone on the server: ask again', () => {
+    assert.deepEqual(takeBackFollowUp(thread, 'm3', 404, 'not_found', { goneOn404: true }), { reread: true, code: 'not_found' });
+    assert.deepEqual(takeBackFollowUp(thread, 'm3', 404, 'not_found'), { reread: false, code: 'not_found' });
+  });
+  it('a message too far back for the newest page to answer is left as it is, with the error', () => {
+    assert.deepEqual(takeBackFollowUp(thread, 'm25', null, 'network_error'), { reread: false, code: 'not_confirmed' });
+    assert.deepEqual(takeBackFollowUp(thread, 'nope', null, 'network_error'), { reread: false, code: 'not_confirmed' });
   });
 });

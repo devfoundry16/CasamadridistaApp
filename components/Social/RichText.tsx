@@ -36,11 +36,14 @@ function openLink(url: string) {
  * `onPress`: the touch lands on the innermost text, which takes it, so tapping
  * a link inside a pressable card opens the link and not the card.
  *
+ * `onLongPress` goes to the links only — they take the touch from whatever
+ * the text sits in, so a long press on one would otherwise do nothing.
+ *
  * Everything else is passed to the outer `T`, so `selectable`, `numberOfLines`
  * and `style` behave as they would on plain text. Links are nested `Text`, so
  * they inherit the font, size and direction.
  */
-export default function RichText({ text, linkColor, color, ...rest }: Props) {
+export default function RichText({ text, linkColor, color, onLongPress, ...rest }: Props) {
   const router = useRouter();
   const tokens = useMemo(() => tokenize(text), [text]);
   const tint = linkColor ?? color;
@@ -53,6 +56,7 @@ export default function RichText({ text, linkColor, color, ...rest }: Props) {
             <Text
               key={i}
               onPress={() => openLink(token.value)}
+              onLongPress={onLongPress}
               accessibilityRole="link"
               style={{ color: tint, textDecorationLine: 'underline' }}
             >
@@ -64,7 +68,7 @@ export default function RichText({ text, linkColor, color, ...rest }: Props) {
         if (!href) return token.value;
         // AppText, so Arabic gets Cairo's bold file rather than a synthesised bold.
         return (
-          <AppText key={i} onPress={() => router.push(href as Href)} accessibilityRole="link" style={{ color: tint, fontWeight: '600' }}>
+          <AppText key={i} onPress={() => router.push(href as Href)} onLongPress={onLongPress} accessibilityRole="link" style={{ color: tint, fontWeight: '600' }}>
             {token.value}
           </AppText>
         );

@@ -222,6 +222,32 @@ export function undoDrop(
  */
 export const outcomeUnknown = (status: number | null): boolean => status === null || status >= 500;
 
+/** How far down the newest-first list a message can sit and still be on the server's newest page (30). */
+const NEWEST_PAGE_REACH = 20;
+
+/**
+ * What to do once a take-back has failed and the bubble is back.
+ *
+ * `reread`: read the newest page again — only when the outcome is unknown (or
+ * the server says an unsent message is already gone, `goneOn404`) and the
+ * message is recent enough for that page to answer. For one further back a
+ * fresh read would throw the loaded history away and settle nothing.
+ *
+ * `code`: the error to show. No answer at all is `not_confirmed`, not the
+ * connection notice the thread keeps quiet about.
+ */
+export function takeBackFollowUp(
+  messages: readonly ChatMessage[],
+  id: string,
+  status: number | null,
+  code: string,
+  { goneOn404 = false }: { goneOn404?: boolean } = {},
+): { reread: boolean; code: string } {
+  const at = messages.findIndex((m) => m.id === id);
+  const unsettled = outcomeUnknown(status) || (goneOn404 && status === 404);
+  return { reread: unsettled && at > -1 && at < NEWEST_PAGE_REACH, code: status === null ? 'not_confirmed' : code };
+}
+
 /** "Delete for me": the message leaves this thread, and so does its text in my quotes of it. */
 export function dropForMe(messages: readonly ChatMessage[], id: string): ChatMessage[] {
   return withRetractedQuotes(messages.filter((m) => m.id !== id), new Set([id]));
