@@ -155,9 +155,12 @@ export function normaliseSearch(raw: unknown): SearchResult[] {
   return people((raw as Wire)?.users, (w) => ({ relationship: normaliseRelationship(w.relationship) }));
 }
 
+/** relationshipRules.rankSuggestions' reasons. An unknown one reads as the weakest. */
+const SUGGESTION_REASONS: readonly string[] = ['mutual', 'interaction', 'fan_club', 'country'];
+
 export function normaliseSuggestions(raw: unknown): SuggestedPerson[] {
   return people((raw as Wire)?.users, (w) => ({
-    reason: (['mutual', 'fan_club', 'country'].includes(w.reason) ? w.reason : 'country') as SuggestedPerson['reason'],
+    reason: (SUGGESTION_REASONS.includes(w.reason) ? w.reason : 'country') as SuggestedPerson['reason'],
     mutual_count: num(w.mutual_count),
   }));
 }
@@ -165,7 +168,7 @@ export function normaliseSuggestions(raw: unknown): SuggestedPerson[] {
 export function normaliseFriends(raw: unknown): FriendsPage {
   const w = (raw ?? {}) as Wire;
   return {
-    friends: people(w.friends, (f) => ({ friends_since: str(f.friends_since) })),
+    friends: people(w.friends, (f) => ({ friends_since: str(f.friends_since), last_active_at: str(f.last_active_at) })),
     next_before: str(w.next_before),
   };
 }

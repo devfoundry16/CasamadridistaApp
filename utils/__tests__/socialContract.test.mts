@@ -25,6 +25,7 @@ import {
   normaliseSearch,
   normaliseShare,
   normaliseUsernameCheck,
+  normaliseSuggestions,
 } from '../../services/social/normalise.ts';
 import {
   EMBED_KINDS,
@@ -218,5 +219,17 @@ describe('stories in messages (C1)', () => {
     assert.equal(live?.expired, false);
     const gone = normaliseEmbed({ kind: 'story', id: 's1', available: true, expired: true, author_id: 'u2', author: { id: 'u2', name: 'Li' } });
     assert.equal(gone?.expired, true);
+  });
+});
+
+describe('friend suggestions', () => {
+  const id = '11111111-1111-4111-8111-111111111111';
+  it('keeps the interaction reason, so the row says why', () => {
+    const [p] = normaliseSuggestions({ users: [{ id, name: 'Ana', reason: 'interaction', mutual_count: 0 }] });
+    assert.equal(p.reason, 'interaction');
+  });
+  it('an unknown reason still falls back to country', () => {
+    const [p] = normaliseSuggestions({ users: [{ id, name: 'Ana', reason: 'astrology', mutual_count: 0 }] });
+    assert.equal(p.reason, 'country');
   });
 });

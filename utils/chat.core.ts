@@ -326,6 +326,36 @@ export function presenceLabel(online: boolean, lastActiveAt: string | null, now:
   return days <= 7 ? { key: 'activeDays', value: days } : null;
 }
 
+/**
+ * Active this recently counts as online in the friends list (C3). Longer than
+ * the five minutes between the server's last-seen stamps
+ * (profileService LAST_SEEN_THROTTLE_SEC), so a friend who is active the whole
+ * time never drops out between two stamps.
+ */
+export const ONLINE_WINDOW_MS = 10 * 60_000;
+
+/**
+ * The friends list's Online section: friends the presence channel shows live
+ * (`live`), then friends active in the last few minutes, most recent first;
+ * everyone else keeps the list's own order. Someone who hides their activity
+ * has no `last_active_at`, no presence channel, and is never listed as online.
+ */
+export function splitOnline<T extends { id: string; last_active_at: string | null }>(
+  friends: readonly T[],
+  now: number,
+  live: ReadonlySet<string> = new Set(),
+): { online: T[]; rest: T[] } {
+  const at = (x: T) => Date.parse(x.last_active_at ?? '');
+  const recent = (x: T) => Number.isFinite(at(x)) && now - at(x) <= ONLINE_WINDOW_MS;
+  const isOnline = (x: T) => live.has(x.id) || recent(x);
+  return {
+    online: friends
+      .filter(isOnline)
+      .sort((a, b) => Number(live.has(b.id)) - Number(live.has(a.id)) || (at(b) || 0) - (at(a) || 0)),
+    rest: friends.filter((x) => !isOnline(x)),
+  };
+}
+
 // ============================================================
 // The relationship control
 // ============================================================

@@ -132,7 +132,7 @@ export interface SearchResult extends PersonCard {
 }
 
 export interface SuggestedPerson extends PersonCard {
-  reason: 'mutual' | 'fan_club' | 'country';
+  reason: 'mutual' | 'interaction' | 'fan_club' | 'country';
   mutual_count: number;
 }
 
@@ -142,7 +142,8 @@ export interface FriendRequests {
 }
 
 export interface FriendsPage {
-  friends: (PersonCard & { friends_since: string | null })[];
+  /** `last_active_at`: null when that friend hides their activity (§18). */
+  friends: (PersonCard & { friends_since: string | null; last_active_at: string | null })[];
   next_before: string | null;
 }
 

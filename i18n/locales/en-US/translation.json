@@ -1578,7 +1578,10 @@
       "empty_requests": "No requests",
       "emptyBody_requests": "Friend requests you send and receive appear here.",
       "empty_suggested": "No suggestions yet",
-      "emptyBody_suggested": "Join a fan club or add friends and we'll suggest people you may know."
+      "emptyBody_suggested": "Join a fan club or add friends and we'll suggest people you may know.",
+      "section_online": "Online",
+      "section_all": "All friends",
+      "reason_interaction": "You've engaged with their posts"
     },
     "inbox": {
       "title": "Messages",

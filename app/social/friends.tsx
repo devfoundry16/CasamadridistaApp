@@ -1,6 +1,6 @@
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { Search, Users, X } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, I18nManager, RefreshControl, SectionList, TextInput, View } from 'react-native';
 
@@ -15,15 +15,23 @@ import Colors from '@/constants/colors';
 import { typeStyle } from '@/constants/type';
 import { useFont } from '@/contexts/FontContext';
 import { useFriendRequests, useFriends, useSuggestions, useUserSearch } from '@/hooks/social/useFriends';
+import { useOnlineIds } from '@/hooks/social/usePresence';
 import { useMyProfile, useRelationshipAction } from '@/hooks/social/useProfile';
 import SocialService from '@/services/SocialService';
 import type { PersonCard, RelationshipState } from '@/types/social';
+import { presenceLabel, splitOnline } from '@/utils/chat.core';
 
 type Segment = 'requests' | 'friends' | 'suggested';
 
 /**
  * Friends (§7–§9, §21): requests, friends and suggestions — and search across
  * everyone by name or @username, narrowed to your country or your fan club.
+ *
+ * My Friends opens with an Online section (C3): friends the presence channel
+ * shows live, then friends active in the last few minutes. Presence is watched
+ * once, at screen level, for the loaded page of friends who show their
+ * activity (50 at most), and the same signal drives the section and each
+ * row's dot. The list refreshes every minute while the screen is in focus.
  */
 export default function FriendsScreen() {
   const { t } = useTranslation();
@@ -40,6 +48,26 @@ export default function FriendsScreen() {
   const country = sameCountry ? me?.user.country_code ?? null : null;
   const fanClub = sameClub ? me?.user.fan_club_id ?? null : null;
   const search = useUserSearch(query, country, fanClub);
+
+  // Only friends who show their activity: the server refuses the others'
+  // presence channel, and a refused join is retried for ever.
+  const watchable = useMemo(() => (friends.data ?? []).filter((f) => f.last_active_at).map((f) => f.id), [friends.data]);
+  const live = useOnlineIds(watchable);
+
+  // "Active 5 minutes ago" and the Online section must not freeze while the
+  // screen stays open.
+  const [now, setNow] = useState(Date.now());
+  const refetchFriends = friends.refetch;
+  useFocusEffect(
+    useCallback(() => {
+      const id = setInterval(() => {
+        setNow(Date.now());
+        void refetchFriends();
+      }, 60_000);
+      return () => clearInterval(id);
+    }, [refetchFriends]),
+  );
+  useEffect(() => setNow(Date.now()), [friends.data]);
 
   const searching = query.trim().length >= 2 || sameCountry || sameClub;
   const incoming = useMemo(() => requests.data?.incoming ?? [], [requests.data]);
@@ -62,8 +90,23 @@ export default function FriendsScreen() {
         })),
       }];
     }
-    return [{ key: 'friends', data: (friends.data ?? []).map((p) => ({ person: p, state: 'friends' as RelationshipState, detail: null })) }];
-  }, [searching, search.data, segment, incoming, requests.data, suggestions.data, friends.data, t]);
+    const { online, rest } = splitOnline(friends.data ?? [], now, live);
+    const row = (p: (typeof online)[number]) => {
+      const presence = presenceLabel(live.has(p.id), p.last_active_at, now);
+      const text = !presence ? null : presence.key === 'online' ? t('social.presence.online') : t(`social.presence.${presence.key}`, { count: presence.value });
+      return {
+        person: p as PersonCard,
+        state: 'friends' as RelationshipState,
+        // The handle stays; presence follows it.
+        detail: [p.username ? `@${p.username}` : null, text].filter(Boolean).join(' · ') || null,
+        online: live.has(p.id),
+      };
+    };
+    return [
+      { key: 'online', data: online.map(row) },
+      { key: online.length ? 'all' : 'friends', data: rest.map(row) },
+    ].filter((s) => s.data.length);
+  }, [searching, search.data, segment, incoming, requests.data, suggestions.data, friends.data, now, live, t]);
 
   const loading = searching ? search.isLoading && search.fetchStatus !== 'idle' : segment === 'requests' ? requests.isLoading : segment === 'suggested' ? suggestions.isLoading : friends.isLoading;
   const refetch = () => {
@@ -121,13 +164,15 @@ export default function FriendsScreen() {
           keyboardShouldPersistTaps="handled"
           refreshControl={<RefreshControl refreshing={false} onRefresh={refetch} tintColor={Colors.darkGold} colors={[Colors.darkGold]} />}
           renderSectionHeader={({ section }) =>
-            section.key === 'incoming' || section.key === 'outgoing' ? (
+            section.key === 'incoming' || section.key === 'outgoing' || section.key === 'online' || section.key === 'all' ? (
               <T step="caption" weight="semibold" color={Colors.text.tertiary} style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 6 }}>
                 {t(`social.friends.section_${section.key}`)}
               </T>
             ) : null
           }
-          renderItem={({ item }) => <Row person={item.person} state={item.state} detail={item.detail} />}
+          renderItem={({ item }) => (
+            <Row person={item.person} state={item.state} detail={item.detail} online={(item as { online?: boolean }).online === true} />
+          )}
           ListEmptyComponent={
             <EmptyState
               icon={Users}
@@ -142,7 +187,7 @@ export default function FriendsScreen() {
   );
 }
 
-function Row({ person, state, detail }: { person: PersonCard; state: RelationshipState; detail: string | null }) {
+function Row({ person, state, detail, online }: { person: PersonCard; state: RelationshipState; detail: string | null; online: boolean }) {
   const { t } = useTranslation();
   const router = useRouter();
   const action = useRelationshipAction(person.id);
@@ -168,7 +213,7 @@ function Row({ person, state, detail }: { person: PersonCard; state: Relationshi
       <SocialButton label={t('social.actions.requested')} tone="muted" busy={action.isPending} onPress={() => action.mutate('cancel')} />
     ) : null;
 
-  return <PersonRow person={person} detail={detail ?? undefined} trailing={trailing} />;
+  return <PersonRow person={person} detail={detail ?? undefined} trailing={trailing} online={online} />;
 }
 
 function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {

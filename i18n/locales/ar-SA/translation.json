@@ -1618,7 +1618,10 @@
       "empty_requests": "لا طلبات",
       "emptyBody_requests": "تظهر هنا طلبات الصداقة التي ترسلها وتستقبلها.",
       "empty_suggested": "لا اقتراحات بعد",
-      "emptyBody_suggested": "انضم إلى رابطة أو أضف أصدقاء وسنقترح عليك أشخاصاً قد تعرفهم."
+      "emptyBody_suggested": "انضم إلى رابطة أو أضف أصدقاء وسنقترح عليك أشخاصاً قد تعرفهم.",
+      "section_online": "متصل الآن",
+      "section_all": "كل الأصدقاء",
+      "reason_interaction": "تفاعلت مع منشوراته"
     },
     "inbox": {
       "title": "الرسائل",
