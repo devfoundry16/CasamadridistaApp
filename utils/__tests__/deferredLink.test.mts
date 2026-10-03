@@ -53,19 +53,23 @@ describe('pathFromReferrer', () => {
 
 describe('pathFromLink', () => {
   it('maps a shared item link to the item screen', () => {
-    assert.equal(pathFromLink(`https://casamadridista.app/m/${ID}`), `/media/item/${ID}`);
-    assert.equal(pathFromLink(`https://www.casamadridista.app/m/${ID}?c=camp`), `/media/item/${ID}`);
+    assert.equal(pathFromLink(`https://dashboard.casamadridista.com/m/${ID}`), `/media/item/${ID}`);
+    assert.equal(pathFromLink(`https://dashboard.casamadridista.com/m/${ID}?c=camp`), `/media/item/${ID}`);
   });
 
   it('maps a match link to the match media page', () => {
-    assert.equal(pathFromLink('https://casamadridista.app/match/1035041/media'), '/match/1035041/media');
+    assert.equal(pathFromLink('https://dashboard.casamadridista.com/match/1035041/media'), '/match/1035041/media');
   });
 
   it('ignores a link to any other host, scheme or path', () => {
-    assert.ok(LINK_HOSTS.includes('casamadridista.app'));
+    assert.deepEqual([...LINK_HOSTS], ['dashboard.casamadridista.com']);
     assert.equal(pathFromLink(`https://evil.example/m/${ID}`), null);
-    assert.equal(pathFromLink(`http://casamadridista.app/m/${ID}`), null);
-    assert.equal(pathFromLink('https://casamadridista.app/login'), null);
+    assert.equal(pathFromLink(`http://dashboard.casamadridista.com/m/${ID}`), null);
+    // The same host serves the admin dashboard: none of its pages is an app link.
+    assert.equal(pathFromLink('https://dashboard.casamadridista.com/login'), null);
+    assert.equal(pathFromLink('https://dashboard.casamadridista.com/users'), null);
+    // The domain the app claimed before, which was never live.
+    assert.equal(pathFromLink(`https://casamadridista.app/m/${ID}`), null);
     assert.equal(pathFromLink('just some copied text'), null);
     assert.equal(pathFromLink(null), null);
   });
@@ -89,5 +93,22 @@ describe('isFreshInstall', () => {
     assert.equal(isFreshInstall(null, NOW), false);
     // A clock that puts the install in the future is a broken reading.
     assert.equal(isFreshInstall(NOW + 60_000, NOW), false);
+  });
+});
+
+describe('the link domain is one value everywhere', () => {
+  it('app.json claims exactly the hosts the app reads links from, on /m and /match only', async () => {
+    const fs = await import('node:fs');
+    const app = JSON.parse(fs.readFileSync(new URL('../../app.json', import.meta.url), 'utf8')).expo;
+    assert.deepEqual(app.ios.associatedDomains, LINK_HOSTS.map((h) => `applinks:${h}`));
+    const data = app.android.intentFilters[0].data;
+    assert.deepEqual([...new Set(data.map((d: { host: string }) => d.host))], [...LINK_HOSTS]);
+    assert.deepEqual([...new Set(data.map((d: { pathPrefix: string }) => d.pathPrefix))].sort(), ['/m', '/match']);
+    assert.equal(app.android.intentFilters[0].autoVerify, true);
+  });
+  it('share links are built on that host', async () => {
+    const fs = await import('node:fs');
+    const src = fs.readFileSync(new URL('../../constants/media.ts', import.meta.url), 'utf8');
+    assert.match(src, new RegExp(`EXPO_PUBLIC_MEDIA_LINK_DOMAIN \\?\\? '${LINK_HOSTS[0].replace(/\./g, '\\.')}'`));
   });
 });

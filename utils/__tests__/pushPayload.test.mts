@@ -122,7 +122,7 @@ describe('pushPayload.core — hrefFromPayload', () => {
 describe('pushPayload.core — safePathFromUrl', () => {
   it('accepts only our scheme and strips it to a leading-slash path', () => {
     assert.equal(safePathFromUrl('casamadridistaapp://media/now', SCHEME), '/media/now');
-    assert.equal(safePathFromUrl('https://casamadridista.app/m/1', SCHEME), null);
+    assert.equal(safePathFromUrl('https://dashboard.casamadridista.com/m/1', SCHEME), null);
     assert.equal(safePathFromUrl('otherapp://media/now', SCHEME), null);
     assert.equal(safePathFromUrl(undefined, SCHEME), null);
   });

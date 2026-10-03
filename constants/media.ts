@@ -1,13 +1,14 @@
 /**
  * Casa Media constants.
  *
- * The universal-link domain is an ops decision (see the plan's "Open items"):
- * DNS must point at the Next.js app before `/m/<id>` links resolve. Everything
+ * The universal-link domain is the host the Next.js app is served on — the
+ * admin dashboard's, which also serves the public `/m/<id>` pages and the two
+ * `/.well-known` files. Only `/m` and `/match` are claimed as app links. Everything
  * in the app reads it from here so there is exactly one place to change, and
  * `app.json` carries the same literal in `associatedDomains` / `intentFilters`.
  */
 export const MEDIA_LINK_DOMAIN =
-  process.env.EXPO_PUBLIC_MEDIA_LINK_DOMAIN ?? 'casamadridista.app';
+  process.env.EXPO_PUBLIC_MEDIA_LINK_DOMAIN ?? 'dashboard.casamadridista.com';
 
 /** Must match app.json "scheme". */
 export const APP_SCHEME = 'casamadridistaapp';

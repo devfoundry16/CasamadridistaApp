@@ -21,7 +21,7 @@
  */
 
 /** Hosts whose links open the app (`app.json` associated domains). */
-export const LINK_HOSTS: readonly string[] = ['casamadridista.app', 'www.casamadridista.app'];
+export const LINK_HOSTS: readonly string[] = ['dashboard.casamadridista.com'];
 
 /** The referrer parameter that holds the in-app path. Mirrored by the web landing page. */
 export const REFERRER_KEY = 'casa_return';
