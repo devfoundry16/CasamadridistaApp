@@ -11,7 +11,8 @@ import type { RealtimeMessageEvent, RealtimeReceiptEvent } from '@/types/social'
  * Every topic is a PRIVATE channel, authorised by the RLS policies on
  * `realtime.messages` in `backend/supabase/migrations/casa_social_realtime.sql`:
  *
- *   conversation:<id>  receive-only: message, receipt, message_removed
+ *   conversation:<id>  receive-only: message, receipt, message_removed,
+ *                      message_unsent, reaction
  *   typing:<id>        participants send and receive `typing`
  *   user:<uid>         receive-only: `inbox` for the header badge
  *   presence:<uid>     that user tracks; friends and accepted partners watch
@@ -154,6 +155,10 @@ export function subscribeConversation(
     onMessage?: (event: RealtimeMessageEvent) => void;
     onReceipt?: (event: RealtimeReceiptEvent) => void;
     onRemoved?: (event: { id: string; conversation_id: string }) => void;
+    /** The sender took a message back. */
+    onUnsent?: (event: { id: string; conversation_id: string }) => void;
+    /** Someone reacted (ids only: the counts are fetched). */
+    onReaction?: (event: { message_id: string; conversation_id: string }) => void;
   },
 ): () => void {
   const topic = `conversation:${conversationId}`;
@@ -161,13 +166,15 @@ export function subscribeConversation(
   let held = false;
   const offs: (() => void)[] = [];
 
-  void acquire(topic, ['message', 'receipt', 'message_removed']).then((entry) => {
+  void acquire(topic, ['message', 'receipt', 'message_removed', 'message_unsent', 'reaction']).then((entry) => {
     if (!entry) return;
     if (stopped) return release(topic);
     held = true;
     if (handlers.onMessage) offs.push(listen(entry, 'message', handlers.onMessage));
     if (handlers.onReceipt) offs.push(listen(entry, 'receipt', handlers.onReceipt));
     if (handlers.onRemoved) offs.push(listen(entry, 'message_removed', handlers.onRemoved));
+    if (handlers.onUnsent) offs.push(listen(entry, 'message_unsent', handlers.onUnsent));
+    if (handlers.onReaction) offs.push(listen(entry, 'reaction', handlers.onReaction));
   });
 
   return () => {

@@ -27,7 +27,7 @@ export const FRIEND_ACTIONS = ['request', 'cancel', 'accept', 'decline', 'remove
 export type FriendAction = (typeof FRIEND_ACTIONS)[number];
 
 /** conversationRules.MESSAGE_KINDS */
-export const MESSAGE_KINDS = ['text', 'image', 'share'] as const;
+export const MESSAGE_KINDS = ['text', 'image', 'share', 'voice', 'video'] as const;
 export type MessageKind = (typeof MESSAGE_KINDS)[number];
 
 /** conversationRules.EMBED_KINDS — what "Send to a friend" can carry. */
@@ -171,7 +171,7 @@ export interface ConversationSummary {
     id: string;
     sender_id: string;
     kind: MessageKind;
-    status: 'visible' | 'removed';
+    status: MessageStatus;
     created_at: string;
     preview: MessagePreview;
     receipt: ReceiptState | null;
@@ -200,9 +200,17 @@ export interface ConversationHeader {
   other_last_read_at: string | null;
 }
 
+/** `unsent` is the sender taking it back; `hidden` exists only in an inbox row (deleted for me). */
+export type MessageStatus = 'visible' | 'removed' | 'unsent' | 'hidden';
+
 export interface MessageAttachment {
   id: string;
+  /** conversationRules.attachmentKind; photos when the server says nothing. */
+  kind: 'image' | 'voice' | 'video';
   mime_type: string;
+  duration_ms?: number | null;
+  /** A video's poster frame. */
+  thumbnail_url?: string | null;
   width: number | null;
   height: number | null;
   url: string | null;
@@ -228,18 +236,35 @@ export interface MessageEmbed {
   author_id?: string | null;
 }
 
+/** What a reply shows of the message it quotes. */
+export interface MessageQuote {
+  id: string;
+  sender_id: string;
+  kind: MessageKind;
+  /** `unavailable`: unsent, removed, or deleted by this reader — no body then. */
+  status: 'visible' | 'unavailable';
+  body: string | null;
+}
+
+export interface MessageReactions {
+  counts: { emoji: string; count: number }[];
+  mine: string | null;
+}
+
 export interface ChatMessage {
   id: string;
   conversation_id: string;
   sender_id: string;
   kind: MessageKind;
   body: string | null;
-  status: 'visible' | 'removed';
+  status: Exclude<MessageStatus, 'hidden'>;
   client_id: string | null;
   created_at: string;
   attachments: MessageAttachment[];
   embed: MessageEmbed | null;
   receipt: ReceiptState | null;
+  reply_to: MessageQuote | null;
+  reactions: MessageReactions;
 }
 
 export interface MessagesPage {
@@ -262,6 +287,7 @@ export interface RealtimeMessageEvent {
   kind: MessageKind;
   body: string | null;
   embed_kind: EmbedKind | null;
+  reply_to_id?: string | null;
   client_id: string | null;
   created_at: string;
 }

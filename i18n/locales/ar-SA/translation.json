@@ -15,7 +15,8 @@
     "home": "الرئيسية",
     "loadingContext": "جاري التحميل",
     "completingSignIn": "جاري تسجيل الدخول...",
-    "failedToLoadData": "فشل تحميل البيانات"
+    "failedToLoadData": "فشل تحميل البيانات",
+    "close": "إغلاق"
   },
   "language": {
     "english": "English",
@@ -1652,7 +1653,11 @@
       "share_media_item": "شارك من Casa Media",
       "share_profile": "شارك ملفاً شخصياً",
       "share": "شارك شيئاً",
-      "share_story": "رد على قصة"
+      "share_story": "رد على قصة",
+      "voice": "رسالة صوتية",
+      "video": "فيديو",
+      "unsent": "أُلغي إرسال رسالة",
+      "hidden": "حذفت رسالة"
     },
     "receipt": {
       "pending": "جارٍ الإرسال",
@@ -1681,13 +1686,36 @@
       "longPressHint": "اضغط مطولاً للخيارات",
       "openProfile": "فتح ملف {{name}}",
       "unavailableTitle": "المحادثة غير متاحة",
-      "unavailableBody": "ربما تم حذفها."
+      "unavailableBody": "ربما تم حذفها.",
+      "react": "تفاعل",
+      "reactWith": "تفاعل بـ {{emoji}}",
+      "reactionCount": "{{emoji}} {{count}}",
+      "reply": "رد",
+      "replyingTo": "رد على {{name}}",
+      "cancelReply": "إلغاء الرد",
+      "you": "أنت",
+      "quoteUnavailable": "الرسالة الأصلية غير متاحة",
+      "deleteForMe": "حذف لديّ",
+      "deleteForMeTitle": "حذفها لديك؟",
+      "deleteForMeBody": "تختفي من محادثتك فقط. سيظل الطرف الآخر يراها.",
+      "unsendAction": "إلغاء الإرسال",
+      "unsendTitle": "إلغاء إرسال هذه الرسالة؟",
+      "unsendBody": "ستُزال لديكما معاً. ربما يكون قد رآها بالفعل.",
+      "unsent": "أُلغي إرسال هذه الرسالة",
+      "unsentByYou": "ألغيت إرسال رسالة",
+      "playVideo": "تشغيل الفيديو"
     },
     "composer": {
       "placeholder": "اكتب رسالة…",
       "send": "إرسال",
       "addPhoto": "إضافة صورة",
-      "removePhoto": "إزالة الصورة"
+      "removePhoto": "إزالة الصورة",
+      "addMedia": "إضافة صور أو فيديو",
+      "removeVideo": "إزالة الفيديو",
+      "videoTitle": "فيديو",
+      "video_too_long": "يمكن أن تصل مدة الفيديو إلى 60 ثانية.",
+      "video_too_large": "الفيديو كبير جداً (50 ميغابايت كحد أقصى).",
+      "videoAlone": "يُرسل الفيديو وحده، لذلك لم تُضف الصور."
     },
     "embed": {
       "post": "منشور في المجتمع",
@@ -1797,7 +1825,27 @@
       "self": "لا يمكنك فعل ذلك مع حسابك.",
       "account_restricted": "حسابك مقيّد.",
       "empty": "اكتب رسالة أولاً.",
-      "body_too_long": "الرسالة طويلة جداً."
+      "body_too_long": "الرسالة طويلة جداً.",
+      "invalid_reaction": "هذا التفاعل غير متاح.",
+      "invalid_reply": "لا يمكن الرد على هذه الرسالة.",
+      "not_yours": "يمكنك إلغاء إرسال رسائلك فقط.",
+      "attachment_too_long": "هذا التسجيل طويل جداً.",
+      "mixed_attachments": "أرسل الرسالة الصوتية أو الفيديو وحده."
+    },
+    "voice": {
+      "play": "تشغيل الرسالة الصوتية",
+      "pause": "إيقاف مؤقت",
+      "speed": "سرعة التشغيل {{rate}}×",
+      "record": "تسجيل رسالة صوتية",
+      "recordHint": "اضغط مطولاً للتسجيل، واسحب للإلغاء، وارفع إصبعك للاستماع قبل الإرسال",
+      "slideToCancel": "اسحب للإلغاء",
+      "releaseToCancel": "ارفع إصبعك للإلغاء",
+      "holdToRecord": "اضغط مطولاً على الميكروفون للتسجيل",
+      "discard": "حذف الرسالة الصوتية",
+      "micDenied": "اسمح بالوصول إلى الميكروفون من الإعدادات لتسجيل الرسائل الصوتية.",
+      "failed": "تعذّر بدء التسجيل. حاول مرة أخرى.",
+      "stopRecording": "إيقاف التسجيل",
+      "recordHintScreenReader": "انقر مرتين لبدء التسجيل، ومرة أخرى للإيقاف والاستماع قبل الإرسال"
     }
   },
   "appeals": {

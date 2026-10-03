@@ -19,6 +19,8 @@ import type {
   FriendsPage,
   InboxPage,
   MessageAttachment,
+  MessageQuote,
+  MessageReactions,
   MessageEmbed,
   MessageKind,
   MessagesPage,
@@ -38,7 +40,8 @@ import type {
 } from '../../types/social';
 
 const RELATIONSHIPS: readonly string[] = ['self', 'blocking', 'friends', 'request_sent', 'request_received', 'none'];
-const KINDS: readonly string[] = ['text', 'image', 'share'];
+/** conversationRules.MESSAGE_KINDS (a literal: this file has type-only imports). */
+const KINDS: readonly string[] = ['text', 'image', 'share', 'voice', 'video'];
 const EMBEDS: readonly string[] = ['post', 'media_item', 'profile', 'story'];
 const RECEIPTS: readonly string[] = ['sent', 'delivered', 'seen'];
 
@@ -216,7 +219,7 @@ export function normaliseConversation(raw: unknown): ConversationSummary | null 
             id: lm.id,
             sender_id: str(lm.sender_id) ?? '',
             kind: (KINDS.includes(lm.kind) ? lm.kind : 'text') as MessageKind,
-            status: lm.status === 'removed' ? 'removed' : 'visible',
+            status: lm.status === 'removed' || lm.status === 'unsent' || lm.status === 'hidden' ? lm.status : 'visible',
             created_at: str(lm.created_at) ?? '',
             preview: {
               key: str(lm.preview?.key) ?? 'empty',
@@ -261,7 +264,10 @@ function normaliseAttachment(w: Wire): MessageAttachment | null {
   if (!id) return null;
   return {
     id,
+    kind: w.kind === 'voice' || w.kind === 'video' ? w.kind : 'image',
     mime_type: str(w.mime_type) ?? 'image/jpeg',
+    duration_ms: typeof w.duration_ms === 'number' ? w.duration_ms : null,
+    thumbnail_url: str(w.thumbnail_url),
     width: typeof w.width === 'number' ? w.width : null,
     height: typeof w.height === 'number' ? w.height : null,
     url: str(w.url),
@@ -328,19 +334,46 @@ export function normaliseMessage(raw: unknown): ChatMessage | null {
   const senderId = str(w.sender_id);
   const createdAt = str(w.created_at);
   if (!id || !conversationId || !senderId || !createdAt) return null;
-  const removed = w.status === 'removed';
+  const status = w.status === 'removed' || w.status === 'unsent' ? w.status : 'visible';
+  const gone = status !== 'visible';
   return {
     id,
     conversation_id: conversationId,
     sender_id: senderId,
     kind: (KINDS.includes(w.kind) ? w.kind : 'text') as MessageKind,
-    body: removed ? null : str(w.body),
-    status: removed ? 'removed' : 'visible',
+    body: gone ? null : str(w.body),
+    status,
     client_id: str(w.client_id),
     created_at: createdAt,
-    attachments: removed ? [] : list(w.attachments).map(normaliseAttachment).filter((a): a is MessageAttachment => a !== null),
-    embed: removed ? null : normaliseEmbed(w.embed),
+    attachments: gone ? [] : list(w.attachments).map(normaliseAttachment).filter((a): a is MessageAttachment => a !== null),
+    embed: gone ? null : normaliseEmbed(w.embed),
     receipt: receipt(w.receipt),
+    reply_to: gone ? null : normaliseQuote(w.reply_to),
+    reactions: gone ? { counts: [], mine: null } : normaliseReactions(w.reactions),
+  };
+}
+
+function normaliseQuote(raw: unknown): MessageQuote | null {
+  const w = (raw ?? null) as Wire | null;
+  const id = str(w?.id);
+  if (!w || !id) return null;
+  const available = w.status === 'visible';
+  return {
+    id,
+    sender_id: str(w.sender_id) ?? '',
+    kind: (KINDS.includes(w.kind) ? w.kind : 'text') as MessageKind,
+    status: available ? 'visible' : 'unavailable',
+    body: available ? str(w.body) : null,
+  };
+}
+
+function normaliseReactions(raw: unknown): MessageReactions {
+  const w = (raw ?? {}) as Wire;
+  return {
+    counts: list(w.counts)
+      .map((c) => (str(c.emoji) && typeof c.count === 'number' && c.count > 0 ? { emoji: c.emoji as string, count: c.count as number } : null))
+      .filter((c): c is { emoji: string; count: number } => c !== null),
+    mine: str(w.mine),
   };
 }
 

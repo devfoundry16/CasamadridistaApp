@@ -8,6 +8,7 @@
  */
 import type {
   ChatMessage,
+  MessageReactions,
   ReceiptState,
   RealtimeMessageEvent,
   RelationshipState,
@@ -53,7 +54,7 @@ export function compareNewestFirst(a: ChatMessage, b: ChatMessage): number {
  *   - an optimistic message is replaced by the server's copy with the same
  *     `client_id`, keeping its local photo preview until the signed URL loads.
  */
-export function mergeMessages(existing: readonly ChatMessage[], incoming: readonly ChatMessage[]): ChatMessage[] {
+export function mergeMessages(existing: readonly ChatMessage[], incoming: readonly ChatMessage[], now: number = Date.now()): ChatMessage[] {
   const byId = new Map<string, ChatMessage>();
   const localByClient = new Map<string, string>();
 
@@ -78,7 +79,7 @@ export function mergeMessages(existing: readonly ChatMessage[], incoming: readon
     }
 
     const previous = byId.get(message.id);
-    byId.set(message.id, previous ? richer(previous, message) : message);
+    byId.set(message.id, previous ? richer(previous, message, now) : message);
   };
 
   for (const m of existing) put(m);
@@ -86,16 +87,49 @@ export function mergeMessages(existing: readonly ChatMessage[], incoming: readon
   return [...byId.values()].sort(compareNewestFirst);
 }
 
-function richer(a: ChatMessage, b: ChatMessage): ChatMessage {
-  const score = (m: ChatMessage) =>
-    (m.embed ? 2 : 0) + m.attachments.filter((x) => x.url).length + (m.status === 'removed' ? 10 : 0);
+/** A signed URL this close to expiry is swapped for a fresher one. */
+const URL_REFRESH_MARGIN_MS = 60_000;
+
+const isGone = (m: ChatMessage) => m.status === 'removed' || m.status === 'unsent';
+
+/**
+ * Two copies of one message, folded. A removal, and then an unsend, always
+ * wins — both are final, so a cached or late copy can never bring the
+ * content back. Receipts only move forward; the newer copy's reactions win.
+ * A signed URL still good for a minute is kept, so a refetch does not restart
+ * a playing voice note or re-download a photo.
+ */
+function richer(a: ChatMessage, b: ChatMessage, now: number): ChatMessage {
+  const status = a.status === 'removed' || b.status === 'removed' ? 'removed' : isGone(a) ? a.status : isGone(b) ? b.status : null;
+  if (status) {
+    const base = isGone(b) ? b : a;
+    return {
+      ...base,
+      status,
+      body: null,
+      attachments: [],
+      embed: null,
+      reply_to: null,
+      reactions: { counts: [], mine: null },
+      receipt: maxReceipt(a.receipt, b.receipt),
+    };
+  }
+  const score = (m: ChatMessage) => (m.embed ? 2 : 0) + m.attachments.filter((x) => x.url).length;
   const base = score(b) >= score(a) ? b : a;
   const other = base === b ? a : b;
-  // A removal always wins, and receipts only ever move forward.
+  // The copy already on screen (`a`) keeps its URL while it is still good.
+  const live = new Map(
+    a.attachments
+      .filter((x) => x.url && Date.parse(x.url_expires_at ?? '') - now > URL_REFRESH_MARGIN_MS)
+      .map((x) => [x.id, x]),
+  );
   return {
     ...base,
-    status: a.status === 'removed' || b.status === 'removed' ? 'removed' : base.status,
-    body: a.status === 'removed' || b.status === 'removed' ? null : base.body,
+    attachments: base.attachments.map((x) => {
+      const held = live.get(x.id);
+      return held ? { ...x, url: held.url, url_expires_at: held.url_expires_at } : x;
+    }),
+    reactions: b.reactions ?? a.reactions,
     receipt: maxReceipt(base.receipt, other.receipt),
   };
 }
@@ -185,10 +219,14 @@ export function messageFromEvent(event: RealtimeMessageEvent, myId: string): Cha
     attachments: [],
     embed: null,
     receipt: event.sender_id === myId ? 'sent' : null,
+    reply_to: null,
+    reactions: { counts: [], mine: null },
   };
 }
 
-export const needsFetch = (event: Pick<RealtimeMessageEvent, 'kind'>): boolean => event.kind !== 'text';
+/** Media and shares need signed URLs; a reply needs its quote. */
+export const needsFetch = (event: Pick<RealtimeMessageEvent, 'kind' | 'reply_to_id'>): boolean =>
+  event.kind !== 'text' || !!event.reply_to_id;
 
 // ============================================================
 // Layout
@@ -341,3 +379,85 @@ export function optimisticState(state: RelationshipState, action: string): Relat
 }
 
 export const badgeText = (count: number): string | null => (count <= 0 ? null : count > 9 ? '9+' : String(count));
+
+// ---------------------------------------------------------------- C2: voice, video, reactions, replies
+
+/** conversationRules.REACTIONS — the server refuses anything else. */
+export const REACTIONS = ['❤️', '😂', '😮', '😢', '🔥', '👍'] as const;
+
+/** conversationRules.ATTACHMENT_LIMITS. */
+export const RECORD_MAX_MS = 120_000;
+export const RECORD_MIN_MS = 1000;
+export const VIDEO_MAX_MS = 60_000;
+export const VIDEO_MAX_BYTES = 50 * 1024 * 1024;
+/** How far a held mic button slides toward the start edge to cancel. */
+export const SLIDE_CANCEL_PX = 80;
+
+/** 7 400 ms → "0:07". */
+export function formatDuration(ms: number): string {
+  const total = Number.isFinite(ms) && ms > 0 ? Math.floor(ms / 1000) : 0;
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+}
+
+/** Voice playback speed: 1× → 1.5× → 2× → 1×. */
+export function nextRate(rate: number): number {
+  return rate === 1 ? 1.5 : rate === 1.5 ? 2 : 1;
+}
+
+/** What happens when the mic button is let go. */
+export function recordingOutcome(durationMs: number, cancelled: boolean): 'cancel' | 'too_short' | 'preview' {
+  if (cancelled) return 'cancel';
+  if (!(durationMs >= RECORD_MIN_MS)) return 'too_short';
+  return 'preview';
+}
+
+/** Sliding toward the start edge cancels: left in a left-to-right layout, right in Arabic. */
+export function isCancelGesture(dx: number, rtl: boolean): boolean {
+  return rtl ? dx > SLIDE_CANCEL_PX : dx < -SLIDE_CANCEL_PX;
+}
+
+/**
+ * The reactions after the viewer picks `emoji` (null takes theirs back). The
+ * same emoji again also takes it back. Optimistic; the server's answer wins.
+ */
+export function applyReaction(current: MessageReactions, emoji: string | null): MessageReactions {
+  const next = emoji !== null && emoji === current.mine ? null : emoji;
+  const counts = new Map(current.counts.map((c) => [c.emoji, c.count]));
+  if (current.mine) {
+    const left = (counts.get(current.mine) ?? 1) - 1;
+    if (left > 0) counts.set(current.mine, left);
+    else counts.delete(current.mine);
+  }
+  if (next) counts.set(next, (counts.get(next) ?? 0) + 1);
+  return { counts: [...counts].map(([e, count]) => ({ emoji: e, count })), mine: next };
+}
+
+export type MessageActionKey = 'react' | 'reply' | 'copy' | 'hide' | 'unsend' | 'report';
+
+/** The long-press menu, in order. A message still sending has only Copy. */
+export function messageActions(message: ChatMessage, myId: string): MessageActionKey[] {
+  const local = isLocal(message);
+  const visible = message.status === 'visible';
+  const mine = message.sender_id === myId;
+  const out: MessageActionKey[] = [];
+  if (visible && !local) out.push('react', 'reply');
+  if (visible && message.body) out.push('copy');
+  if (local) return out;
+  out.push('hide');
+  if (visible && mine) out.push('unsend');
+  // Theirs can be reported even once unsent: the server kept it for review.
+  if (!mine && message.status !== 'removed') out.push('report');
+  return out;
+}
+
+/** The tombstone's translation key. */
+export function unsentCopy(message: Pick<ChatMessage, 'sender_id'>, myId: string): string {
+  return message.sender_id === myId ? 'social.thread.unsentByYou' : 'social.thread.unsent';
+}
+
+/** Why a picked video cannot be sent, or null. */
+export function videoPickProblem(asset: { durationMs?: number | null; fileSize?: number | null }): 'video_too_long' | 'video_too_large' | null {
+  if ((asset.durationMs ?? 0) > VIDEO_MAX_MS + 500) return 'video_too_long';
+  if ((asset.fileSize ?? 0) > VIDEO_MAX_BYTES) return 'video_too_large';
+  return null;
+}

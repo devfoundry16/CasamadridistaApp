@@ -27,7 +27,9 @@ function ConversationRow({ conversation, myId }: Props) {
   const mine = last?.sender_id === myId;
 
   const preview = last ? previewText(last.preview, t) : '';
-  const line = mine && last?.status !== 'removed' ? t('social.preview.you', { text: preview }) : preview;
+  // Removed, unsent or deleted for me: the preview is a status line, never "You: …".
+  const gone = !!last && last.status !== 'visible';
+  const line = mine && !gone ? t('social.preview.you', { text: preview }) : preview;
   // The handle tells two people with the same display name apart (PersonRow's pattern).
   const handle = conversation.other.username ? `@${conversation.other.username}` : null;
 
@@ -64,7 +66,7 @@ function ConversationRow({ conversation, myId }: Props) {
             color={unread ? Colors.text.secondary : Colors.text.tertiary}
             weight={unread ? 'semibold' : 'regular'}
             numberOfLines={1}
-            style={{ flex: 1, fontStyle: last?.status === 'removed' ? 'italic' : 'normal' }}
+            style={{ flex: 1, fontStyle: gone ? 'italic' : 'normal' }}
           >
             {line}
           </T>

@@ -15,7 +15,8 @@
     "home": "Home",
     "loadingContext": "Loading Context",
     "completingSignIn": "Completing sign-in...",
-    "failedToLoadData": "Failed to load initial data"
+    "failedToLoadData": "Failed to load initial data",
+    "close": "Close"
   },
   "language": {
     "english": "English",
@@ -1604,7 +1605,11 @@
       "share_media_item": "Shared from Casa Media",
       "share_profile": "Shared a profile",
       "share": "Shared something",
-      "share_story": "Replied to a story"
+      "share_story": "Replied to a story",
+      "voice": "Voice message",
+      "video": "Video",
+      "unsent": "Message unsent",
+      "hidden": "You deleted a message"
     },
     "receipt": {
       "pending": "Sending",
@@ -1633,13 +1638,36 @@
       "longPressHint": "Long press for options",
       "openProfile": "Open {{name}}'s profile",
       "unavailableTitle": "Conversation not available",
-      "unavailableBody": "It may have been removed."
+      "unavailableBody": "It may have been removed.",
+      "react": "React",
+      "reactWith": "React with {{emoji}}",
+      "reactionCount": "{{emoji}} {{count}}",
+      "reply": "Reply",
+      "replyingTo": "Replying to {{name}}",
+      "cancelReply": "Cancel reply",
+      "you": "You",
+      "quoteUnavailable": "Original message unavailable",
+      "deleteForMe": "Delete for me",
+      "deleteForMeTitle": "Delete for you?",
+      "deleteForMeBody": "It disappears from your chat only. The other person still sees it.",
+      "unsendAction": "Unsend",
+      "unsendTitle": "Unsend this message?",
+      "unsendBody": "It's removed for both of you. They may already have seen it.",
+      "unsent": "This message was unsent",
+      "unsentByYou": "You unsent a message",
+      "playVideo": "Play video"
     },
     "composer": {
       "placeholder": "Message…",
       "send": "Send",
       "addPhoto": "Add photo",
-      "removePhoto": "Remove photo"
+      "removePhoto": "Remove photo",
+      "addMedia": "Add photos or a video",
+      "removeVideo": "Remove video",
+      "videoTitle": "Video",
+      "video_too_long": "Videos can be up to 60 seconds.",
+      "video_too_large": "That video is too large (50 MB at most).",
+      "videoAlone": "A video is sent on its own, so the photos were left out."
     },
     "embed": {
       "post": "Community post",
@@ -1741,7 +1769,27 @@
       "self": "You can't do that with your own account.",
       "account_restricted": "Your account is restricted.",
       "empty": "Write a message first.",
-      "body_too_long": "That message is too long."
+      "body_too_long": "That message is too long.",
+      "invalid_reaction": "That reaction isn't available.",
+      "invalid_reply": "That message can't be replied to.",
+      "not_yours": "You can only unsend your own messages.",
+      "attachment_too_long": "That recording is too long.",
+      "mixed_attachments": "Send a voice message or a video on its own."
+    },
+    "voice": {
+      "play": "Play voice message",
+      "pause": "Pause",
+      "speed": "Playback speed {{rate}}×",
+      "record": "Record a voice message",
+      "recordHint": "Hold to record, slide to cancel, let go to listen before sending",
+      "slideToCancel": "Slide to cancel",
+      "releaseToCancel": "Let go to cancel",
+      "holdToRecord": "Hold the microphone to record",
+      "discard": "Discard voice message",
+      "micDenied": "Allow microphone access in Settings to record voice messages.",
+      "failed": "The recording couldn't start. Try again.",
+      "stopRecording": "Stop recording",
+      "recordHintScreenReader": "Double-tap to start recording, double-tap again to stop and listen before sending"
     }
   },
   "appeals": {

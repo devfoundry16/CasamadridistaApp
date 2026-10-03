@@ -1,15 +1,17 @@
 import * as Crypto from 'expo-crypto';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
+import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 
 import SocialService, { SocialApiError } from '@/services/SocialService';
 import { subscribeConversation, subscribeTyping } from '@/services/social/realtime';
-import type { ChatMessage, EmbedKind, RealtimeMessageEvent } from '@/types/social';
+import type { ChatMessage, EmbedKind, MessageAttachment, MessageKind, MessageQuote, RealtimeMessageEvent } from '@/types/social';
 import {
   LOCAL_PREFIX,
+  applyReaction,
   applyReceipts,
   isLocal,
   isTyping as typingActive,
@@ -36,6 +38,9 @@ interface ThreadCache {
 }
 const threads = new Map<string, ThreadCache>();
 
+/** How long a burst of reaction events is gathered before one refetch. */
+const REACTION_REFRESH_MS = 800;
+
 /** Longest edge a message photo is resized to before upload. */
 const PHOTO_MAX_EDGE = 1600;
 
@@ -43,6 +48,45 @@ export interface PhotoInput {
   uri: string;
   width: number | null;
   height: number | null;
+}
+
+/** A recorded voice note (m4a / AAC, from expo-audio's high-quality preset). */
+export interface VoiceInput {
+  uri: string;
+  durationMs: number;
+}
+
+/** A picked video, already checked against videoPickProblem. */
+export interface VideoInput {
+  uri: string;
+  durationMs: number;
+  width: number | null;
+  height: number | null;
+  mimeType: string | null;
+}
+
+export interface OutgoingInput {
+  body?: string;
+  photos?: PhotoInput[];
+  voice?: VoiceInput;
+  video?: VideoInput;
+  embed?: { kind: EmbedKind; id: string };
+  /** The message being replied to. */
+  replyTo?: ChatMessage | null;
+}
+
+interface PendingInput {
+  body: string | null;
+  photos: PhotoInput[];
+  voice?: VoiceInput;
+  video?: VideoInput;
+  embed?: { kind: EmbedKind; id: string };
+  replyToId?: string;
+}
+
+/** What a local reply shows of its original until the server's copy lands. */
+function quoteFrom(message: ChatMessage): MessageQuote {
+  return { id: message.id, sender_id: message.sender_id, kind: message.kind, status: 'visible', body: message.body };
 }
 
 /**
@@ -68,7 +112,8 @@ export function useThread(conversationId: string | undefined, myId: string | und
   const lastReadAckRef = useRef<string | null>(null);
   const lastTypingSentRef = useRef<number | null>(null);
   const typingRef = useRef<ReturnType<typeof subscribeTyping> | null>(null);
-  const pendingInputs = useRef(new Map<string, { body: string | null; photos: PhotoInput[]; embed?: { kind: EmbedKind; id: string } }>());
+  const pendingInputs = useRef(new Map<string, PendingInput>());
+  const reactionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /** Every state change goes through here, so the cache and ref stay in step. */
   const commit = useCallback(
@@ -144,12 +189,19 @@ export function useThread(conversationId: string | undefined, myId: string | und
         if (event.user_id === myId) return;
         commit(applyReceipts(messagesRef.current, myId, event));
       },
-      onRemoved: (event) => {
-        commit(
-          messagesRef.current.map((m) =>
-            m.id === event.id ? { ...m, status: 'removed', body: null, attachments: [], embed: null } : m,
-          ),
-        );
+      onRemoved: (event) => commit(tombstone(messagesRef.current, event.id, 'removed')),
+      onUnsent: (event) => commit(tombstone(messagesRef.current, event.id, 'unsent')),
+      // Counts come from the API, never from the event. Only for a message on
+      // screen, and a burst of reactions costs one fetch. The newest page
+      // covers the reactions people actually make; an older one refreshes on
+      // return.
+      onReaction: (event) => {
+        if (!messagesRef.current.some((m) => m.id === event.message_id)) return;
+        if (reactionTimer.current) clearTimeout(reactionTimer.current);
+        reactionTimer.current = setTimeout(() => {
+          reactionTimer.current = null;
+          void loadNewest();
+        }, REACTION_REFRESH_MS);
       },
     });
 
@@ -163,6 +215,7 @@ export function useThread(conversationId: string | undefined, myId: string | und
 
     return () => {
       offConversation();
+      if (reactionTimer.current) clearTimeout(reactionTimer.current);
       typing.unsubscribe();
       typingRef.current = null;
       appState.remove();
@@ -216,12 +269,15 @@ export function useThread(conversationId: string | undefined, myId: string | und
       try {
         const attachmentIds: string[] = [];
         for (const photo of input.photos) attachmentIds.push(await uploadPhoto(conversationId, photo));
+        if (input.voice) attachmentIds.push(await uploadVoice(conversationId, input.voice));
+        if (input.video) attachmentIds.push(await uploadVideo(conversationId, input.video));
 
         const sent = await SocialService.sendMessage(conversationId, {
           client_id: clientId,
           body: input.body,
           ...(attachmentIds.length ? { attachment_ids: attachmentIds } : {}),
           ...(input.embed ? { embed_kind: input.embed.kind, embed_id: input.embed.id } : {}),
+          ...(input.replyToId ? { reply_to_id: input.replyToId } : {}),
         });
         pendingInputs.current.delete(clientId);
         merge([sent]);
@@ -237,35 +293,52 @@ export function useThread(conversationId: string | undefined, myId: string | und
   );
 
   const send = useCallback(
-    (input: { body?: string; photos?: PhotoInput[]; embed?: { kind: EmbedKind; id: string } }) => {
+    (input: OutgoingInput) => {
       if (!conversationId || !myId) return;
       const body = input.body?.trim() || null;
       const photos = input.photos ?? [];
-      if (!body && !photos.length && !input.embed) return;
+      if (!body && !photos.length && !input.embed && !input.voice && !input.video) return;
+      const replyTo = input.replyTo && !isLocal(input.replyTo) && input.replyTo.status === 'visible' ? input.replyTo : null;
 
       const clientId = newClientId(Date.now(), Crypto.randomUUID());
-      pendingInputs.current.set(clientId, { body, photos, embed: input.embed });
+      pendingInputs.current.set(clientId, {
+        body,
+        photos,
+        voice: input.voice,
+        video: input.video,
+        embed: input.embed,
+        replyToId: replyTo?.id,
+      });
+      const kind: MessageKind = input.embed ? 'share' : input.voice ? 'voice' : input.video ? 'video' : photos.length ? 'image' : 'text';
+      const attachments: MessageAttachment[] = input.voice
+        ? [{ id: `${clientId}_0`, kind: 'voice', mime_type: 'audio/mp4', width: null, height: null, duration_ms: input.voice.durationMs, url: null, url_expires_at: null, local_uri: input.voice.uri }]
+        : input.video
+          ? [{ id: `${clientId}_0`, kind: 'video', mime_type: input.video.mimeType ?? 'video/mp4', width: input.video.width, height: input.video.height, duration_ms: input.video.durationMs, url: null, url_expires_at: null, local_uri: input.video.uri }]
+          : photos.map((p, i) => ({
+              id: `${clientId}_${i}`,
+              kind: 'image' as const,
+              mime_type: 'image/jpeg',
+              width: p.width,
+              height: p.height,
+              url: null,
+              url_expires_at: null,
+              local_uri: p.uri,
+            }));
       merge([
         {
           id: `${LOCAL_PREFIX}${clientId}`,
           conversation_id: conversationId,
           sender_id: myId,
-          kind: input.embed ? 'share' : photos.length ? 'image' : 'text',
+          kind,
           body,
           status: 'visible',
           client_id: clientId,
           created_at: new Date().toISOString(),
-          attachments: photos.map((p, i) => ({
-            id: `${clientId}_${i}`,
-            mime_type: 'image/jpeg',
-            width: p.width,
-            height: p.height,
-            url: null,
-            url_expires_at: null,
-            local_uri: p.uri,
-          })),
+          attachments,
           embed: null,
           receipt: 'pending',
+          reply_to: replyTo ? quoteFrom(replyTo) : null,
+          reactions: { counts: [], mine: null },
         },
       ]);
       lastTypingSentRef.current = null;
@@ -283,6 +356,48 @@ export function useThread(conversationId: string | undefined, myId: string | und
     pendingInputs.current.delete(message.client_id);
     commit(messagesRef.current.filter((m) => m.id !== message.id));
   }, [commit]);
+
+  // ---------- reactions, delete for me, unsend ----------
+
+  /** Optimistic; a refusal puts the old reactions back. */
+  const react = useCallback(async (message: ChatMessage, emoji: string | null) => {
+    if (isLocal(message)) return;
+    const before = message.reactions;
+    const after = applyReaction(before, emoji);
+    const patch = (reactions: typeof before) =>
+      commit(messagesRef.current.map((m) => (m.id === message.id ? { ...m, reactions } : m)));
+    patch(after);
+    try {
+      await SocialService.reactToMessage(message.id, after.mine);
+    } catch (e) {
+      patch(before);
+      setError(e instanceof SocialApiError ? e.code : 'network_error');
+    }
+  }, [commit]);
+
+  const hideMessage = useCallback(async (message: ChatMessage) => {
+    if (isLocal(message)) return;
+    const before = messagesRef.current;
+    commit(before.filter((m) => m.id !== message.id));
+    try {
+      await SocialService.hideMessage(message.id);
+    } catch (e) {
+      commit(mergeMessages(messagesRef.current, [message]));
+      setError(e instanceof SocialApiError ? e.code : 'network_error');
+    }
+  }, [commit]);
+
+  const unsend = useCallback(async (message: ChatMessage) => {
+    if (isLocal(message)) return;
+    commit(tombstone(messagesRef.current, message.id, 'unsent'));
+    try {
+      await SocialService.unsendMessage(message.id);
+      void queryClient.invalidateQueries({ queryKey: socialKeys.inbox('inbox') });
+    } catch (e) {
+      commit(messagesRef.current.map((m) => (m.id === message.id ? message : m)));
+      setError(e instanceof SocialApiError ? e.code : 'network_error');
+    }
+  }, [commit, queryClient]);
 
   const notifyTyping = useCallback(() => {
     const at = Date.now();
@@ -304,8 +419,63 @@ export function useThread(conversationId: string | undefined, myId: string | und
     send,
     retry,
     discard,
+    react,
+    hideMessage,
+    unsend,
     notifyTyping,
   };
+}
+
+/** A message that lost its content: removed by a moderator, or unsent. */
+function tombstone(messages: ChatMessage[], id: string, status: 'removed' | 'unsent'): ChatMessage[] {
+  return messages.map((m) =>
+    m.id === id ? { ...m, status, body: null, attachments: [], embed: null, reply_to: null, reactions: { counts: [], mine: null } } : m,
+  );
+}
+
+async function sizeOf(uri: string): Promise<number | undefined> {
+  const info = await FileSystem.getInfoAsync(uri);
+  return info.exists && typeof info.size === 'number' ? info.size : undefined;
+}
+
+async function put(url: string, uri: string, contentType: string) {
+  const result = await FileSystem.uploadAsync(url, uri, {
+    httpMethod: 'PUT',
+    headers: { 'Content-Type': contentType },
+    uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+  });
+  if (result.status >= 300) throw new SocialApiError('upload_failed', result.status);
+}
+
+/** Reserve a voice slot (size and length up front) and upload the recording. */
+async function uploadVoice(conversationId: string, voice: VoiceInput): Promise<string> {
+  const slot = await SocialService.createAttachment(conversationId, {
+    mime_type: 'audio/mp4',
+    size_bytes: await sizeOf(voice.uri),
+    duration_ms: Math.round(voice.durationMs),
+  });
+  await put(slot.upload_url, voice.uri, 'audio/mp4');
+  return slot.attachment_id;
+}
+
+/**
+ * Reserve a video slot, upload the clip and its poster frame. The frame is
+ * what the server's image scan sees and what the bubble shows before play.
+ */
+async function uploadVideo(conversationId: string, video: VideoInput): Promise<string> {
+  const mime = video.mimeType === 'video/quicktime' ? 'video/quicktime' : 'video/mp4';
+  const { uri: frame } = await VideoThumbnails.getThumbnailAsync(video.uri, { time: 500, quality: 0.7 });
+  const slot = await SocialService.createAttachment(conversationId, {
+    mime_type: mime,
+    size_bytes: await sizeOf(video.uri),
+    duration_ms: Math.round(video.durationMs),
+    ...(video.width ? { width: video.width } : {}),
+    ...(video.height ? { height: video.height } : {}),
+  });
+  if (!slot.thumbnail_upload_url) throw new SocialApiError('invalid_response', null);
+  await put(slot.thumbnail_upload_url, frame, 'image/jpeg');
+  await put(slot.upload_url, video.uri, mime);
+  return slot.attachment_id;
 }
 
 /** Resize, reserve a slot, PUT to the signed URL. Returns the attachment id. */

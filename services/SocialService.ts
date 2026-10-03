@@ -68,6 +68,8 @@ export interface OutgoingMessage {
   attachment_ids?: string[];
   embed_kind?: EmbedKind;
   embed_id?: string;
+  /** The message this one replies to (same conversation). */
+  reply_to_id?: string;
 }
 
 export interface AttachmentSlot {
@@ -76,6 +78,9 @@ export interface AttachmentSlot {
   token: string;
   bucket: string;
   path: string;
+  /** A video's poster-frame slot. */
+  thumbnail_upload_url?: string;
+  thumbnail_path?: string;
 }
 
 /**
@@ -104,7 +109,7 @@ class SocialServiceClass {
     }
   }
 
-  private async send<T>(method: 'post' | 'patch' | 'delete', path: string, body?: unknown): Promise<T> {
+  private async send<T>(method: 'post' | 'put' | 'patch' | 'delete', path: string, body?: unknown): Promise<T> {
     try {
       const headers = await this.headers();
       const { data } =
@@ -239,8 +244,28 @@ class SocialServiceClass {
     await this.send('delete', `/conversations/${encodeURIComponent(id)}`);
   }
 
-  async createAttachment(id: string, file: { mime_type: string; size_bytes?: number; width?: number; height?: number }): Promise<AttachmentSlot> {
+  async createAttachment(
+    id: string,
+    file: { mime_type: string; size_bytes?: number; width?: number; height?: number; duration_ms?: number },
+  ): Promise<AttachmentSlot> {
     return this.send<AttachmentSlot>('post', `/conversations/${encodeURIComponent(id)}/attachments`, file);
+  }
+
+  /** One reaction per person per message; `null` takes it back. */
+  async reactToMessage(messageId: string, emoji: string | null): Promise<void> {
+    const path = `/messages/${encodeURIComponent(messageId)}/reaction`;
+    if (emoji === null) await this.send('delete', path);
+    else await this.send('put', path, { emoji });
+  }
+
+  /** Delete for me: gone from my thread only. */
+  async hideMessage(messageId: string): Promise<void> {
+    await this.send('post', `/messages/${encodeURIComponent(messageId)}/hide`);
+  }
+
+  /** Take my message back: both sides see that it was unsent. */
+  async unsendMessage(messageId: string): Promise<void> {
+    await this.send('post', `/messages/${encodeURIComponent(messageId)}/unsend`);
   }
 
   /** "Send to a friend", to several at once (§16, §37, §38). */

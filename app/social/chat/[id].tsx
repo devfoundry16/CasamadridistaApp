@@ -11,6 +11,7 @@ import MessageBubble from '@/components/Social/MessageBubble';
 import PhotoModal from '@/components/Social/PhotoModal';
 import SocialButton from '@/components/Social/SocialButton';
 import SocialReportSheet from '@/components/Social/SocialReportSheet';
+import VideoMessageModal from '@/components/Social/VideoMessageModal';
 import T from '@/components/Social/T';
 import EmptyState from '@/components/Team/EmptyState';
 import Touchable from '@/components/Touchable';
@@ -44,6 +45,9 @@ export default function ChatScreen() {
   const [focused, setFocused] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ kind: 'message' | 'profile'; id: string } | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [video, setVideo] = useState<string | null>(null);
+  // Held by id: if the original is unsent or deleted meanwhile, the banner goes.
+  const [replyingToId, setReplyingToId] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -62,6 +66,11 @@ export default function ChatScreen() {
   const block = useRelationshipAction(other?.id ?? '');
   const thread = useThread(conversation ? id : undefined, myId, focused);
   const presence = usePresence(other?.id, null);
+
+  const replyingTo = useMemo(
+    () => (replyingToId ? thread.messages.find((m) => m.id === replyingToId && m.status === 'visible') ?? null : null),
+    [replyingToId, thread.messages],
+  );
 
   const layouts = useMemo(() => thread.messages.map((_, i) => bubbleLayout(thread.messages, i, myId ?? '')), [thread.messages, myId]);
 
@@ -118,15 +127,22 @@ export default function ChatScreen() {
           <MessageBubble
             message={item}
             layout={layout}
+            myId={myId ?? ''}
+            otherName={other?.name ?? ''}
             onRetry={thread.retry}
             onDiscard={thread.discard}
             onReport={(m) => setReportTarget({ kind: 'message', id: m.id })}
             onOpenPhoto={setPhoto}
+            onOpenVideo={setVideo}
+            onReact={thread.react}
+            onReply={(m) => setReplyingToId(m.id)}
+            onHide={thread.hideMessage}
+            onUnsend={thread.unsend}
           />
         </View>
       );
     },
-    [layouts, thread.retry, thread.discard],
+    [layouts, myId, other?.name, thread.retry, thread.discard, thread.react, thread.hideMessage, thread.unsend],
   );
 
   const titleNode = other ? (
@@ -241,10 +257,22 @@ export default function ChatScreen() {
         </Touchable>
       ) : null}
 
-      <Composer onSend={thread.send} onTyping={thread.notifyTyping} bottomInset={bottomInset} disabledReason={disabledReason} />
+      <Composer
+        onSend={(input) => {
+          thread.send(input);
+          setReplyingToId(null);
+        }}
+        onTyping={thread.notifyTyping}
+        bottomInset={bottomInset}
+        disabledReason={disabledReason}
+        replyingTo={replyingTo}
+        replyingToName={replyingTo ? (replyingTo.sender_id === myId ? t('social.thread.you') : conversation.other.name) : undefined}
+        onCancelReply={() => setReplyingToId(null)}
+      />
 
       <SocialReportSheet visible={!!reportTarget} target={reportTarget} onClose={() => setReportTarget(null)} onBlock={confirmBlock} />
       <PhotoModal uri={photo} onClose={() => setPhoto(null)} />
+      <VideoMessageModal uri={video} onClose={() => setVideo(null)} />
     </KeyboardAvoidingView>
   );
 }
