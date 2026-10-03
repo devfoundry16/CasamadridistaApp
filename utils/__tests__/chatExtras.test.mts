@@ -19,6 +19,7 @@ import {
   messageFromEvent,
   needsFetch,
   nextRate,
+  outcomeUnknown,
   recordingOutcome,
   retract,
   REACTIONS,
@@ -351,5 +352,30 @@ describe('what this device has heard or done is enforced on every list, whatever
   it('with nothing heard and nothing hidden the list is returned as it is', () => {
     const list = [msg({ id: 'a' })];
     assert.equal(enforceRetractions(list, new Map(), new Set()), list);
+  });
+});
+
+describe('a take-back the server never answered', () => {
+  it('is unknown when there was no answer, or the server failed while handling it', () => {
+    assert.equal(outcomeUnknown(null), true);
+    assert.equal(outcomeUnknown(500), true);
+    assert.equal(outcomeUnknown(503), true);
+  });
+  it('is known when the server refused it', () => {
+    assert.equal(outcomeUnknown(403), false);
+    assert.equal(outcomeUnknown(404), false);
+    assert.equal(outcomeUnknown(409), false);
+  });
+  it('once the server is asked again, an unsend that did go through stays taken back', () => {
+    // The request timed out, the bubble was put back, and the fresh page says it was unsent after all.
+    const restored = [msg({ id: 'x' })];
+    const out = freshPage(restored, [msg({ id: 'x', status: 'unsent', body: null })]);
+    assert.equal(out[0].status, 'unsent');
+    assert.equal(out[0].body, null);
+  });
+  it('and a delete-for-me that did go through leaves with the fresh page', () => {
+    const restored = [msg({ id: 'x' }), msg({ id: 'y', created_at: '2026-10-03T10:01:00Z' })];
+    const out = freshPage(restored, [msg({ id: 'y', created_at: '2026-10-03T10:01:00Z' })]);
+    assert.deepEqual(out.map((m) => m.id), ['y']);
   });
 });

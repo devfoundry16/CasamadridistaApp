@@ -15,6 +15,7 @@ import {
   applyReceipts,
   dropForMe,
   enforceRetractions,
+  outcomeUnknown,
   freshPage,
   undoDrop,
   undoRetract,
@@ -441,9 +442,16 @@ export function useThread(conversationId: string | undefined, myId: string | und
     } catch (e) {
       hiddenRef.current.delete(message.id);
       commit(undoDrop(messagesRef.current, before, message.id, goneRef.current.get(message.id) ?? null));
-      setError(e instanceof SocialApiError ? e.code : 'network_error');
+      const code = e instanceof SocialApiError ? e.code : 'network_error';
+      setError(code);
+      // It may have gone through all the same: the server has the last word.
+      if (!(e instanceof SocialApiError) || outcomeUnknown(e.status)) {
+        await loadNewest(true);
+        // The reload clears the error; it stands if the message is still there.
+        if (messagesRef.current.some((m) => m.id === message.id)) setError(code);
+      }
     }
-  }, [commit]);
+  }, [commit, loadNewest]);
 
   const unsend = useCallback(async (message: ChatMessage) => {
     if (isLocal(message)) return;
@@ -456,9 +464,16 @@ export function useThread(conversationId: string | undefined, myId: string | und
       // Only our own optimistic tombstone is undone: a removal that arrived
       // meanwhile stays.
       commit(undoRetract(messagesRef.current, before, message.id));
-      setError(e instanceof SocialApiError ? e.code : 'network_error');
+      const code = e instanceof SocialApiError ? e.code : 'network_error';
+      setError(code);
+      // It may have gone through all the same: the server has the last word.
+      if (!(e instanceof SocialApiError) || outcomeUnknown(e.status)) {
+        await loadNewest(true);
+        // The reload clears the error; it stands if the message is still there.
+        if (messagesRef.current.some((m) => m.id === message.id && m.status === 'visible')) setError(code);
+      }
     }
-  }, [commit, queryClient]);
+  }, [commit, queryClient, loadNewest]);
 
   const notifyTyping = useCallback(() => {
     const at = Date.now();

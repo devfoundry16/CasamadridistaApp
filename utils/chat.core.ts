@@ -214,6 +214,14 @@ export function undoDrop(
   return goneAs ? retract(list, id, goneAs) : list;
 }
 
+/**
+ * A take-back (unsend, delete for me) whose request got no answer, or failed
+ * inside the server, may still have gone through: only a refusal is certain.
+ * The bubble is put back so nothing looks taken back that might not be, and
+ * the thread is read again from the server, which settles it either way.
+ */
+export const outcomeUnknown = (status: number | null): boolean => status === null || status >= 500;
+
 /** "Delete for me": the message leaves this thread, and so does its text in my quotes of it. */
 export function dropForMe(messages: readonly ChatMessage[], id: string): ChatMessage[] {
   return withRetractedQuotes(messages.filter((m) => m.id !== id), new Set([id]));
