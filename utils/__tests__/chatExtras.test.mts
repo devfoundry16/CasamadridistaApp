@@ -13,6 +13,7 @@ import {
   freshPage,
   isCancelGesture,
   dropForMe,
+  enforceRetractions,
   mergeMessages,
   messageActions,
   messageFromEvent,
@@ -325,5 +326,30 @@ describe('review: retraction holes', () => {
     assert.equal(out.find((m) => m.id === 'o')!.status, 'unsent');
     assert.equal(out.find((m) => m.id === 'o')!.body, null);
     assert.equal(out.find((m) => m.id === 'r')!.reply_to!.body, null);
+  });
+});
+
+describe('what this device has heard or done is enforced on every list, whatever path built it', () => {
+  const quote = (id: string) => ({ id, sender_id: 'them', kind: 'text', status: 'visible', body: 'secret' });
+  it('an unsend heard before its message was loaded wins over a page fetched a moment earlier', () => {
+    // The event came first and found nothing to tombstone; the stale page still shows the text.
+    const stalePage = [msg({ id: 'x', body: 'secret', sender_id: 'them' }), msg({ id: 'r', created_at: '2026-10-03T10:01:00Z', reply_to: quote('x') })];
+    const out = enforceRetractions(stalePage, new Map([['x', 'unsent']]), new Set());
+    assert.equal(out.find((m) => m.id === 'x')!.status, 'unsent');
+    assert.equal(out.find((m) => m.id === 'x')!.body, null);
+    assert.equal(out.find((m) => m.id === 'r')!.reply_to!.body, null);
+  });
+  it('a removal outranks an unsend', () => {
+    const out = enforceRetractions([msg({ id: 'x', status: 'unsent', body: null })], new Map([['x', 'removed']]), new Set());
+    assert.equal(out[0].status, 'removed');
+  });
+  it('a message I deleted for myself does not come back with a page fetched before the server knew', () => {
+    const out = enforceRetractions([msg({ id: 'x' }), msg({ id: 'r', created_at: '2026-10-03T10:01:00Z', reply_to: quote('x') })], new Map(), new Set(['x']));
+    assert.deepEqual(out.map((m) => m.id), ['r']);
+    assert.equal(out[0].reply_to!.body, null);
+  });
+  it('with nothing heard and nothing hidden the list is returned as it is', () => {
+    const list = [msg({ id: 'a' })];
+    assert.equal(enforceRetractions(list, new Map(), new Set()), list);
   });
 });

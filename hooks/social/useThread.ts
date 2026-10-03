@@ -14,6 +14,7 @@ import {
   applyReaction,
   applyReceipts,
   dropForMe,
+  enforceRetractions,
   freshPage,
   undoDrop,
   undoRetract,
@@ -122,9 +123,23 @@ export function useThread(conversationId: string | undefined, myId: string | und
   /** Retractions heard on the channel while this thread has been open. */
   const goneRef = useRef(new Map<string, 'removed' | 'unsent'>());
 
-  /** Every state change goes through here, so the cache and ref stay in step. */
+  /** Messages this person deleted for themselves while the thread has been open. */
+  const hiddenRef = useRef(new Set<string>());
+
+  // Another conversation: what was heard and hidden belongs to the last one.
+  useEffect(() => {
+    goneRef.current = new Map();
+    hiddenRef.current = new Set();
+  }, [conversationId]);
+
+  /**
+   * Every state change goes through here, so the cache and ref stay in step —
+   * and so does `enforceRetractions`: whichever path built the list (a page,
+   * a merge, an event, a rollback), what was taken back stays taken back.
+   */
   const commit = useCallback(
-    (next: ChatMessage[]) => {
+    (list: ChatMessage[]) => {
+      const next = enforceRetractions(list, goneRef.current, hiddenRef.current);
       messagesRef.current = next;
       setMessages(next);
       if (conversationId) {
@@ -403,10 +418,12 @@ export function useThread(conversationId: string | undefined, myId: string | und
   const hideMessage = useCallback(async (message: ChatMessage) => {
     if (isLocal(message)) return;
     const before = messagesRef.current;
+    hiddenRef.current.add(message.id);
     commit(dropForMe(before, message.id));
     try {
       await SocialService.hideMessage(message.id);
     } catch (e) {
+      hiddenRef.current.delete(message.id);
       commit(undoDrop(messagesRef.current, before, message.id, goneRef.current.get(message.id) ?? null));
       setError(e instanceof SocialApiError ? e.code : 'network_error');
     }

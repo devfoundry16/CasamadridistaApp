@@ -148,6 +148,32 @@ export function retract(messages: readonly ChatMessage[], id: string, status: 'r
 }
 
 /**
+ * The last word on any list of messages, whatever built it — a page, a merge,
+ * an event, a rollback. What this device has heard on the channel (`gone`) or
+ * done itself (`hidden`, "delete for me") is applied again, so no path can
+ * show what was taken back: not a page fetched a moment before the unsend, not
+ * an event that arrived before its message was loaded.
+ *
+ * A removal outranks an unsend. Returns the same array when there is nothing
+ * to enforce.
+ */
+export function enforceRetractions(
+  messages: ChatMessage[],
+  gone: ReadonlyMap<string, 'removed' | 'unsent'>,
+  hidden: ReadonlySet<string>,
+): ChatMessage[] {
+  if (!gone.size && !hidden.size) return messages;
+  const list = messages
+    .filter((m) => !hidden.has(m.id))
+    .map((m) => {
+      const status = gone.get(m.id);
+      if (!status || m.status === 'removed' || m.status === status) return m;
+      return { ...m, status, body: null, attachments: [], embed: null, reply_to: null, reactions: { counts: [], mine: null } };
+    });
+  return withRetractedQuotes(list, new Set([...gone.keys(), ...hidden]));
+}
+
+/**
  * The server refused an unsend: put back what `retract` took, from the list as
  * it was before — unless the message was removed (or really unsent) in the
  * meantime, in which case nothing comes back.
