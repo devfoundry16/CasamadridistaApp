@@ -15,12 +15,15 @@ import {
   dropForMe,
   mergeMessages,
   messageActions,
+  messageFromEvent,
   needsFetch,
   nextRate,
   recordingOutcome,
   retract,
   REACTIONS,
   RECORD_MAX_MS,
+  undoDrop,
+  undoRetract,
   unsentCopy,
   viewerStillAllowed,
   videoPickProblem,
@@ -228,4 +231,71 @@ describe('an open photo or video closes when its message is taken back', () => {
   it('stays open while the message is visible', () => assert.equal(viewerStillAllowed(list, 'a'), true));
   it('closes when it was unsent or removed', () => assert.equal(viewerStillAllowed(list, 'b'), false));
   it('closes when it was deleted for me, or is no longer loaded', () => assert.equal(viewerStillAllowed(list, 'zzz'), false));
+});
+
+describe('the server copy is the truth: a cached copy never beats it', () => {
+  const att = (id: string) => ({ id, kind: 'image', mime_type: 'image/jpeg', width: 1, height: 1, url: `https://u/${id}`, url_expires_at: '2099-01-01T00:00:00Z' });
+  const card = { kind: 'post', id: 'p1', available: true, title: 'x' };
+  it('a cached copy with more photos and a card loses to a server copy that has fewer', () => {
+    const cached = msg({ id: 'm1', kind: 'image', attachments: [att('a'), att('b')], embed: card });
+    const server = msg({ id: 'm1', kind: 'image', attachments: [att('a')], embed: null });
+    const [out] = mergeMessages([cached], [server], Date.parse('2026-10-03T10:00:00Z'));
+    assert.deepEqual(out.attachments.map((x: any) => x.id), ['a']);
+    assert.equal(out.embed, null);
+  });
+  it('a card the server now reports unavailable replaces the cached one', () => {
+    const cached = msg({ id: 'm1', kind: 'share', embed: card });
+    const server = msg({ id: 'm1', kind: 'share', embed: { kind: 'post', id: 'p1', available: false } });
+    assert.equal((mergeMessages([cached], [server])[0].embed as any).available, false);
+  });
+  it('a bare realtime event does not wipe what the server copy carries', () => {
+    const server = msg({ id: 'm1', body: 'hi', sender_id: 'them', reactions: { counts: [{ emoji: '❤️', count: 1 }], mine: null }, reply_to: { id: 'o', sender_id: 'me', kind: 'text', status: 'visible', body: 'q' } });
+    const event = messageFromEvent({ id: 'm1', conversation_id: 'c', sender_id: 'them', kind: 'text', body: 'hi', embed_kind: null, client_id: null, created_at: server.created_at } as any, 'me')!;
+    const [out] = mergeMessages([server], [event]);
+    assert.equal(out.reactions.counts.length, 1);
+    assert.equal(out.reply_to!.body, 'q');
+  });
+});
+
+describe('a quote, once unavailable, stays unavailable', () => {
+  const visible = { id: 'o', sender_id: 'them', kind: 'text', status: 'visible', body: 'secret' };
+  const gone = { id: 'o', sender_id: 'them', kind: 'text', status: 'unavailable', body: null };
+  it('the server says unavailable: a cached reply cannot keep the text (the original may be on a page no longer loaded)', () => {
+    const [out] = mergeMessages([msg({ id: 'r', reply_to: visible })], [msg({ id: 'r', reply_to: gone })]);
+    assert.equal(out.reply_to!.body, null);
+  });
+  it('a stale copy cannot bring the text back', () => {
+    const [out] = mergeMessages([msg({ id: 'r', reply_to: gone })], [msg({ id: 'r', reply_to: visible })]);
+    assert.equal(out.reply_to!.status, 'unavailable');
+    assert.equal(out.reply_to!.body, null);
+  });
+});
+
+describe('undoing an optimistic unsend or delete that the server refused', () => {
+  const original = msg({ id: 'o', body: 'mine' });
+  const reply = msg({ id: 'r', created_at: '2026-10-03T10:01:00Z', reply_to: { id: 'o', sender_id: 'me', kind: 'text', status: 'visible', body: 'mine' } });
+  const before = [original, reply];
+
+  it('puts the message and the quotes of it back', () => {
+    const out = undoRetract(retract(before, 'o', 'unsent'), before, 'o');
+    assert.equal(out.find((m) => m.id === 'o')!.body, 'mine');
+    assert.equal(out.find((m) => m.id === 'r')!.reply_to!.body, 'mine');
+  });
+  it('but never over a removal that arrived meanwhile: nothing comes back', () => {
+    const now = retract(retract(before, 'o', 'unsent'), 'o', 'removed');
+    const out = undoRetract(now, before, 'o');
+    assert.equal(out.find((m) => m.id === 'o')!.status, 'removed');
+    assert.equal(out.find((m) => m.id === 'o')!.body, null);
+    assert.equal(out.find((m) => m.id === 'r')!.reply_to!.body, null);
+  });
+  it('a refused delete-for-me puts the message and my quotes back', () => {
+    const out = undoDrop(dropForMe(before, 'o'), before, 'o');
+    assert.deepEqual(out.map((m) => m.id).sort(), ['o', 'r']);
+    assert.equal(out.find((m) => m.id === 'r')!.reply_to!.body, 'mine');
+  });
+  it('a refused delete-for-me does not revive a message unsent meanwhile', () => {
+    const now = dropForMe(before, 'o');
+    const out = undoDrop(now, [msg({ id: 'o', status: 'unsent', body: null }), reply], 'o');
+    assert.equal(out.find((m) => m.id === 'o')!.body, null);
+  });
 });

@@ -266,6 +266,11 @@ export interface ChatMessage {
   receipt: ReceiptState | null;
   reply_to: MessageQuote | null;
   reactions: MessageReactions;
+  /**
+   * Device-only: built from a realtime event, which carries the text and
+   * nothing else. Such a copy never overrides one fetched from the API.
+   */
+  from_event?: boolean;
 }
 
 export interface MessagesPage {

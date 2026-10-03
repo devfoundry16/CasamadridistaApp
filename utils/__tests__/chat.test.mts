@@ -56,8 +56,9 @@ describe('mergeMessages', () => {
     assert.deepEqual(out.map((m) => m.id), ['b', 'a']);
   });
 
-  it('a fetch racing a broadcast yields one message, keeping the richer copy', () => {
-    const broadcast = msg({ id: 'x', kind: 'share', embed: null });
+  it('a fetch racing a broadcast yields one message, keeping the fetched copy', () => {
+    // A copy built from a realtime event carries the text only (`from_event`).
+    const broadcast = msg({ id: 'x', kind: 'share', embed: null, from_event: true });
     const fetched = msg({
       id: 'x',
       kind: 'share',

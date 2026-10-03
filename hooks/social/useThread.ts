@@ -15,6 +15,8 @@ import {
   applyReceipts,
   dropForMe,
   freshPage,
+  undoDrop,
+  undoRetract,
   isLocal,
   isTyping as typingActive,
   mergeMessages,
@@ -392,19 +394,22 @@ export function useThread(conversationId: string | undefined, myId: string | und
     try {
       await SocialService.hideMessage(message.id);
     } catch (e) {
-      commit(mergeMessages(messagesRef.current, [message]));
+      commit(undoDrop(messagesRef.current, before, message.id));
       setError(e instanceof SocialApiError ? e.code : 'network_error');
     }
   }, [commit]);
 
   const unsend = useCallback(async (message: ChatMessage) => {
     if (isLocal(message)) return;
-    commit(retract(messagesRef.current, message.id, 'unsent'));
+    const before = messagesRef.current;
+    commit(retract(before, message.id, 'unsent'));
     try {
       await SocialService.unsendMessage(message.id);
       void queryClient.invalidateQueries({ queryKey: socialKeys.inbox('inbox') });
     } catch (e) {
-      commit(messagesRef.current.map((m) => (m.id === message.id ? message : m)));
+      // Only our own optimistic tombstone is undone: a removal that arrived
+      // meanwhile stays.
+      commit(undoRetract(messagesRef.current, before, message.id));
       setError(e instanceof SocialApiError ? e.code : 'network_error');
     }
   }, [commit, queryClient]);

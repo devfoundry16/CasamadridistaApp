@@ -137,6 +137,39 @@ export function retract(messages: readonly ChatMessage[], id: string, status: 'r
   );
 }
 
+/**
+ * The server refused an unsend: put back what `retract` took, from the list as
+ * it was before — unless the message was removed (or really unsent) in the
+ * meantime, in which case nothing comes back.
+ */
+export function undoRetract(current: readonly ChatMessage[], before: readonly ChatMessage[], id: string): ChatMessage[] {
+  const was = new Map(before.map((m) => [m.id, m]));
+  const original = was.get(id);
+  const now = current.find((m) => m.id === id);
+  // Only our own optimistic tombstone is undone.
+  if (!original || !now || now.status !== 'unsent' || original.status !== 'visible') return [...current];
+  return current.map((m) => {
+    if (m.id === id) return original;
+    const old = was.get(m.id);
+    return old?.reply_to?.id === id && m.reply_to?.id === id ? { ...m, reply_to: old.reply_to } : m;
+  });
+}
+
+/**
+ * The server refused a "delete for me": the message and my quotes of it come
+ * back as they were — never with content it had already lost.
+ */
+export function undoDrop(current: readonly ChatMessage[], before: readonly ChatMessage[], id: string): ChatMessage[] {
+  const was = new Map(before.map((m) => [m.id, m]));
+  const original = was.get(id);
+  if (!original || current.some((m) => m.id === id)) return [...current];
+  const restored = current.map((m) => {
+    const old = was.get(m.id);
+    return original.status === 'visible' && old?.reply_to?.id === id && m.reply_to?.id === id ? { ...m, reply_to: old.reply_to } : m;
+  });
+  return [...restored, original].sort(compareNewestFirst);
+}
+
 /** "Delete for me": the message leaves this thread, and so does its text in my quotes of it. */
 export function dropForMe(messages: readonly ChatMessage[], id: string): ChatMessage[] {
   return withRetractedQuotes(messages.filter((m) => m.id !== id), new Set([id]));
@@ -147,12 +180,26 @@ const URL_REFRESH_MARGIN_MS = 60_000;
 
 const isGone = (m: ChatMessage) => m.status === 'removed' || m.status === 'unsent';
 
+/** A quote that is unavailable in either copy is unavailable: its text never comes back. */
+function foldQuote(a: ChatMessage['reply_to'], b: ChatMessage['reply_to']): ChatMessage['reply_to'] {
+  const lost = [a, b].find((q) => q && q.status !== 'visible');
+  if (lost) return { ...lost, status: 'unavailable', body: null };
+  return b ?? a;
+}
+
 /**
- * Two copies of one message, folded. A removal, and then an unsend, always
- * wins — both are final, so a cached or late copy can never bring the
- * content back. Receipts only move forward; the newer copy's reactions win.
- * A signed URL still good for a minute is kept, so a refetch does not restart
- * a playing voice note or re-download a photo.
+ * Two copies of one message, folded: `a` is the one already held, `b` the one
+ * arriving.
+ *
+ *   - A removal, and then an unsend, always wins. Both are final, so a cached
+ *     or late copy can never bring the content back.
+ *   - Otherwise the arriving copy is the truth, whatever the held one has more
+ *     of: a photo or a card the server no longer sends is gone.
+ *   - The one exception is a copy built from a realtime event, which carries
+ *     only the text: it never replaces a copy fetched from the API.
+ *   - A quote that either copy marks unavailable stays unavailable.
+ *   - Receipts only move forward. A signed URL still good for a minute is
+ *     kept, so a refetch does not restart a playing voice note.
  */
 function richer(a: ChatMessage, b: ChatMessage, now: number): ChatMessage {
   const status = a.status === 'removed' || b.status === 'removed' ? 'removed' : isGone(a) ? a.status : isGone(b) ? b.status : null;
@@ -169,8 +216,7 @@ function richer(a: ChatMessage, b: ChatMessage, now: number): ChatMessage {
       receipt: maxReceipt(a.receipt, b.receipt),
     };
   }
-  const score = (m: ChatMessage) => (m.embed ? 2 : 0) + m.attachments.filter((x) => x.url).length;
-  const base = score(b) >= score(a) ? b : a;
+  const base = b.from_event && !a.from_event ? a : b;
   const other = base === b ? a : b;
   // The copy already on screen (`a`) keeps its URL while it is still good.
   const live = new Map(
@@ -184,7 +230,7 @@ function richer(a: ChatMessage, b: ChatMessage, now: number): ChatMessage {
       const held = live.get(x.id);
       return held ? { ...x, url: held.url, url_expires_at: held.url_expires_at } : x;
     }),
-    reactions: b.reactions ?? a.reactions,
+    reply_to: base === b ? foldQuote(a.reply_to, b.reply_to) : a.reply_to,
     receipt: maxReceipt(base.receipt, other.receipt),
   };
 }
@@ -276,6 +322,7 @@ export function messageFromEvent(event: RealtimeMessageEvent, myId: string): Cha
     receipt: event.sender_id === myId ? 'sent' : null,
     reply_to: null,
     reactions: { counts: [], mine: null },
+    from_event: true,
   };
 }
 
