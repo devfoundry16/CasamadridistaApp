@@ -353,6 +353,10 @@ function RootLayoutNav() {
           options={{ title: t("social.blocked.title"), ...options }}
         />
         <Stack.Screen
+          name="social/appeals"
+          options={{ title: t("appeals.title"), ...options }}
+        />
+        <Stack.Screen
           name="social/chat/[id]"
           options={{ title: "", ...options, headerTitleAlign: "left" }}
         />

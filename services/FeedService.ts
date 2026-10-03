@@ -49,6 +49,8 @@ export interface TaggedUser {
 }
 
 export interface Post {
+  /** false when a moderator turned comments off (admin §5). Absent on older APIs. */
+  comments_enabled?: boolean;
   id: string;
   author_id: string;
   /** `casa` is an official Casa Media teaser, posted from the admin dashboard. */

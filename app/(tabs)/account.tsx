@@ -14,6 +14,7 @@ import {
   LogOut,
   Settings,
   User,
+  Scale,
   Wallet,
 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
@@ -348,6 +349,17 @@ export default function AccountScreen() {
             </View>
           </TouchableOpacity>
         )}
+
+        {/* Appeals and warnings (admin §25): reachable while restricted. */}
+        <TouchableOpacity
+          className="flex-row items-center bg-bg-card p-4 rounded-[25px] mb-3 gap-4"
+          onPress={() => router.push('/social/appeals' as any)}
+        >
+          <Scale size={24} color={Colors.darkGold} />
+          <View className="flex-1 flex-row justify-between items-center">
+            <Text className="text-base font-semibold text-text-primary">{t("appeals.entry")}</Text>
+          </View>
+        </TouchableOpacity>
 
         <TouchableOpacity
           className="flex-row items-center bg-bg-light p-4 rounded-[25px] mb-3 gap-4 border border-status-error"

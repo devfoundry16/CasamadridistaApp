@@ -190,15 +190,22 @@ export default function PostDetailPage() {
             ) : null
           }
         />
-        <CommentInput
-          ref={commentInputRef}
-          postId={id}
-          replyTo={replyTo?.id}
-          replyToName={replyTo?.author?.first_name ?? null}
-          onSubmit={handleSubmit}
-          onCancelReply={handleCancelReply}
-          bottomInset={bottomInset}
-        />
+        {post.comments_enabled === false ? (
+          // A moderator turned comments off (admin §5); the API refuses new ones.
+          <View style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 + bottomInset, borderTopWidth: 1, borderTopColor: Colors.border.default }}>
+            <Text style={{ color: Colors.text.tertiary, textAlign: 'center' }}>{t('community.commentsOff')}</Text>
+          </View>
+        ) : (
+          <CommentInput
+            ref={commentInputRef}
+            postId={id}
+            replyTo={replyTo?.id}
+            replyToName={replyTo?.author?.first_name ?? null}
+            onSubmit={handleSubmit}
+            onCancelReply={handleCancelReply}
+            bottomInset={bottomInset}
+          />
+        )}
       </KeyboardAvoidingView>
       <ReportSheet visible={reportOpen} postId={post.id} onClose={() => setReportOpen(false)} />
     </>

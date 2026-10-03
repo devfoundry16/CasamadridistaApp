@@ -64,6 +64,9 @@ class CommentServiceClass {
       if (error.response?.data?.error === 'account_restricted') {
         throw new Error(i18n.t('community.accountRestricted'));
       }
+      if (error.response?.data?.error === 'comments_disabled') {
+        throw new Error(i18n.t('community.commentsOff'));
+      }
       throw new Error(error.response?.data?.error || 'Failed to create comment');
     }
   }

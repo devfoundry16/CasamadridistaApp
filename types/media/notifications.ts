@@ -10,6 +10,8 @@ export type PushPayloadType =
   | 'custom'
   // A manager invited this account to contribute to Casa Media.
   | 'contributor_invite'
+  // A warning, or a decision on the person's appeal: opens the appeals screen.
+  | 'safety_notice'
   // Casa Social (`backend/services/notifications/payload.js` SOCIAL_TYPES).
   | 'friend_request'
   | 'friend_accept'
@@ -37,6 +39,8 @@ export interface PushPayload {
   comment_id?: string;
   /** Social: a post_comment that answers the recipient's own comment. */
   reply?: boolean;
+  /** safety_notice: 'warning' | 'appeal_overturned' | 'appeal_upheld' — the title is localised from it. */
+  subtype?: string;
   /** casamadridistaapp://media/item/<uuid>?c=<campaign_id> */
   url?: string;
   /** https://<MEDIA_LINK_DOMAIN>/m/<uuid> */

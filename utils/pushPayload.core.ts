@@ -68,6 +68,9 @@ export function hrefFromPayloadWithScheme(
     // route is fixed; nothing in the payload can change it.
     case 'contributor_invite':
       return '/contributor';
+    // A warning or an appeal decision opens the person's appeals screen.
+    case 'safety_notice':
+      return '/social/appeals';
     case 'custom':
     default:
       return safePathFromUrl(payload.url, scheme);
@@ -116,5 +119,6 @@ export function parsePushPayload(data: unknown): PushPayload | null {
     ...(typeof candidate.post_id === 'string' ? { post_id: candidate.post_id } : {}),
     ...(typeof candidate.comment_id === 'string' ? { comment_id: candidate.comment_id } : {}),
     ...(candidate.reply === true ? { reply: true } : {}),
+    ...(typeof candidate.subtype === 'string' ? { subtype: candidate.subtype } : {}),
   };
 }

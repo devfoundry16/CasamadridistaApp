@@ -107,6 +107,26 @@ export interface SocialProfile {
   relationship: { state: RelationshipState; can_message: boolean };
 }
 
+/** Your own appeal against a moderation decision (admin §25). */
+export interface MyAppeal {
+  id: string;
+  subject_kind: 'restriction' | 'warning';
+  subject_id: string | null;
+  status: 'open' | 'upheld' | 'overturned';
+  decision_note: string | null;
+  decided_at: string | null;
+  created_at: string;
+}
+
+/** A formal warning on your account. Who issued it is not shown. */
+export interface MyWarning {
+  id: string;
+  reason: string;
+  source_kind: string;
+  created_at: string;
+  withdrawn_at: string | null;
+}
+
 export interface SearchResult extends PersonCard {
   relationship: RelationshipState;
 }

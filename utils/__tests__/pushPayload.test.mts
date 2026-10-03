@@ -98,6 +98,11 @@ describe('pushPayload.core — hrefFromPayload', () => {
     );
   });
 
+  it('opens the appeals screen for a warning or an appeal decision', () => {
+    assert.equal(href({ v: 1, type: 'safety_notice' }), '/social/appeals');
+    assert.equal(href({ v: 1, type: 'safety_notice', url: 'casamadridistaapp://account/delete' }), '/social/appeals');
+  });
+
   it('falls back to the url only for custom, and only for our own scheme', () => {
     assert.equal(
       href({ v: 1, type: 'custom', url: 'casamadridistaapp://media/archive' }),
@@ -233,5 +238,13 @@ describe('pushPayload.core — parsePushPayload', () => {
     assert.equal(parsePushPayload('media_item'), null);
     assert.equal(parsePushPayload({ item_id: 'a' }), null);
     assert.equal(parsePushPayload({ type: 3 }), null);
+  });
+});
+
+describe('pushPayload.core — safety notices', () => {
+  it('keeps the subtype the title is localised from', () => {
+    assert.equal(parsePushPayload({ type: 'safety_notice', subtype: 'warning' })?.subtype, 'warning');
+    assert.ok(!('subtype' in parsePushPayload({ type: 'safety_notice', subtype: 5 })!));
+    assert.ok(!('subtype' in parsePushPayload({ type: 'safety_notice' })!));
   });
 });

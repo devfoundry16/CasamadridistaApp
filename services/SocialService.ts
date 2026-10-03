@@ -37,6 +37,8 @@ import type {
   SuggestedPerson,
   UnreadCounts,
   UsernameCheck,
+  MyAppeal,
+  MyWarning,
 } from '@/types/social';
 
 const BASE = `${API_BASE_URL}social`;
@@ -246,6 +248,32 @@ class SocialServiceClass {
 
   async report(input: { target_kind: 'message' | 'profile'; target_id: string; reason: SocialReportReason; details?: string }): Promise<void> {
     await this.send('post', '/reports', input);
+  }
+
+  /* ---------------- appeals (admin §25) ---------------- */
+
+  /**
+   * Your appeals, whether the account is restricted, and whether that
+   * restriction can still be appealed (not once an appeal on it was upheld).
+   */
+  async myAppeals(): Promise<{ data: MyAppeal[]; restricted: boolean; restrictionAppealable: boolean }> {
+    const body = await this.get<{ data?: MyAppeal[]; restricted?: boolean; restriction_appealable?: boolean }>(
+      '/appeals/mine'
+    );
+    return {
+      data: body?.data ?? [],
+      restricted: !!body?.restricted,
+      restrictionAppealable: !!body?.restriction_appealable,
+    };
+  }
+
+  async myWarnings(): Promise<MyWarning[]> {
+    const body = await this.get<{ data?: MyWarning[] }>('/warnings/mine');
+    return body?.data ?? [];
+  }
+
+  async appeal(input: { subject_kind: MyAppeal['subject_kind']; subject_id?: string | null; statement: string }): Promise<MyAppeal> {
+    return this.send('post', '/appeals', input);
   }
 }
 

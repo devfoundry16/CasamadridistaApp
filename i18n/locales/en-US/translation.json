@@ -903,7 +903,8 @@
       "failed": "Couldn't load this hashtag.",
       "invalidTitle": "Not a hashtag",
       "invalidBody": "This link doesn't point to a hashtag."
-    }
+    },
+    "commentsOff": "Comments are turned off for this post."
   },
   "membershipPackages": {
     "halaGold": {
@@ -1724,6 +1725,41 @@
       "account_restricted": "Your account is restricted.",
       "empty": "Write a message first.",
       "body_too_long": "That message is too long."
+    }
+  },
+  "appeals": {
+    "title": "Appeals and warnings",
+    "emptyTitle": "Nothing to appeal",
+    "emptyBody": "Your account has no restriction or warnings.",
+    "restrictedTitle": "Your account is restricted",
+    "restrictedBody": "You can still read and report, but you cannot post, comment, message or send friend requests.",
+    "appealRestriction": "Appeal the restriction",
+    "appealWarning": "Appeal this warning",
+    "warnings": "Warnings",
+    "withdrawn": "Withdrawn",
+    "yourAppeals": "Your appeals",
+    "formRestriction": "Tell us why the restriction should be lifted.",
+    "formWarning": "Tell us why this warning is wrong.",
+    "placeholder": "Explain what happened, in your own words.",
+    "send": "Send appeal",
+    "sent": "Your appeal was sent. Someone other than the person who decided will review it.",
+    "failed": "Your appeal could not be sent. You may already have one open, or this decision was already reviewed.",
+    "tooShort": "Please write at least a sentence.",
+    "tooLong": "Please keep it under 2,000 characters.",
+    "status": {
+      "open": "Waiting for review",
+      "upheld": "Reviewed: the decision stands",
+      "overturned": "Accepted: the decision was reversed"
+    },
+    "subject": {
+      "restriction": "Account restriction",
+      "warning": "Warning"
+    },
+    "entry": "Appeals and warnings",
+    "notice": {
+      "warning": "You received a warning",
+      "appeal_overturned": "Your appeal was accepted",
+      "appeal_upheld": "Your appeal was reviewed"
     }
   }
 }

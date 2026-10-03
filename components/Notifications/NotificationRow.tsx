@@ -9,6 +9,7 @@ import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import NotificationService from '@/services/NotificationService';
 import type { InboxNotification, PushPayloadType } from '@/types/media/notifications';
+import { safetyNoticeKey } from '@/utils/appeals.core';
 import { hrefFromPayload } from '@/utils/pushPayload';
 
 /** Payload types whose title is rebuilt from `actor_name` in the reader's language. */
@@ -44,8 +45,12 @@ function NotificationRow({ notification, onRead }: Props) {
       : type === 'post_comment' && notification.data?.reply === true
         ? 'post_comment_reply'
         : type;
-  const title =
-    type && LOCALISED_TYPES.has(type) && actor
+  // A safety notice is titled from its subtype; the body carries the
+  // reviewer's note as written.
+  const noticeKey = type === 'safety_notice' ? safetyNoticeKey(notification.data?.subtype) : null;
+  const title = noticeKey
+    ? t(noticeKey)
+    : type && LOCALISED_TYPES.has(type) && actor
       ? t(`social.notifications.${key}`, { name: actor })
       : notification.title ?? '';
 
