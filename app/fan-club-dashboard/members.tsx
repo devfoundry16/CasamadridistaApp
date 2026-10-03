@@ -99,9 +99,10 @@ export default function DashboardMembersScreen() {
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1 mr-3">
                     <Text className="text-text-primary font-semibold">
-                      {name || item.user_profiles.email}
+                      {/* Editors get no email (owners and admins do). */}
+                      {name || item.user_profiles.email || t("fanClubDashboard.unnamedMember")}
                     </Text>
-                    {name ? (
+                    {name && item.user_profiles.email ? (
                       <Text className="text-text-secondary text-sm">{item.user_profiles.email}</Text>
                     ) : null}
                     <Text className="text-text-secondary text-xs mt-1">

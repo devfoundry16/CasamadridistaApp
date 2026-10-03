@@ -15,6 +15,9 @@ export interface MemberRegistration {
   madridista_card_number: string | null;
   signature_full_name: string;
   registration_pdf_path: string | null;
+  /** The fan club desk's decision on the application (absent from older backends). */
+  status?: 'pending' | 'approved' | 'rejected';
+  review_note?: string | null;
   created_at: string;
   updated_at: string;
 }

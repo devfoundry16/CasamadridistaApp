@@ -16,6 +16,7 @@ import { ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-r
 import Colors from '@/constants/colors';
 import FanClubDashboardService, { RevenueTransaction } from '@/services/FanClubDashboardService';
 import { useTranslation } from 'react-i18next';
+import { ledgerLine } from '@/utils/clubLedger.core';
 
 /**
  * These screens draw their own back row (`headerShown: false`), so nothing
@@ -175,7 +176,7 @@ export default function DashboardRevenueScreen() {
             <Text className="text-text-secondary text-center mt-8">{t("fanClubDashboard.noTransactions")}</Text>
           }
           renderItem={({ item }) => {
-            const isRevenue = item.type === 'revenue_share';
+            const { incoming: isRevenue, labelKey } = ledgerLine(item.type);
             return (
               <View className="bg-bg-card rounded-xl px-4 py-3 mb-2 flex-row items-center">
                 <View
@@ -189,7 +190,10 @@ export default function DashboardRevenueScreen() {
                 </View>
                 <View className="flex-1">
                   <Text className="text-text-primary font-medium text-sm">
-                    {item.description || (isRevenue ? t("fanClubDashboard.revenueShare") : t("fanClubDashboard.payout"))}
+                    {/* Payout lines are written by the backend in English; the type's own
+                        label reads in the person's language. A revenue share keeps its
+                        description, which carries the percentage. */}
+                    {item.type === 'revenue_share' ? item.description || t(labelKey) : t(labelKey)}
                   </Text>
                   <Text className="text-text-secondary text-xs">{formatDate(item.created_at)}</Text>
                 </View>

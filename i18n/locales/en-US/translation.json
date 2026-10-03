@@ -111,7 +111,13 @@
     "signatureDisclaimer": "By typing your full name in the Signature field above, you are legally signing this registration form.",
     "noSubscriptionTitle": "No Active Membership",
     "noSubscriptionMessage": "You need an active membership to complete your registration. Choose a plan to get started.",
-    "viewPackages": "View Membership Plans"
+    "viewPackages": "View Membership Plans",
+    "status": {
+      "pending": "Your application to {{club}} is waiting for review.",
+      "approved": "You are a registered member of {{club}}.",
+      "rejected": "Your application to {{club}} was not approved.",
+      "rejectedHint": "Choosing another club sends a new application."
+    }
   },
   "fanClubs": {
     "title": "Global Fan Clubs",
@@ -983,7 +989,9 @@
     "loadFailed": "Failed to load dashboard",
     "switchClub": "Choose a club",
     "unnamedClub": "Unnamed club",
-    "payoutNotAllowed": "Only club owners and admins can request payouts."
+    "payoutNotAllowed": "Only club owners and admins can request payouts.",
+    "payoutReversal": "Payout credited back",
+    "unnamedMember": "Unnamed member"
   },
   "admin": {
     "title": "Super Admin Panel",

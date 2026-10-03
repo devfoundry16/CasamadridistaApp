@@ -21,6 +21,7 @@ import MemberRegistrationService, {
   MemberRegistrationInput,
 } from '@/services/MemberRegistrationService';
 import { useUser } from '@/hooks/useUser';
+import { registrationStatusKey } from '@/utils/registrationStatus.core';
 import Purchases from 'react-native-purchases';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -176,7 +177,9 @@ export default function MemberRegistrationScreen() {
         phone:              form.phone.trim(),
         city:               form.city.trim(),
         country:            form.country.trim(),
-        fanClubId:          fanClubIdParam || null,
+        // Opened from the Registration tab there is no param: keep the stored
+        // club, or saving would read as leaving it (and re-apply).
+        fanClubId:          fanClubIdParam || existingRegistration?.fan_club_id || null,
         fanClubName:        form.fanClubName.trim(),
         madristaCardNumber: form.madristaCardNumber.trim() || undefined,
         signatureFullName:  form.signatureFullName.trim(),
@@ -280,7 +283,12 @@ export default function MemberRegistrationScreen() {
         <View className="p-9">
           {existingRegistration && (
             <GoldAccentBanner className="mb-6">
-              {t('registration.alreadyRegistered')}
+              {/* One string: the banner wraps only a string child in Text. */}
+              {`${t(registrationStatusKey(existingRegistration), { club: existingRegistration.fan_club_name })}${
+                existingRegistration.status === 'rejected' && existingRegistration.fan_club_id
+                  ? `\n${t('registration.status.rejectedHint')}`
+                  : ''
+              }`}
             </GoldAccentBanner>
           )}
 

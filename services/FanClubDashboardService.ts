@@ -22,7 +22,8 @@ export interface DashboardMember {
   created_at: string;
   user_profiles: {
     id: string;
-    email: string;
+    /** Sent to the club's owners and admins only. */
+    email?: string;
     first_name: string | null;
     last_name: string | null;
   };
@@ -30,7 +31,8 @@ export interface DashboardMember {
 
 export interface RevenueTransaction {
   id: string;
-  type: 'revenue_share' | 'payout';
+  /** 'payout_reversal': a rejected or cancelled payout credited back. */
+  type: 'revenue_share' | 'payout' | 'payout_reversal';
   amount: number;
   description: string | null;
   created_at: string;
@@ -135,7 +137,11 @@ class FanClubDashboardServiceClass {
     return res.data;
   }
 
-  async requestPayout(amount: number): Promise<{ transaction: RevenueTransaction; newBalance: number }> {
+  async requestPayout(amount: number): Promise<{
+    payout: { id: string; amount: number; status: string };
+    transaction: Pick<RevenueTransaction, 'id' | 'type' | 'amount'>;
+    newBalance: number;
+  }> {
     const headers = await this.getAuthHeader();
     const res = await axios.post(
       `${API_BASE_URL}fan-club-dashboard/payout`,
