@@ -12,6 +12,8 @@ export type PushPayloadType =
   | 'contributor_invite'
   // A warning, or a decision on the person's appeal: opens the appeals screen.
   | 'safety_notice'
+  // Mentioned in a user story: opens the author's stories.
+  | 'story_mention'
   // Casa Social (`backend/services/notifications/payload.js` SOCIAL_TYPES).
   | 'friend_request'
   | 'friend_accept'

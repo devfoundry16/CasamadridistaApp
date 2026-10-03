@@ -31,7 +31,7 @@ export const MESSAGE_KINDS = ['text', 'image', 'share'] as const;
 export type MessageKind = (typeof MESSAGE_KINDS)[number];
 
 /** conversationRules.EMBED_KINDS — what "Send to a friend" can carry. */
-export const EMBED_KINDS = ['post', 'media_item', 'profile'] as const;
+export const EMBED_KINDS = ['post', 'media_item', 'profile', 'story'] as const;
 export type EmbedKind = (typeof EMBED_KINDS)[number];
 
 /** `pending` and `failed` exist only on the device; the server sends the rest. */
@@ -222,6 +222,10 @@ export interface MessageEmbed {
   /** Media items only: the server-side lock, never derived here. */
   locked: boolean;
   person: PersonCard | null;
+  /** Stories only: past its 24 hours (the reply still reads, the story is gone). */
+  expired?: boolean;
+  /** Stories only: whose story it is, to open their stories. */
+  author_id?: string | null;
 }
 
 export interface ChatMessage {
@@ -267,4 +271,50 @@ export interface RealtimeReceiptEvent {
   user_id: string;
   last_delivered_at: string | null;
   last_read_at: string | null;
+}
+
+// ---------- user stories (C1) ----------
+
+export interface UserStory {
+  id: string;
+  author_id: string;
+  kind: 'photo' | 'video';
+  caption: string | null;
+  width: number | null;
+  height: number | null;
+  duration_ms: number | null;
+  published_at: string | null;
+  expires_at: string | null;
+  seen: boolean;
+  /** Photo, signed for a few minutes. */
+  url: string | null;
+  /** Video, a signed HLS manifest. */
+  hls_url: string | null;
+  thumbnail_url: string | null;
+  url_expires_at: string | null;
+  status?: string;
+}
+
+export interface UserStoryGroup {
+  author_id: string;
+  author: PersonCard | null;
+  all_seen: boolean;
+  stories: UserStory[];
+}
+
+export interface StorySlot {
+  story_id: string;
+  kind: 'photo' | 'video';
+  upload_url: string;
+  method: 'PUT' | 'POST';
+  token?: string;
+}
+
+export interface StoryViewer {
+  id: string;
+  username: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  avatar_url: string | null;
+  viewed_at: string;
 }

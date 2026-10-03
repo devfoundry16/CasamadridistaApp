@@ -17,6 +17,7 @@ import T from '@/components/Social/T';
 import Colors from '@/constants/colors';
 import { socialKeys } from '@/hooks/social/keys';
 import { useProfile, useRelationshipAction } from '@/hooks/social/useProfile';
+import { useUserStories } from '@/hooks/social/useStories';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useUser } from '@/hooks/useUser';
 import CasaMediaService from '@/services/CasaMediaService';
@@ -31,6 +32,7 @@ import {
   type ProfileTab,
 } from '@/utils/profileGrid.core';
 import { isUuid } from '@/utils/pushPayload.core';
+import { ringState } from '@/utils/stories.core';
 
 /**
  * A person's profile (§1–§5).
@@ -88,6 +90,10 @@ export default function UserProfileScreen() {
 
   const isSelf = profile?.relationship.state === 'self';
   const blocking = profile?.relationship.state === 'blocking';
+  // A blocked or blocking pair never sees each other's stories, so the ring
+  // is not asked for at all then.
+  const stories = useUserStories(profile && !blocking ? id : undefined);
+  const ring = stories.data ? ringState(stories.data.stories) : null;
   const isContributor = profile?.user.is_media_contributor === true;
   // Saved is private and Media is a contributor's; a stale tab carried over
   // from another profile falls back to Posts.
@@ -229,7 +235,13 @@ export default function UserProfileScreen() {
                 </View>
               </Touchable>
             ) : null}
-            <ProfileHeader profile={profile} onMessage={openChat} onCreate={isSelf ? () => router.push('/community/compose') : undefined} />
+            <ProfileHeader
+              profile={profile}
+              onMessage={openChat}
+              onCreate={isSelf ? () => router.push('/community/compose') : undefined}
+              storyRing={ring}
+              onAvatarPress={ring ? () => router.push(`/stories/${id}`) : isSelf ? () => router.push('/stories/create') : undefined}
+            />
             {blocking ? (
               <T step="footnote" color={Colors.text.tertiary} align="center" style={{ padding: 24 }}>
                 {t('social.profile.youBlocked', { name })}

@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Clapperboard, Lock, MessageSquareText, UserRound } from 'lucide-react-native';
+import { CircleDashed, Clapperboard, Lock, MessageSquareText, UserRound } from 'lucide-react-native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -30,7 +30,19 @@ export default function EmbedCard({ embed, mine }: Props) {
   const sub = mine ? 'rgba(26,26,26,0.7)' : Colors.text.tertiary;
 
   const kindLabel = t(`social.embed.${embed.kind}`);
-  const Icon = embed.kind === 'post' ? MessageSquareText : embed.kind === 'media_item' ? Clapperboard : UserRound;
+  const Icon = embed.kind === 'post' ? MessageSquareText : embed.kind === 'media_item' ? Clapperboard : embed.kind === 'story' ? CircleDashed : UserRound;
+
+  // A reply to a story that has run its 24 hours: the text still reads.
+  if (embed.kind === 'story' && embed.expired) {
+    return (
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 4 }}>
+        <Icon size={16} color={sub} />
+        <T step="footnote" color={sub} style={{ marginStart: 8, fontStyle: 'italic' }}>
+          {t('social.embed.storyExpired', { name: embed.title ?? '' })}
+        </T>
+      </View>
+    );
+  }
 
   if (!embed.available) {
     return (
@@ -46,6 +58,7 @@ export default function EmbedCard({ embed, mine }: Props) {
   const open = () => {
     if (embed.kind === 'post') router.push(`/community/post/${embed.id}`);
     else if (embed.kind === 'media_item') router.push(`/media/item/${embed.id}`);
+    else if (embed.kind === 'story') router.push(`/stories/${embed.author_id ?? ''}` as any);
     else router.push(`/user/${embed.id}`);
   };
 

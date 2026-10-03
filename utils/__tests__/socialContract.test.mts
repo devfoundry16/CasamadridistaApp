@@ -207,3 +207,16 @@ describe('profile grid', () => {
     assert.equal(row.is_video, false);
   });
 });
+
+describe('stories in messages (C1)', () => {
+  it('a story reply card names the author and opens their stories; an expired one says so', () => {
+    const live = normaliseEmbed({ kind: 'story', id: 's1', available: true, expired: false, author_id: 'u2', caption: 'Hala', thumbnail_url: 'https://t', author: { id: 'u2', name: 'Li', username: 'li' } });
+    assert.equal(live?.kind, 'story');
+    assert.equal(live?.title, 'Li');
+    assert.equal(live?.subtitle, 'Hala');
+    assert.equal(live?.author_id, 'u2');
+    assert.equal(live?.expired, false);
+    const gone = normaliseEmbed({ kind: 'story', id: 's1', available: true, expired: true, author_id: 'u2', author: { id: 'u2', name: 'Li' } });
+    assert.equal(gone?.expired, true);
+  });
+});

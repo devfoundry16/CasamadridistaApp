@@ -1603,7 +1603,8 @@
       "share_post": "Shared a post",
       "share_media_item": "Shared from Casa Media",
       "share_profile": "Shared a profile",
-      "share": "Shared something"
+      "share": "Shared something",
+      "share_story": "Replied to a story"
     },
     "receipt": {
       "pending": "Sending",
@@ -1645,7 +1646,9 @@
       "media_item": "Casa Media",
       "profile": "Profile",
       "exclusive": "Exclusive",
-      "unavailable": "{{kind}} no longer available"
+      "unavailable": "{{kind}} no longer available",
+      "story": "Story",
+      "storyExpired": "{{name}}'s story is no longer available"
     },
     "share": {
       "title": "Send to friends",
@@ -1669,7 +1672,9 @@
     "report": {
       "titleMessage": "Report message",
       "titleProfile": "Report profile",
+      "titleStory": "Report story",
       "privacy": "They won't know who reported them. Our Trust & Safety team only sees the reported message and the few before it.",
+      "privacyStory": "They won't know who reported them. Our Trust & Safety team sees the reported story and its caption.",
       "reasons": {
         "spam": "Spam",
         "harassment": "Harassment or bullying",
@@ -1773,5 +1778,48 @@
       "appeal_overturned": "Your appeal was accepted",
       "appeal_upheld": "Your appeal was reviewed"
     }
+  },
+  "stories": {
+    "title": "Stories",
+    "create": "New story",
+    "add": "Add story",
+    "yourStory": "Your story",
+    "openOf": "Open {{name}}'s story",
+    "none": "No stories right now.",
+    "you": "You",
+    "more": "More options",
+    "previous": "Previous story",
+    "next": "Next story",
+    "seenBy": "Seen by",
+    "viewers_one": "{{count}} viewer",
+    "viewers_other": "{{count}} viewers",
+    "noViewers": "No one has seen this yet.",
+    "react": "React with {{reaction}}",
+    "replyPlaceholder": "Reply to {{name}}…",
+    "send": "Send",
+    "replySent": "Sent as a message.",
+    "replyFailed": "Your reply wasn't sent. Try again.",
+    "requestLimit": "You can send up to 3 messages before they accept your request.",
+    "delete": "Delete story",
+    "deleteTitle": "Delete this story?",
+    "deleteBody": "It disappears for everyone straight away.",
+    "deleteFailed": "The story wasn't deleted. Try again.",
+    "mute": "Mute {{name}}'s stories",
+    "muted": "You won't see {{name}}'s stories.",
+    "report": "Report story",
+    "unavailable": "This story is no longer available.",
+    "camera": "Camera",
+    "library": "Library",
+    "change": "Change",
+    "hint": "A photo, or a video of up to 15 seconds. Stories are visible for 24 hours.",
+    "captionPlaceholder": "Add a caption — @mention a friend",
+    "share": "Share story",
+    "posted": "Your story is live for 24 hours.",
+    "processing": "Your video is processing. It goes live when it's ready.",
+    "failed": "Your story wasn't posted. Try again.",
+    "blocked": "This story can't be posted because it breaks the community guidelines.",
+    "videoUnavailable": "Video stories aren't available right now. Try a photo.",
+    "too_long": "Videos can be up to 15 seconds.",
+    "too_large": "That file is too large."
   }
 }

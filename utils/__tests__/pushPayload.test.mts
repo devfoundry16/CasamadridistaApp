@@ -248,3 +248,10 @@ describe('pushPayload.core — safety notices', () => {
     assert.ok(!('subtype' in parsePushPayload({ type: 'safety_notice' })!));
   });
 });
+
+describe('pushPayload.core — story mentions', () => {
+  it('opens the stories of the person who mentioned you', () => {
+    assert.equal(href({ v: 1, type: 'story_mention', user_id: '22222222-2222-4222-8222-222222222222' }), '/stories/22222222-2222-4222-8222-222222222222');
+    assert.equal(href({ v: 1, type: 'story_mention', user_id: 'nope' }), '/community');
+  });
+});

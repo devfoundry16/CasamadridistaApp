@@ -39,7 +39,7 @@ import type {
 
 const RELATIONSHIPS: readonly string[] = ['self', 'blocking', 'friends', 'request_sent', 'request_received', 'none'];
 const KINDS: readonly string[] = ['text', 'image', 'share'];
-const EMBEDS: readonly string[] = ['post', 'media_item', 'profile'];
+const EMBEDS: readonly string[] = ['post', 'media_item', 'profile', 'story'];
 const RECEIPTS: readonly string[] = ['sent', 'delivered', 'seen'];
 
 export const INLINED_VOCABULARIES = { RELATIONSHIPS, KINDS, EMBEDS, RECEIPTS };
@@ -303,6 +303,18 @@ export function normaliseEmbed(raw: unknown): MessageEmbed | null {
       subtitle: str(w.short_description),
       image_url: str(w.cover?.url),
       locked: w.locked === true,
+    };
+  }
+  if (kind === 'story') {
+    const author = normalisePerson(w.author);
+    return {
+      ...base,
+      title: author?.name ?? null,
+      subtitle: str(w.caption),
+      image_url: str(w.thumbnail_url),
+      person: author,
+      expired: w.expired === true,
+      author_id: str(w.author_id),
     };
   }
   const person = normalisePerson(w);

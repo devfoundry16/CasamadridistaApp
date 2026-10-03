@@ -304,6 +304,20 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="stories/[userId]"
+          options={{
+            headerShown: false,
+            presentation: "fullScreenModal",
+            animation: "fade",
+            statusBarStyle: "light",
+            navigationBarColor: "#000000",
+          }}
+        />
+        <Stack.Screen
+          name="stories/create"
+          options={{ title: t("stories.create"), ...options }}
+        />
+        <Stack.Screen
           name="media/now"
           options={{ title: t("casaMedia.fromMadridNow"), ...options }}
         />

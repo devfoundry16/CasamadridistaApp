@@ -14,7 +14,7 @@ import T from './T';
 
 interface Props {
   visible: boolean;
-  target: { kind: 'message' | 'profile'; id: string } | null;
+  target: { kind: 'message' | 'profile' | 'story'; id: string } | null;
   onClose: () => void;
   /** Offered after a successful report — reporting and blocking are separate choices. */
   onBlock?: () => void;
@@ -63,14 +63,18 @@ export default function SocialReportSheet({ visible, target, onClose, onBlock }:
       <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16 }}>
           <T step="headline" weight="bold" style={{ flex: 1 }}>
-            {target?.kind === 'profile' ? t('social.report.titleProfile') : t('social.report.titleMessage')}
+            {target?.kind === 'profile'
+              ? t('social.report.titleProfile')
+              : target?.kind === 'story'
+                ? t('social.report.titleStory')
+                : t('social.report.titleMessage')}
           </T>
           <Touchable onPress={close} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('common.cancel')}>
             <X size={22} color={Colors.text.tertiary} />
           </Touchable>
         </View>
         <T step="footnote" color={Colors.text.tertiary} style={{ paddingHorizontal: 16, marginBottom: 8 }}>
-          {t('social.report.privacy')}
+          {target?.kind === 'story' ? t('social.report.privacyStory') : t('social.report.privacy')}
         </T>
         <ScrollView keyboardShouldPersistTaps="handled">
           {SOCIAL_REPORT_REASONS.map((key) => {

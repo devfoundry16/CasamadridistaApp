@@ -19,6 +19,10 @@ import {
   normaliseUsernameCheck,
 } from '@/services/social/normalise';
 import type {
+  StorySlot,
+  StoryViewer,
+  UserStory,
+  UserStoryGroup,
   ChatMessage,
   ConversationHeader,
   EmbedKind,
@@ -246,7 +250,7 @@ class SocialServiceClass {
 
   /* ---------------- reports ---------------- */
 
-  async report(input: { target_kind: 'message' | 'profile'; target_id: string; reason: SocialReportReason; details?: string }): Promise<void> {
+  async report(input: { target_kind: 'message' | 'profile' | 'story'; target_id: string; reason: SocialReportReason; details?: string }): Promise<void> {
     await this.send('post', '/reports', input);
   }
 
@@ -274,6 +278,47 @@ class SocialServiceClass {
 
   async appeal(input: { subject_kind: MyAppeal['subject_kind']; subject_id?: string | null; statement: string }): Promise<MyAppeal> {
     return this.send('post', '/appeals', input);
+  }
+
+  // ---------- stories (C1) ----------
+
+  async storyFeed(): Promise<UserStoryGroup[]> {
+    return (await this.get<{ data?: UserStoryGroup[] }>('/stories'))?.data ?? [];
+  }
+
+  /** One person's live stories, as a single group for the viewer. */
+  async userStories(userId: string): Promise<UserStoryGroup> {
+    const body = await this.get<{ data?: UserStory[]; author?: PersonCard | null }>(`/stories/user/${encodeURIComponent(userId)}`);
+    const stories = body?.data ?? [];
+    return { author_id: userId, author: body?.author ?? null, all_seen: stories.every((s) => s.seen), stories };
+  }
+
+  async createStorySlot(input: { kind: 'photo' | 'video'; mime_type: string; size_bytes: number; width?: number; height?: number; duration_ms?: number }): Promise<StorySlot> {
+    return this.send('post', '/stories/slot', input);
+  }
+
+  async publishStory(id: string, caption: string | null): Promise<UserStory> {
+    return this.send('post', `/stories/${encodeURIComponent(id)}/publish`, { caption });
+  }
+
+  async viewStory(id: string): Promise<void> {
+    await this.send('post', `/stories/${encodeURIComponent(id)}/view`);
+  }
+
+  async storyViewers(id: string): Promise<{ count: number; viewers: StoryViewer[] }> {
+    return this.get(`/stories/${encodeURIComponent(id)}/viewers`);
+  }
+
+  async deleteStory(id: string): Promise<void> {
+    await this.send('delete', `/stories/${encodeURIComponent(id)}`);
+  }
+
+  async replyToStory(id: string, input: { body?: string; reaction?: string; client_id: string }): Promise<{ conversation_id: string }> {
+    return this.send('post', `/stories/${encodeURIComponent(id)}/reply`, input);
+  }
+
+  async muteStories(userId: string, muted: boolean): Promise<void> {
+    await this.send(muted ? 'post' : 'delete', `/stories/mutes/${encodeURIComponent(userId)}`);
   }
 }
 

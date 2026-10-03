@@ -1,0 +1,64 @@
+/**
+ * User stories in the app (Social, C1). Pure; mirrors backend storyRules.
+ */
+
+export const MAX_VIDEO_MS = 15_000;
+export const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+export const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+export const PHOTO_SHOW_MS = 5000;
+export const QUICK_REACTIONS = ['❤️', '🔥', '👏', '😂', '😮', '⚽'] as const;
+
+/** The ring on a profile picture: gold while something is unseen. */
+export function ringState(stories: { seen: boolean }[]): 'unseen' | 'seen' | null {
+  if (!stories.length) return null;
+  return stories.some((s) => !s.seen) ? 'unseen' : 'seen';
+}
+
+/** Why a picked file cannot be a story, or null. */
+export function pickProblem(asset: { type?: string | null; durationMs?: number | null; fileSize?: number | null }): 'too_long' | 'too_large' | null {
+  const video = asset.type === 'video';
+  if (video && (asset.durationMs ?? 0) > MAX_VIDEO_MS + 500) return 'too_long';
+  if ((asset.fileSize ?? 0) > (video ? MAX_VIDEO_BYTES : MAX_PHOTO_BYTES)) return 'too_large';
+  return null;
+}
+
+export function showForMs(story: { kind: 'photo' | 'video'; duration_ms: number | null }): number {
+  if (story.kind === 'photo') return PHOTO_SHOW_MS;
+  return story.duration_ms && story.duration_ms > 0 ? story.duration_ms : MAX_VIDEO_MS;
+}
+
+export interface Position {
+  group: number;
+  story: number;
+}
+
+/** The next (+1) or previous (-1) story across people, or 'close' past the end. */
+export function step(groups: { stories: unknown[] }[], at: Position, dir: 1 | -1): Position | 'close' {
+  if (dir === 1) {
+    if (at.story + 1 < groups[at.group].stories.length) return { group: at.group, story: at.story + 1 };
+    if (at.group + 1 < groups.length) return { group: at.group + 1, story: 0 };
+    return 'close';
+  }
+  if (at.story > 0) return { group: at.group, story: at.story - 1 };
+  if (at.group > 0) return { group: at.group - 1, story: groups[at.group - 1].stories.length - 1 };
+  return at;
+}
+
+export function uploadMimeType(asset: { type?: string | null; mimeType?: string | null }): string {
+  if (asset.mimeType) return asset.mimeType;
+  return asset.type === 'video' ? 'video/mp4' : 'image/jpeg';
+}
+
+/** After muting someone: straight to the next person, or 'close'. */
+export function nextAuthor(groups: { stories: unknown[] }[], at: Position): Position | 'close' {
+  return at.group + 1 < groups.length ? { group: at.group + 1, story: 0 } : 'close';
+}
+
+/**
+ * A video story's progress, from the player's own clock (seconds), so
+ * buffering pauses the bar instead of cutting the end off the clip.
+ */
+export function videoProgress(currentTime: number, duration: number): number {
+  if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(currentTime)) return 0;
+  return Math.min(1, Math.max(0, currentTime / duration));
+}
