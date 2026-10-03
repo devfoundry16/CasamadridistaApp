@@ -3,6 +3,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
 import AnalyticsService from '@/services/AnalyticsService';
 import { anonIdHeader } from '@/services/media/wire';
+import { parseEmailPreference } from '@/utils/emailPreference.core';
 import type {
   DeviceRegistration,
   InboxPage,
@@ -124,6 +125,27 @@ class NotificationServiceClass {
       );
     } catch {
       // ignore
+    }
+  }
+
+  /** News by email (admin §45): null when the server did not say. */
+  async getMarketingEmails(): Promise<boolean | null> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.get(`${BASE}/email-preference`, { headers });
+      return parseEmailPreference(data);
+    } catch (error: any) {
+      this.fail(error, 'Failed to load the email setting');
+    }
+  }
+
+  async setMarketingEmails(on: boolean): Promise<boolean | null> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.put(`${BASE}/email-preference`, { marketing_emails: on }, { headers });
+      return parseEmailPreference(data);
+    } catch (error: any) {
+      this.fail(error, 'Failed to save the email setting');
     }
   }
 }

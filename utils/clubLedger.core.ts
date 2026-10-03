@@ -8,6 +8,7 @@ const LINES: Record<string, { incoming: boolean; labelKey: string }> = {
   revenue_share: { incoming: true, labelKey: 'fanClubDashboard.revenueShare' },
   payout: { incoming: false, labelKey: 'fanClubDashboard.payout' },
   payout_reversal: { incoming: true, labelKey: 'fanClubDashboard.payoutReversal' },
+  revenue_share_reversal: { incoming: false, labelKey: 'fanClubDashboard.shareReversal' },
 };
 
 export function ledgerLine(type: string): { incoming: boolean; labelKey: string } {

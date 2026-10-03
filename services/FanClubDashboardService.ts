@@ -32,7 +32,7 @@ export interface DashboardMember {
 export interface RevenueTransaction {
   id: string;
   /** 'payout_reversal': a rejected or cancelled payout credited back. */
-  type: 'revenue_share' | 'payout' | 'payout_reversal';
+  type: 'revenue_share' | 'revenue_share_reversal' | 'payout' | 'payout_reversal';
   amount: number;
   description: string | null;
   created_at: string;

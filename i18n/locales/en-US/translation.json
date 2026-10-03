@@ -243,7 +243,10 @@
     "placeholderConfirmNewPassword": "Confirm your new password",
     "loadingSubscription": "Loading subscription",
     "uploadError": "Upload Error",
-    "uploadAvatarFailed": "Failed to upload avatar. Please try again."
+    "uploadAvatarFailed": "Failed to upload avatar. Please try again.",
+    "newsEmail": "News by email",
+    "newsEmailHint": "Match-day news and offers from Casa Madridista. Every email has an unsubscribe link.",
+    "newsEmailFailed": "Could not change the email setting. Try again."
   },
   "contact": {
     "title": "Contact",
@@ -991,7 +994,8 @@
     "unnamedClub": "Unnamed club",
     "payoutNotAllowed": "Only club owners and admins can request payouts.",
     "payoutReversal": "Payout credited back",
-    "unnamedMember": "Unnamed member"
+    "unnamedMember": "Unnamed member",
+    "shareReversal": "Share taken back (refund)"
   },
   "admin": {
     "title": "Super Admin Panel",

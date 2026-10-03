@@ -16,6 +16,7 @@ import {
   User,
   Scale,
   Wallet,
+  Mail,
 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
@@ -38,6 +39,7 @@ import { LANG_STORAGE_KEY } from "@/i18n";
 import axios from "axios";
 import { API_BASE_URL } from "@/config/supabase";
 import { useSocialPushSetting } from "@/hooks/notifications/useSocialPushSetting";
+import { useMarketingEmailSetting } from "@/hooks/notifications/useMarketingEmailSetting";
 import { showsContributorEntry } from "@/utils/contributorGate.core";
 import { Clapperboard, LayoutDashboard, Send, ShieldCheck, UserRound, Users } from "lucide-react-native";
 
@@ -58,6 +60,13 @@ export default function AccountScreen() {
   // else; a manager gets the same area through `mediaManager`.
   const [isContributor, setIsContributor] = useState(false);
   const socialPush = useSocialPushSetting();
+  const newsEmail = useMarketingEmailSetting(!!user);
+
+  const toggleNewsEmail = async (on: boolean) => {
+    if (!(await newsEmail.set(on))) {
+      Alert.alert(t("common.error"), t("account.newsEmailFailed"));
+    }
+  };
 
   const toggleSocialPush = async (on: boolean) => {
     if (!(await socialPush.set(on))) {
@@ -313,6 +322,26 @@ export default function AccountScreen() {
             accessibilityHint={t("social.notifications.socialSettingHint")}
           />
         </View>
+
+        {/* News by email: Casa Madridista campaign emails to this account. */}
+        {user ? (
+          <View className="flex-row items-center bg-bg-card p-4 rounded-[25px] mb-3 gap-4 border border-rm-gold">
+            <Mail size={24} color={Colors.darkGold} />
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-text-primary">{t("account.newsEmail")}</Text>
+              <Text className="text-xs text-text-secondary mt-0.5">{t("account.newsEmailHint")}</Text>
+            </View>
+            <Switch
+              value={newsEmail.value ?? false}
+              onValueChange={toggleNewsEmail}
+              disabled={newsEmail.value === null || newsEmail.saving}
+              trackColor={{ true: Colors.darkGold, false: Colors.background.light }}
+              thumbColor={Colors.text.primary}
+              accessibilityLabel={t("account.newsEmail")}
+              accessibilityHint={t("account.newsEmailHint")}
+            />
+          </View>
+        ) : null}
 
         {isSuperAdmin && (
           <TouchableOpacity

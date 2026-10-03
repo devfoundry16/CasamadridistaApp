@@ -15,6 +15,10 @@ describe('clubLedger.core', () => {
     assert.deepEqual(ledgerLine('payout_reversal'), { incoming: true, labelKey: 'fanClubDashboard.payoutReversal' });
   });
 
+  it('a share taken back after a refund is money out', () => {
+    assert.deepEqual(ledgerLine('revenue_share_reversal'), { incoming: false, labelKey: 'fanClubDashboard.shareReversal' });
+  });
+
   it('an unknown type is shown as going out, so money is never overstated', () => {
     assert.equal(ledgerLine('something_new').incoming, false);
   });
