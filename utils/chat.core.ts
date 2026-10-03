@@ -111,11 +111,18 @@ function withRetractedQuotes(messages: ChatMessage[], alsoGone: ReadonlySet<stri
  * unsent or removed meanwhile, further back than the newest page, would
  * otherwise stay readable from the cache. They are fetched again on scroll.
  */
-export function freshPage(existing: readonly ChatMessage[], page: readonly ChatMessage[], now: number = Date.now()): ChatMessage[] {
+export function freshPage(
+  existing: readonly ChatMessage[],
+  page: readonly ChatMessage[],
+  heldBefore: ReadonlySet<string> = new Set(existing.map((m) => m.id)),
+  now: number = Date.now(),
+): ChatMessage[] {
   const onPage = new Set(page.map((m) => m.id));
-  // Kept: unsent locals, and the cached copies of this very page (their live
-  // signed URLs survive the merge). Dropped: everything older.
-  return mergeMessages(existing.filter((m) => isLocal(m) || onPage.has(m.id)), page, now);
+  // Kept: messages still sending, the cached copies of this very page (their
+  // live signed URLs survive the merge), and anything that arrived while the
+  // page was being fetched (`heldBefore` is what was held when the request
+  // started). Dropped: the older pages held before.
+  return mergeMessages(existing.filter((m) => isLocal(m) || onPage.has(m.id) || !heldBefore.has(m.id)), page, now);
 }
 
 /** A full-screen photo or video stays open only while its message is still visible in the thread. */
@@ -125,7 +132,9 @@ export function viewerStillAllowed(messages: readonly ChatMessage[], messageId: 
 
 /**
  * A message was removed by a moderator or unsent by its sender: its bubble
- * becomes a tombstone, and every reply that quoted it loses the quoted text.
+ * becomes a tombstone, and every reply that quoted it loses the quoted text —
+ * also when the message itself is not loaded (it sits on an older page), which
+ * is the usual case for a quote.
  */
 export function retract(messages: readonly ChatMessage[], id: string, status: 'removed' | 'unsent'): ChatMessage[] {
   return withRetractedQuotes(
@@ -134,6 +143,7 @@ export function retract(messages: readonly ChatMessage[], id: string, status: 'r
         ? { ...m, status, body: null, attachments: [], embed: null, reply_to: null, reactions: { counts: [], mine: null } }
         : m,
     ),
+    new Set([id]),
   );
 }
 
@@ -157,9 +167,16 @@ export function undoRetract(current: readonly ChatMessage[], before: readonly Ch
 
 /**
  * The server refused a "delete for me": the message and my quotes of it come
- * back as they were — never with content it had already lost.
+ * back as they were. While it was out of the list an unsend or a removal could
+ * not be applied to it, so the caller passes what it heard meanwhile
+ * (`goneAs`), and the message then comes back as that tombstone.
  */
-export function undoDrop(current: readonly ChatMessage[], before: readonly ChatMessage[], id: string): ChatMessage[] {
+export function undoDrop(
+  current: readonly ChatMessage[],
+  before: readonly ChatMessage[],
+  id: string,
+  goneAs: 'removed' | 'unsent' | null = null,
+): ChatMessage[] {
   const was = new Map(before.map((m) => [m.id, m]));
   const original = was.get(id);
   if (!original || current.some((m) => m.id === id)) return [...current];
@@ -167,7 +184,8 @@ export function undoDrop(current: readonly ChatMessage[], before: readonly ChatM
     const old = was.get(m.id);
     return original.status === 'visible' && old?.reply_to?.id === id && m.reply_to?.id === id ? { ...m, reply_to: old.reply_to } : m;
   });
-  return [...restored, original].sort(compareNewestFirst);
+  const list = [...restored, original].sort(compareNewestFirst);
+  return goneAs ? retract(list, id, goneAs) : list;
 }
 
 /** "Delete for me": the message leaves this thread, and so does its text in my quotes of it. */

@@ -299,3 +299,31 @@ describe('undoing an optimistic unsend or delete that the server refused', () =>
     assert.equal(out.find((m) => m.id === 'o')!.body, null);
   });
 });
+
+describe('review: retraction holes', () => {
+  const quote = { id: 'o', sender_id: 'them', kind: 'text', status: 'visible', body: 'secret' };
+  it('an unsend for a message that is no longer loaded still blanks the reply that quotes it', () => {
+    // The original sits on an older page that a fresh load dropped.
+    const out = retract([msg({ id: 'r', reply_to: quote })], 'o', 'unsent');
+    assert.equal(out[0].reply_to!.status, 'unavailable');
+    assert.equal(out[0].reply_to!.body, null);
+  });
+  it('a message that arrived while the fresh page was being fetched is kept', () => {
+    const cachedOld = msg({ id: 'old', created_at: '2026-10-01T10:00:00Z' });
+    const onPage = msg({ id: 'p', created_at: '2026-10-03T10:00:00Z' });
+    const arrived = msg({ id: 'new', body: 'just now', created_at: '2026-10-03T10:05:00Z', from_event: true });
+    const heldBefore = new Set(['old', 'p']);
+    const out = freshPage([cachedOld, onPage, arrived], [onPage], heldBefore);
+    assert.deepEqual(out.map((m) => m.id), ['new', 'p']);
+  });
+  it('a refused delete-for-me re-applies an unsend heard meanwhile', () => {
+    const original = msg({ id: 'o', body: 'mine', sender_id: 'them' });
+    const before = [original, msg({ id: 'r', created_at: '2026-10-03T10:01:00Z', reply_to: quote })];
+    const dropped = dropForMe(before, 'o');
+    const afterEvent = retract(dropped, 'o', 'unsent'); // a no-op on the row: it is not in the list
+    const out = undoDrop(afterEvent, before, 'o', 'unsent');
+    assert.equal(out.find((m) => m.id === 'o')!.status, 'unsent');
+    assert.equal(out.find((m) => m.id === 'o')!.body, null);
+    assert.equal(out.find((m) => m.id === 'r')!.reply_to!.body, null);
+  });
+});

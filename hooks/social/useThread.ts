@@ -119,6 +119,8 @@ export function useThread(conversationId: string | undefined, myId: string | und
   const typingRef = useRef<ReturnType<typeof subscribeTyping> | null>(null);
   const pendingInputs = useRef(new Map<string, PendingInput>());
   const reactionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Retractions heard on the channel while this thread has been open. */
+  const goneRef = useRef(new Map<string, 'removed' | 'unsent'>());
 
   /** Every state change goes through here, so the cache and ref stay in step. */
   const commit = useCallback(
@@ -144,13 +146,16 @@ export function useThread(conversationId: string | undefined, myId: string | und
    */
   const loadNewest = useCallback(async (fresh = false) => {
     if (!conversationId) return;
+    // What was held when the request started: anything that arrives while it
+    // is in flight is newer than the page and must survive a fresh start.
+    const heldBefore = new Set(messagesRef.current.map((m) => m.id));
     try {
       const page = await SocialService.messages(conversationId, null);
       if (fresh || !threads.has(conversationId)) {
         cursorRef.current = page.nextCursor;
         exhaustedRef.current = !page.nextCursor;
       }
-      if (fresh) commit(freshPage(messagesRef.current, page.messages));
+      if (fresh) commit(freshPage(messagesRef.current, page.messages, heldBefore));
       else merge(page.messages);
       setError(null);
     } catch (e) {
@@ -201,8 +206,16 @@ export function useThread(conversationId: string | undefined, myId: string | und
         if (event.user_id === myId) return;
         commit(applyReceipts(messagesRef.current, myId, event));
       },
-      onRemoved: (event) => commit(retract(messagesRef.current, event.id, 'removed')),
-      onUnsent: (event) => commit(retract(messagesRef.current, event.id, 'unsent')),
+      // Remembered as well as applied: a message that is out of the list at
+      // that moment (an optimistic delete-for-me) must not come back whole.
+      onRemoved: (event) => {
+        goneRef.current.set(event.id, 'removed');
+        commit(retract(messagesRef.current, event.id, 'removed'));
+      },
+      onUnsent: (event) => {
+        if (!goneRef.current.has(event.id)) goneRef.current.set(event.id, 'unsent');
+        commit(retract(messagesRef.current, event.id, 'unsent'));
+      },
       // Counts come from the API, never from the event. Only for a message on
       // screen, and a burst of reactions costs one fetch. The newest page
       // covers the reactions people actually make; an older one refreshes on
@@ -394,7 +407,7 @@ export function useThread(conversationId: string | undefined, myId: string | und
     try {
       await SocialService.hideMessage(message.id);
     } catch (e) {
-      commit(undoDrop(messagesRef.current, before, message.id));
+      commit(undoDrop(messagesRef.current, before, message.id, goneRef.current.get(message.id) ?? null));
       setError(e instanceof SocialApiError ? e.code : 'network_error');
     }
   }, [commit]);
