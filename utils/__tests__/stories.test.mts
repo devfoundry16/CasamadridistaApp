@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { pickProblem, ringState, showForMs, step, uploadMimeType, videoProgress, nextAuthor } from '../stories.core.ts';
+import { pickProblem, ringState, showForMs, step, uploadMimeType, videoProgress, nextAuthor, msUntilExpiry } from '../stories.core.ts';
 
 const g = (author: string, seen: boolean[]) => ({ author_id: author, all_seen: seen.every(Boolean), stories: seen.map((s, i) => ({ id: `${author}${i}`, seen: s })) });
 
@@ -68,5 +68,18 @@ describe('nextAuthor', () => {
   });
   it('closes after the last person', () => {
     assert.equal(nextAuthor(groups, { group: 2, story: 0 }), 'close');
+  });
+});
+
+describe('msUntilExpiry', () => {
+  const now = Date.parse('2026-10-03T12:00:00Z');
+  it('counts down to the story\'s end', () => {
+    assert.equal(msUntilExpiry({ expires_at: '2026-10-03T12:00:30Z' }, now), 30_000);
+  });
+  it('is 0 once it has ended: the viewer must not keep showing it', () => {
+    assert.equal(msUntilExpiry({ expires_at: '2026-10-03T11:59:00Z' }, now), 0);
+  });
+  it('a story with no end time is treated as ended', () => {
+    assert.equal(msUntilExpiry({ expires_at: null }, now), 0);
   });
 });

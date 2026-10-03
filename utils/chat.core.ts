@@ -84,7 +84,62 @@ export function mergeMessages(existing: readonly ChatMessage[], incoming: readon
 
   for (const m of existing) put(m);
   for (const m of incoming) put(m);
-  return [...byId.values()].sort(compareNewestFirst);
+  return withRetractedQuotes([...byId.values()]).sort(compareNewestFirst);
+}
+
+/**
+ * A quote must never outlive the message it quotes. Any reply whose original
+ * is in the list as removed or unsent shows "unavailable" instead of its text —
+ * whichever way the tombstone arrived (an event, a fetch), and however stale
+ * the reply's own copy is.
+ */
+function withRetractedQuotes(messages: ChatMessage[], alsoGone: ReadonlySet<string> = new Set()): ChatMessage[] {
+  const gone = new Set(alsoGone);
+  for (const m of messages) if (isGone(m)) gone.add(m.id);
+  if (!gone.size) return messages;
+  return messages.map((m) =>
+    m.reply_to && m.reply_to.status === 'visible' && gone.has(m.reply_to.id)
+      ? { ...m, reply_to: { ...m.reply_to, status: 'unavailable' as const, body: null } }
+      : m,
+  );
+}
+
+/**
+ * A thread when it is (re)opened or the app returns: the server's newest page
+ * and the messages still being sent, and nothing else. Older cached pages are
+ * dropped, because realtime only runs while the thread is open: a message
+ * unsent or removed meanwhile, further back than the newest page, would
+ * otherwise stay readable from the cache. They are fetched again on scroll.
+ */
+export function freshPage(existing: readonly ChatMessage[], page: readonly ChatMessage[], now: number = Date.now()): ChatMessage[] {
+  const onPage = new Set(page.map((m) => m.id));
+  // Kept: unsent locals, and the cached copies of this very page (their live
+  // signed URLs survive the merge). Dropped: everything older.
+  return mergeMessages(existing.filter((m) => isLocal(m) || onPage.has(m.id)), page, now);
+}
+
+/** A full-screen photo or video stays open only while its message is still visible in the thread. */
+export function viewerStillAllowed(messages: readonly ChatMessage[], messageId: string): boolean {
+  return messages.some((m) => m.id === messageId && m.status === 'visible');
+}
+
+/**
+ * A message was removed by a moderator or unsent by its sender: its bubble
+ * becomes a tombstone, and every reply that quoted it loses the quoted text.
+ */
+export function retract(messages: readonly ChatMessage[], id: string, status: 'removed' | 'unsent'): ChatMessage[] {
+  return withRetractedQuotes(
+    messages.map((m) =>
+      m.id === id
+        ? { ...m, status, body: null, attachments: [], embed: null, reply_to: null, reactions: { counts: [], mine: null } }
+        : m,
+    ),
+  );
+}
+
+/** "Delete for me": the message leaves this thread, and so does its text in my quotes of it. */
+export function dropForMe(messages: readonly ChatMessage[], id: string): ChatMessage[] {
+  return withRetractedQuotes(messages.filter((m) => m.id !== id), new Set([id]));
 }
 
 /** A signed URL this close to expiry is swapped for a fresher one. */

@@ -14,7 +14,7 @@ import Colors from '@/constants/colors';
 import { useStoryActions } from '@/hooks/social/useStories';
 import SocialService from '@/services/SocialService';
 import type { StoryViewer, UserStory, UserStoryGroup } from '@/types/social';
-import { QUICK_REACTIONS, nextAuthor, showForMs, step, videoProgress, type Position } from '@/utils/stories.core';
+import { QUICK_REACTIONS, msUntilExpiry, nextAuthor, showForMs, step, videoProgress, type Position } from '@/utils/stories.core';
 import { relativeTime } from '@/components/Media/time';
 
 interface Props {
@@ -72,6 +72,17 @@ export default function UserStoryViewer({ groups: initialGroups, viewerId, initi
   useEffect(() => {
     if (!story) onClose();
   }, [story, onClose]);
+
+  // The groups are a snapshot, so the viewer keeps time itself: a story whose
+  // 24 hours run out is left at once, including while paused or in a menu.
+  useEffect(() => {
+    if (!story) return;
+    const left = msUntilExpiry(story, Date.now());
+    if (left === 0) return go(1);
+    // setTimeout cannot hold more than about 24.8 days; a story has 24 hours.
+    const id = setTimeout(() => go(1), left);
+    return () => clearTimeout(id);
+  }, [story, go]);
 
   // A video drives its own bar from the player's clock and moves on when it
   // ends, so buffering never cuts the end off.
@@ -162,7 +173,14 @@ export default function UserStoryViewer({ groups: initialGroups, viewerId, initi
   const mute = async () => {
     if (!story) return;
     setMenu(false);
-    await actions.mute(story.author_id).catch(() => {});
+    // Never claim it worked when it did not: the person would go on seeing
+    // stories they believe they muted.
+    try {
+      await actions.mute(story.author_id);
+    } catch {
+      Alert.alert(t('common.error'), t('stories.muteFailed'));
+      return;
+    }
     Alert.alert(t('stories.muted', { name: author?.name ?? '' }));
     const next = nextAuthor(groups, at);
     if (next === 'close') onClose();

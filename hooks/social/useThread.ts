@@ -13,6 +13,8 @@ import {
   LOCAL_PREFIX,
   applyReaction,
   applyReceipts,
+  dropForMe,
+  freshPage,
   isLocal,
   isTyping as typingActive,
   mergeMessages,
@@ -20,6 +22,7 @@ import {
   needsFetch,
   newClientId,
   newestFromOthers,
+  retract,
   shouldSendTyping,
   TYPING_SHOW_FOR_MS,
 } from '@/utils/chat.core';
@@ -131,22 +134,29 @@ export function useThread(conversationId: string | undefined, myId: string | und
 
   // ---------- history ----------
 
-  const loadNewest = useCallback(async () => {
+  /**
+   * @param fresh on opening the thread and on returning to the app: start
+   *        again from the server's newest page (`freshPage`), so nothing that
+   *        was unsent or removed while realtime was not listening stays
+   *        readable from the cache. Otherwise the page is merged in.
+   */
+  const loadNewest = useCallback(async (fresh = false) => {
     if (!conversationId) return;
     try {
       const page = await SocialService.messages(conversationId, null);
-      if (!threads.has(conversationId)) {
+      if (fresh || !threads.has(conversationId)) {
         cursorRef.current = page.nextCursor;
         exhaustedRef.current = !page.nextCursor;
       }
-      merge(page.messages);
+      if (fresh) commit(freshPage(messagesRef.current, page.messages));
+      else merge(page.messages);
       setError(null);
     } catch (e) {
       setError(e instanceof SocialApiError ? e.code : 'network_error');
     } finally {
       setLoading(false);
     }
-  }, [conversationId, merge]);
+  }, [conversationId, merge, commit]);
 
   const loadOlder = useCallback(async () => {
     if (!conversationId || loadingOlder || exhaustedRef.current || !cursorRef.current) return;
@@ -164,7 +174,7 @@ export function useThread(conversationId: string | undefined, myId: string | und
   }, [conversationId, loadingOlder, merge]);
 
   useEffect(() => {
-    void loadNewest();
+    void loadNewest(true);
   }, [loadNewest]);
 
   // ---------- realtime ----------
@@ -189,8 +199,8 @@ export function useThread(conversationId: string | undefined, myId: string | und
         if (event.user_id === myId) return;
         commit(applyReceipts(messagesRef.current, myId, event));
       },
-      onRemoved: (event) => commit(tombstone(messagesRef.current, event.id, 'removed')),
-      onUnsent: (event) => commit(tombstone(messagesRef.current, event.id, 'unsent')),
+      onRemoved: (event) => commit(retract(messagesRef.current, event.id, 'removed')),
+      onUnsent: (event) => commit(retract(messagesRef.current, event.id, 'unsent')),
       // Counts come from the API, never from the event. Only for a message on
       // screen, and a burst of reactions costs one fetch. The newest page
       // covers the reactions people actually make; an older one refreshes on
@@ -210,7 +220,7 @@ export function useThread(conversationId: string | undefined, myId: string | und
 
     // A socket can drop while backgrounded; catch up on return.
     const appState = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void loadNewest();
+      if (state === 'active') void loadNewest(true);
     });
 
     return () => {
@@ -378,7 +388,7 @@ export function useThread(conversationId: string | undefined, myId: string | und
   const hideMessage = useCallback(async (message: ChatMessage) => {
     if (isLocal(message)) return;
     const before = messagesRef.current;
-    commit(before.filter((m) => m.id !== message.id));
+    commit(dropForMe(before, message.id));
     try {
       await SocialService.hideMessage(message.id);
     } catch (e) {
@@ -389,7 +399,7 @@ export function useThread(conversationId: string | undefined, myId: string | und
 
   const unsend = useCallback(async (message: ChatMessage) => {
     if (isLocal(message)) return;
-    commit(tombstone(messagesRef.current, message.id, 'unsent'));
+    commit(retract(messagesRef.current, message.id, 'unsent'));
     try {
       await SocialService.unsendMessage(message.id);
       void queryClient.invalidateQueries({ queryKey: socialKeys.inbox('inbox') });
@@ -415,7 +425,7 @@ export function useThread(conversationId: string | undefined, myId: string | und
     clearError: () => setError(null),
     otherTyping: typingActive(otherTypingAt, Math.max(now, Date.now())),
     loadOlder,
-    refresh: loadNewest,
+    refresh: () => loadNewest(true),
     send,
     retry,
     discard,
@@ -424,13 +434,6 @@ export function useThread(conversationId: string | undefined, myId: string | und
     unsend,
     notifyTyping,
   };
-}
-
-/** A message that lost its content: removed by a moderator, or unsent. */
-function tombstone(messages: ChatMessage[], id: string, status: 'removed' | 'unsent'): ChatMessage[] {
-  return messages.map((m) =>
-    m.id === id ? { ...m, status, body: null, attachments: [], embed: null, reply_to: null, reactions: { counts: [], mine: null } } : m,
-  );
 }
 
 async function sizeOf(uri: string): Promise<number | undefined> {

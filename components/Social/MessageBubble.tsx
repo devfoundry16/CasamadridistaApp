@@ -26,8 +26,8 @@ interface Props {
   onRetry: (m: ChatMessage) => void;
   onDiscard: (m: ChatMessage) => void;
   onReport: (m: ChatMessage) => void;
-  onOpenPhoto: (uri: string) => void;
-  onOpenVideo: (uri: string) => void;
+  onOpenPhoto: (uri: string, m: ChatMessage) => void;
+  onOpenVideo: (uri: string, m: ChatMessage) => void;
   onReact: (m: ChatMessage, emoji: string | null) => void;
   onReply: (m: ChatMessage) => void;
   onHide: (m: ChatMessage) => void;
@@ -142,7 +142,7 @@ function MessageBubble({ message, layout, myId, otherName, onRetry, onDiscard, o
                   const w = single ? 232 : 115;
                   const ratio = single && a.width && a.height ? Math.min(1.4, Math.max(0.6, a.height / a.width)) : 1;
                   return (
-                    <Touchable key={a.id} onPress={() => uri && onOpenPhoto(uri)} accessibilityRole="imagebutton" accessibilityLabel={t('social.preview.photo')}>
+                    <Touchable key={a.id} onPress={() => uri && onOpenPhoto(uri, message)} accessibilityRole="imagebutton" accessibilityLabel={t('social.preview.photo')}>
                       <Image
                         source={uri ? { uri } : undefined}
                         style={{ width: w, height: Math.round(w * ratio), backgroundColor: Colors.background.medium }}
@@ -161,7 +161,7 @@ function MessageBubble({ message, layout, myId, otherName, onRetry, onDiscard, o
               <Touchable
                 onPress={() => {
                   const uri = video.local_uri ?? video.url;
-                  if (uri) onOpenVideo(uri);
+                  if (uri) onOpenVideo(uri, message);
                 }}
                 accessibilityRole="button"
                 accessibilityLabel={t('social.thread.playVideo')}

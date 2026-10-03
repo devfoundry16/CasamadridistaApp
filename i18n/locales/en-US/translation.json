@@ -1871,6 +1871,7 @@
     "blocked": "This story can't be posted because it breaks the community guidelines.",
     "videoUnavailable": "Video stories aren't available right now. Try a photo.",
     "too_long": "Videos can be up to 15 seconds.",
-    "too_large": "That file is too large."
+    "too_large": "That file is too large.",
+    "muteFailed": "Couldn't mute. Try again."
   }
 }

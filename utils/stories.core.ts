@@ -62,3 +62,13 @@ export function videoProgress(currentTime: number, duration: number): number {
   if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(currentTime)) return 0;
   return Math.min(1, Math.max(0, currentTime / duration));
 }
+
+/**
+ * How long a story may still be shown. 0 once its 24 hours are over (or when
+ * it has no end time): the viewer works from a snapshot taken on open, so it
+ * checks the clock itself rather than keep playing an expired story.
+ */
+export function msUntilExpiry(story: { expires_at: string | null }, now: number): number {
+  const at = Date.parse(story.expires_at ?? '');
+  return Number.isFinite(at) ? Math.max(0, at - now) : 0;
+}

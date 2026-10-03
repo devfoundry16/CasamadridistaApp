@@ -24,7 +24,7 @@ import { useKeyboardOffsets } from '@/hooks/useKeyboardOffsets';
 import { useUser } from '@/hooks/useUser';
 import SocialService from '@/services/SocialService';
 import type { ChatMessage } from '@/types/social';
-import { bubbleLayout } from '@/utils/chat.core';
+import { bubbleLayout, viewerStillAllowed } from '@/utils/chat.core';
 
 /**
  * A conversation (§10–§13).
@@ -44,8 +44,10 @@ export default function ChatScreen() {
   const { keyboardVerticalOffset, bottomInset } = useKeyboardOffsets();
   const [focused, setFocused] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ kind: 'message' | 'profile'; id: string } | null>(null);
-  const [photo, setPhoto] = useState<string | null>(null);
-  const [video, setVideo] = useState<string | null>(null);
+  // The message is kept with the open photo or video, so the viewer closes
+  // the moment that message is unsent, removed or deleted (viewerStillAllowed).
+  const [photoOpen, setPhoto] = useState<{ uri: string; messageId: string } | null>(null);
+  const [videoOpen, setVideo] = useState<{ uri: string; messageId: string } | null>(null);
   // Held by id: if the original is unsent or deleted meanwhile, the banner goes.
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
 
@@ -71,6 +73,9 @@ export default function ChatScreen() {
     () => (replyingToId ? thread.messages.find((m) => m.id === replyingToId && m.status === 'visible') ?? null : null),
     [replyingToId, thread.messages],
   );
+
+  const photo = photoOpen && viewerStillAllowed(thread.messages, photoOpen.messageId) ? photoOpen.uri : null;
+  const video = videoOpen && viewerStillAllowed(thread.messages, videoOpen.messageId) ? videoOpen.uri : null;
 
   const layouts = useMemo(() => thread.messages.map((_, i) => bubbleLayout(thread.messages, i, myId ?? '')), [thread.messages, myId]);
 
@@ -132,8 +137,8 @@ export default function ChatScreen() {
             onRetry={thread.retry}
             onDiscard={thread.discard}
             onReport={(m) => setReportTarget({ kind: 'message', id: m.id })}
-            onOpenPhoto={setPhoto}
-            onOpenVideo={setVideo}
+            onOpenPhoto={(uri, m) => setPhoto({ uri, messageId: m.id })}
+            onOpenVideo={(uri, m) => setVideo({ uri, messageId: m.id })}
             onReact={thread.react}
             onReply={(m) => setReplyingToId(m.id)}
             onHide={thread.hideMessage}

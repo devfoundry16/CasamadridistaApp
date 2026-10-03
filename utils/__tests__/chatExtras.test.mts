@@ -10,15 +10,19 @@ import { describe, it } from 'node:test';
 import {
   applyReaction,
   formatDuration,
+  freshPage,
   isCancelGesture,
+  dropForMe,
   mergeMessages,
   messageActions,
   needsFetch,
   nextRate,
   recordingOutcome,
+  retract,
   REACTIONS,
   RECORD_MAX_MS,
   unsentCopy,
+  viewerStillAllowed,
   videoPickProblem,
 } from '../chat.core.ts';
 
@@ -166,4 +170,62 @@ describe('mergeMessages keeps a signed URL while it is good', () => {
     const b = msg({ id: 'm1', reactions: { counts: [{ emoji: '❤️', count: 2 }], mine: '❤️' } });
     assert.deepEqual(mergeMessages([a], [b], now)[0].reactions, b.reactions);
   });
+});
+
+describe('taking a message back also takes back every quote of it', () => {
+  const original = msg({ id: 'o', body: 'secret', sender_id: 'them' });
+  const reply = msg({ id: 'r', body: 'ok', created_at: '2026-10-03T10:01:00Z', reply_to: { id: 'o', sender_id: 'them', kind: 'text', status: 'visible', body: 'secret' } });
+  const local = msg({ id: 'local:x', body: 'typing', created_at: '2026-10-03T10:02:00Z', reply_to: { id: 'o', sender_id: 'them', kind: 'text', status: 'visible', body: 'secret' } });
+  const other = msg({ id: 'z', body: 'hi', created_at: '2026-10-03T10:03:00Z', reply_to: { id: 'q', sender_id: 'me', kind: 'text', status: 'visible', body: 'kept' } });
+  const quotes = (list: any[]) => Object.fromEntries(list.filter((m) => m.reply_to).map((m) => [m.id, m.reply_to.body]));
+
+  it('an unsend event blanks the bubble and the replies that quoted it, sent or still sending', () => {
+    const out = retract([original, reply, local, other], 'o', 'unsent');
+    assert.equal(out.find((m) => m.id === 'o')!.status, 'unsent');
+    assert.equal(out.find((m) => m.id === 'o')!.body, null);
+    assert.deepEqual(quotes(out), { r: null, 'local:x': null, z: 'kept' });
+    assert.equal(out.find((m) => m.id === 'r')!.reply_to!.status, 'unavailable');
+  });
+  it('a removal does the same', () => {
+    assert.deepEqual(quotes(retract([original, reply], 'o', 'removed')), { r: null });
+  });
+  it('deleting it for me removes it and blanks my quotes of it', () => {
+    const out = dropForMe([original, reply, other], 'o');
+    assert.deepEqual(out.map((m) => m.id).sort(), ['r', 'z']);
+    assert.deepEqual(quotes(out), { r: null, z: 'kept' });
+  });
+  it('a tombstone that arrives by fetch blanks quotes still cached from an older page', () => {
+    const out = mergeMessages([original, reply], [msg({ id: 'o', status: 'unsent', body: null, sender_id: 'them' })]);
+    assert.deepEqual(quotes(out), { r: null });
+  });
+  it('nothing leaks back: a stale copy of the reply cannot restore the quote', () => {
+    const retracted = retract([original, reply], 'o', 'unsent');
+    assert.deepEqual(quotes(mergeMessages(retracted, [reply])), { r: null });
+  });
+});
+
+describe('reopening a thread starts from what the server says now', () => {
+  const old = msg({ id: 'old', body: 'unsent while the chat was closed', created_at: '2026-10-01T10:00:00Z' });
+  const kept = msg({ id: 'new', body: 'still here', created_at: '2026-10-03T10:00:00Z' });
+  const sending = msg({ id: 'local:abc', client_id: 'abc', body: 'on its way', created_at: '2026-10-03T10:05:00Z', receipt: 'pending' });
+
+  it('drops cached older pages: they are fetched again on scroll, so nothing stale survives', () => {
+    const out = freshPage([old, kept, sending], [kept]);
+    assert.deepEqual(out.map((m) => m.id), ['local:abc', 'new']);
+  });
+  it('keeps a message still being sent', () => {
+    assert.ok(freshPage([sending], []).some((m) => m.id === 'local:abc'));
+  });
+  it('a tombstone in the fresh page replaces the cached content', () => {
+    const [m] = freshPage([kept], [msg({ id: 'new', status: 'unsent', body: null, created_at: kept.created_at })]);
+    assert.equal(m.status, 'unsent');
+    assert.equal(m.body, null);
+  });
+});
+
+describe('an open photo or video closes when its message is taken back', () => {
+  const list = [msg({ id: 'a', kind: 'image' }), msg({ id: 'b', kind: 'video', status: 'unsent' })];
+  it('stays open while the message is visible', () => assert.equal(viewerStillAllowed(list, 'a'), true));
+  it('closes when it was unsent or removed', () => assert.equal(viewerStillAllowed(list, 'b'), false));
+  it('closes when it was deleted for me, or is no longer loaded', () => assert.equal(viewerStillAllowed(list, 'zzz'), false));
 });
