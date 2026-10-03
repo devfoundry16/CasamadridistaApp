@@ -114,6 +114,10 @@ export function useThread(conversationId: string | undefined, myId: string | und
 
   const cursorRef = useRef<string | null>(cached?.cursor ?? null);
   const exhaustedRef = useRef<boolean>(cached?.exhausted ?? false);
+  // Counts fresh starts: an older page asked for before one belongs to a list
+  // that no longer exists.
+  const generationRef = useRef(0);
+  const freshInFlightRef = useRef(0);
   const messagesRef = useRef(messages);
   const lastReadAckRef = useRef<string | null>(null);
   const lastTypingSentRef = useRef<number | null>(null);
@@ -164,9 +168,16 @@ export function useThread(conversationId: string | undefined, myId: string | und
     // What was held when the request started: anything that arrives while it
     // is in flight is newer than the page and must survive a fresh start.
     const heldBefore = new Set(messagesRef.current.map((m) => m.id));
+    // From here on an older page already asked for is stale whichever lands
+    // first, and no new one starts until the fresh page is in.
+    if (fresh) {
+      generationRef.current += 1;
+      freshInFlightRef.current += 1;
+    }
     try {
       const page = await SocialService.messages(conversationId, null);
       if (fresh || !threads.has(conversationId)) {
+        generationRef.current += 1;
         cursorRef.current = page.nextCursor;
         exhaustedRef.current = !page.nextCursor;
       }
@@ -176,15 +187,20 @@ export function useThread(conversationId: string | undefined, myId: string | und
     } catch (e) {
       setError(e instanceof SocialApiError ? e.code : 'network_error');
     } finally {
+      if (fresh) freshInFlightRef.current -= 1;
       setLoading(false);
     }
   }, [conversationId, merge, commit]);
 
   const loadOlder = useCallback(async () => {
-    if (!conversationId || loadingOlder || exhaustedRef.current || !cursorRef.current) return;
+    if (!conversationId || loadingOlder || freshInFlightRef.current > 0 || exhaustedRef.current || !cursorRef.current) return;
     setLoadingOlder(true);
+    const generation = generationRef.current;
     try {
       const page = await SocialService.messages(conversationId, cursorRef.current);
+      // A fresh start dropped the older pages and reset the cursor while this
+      // was in flight: landing it now would leave a hole above the new page.
+      if (generation !== generationRef.current) return;
       cursorRef.current = page.nextCursor;
       exhaustedRef.current = !page.nextCursor;
       merge(page.messages);
