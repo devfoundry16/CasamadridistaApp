@@ -18,6 +18,7 @@ import type {
 } from '@/types/media/contributor';
 import { normaliseMe } from '@/services/media/contributorMe';
 import type { ContributorInvite } from '@/utils/contributorGate.core';
+import { UPLOAD_METHODS } from '@/utils/uploadTarget.core';
 
 // `normaliseMe` and the fallback limits live in a pure module so the recorded
 // `/contributor/me` response can be replayed under `node --test`.
@@ -235,7 +236,10 @@ class ContributorMediaServiceClass {
           kind: input.kind,
           role: input.role ?? 'content',
           position: input.position ?? 0,
-          ...(input.transport ? { transport: input.transport, size_bytes: input.size_bytes } : {}),
+          // This build can POST to Cloudflare Images as well as PUT to Supabase.
+          upload_methods: UPLOAD_METHODS,
+          ...(input.transport ? { transport: input.transport } : {}),
+          ...(input.size_bytes ? { size_bytes: input.size_bytes } : {}),
         },
         { headers },
       );
@@ -253,7 +257,7 @@ class ContributorMediaServiceClass {
         `${BASE}/items/${itemId}/cover`,
         // `{ slot: true }` is required. The endpoint takes exactly two shapes and
         // 400s on anything else, so an empty body asked for nothing at all.
-        { slot: true },
+        { slot: true, upload_methods: UPLOAD_METHODS },
         { headers },
       );
       return data;

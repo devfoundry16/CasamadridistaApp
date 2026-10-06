@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto';
+import { retryWhileIncomplete } from '@/utils/uploadTarget.core';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -82,7 +83,8 @@ export function usePostStory() {
             mimeType: mime,
           });
       if (result.status >= 300) throw new SocialApiError('upload_failed', result.status);
-      return SocialService.publishStory(slot.story_id, caption.trim() || null);
+      // Publishing writes nothing before it checks the upload, so a retry is safe.
+      return retryWhileIncomplete(() => SocialService.publishStory(slot.story_id, caption.trim() || null));
     },
     onSuccess: () => client.invalidateQueries({ queryKey: feedKey }),
   });

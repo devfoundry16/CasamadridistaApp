@@ -186,7 +186,7 @@ export const VIDEO_FORMATS: readonly VideoFormat[] = ['vertical_short', 'horizon
 /* Upload slots                                                        */
 /* ------------------------------------------------------------------ */
 
-export type UploadProvider = 'supabase' | 'cloudflare_stream';
+export type UploadProvider = 'supabase' | 'cloudflare_stream' | 'cloudflare_images';
 
 /**
  * `POST …/assets` and `POST …/assets/:assetId/retry` return the same envelope.

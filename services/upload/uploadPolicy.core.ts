@@ -47,7 +47,7 @@ export type UploadEntryStatus =
   | 'ready'
   | 'failed';
 
-export type UploadProviderName = 'supabase' | 'cloudflare_stream';
+export type UploadProviderName = 'supabase' | 'cloudflare_stream' | 'cloudflare_images';
 
 export interface UploadEntry {
   /** Client-side queue id. Stable across retries; NOT the asset id. */
@@ -409,7 +409,7 @@ export function parseEntry(raw: unknown): UploadEntry | null {
     attempts: typeof r.attempts === 'number' && r.attempts >= 0 ? Math.floor(r.attempts) : 0,
     error: isNonEmptyString(r.error) ? r.error : null,
     provider:
-      r.provider === 'supabase' || r.provider === 'cloudflare_stream' ? r.provider : null,
+      r.provider === 'supabase' || r.provider === 'cloudflare_stream' || r.provider === 'cloudflare_images' ? r.provider : null,
     transport: r.transport === 'tus' || r.transport === 'direct' ? r.transport : null,
     uploadUrl: isNonEmptyString(r.uploadUrl) ? r.uploadUrl : null,
     // PATCH only means something on a resumable upload.

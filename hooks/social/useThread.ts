@@ -8,6 +8,8 @@ import { AppState } from 'react-native';
 
 import SocialService, { SocialApiError } from '@/services/SocialService';
 import { subscribeConversation, subscribeTyping } from '@/services/social/realtime';
+import { uploadToSlot } from '@/services/upload/uploadToSlot';
+import { retryWhileIncomplete, type SlotTarget } from '@/utils/uploadTarget.core';
 import type { ChatMessage, EmbedKind, MessageAttachment, MessageKind, MessageQuote, RealtimeMessageEvent } from '@/types/social';
 import {
   LOCAL_PREFIX,
@@ -342,13 +344,15 @@ export function useThread(conversationId: string | undefined, myId: string | und
         if (input.voice) attachmentIds.push(await uploadVoice(conversationId, input.voice));
         if (input.video) attachmentIds.push(await uploadVideo(conversationId, input.video));
 
-        const sent = await SocialService.sendMessage(conversationId, {
+        // A Cloudflare photo can take a moment to leave its draft state; the
+        // send is idempotent on client_id, so retrying it is safe.
+        const sent = await retryWhileIncomplete(() => SocialService.sendMessage(conversationId, {
           client_id: clientId,
           body: input.body,
           ...(attachmentIds.length ? { attachment_ids: attachmentIds } : {}),
           ...(input.embed ? { embed_kind: input.embed.kind, embed_id: input.embed.id } : {}),
           ...(input.replyToId ? { reply_to_id: input.replyToId } : {}),
-        });
+        }));
         pendingInputs.current.delete(clientId);
         merge([sent]);
         void queryClient.invalidateQueries({ queryKey: socialKeys.inbox('inbox') });
@@ -523,13 +527,10 @@ async function sizeOf(uri: string): Promise<number | undefined> {
   return info.exists && typeof info.size === 'number' ? info.size : undefined;
 }
 
-async function put(url: string, uri: string, contentType: string) {
-  const result = await FileSystem.uploadAsync(url, uri, {
-    httpMethod: 'PUT',
-    headers: { 'Content-Type': contentType },
-    uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-  });
-  if (result.status >= 300) throw new SocialApiError('upload_failed', result.status);
+/** Send a file to a slot: a PUT, or a multipart POST when the slot says so. */
+async function put(url: string, uri: string, contentType: string, target: SlotTarget = {}) {
+  const status = await uploadToSlot(url, uri, target, contentType);
+  if (status >= 300) throw new SocialApiError('upload_failed', status);
 }
 
 /** Reserve a voice slot (size and length up front) and upload the recording. */
@@ -558,12 +559,12 @@ async function uploadVideo(conversationId: string, video: VideoInput): Promise<s
     ...(video.height ? { height: video.height } : {}),
   });
   if (!slot.thumbnail_upload_url) throw new SocialApiError('invalid_response', null);
-  await put(slot.thumbnail_upload_url, frame, 'image/jpeg');
+  await put(slot.thumbnail_upload_url, frame, 'image/jpeg', { method: slot.thumbnail_method, field: slot.thumbnail_field });
   await put(slot.upload_url, video.uri, mime);
   return slot.attachment_id;
 }
 
-/** Resize, reserve a slot, PUT to the signed URL. Returns the attachment id. */
+/** Resize, reserve a slot, upload the way the slot asks. Returns the attachment id. */
 async function uploadPhoto(conversationId: string, photo: PhotoInput): Promise<string> {
   const longest = Math.max(photo.width ?? 0, photo.height ?? 0);
   const resize =
@@ -583,12 +584,7 @@ async function uploadPhoto(conversationId: string, photo: PhotoInput): Promise<s
     height: prepared.height,
   });
 
-  const result = await FileSystem.uploadAsync(slot.upload_url, prepared.uri, {
-    httpMethod: 'PUT',
-    headers: { 'Content-Type': 'image/jpeg' },
-    uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-  });
-  if (result.status >= 300) throw new SocialApiError('upload_failed', result.status);
+  await put(slot.upload_url, prepared.uri, 'image/jpeg', slot);
   return slot.attachment_id;
 }
 

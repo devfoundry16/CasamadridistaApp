@@ -427,6 +427,16 @@ describe('persistence', () => {
     assert.equal(repaired.role, 'content');
   });
 
+  it('keeps a Cloudflare Images slot across an app restart', () => {
+    const kept = parseEntry({
+      id: 'a', itemId: 'i', localUri: 'file:///f.jpg', kind: 'image', status: 'uploading',
+      provider: 'cloudflare_images', method: 'POST', uploadUrl: 'https://upload.imagedelivery.net/x/y',
+    });
+    assert.ok(kept);
+    assert.equal(kept.provider, 'cloudflare_images');
+    assert.equal(kept.method, 'POST');
+  });
+
   it('drops entries older than the TTL', () => {
     const stale = entry({ createdAt: NOW - QUEUE_ENTRY_TTL_MS - 1 });
     const fresh = entry({ id: 'fresh', createdAt: NOW - QUEUE_ENTRY_TTL_MS });

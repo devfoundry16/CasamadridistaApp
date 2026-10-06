@@ -14,12 +14,17 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import * as FileSystem from 'expo-file-system/legacy';
 import { API_BASE_URL } from '@/config/supabase';
+import { UPLOAD_METHODS, retryWhileIncomplete } from '@/utils/uploadTarget.core';
+import { uploadToSlot } from './upload/uploadToSlot';
 
 export interface UploadSlot {
   uploadUrl: string;
   mediaId: string;
   provider: string;
   externalId: string;
+  /** 'POST' (multipart, field `field`) for a Cloudflare Images slot; absent for a PUT. */
+  method?: string;
+  field?: string;
   thumbnailUploadUrl?: string;
   thumbnailPublicUrl?: string;
 }
@@ -73,7 +78,7 @@ class MediaServiceClass {
       const headers = await this.getAuthHeader();
       const response = await axios.post<UploadSlot>(
         `${API_BASE_URL}media/uploads`,
-        { kind, post_id: postId, ...(position !== undefined ? { position } : {}) },
+        { kind, post_id: postId, upload_methods: UPLOAD_METHODS, ...(position !== undefined ? { position } : {}) },
         { headers }
       );
       return response.data;
@@ -128,14 +133,16 @@ class MediaServiceClass {
     // 2. Get upload slot, unless one was reserved already
     const uploadSlot = slot ?? await this.requestUploadSlot('image', postId, position);
 
-    // 3. Upload bytes
-    await this.uploadToSignedUrl(uploadSlot.uploadUrl, compressed.uri, 'image/jpeg');
+    // 3. Upload bytes, the way the slot asks (PUT for Supabase, POST for Cloudflare)
+    const status = await uploadToSlot(uploadSlot.uploadUrl, compressed.uri, uploadSlot, 'image/jpeg');
+    if (status >= 300) throw new Error(`Upload failed with status ${status}`);
 
-    // 4. Complete. The backend derives image URLs from the storage key.
-    await this.completeUpload(uploadSlot.mediaId, {
+    // 4. Complete. The backend derives image URLs from the storage key. A
+    //    Cloudflare image can take a moment to leave its draft state.
+    await retryWhileIncomplete(() => this.completeUpload(uploadSlot.mediaId, {
       width: compressed.width,
       height: compressed.height,
-    });
+    }));
 
     return {
       mediaId:      uploadSlot.mediaId,

@@ -15,6 +15,7 @@ import {
   queueHydrated,
 } from '@/store/slices/uploadQueueSlice';
 import type { ContributorAsset, UploadSlot } from '@/types/media/contributor';
+import { retryWhileIncomplete } from '@/utils/uploadTarget.core';
 import {
   UPLOAD_QUEUE_STORAGE_KEY,
   clampProgress,
@@ -485,13 +486,15 @@ class UploadManagerClass {
       entry = this.update(entryId, { status: 'completing' });
       if (!entry) return;
 
-      const asset = await ContributorMediaService.completeUpload(entry.itemId, assetId, {
-        width: entry.width,
-        height: entry.height,
-        size_bytes: entry.sizeBytes,
-        mime_type: entry.mime,
-        duration_ms: entry.durationMs,
-      });
+      // A Cloudflare image can take a moment to leave its draft state.
+      const done = entry;
+      const asset = await retryWhileIncomplete(() => ContributorMediaService.completeUpload(done.itemId, assetId, {
+        width: done.width,
+        height: done.height,
+        size_bytes: done.sizeBytes,
+        mime_type: done.mime,
+        duration_ms: done.durationMs,
+      }));
 
       // Uploading into the cover slot does not make the image the cover. The
       // complete call writes `thumbnail_url` on the asset and stops there; only
@@ -571,7 +574,8 @@ class UploadManagerClass {
       position: entry.position,
       ...(shouldUseTus(entry)
         ? { transport: 'tus' as const, size_bytes: entry.sizeBytes as number }
-        : {}),
+        // The size lets the server keep a photo over Cloudflare's 10 MB on Supabase.
+        : entry.sizeBytes ? { size_bytes: entry.sizeBytes } : {}),
     };
   }
 

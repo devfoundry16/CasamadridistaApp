@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 import { API_BASE_URL } from '@/config/supabase';
+import { UPLOAD_METHODS } from '@/utils/uploadTarget.core';
 import {
   normaliseBlocked,
   normaliseConversationHeader,
@@ -75,12 +76,18 @@ export interface OutgoingMessage {
 export interface AttachmentSlot {
   attachment_id: string;
   upload_url: string;
-  token: string;
-  bucket: string;
+  /** 'POST' (multipart, field `field`) for a Cloudflare Images slot; absent for a PUT. */
+  method?: string;
+  field?: string;
+  /** Supabase slots only. */
+  token?: string;
+  bucket?: string;
   path: string;
-  /** A video's poster-frame slot. */
+  /** A video's poster-frame slot, sent the way `thumbnail_method` says. */
   thumbnail_upload_url?: string;
   thumbnail_path?: string;
+  thumbnail_method?: string;
+  thumbnail_field?: string;
 }
 
 /**
@@ -248,7 +255,7 @@ class SocialServiceClass {
     id: string,
     file: { mime_type: string; size_bytes?: number; width?: number; height?: number; duration_ms?: number },
   ): Promise<AttachmentSlot> {
-    return this.send<AttachmentSlot>('post', `/conversations/${encodeURIComponent(id)}/attachments`, file);
+    return this.send<AttachmentSlot>('post', `/conversations/${encodeURIComponent(id)}/attachments`, { ...file, upload_methods: UPLOAD_METHODS });
   }
 
   /** One reaction per person per message; `null` takes it back. */

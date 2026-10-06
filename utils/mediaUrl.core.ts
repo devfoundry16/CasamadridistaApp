@@ -81,6 +81,9 @@ export function transformCover(
   enabled: boolean,
 ): string | null {
   if (!url) return null;
+  // Cloudflare Images sizes by variant, always available: swap it in.
+  const cloudflare = cloudflareVariant(url, width);
+  if (cloudflare) return cloudflare;
   if (!enabled || !isResizable(url)) return url ?? null;
   if (!url.includes(PUBLIC_OBJECT_PATH)) return url;
 
@@ -90,6 +93,22 @@ export function transformCover(
   const separator = beforeHash.includes('?') ? '&' : '?';
   const withWidth = `${beforeHash}${separator}width=${width}`;
   return hash ? `${withWidth}#${hash}` : withWidth;
+}
+
+/** The backend's named Cloudflare Images variants (services/images/imagesRules.js). */
+const CF_VARIANT_WIDTHS = [320, 480, 640, 720, 1080, 1600, 2048] as const;
+const CF_IMAGE = /^https:\/\/imagedelivery\.net\/([^/?#]+)\/([^/?#]+)\/([^/?#]+)$/;
+
+/**
+ * A public Cloudflare Images URL at the variant nearest `width`, or null when
+ * `url` is not one. A signed URL (`?exp=&sig=`) is never rewritten: its
+ * signature covers the variant in the path.
+ */
+function cloudflareVariant(url: string, width: number): string | null {
+  const m = CF_IMAGE.exec(url);
+  if (!m) return null;
+  const nearest = CF_VARIANT_WIDTHS.reduce((best, w) => (Math.abs(w - width) < Math.abs(best - width) ? w : best));
+  return `https://imagedelivery.net/${m[1]}/${m[2]}/w${nearest}`;
 }
 
 /** Whether Supabase image transforms are enabled for this build. */
