@@ -538,10 +538,18 @@ function RootLayoutInner() {
   // Maintenance can start or end while the app sits in the background.
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => {
-      if (state === "active") recheckMaintenance();
+      if (state === "active") {
+        recheckMaintenance();
+        // The daily visit report (at most once a day; the funnel's Visitor step).
+        void AnalyticsService.reportVisit();
+      }
     });
     return () => subscription.remove();
   }, [recheckMaintenance]);
+
+  useEffect(() => {
+    void AnalyticsService.reportVisit();
+  }, []);
 
   // The backend is refusing every request. AppShell is not mounted at all, so
   // no screen fetches into the refusal and no deep link or push tap tries to

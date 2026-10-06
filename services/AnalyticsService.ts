@@ -5,6 +5,8 @@ import { AppState, type AppStateStatus, Platform } from 'react-native';
 import { API_BASE_URL } from '@/config/supabase';
 import type { MediaAnalyticsEvent, MediaEventName } from '@/types/media/casaMedia';
 import { buildEventsBody, toEventType } from '@/services/media/wire';
+import Constants from 'expo-constants';
+import { shouldReportVisit, visitBody } from '@/utils/appVisit.core';
 import {
   SESSION_STORAGE_KEY,
   parseSession,
@@ -14,6 +16,8 @@ import {
 
 const QUEUE_KEY = 'casa_media_event_queue';
 const ANON_ID_KEY = 'casa_media_anon_id';
+/** When the daily visit was last reported (reportVisit). */
+const VISIT_KEY = 'casa_app_visit_at';
 
 const FLUSH_AT = 20; // events
 const FLUSH_EVERY_MS = 10_000;
@@ -67,6 +71,36 @@ class AnalyticsServiceClass {
       void this.flush();
     }
   };
+
+  /**
+   * Report, at most once a day, that the app was opened (the analytics
+   * funnel's Visitor step). Signed in, it also links this install to the
+   * account. Best effort: a lost report only lowers an estimate.
+   */
+  async reportVisit(): Promise<void> {
+    // A cold start fires this twice (launch and first "active"): one is enough.
+    if (this.visitInFlight) return this.visitInFlight;
+    this.visitInFlight = this.sendVisit().finally(() => {
+      this.visitInFlight = null;
+    });
+    return this.visitInFlight;
+  }
+
+  private visitInFlight: Promise<void> | null = null;
+
+  private async sendVisit(): Promise<void> {
+    try {
+      const last = await AsyncStorage.getItem(VISIT_KEY);
+      if (!shouldReportVisit(last, Date.now())) return;
+      const token = await AsyncStorage.getItem('auth_token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const body = visitBody(await this.getAnonId(), Platform.OS, Constants.expoConfig?.version ?? null);
+      await axios.post(`${API_BASE_URL}app/visit`, body, { headers, timeout: 10_000 });
+      await AsyncStorage.setItem(VISIT_KEY, new Date().toISOString());
+    } catch {
+      // Tried again on the next launch or return to the app.
+    }
+  }
 
   /**
    * Stable per-install id used to attribute an anonymous `locked_view` to the
