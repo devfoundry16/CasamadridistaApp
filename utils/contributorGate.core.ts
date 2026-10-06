@@ -19,6 +19,12 @@ export interface GateInput {
   me: { contributor: unknown; isMediaManager: boolean } | null;
   /** Why `/contributor/me` did not answer. `status` is absent on a transport failure. */
   error: { status?: number; message?: string } | null;
+  /**
+   * The error is a closed staff session (`isStaffSessionRefusal` in
+   * utils/staffRefusal.core.ts), worked out by the caller so this file stays
+   * free of imports and loadable under `node --test`.
+   */
+  staffSessionClosed?: boolean;
   /** `undefined` = not answered yet; `null` = this account was never invited. */
   invite: ContributorInvite | null | undefined;
 }
@@ -32,6 +38,8 @@ export type GateState =
   | { kind: 'refused'; message: string }
   /** The request did not get an answer: retryable. */
   | { kind: 'failed'; message: string }
+  /** A manager's staff session closed (idle, lifetime, or revoked): sign in again. */
+  | { kind: 'sessionEnded' }
   | { kind: 'notContributor' };
 
 export function gateState(input: GateInput): GateState {
@@ -41,8 +49,11 @@ export function gateState(input: GateInput): GateState {
   if (input.error || !input.me) {
     const status = input.error?.status;
     const message = input.error?.message ?? '';
-    // 401 is handled by the global axios interceptor, so a 4xx that reaches
-    // here is the server answering, not the network failing.
+    // A closed staff session is a 401 the axios interceptor passes through:
+    // refreshing keeps the same session, so only a new sign-in opens it.
+    if (input.staffSessionClosed) return { kind: 'sessionEnded' };
+    // Any other 401 is handled by the interceptor, so a 4xx that reaches here
+    // is the server answering, not the network failing.
     const refused = status !== undefined && status >= 403 && status < 500;
     if (!refused) return { kind: 'failed', message };
 

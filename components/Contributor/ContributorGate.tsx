@@ -19,6 +19,7 @@ import { useUser } from '@/hooks/useUser';
 import Colors from '@/constants/colors';
 import type { ContributorMe } from '@/types/media/contributor';
 import { gateState } from '@/utils/contributorGate.core';
+import { isStaffSessionRefusal } from '@/utils/staffRefusal.core';
 
 interface Props {
   /** Where the login modal should return to. */
@@ -42,6 +43,10 @@ interface Props {
  *   - 403 (not / suspended) → the server's own sentence, no retry button. This
  *                             is an *answer*, not a failure, and offering
  *                             "try again" would invite a pointless loop.
+ *   - 401 session ended     → a manager's staff session closed (idle, lifetime
+ *                             or revoked). Refreshing the token keeps the same
+ *                             session, so the only way on is to sign out; the
+ *                             signed-out case then offers sign-in with returnTo.
  *   - anything else         → retryable error.
  *
  * The 403/other split relies on `useContributorMe` running with `retry: false`
@@ -49,7 +54,7 @@ interface Props {
  */
 export default function ContributorGate({ returnTo, children }: Props) {
   const { t } = useTranslation();
-  const { user } = useUser();
+  const { user, logout } = useUser();
   const requireAuth = useRequireAuth();
   const { data, isLoading, isError, error, refetch } = useContributorMe();
 
@@ -64,6 +69,7 @@ export default function ContributorGate({ returnTo, children }: Props) {
     loading: isLoading,
     me: data ?? null,
     error: failure ? { status, message: failure.message } : null,
+    staffSessionClosed: isStaffSessionRefusal(status, failure?.message),
     // A failed invitation check is "no open invitation": the refusal the
     // server already gave is then the truest thing to show.
     invite: invite.isError ? null : invite.data,
@@ -177,6 +183,21 @@ export default function ContributorGate({ returnTo, children }: Props) {
           icon={ShieldAlert}
           title={t('contributor.gate.notContributorTitle')}
           body={state.message}
+        />,
+      );
+
+    case 'sessionEnded':
+      return page(
+        <EmptyState
+          icon={ShieldAlert}
+          title={t('contributor.gate.sessionEndedTitle')}
+          body={t('contributor.gate.sessionEndedBody')}
+          action={{
+            label: t('contributor.gate.signOut'),
+            // Signed out, the gate shows sign-in with returnTo; MediaAuthSync
+            // drops this account's cached refusal.
+            onPress: () => logout(),
+          }}
         />,
       );
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { mediaKeys, notificationKeys } from '@/hooks/media/keys';
+import { contributorKeys, mediaKeys, notificationKeys } from '@/hooks/media/keys';
 import { useUser } from '@/hooks/useUser';
 
 /**
@@ -13,6 +13,10 @@ import { useUser } from '@/hooks/useUser';
  * because React Query happily serves the stale teaser. Dropping the whole
  * `casaMedia` key space on an identity change is the only correct scope — the
  * same is true in reverse on sign-out.
+ *
+ * Contributor rows belong to one account (`contributorKeys.me()` is not keyed
+ * by user), so they are dropped rather than invalidated: the next account must
+ * never be shown the last one's profile, or its refusal.
  *
  * Renders nothing; mounted once in the root layout.
  */
@@ -34,6 +38,7 @@ export default function MediaAuthSync() {
 
     queryClient.invalidateQueries({ queryKey: mediaKeys.all });
     queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+    queryClient.removeQueries({ queryKey: contributorKeys.all });
   }, [user?.id, queryClient]);
 
   return null;

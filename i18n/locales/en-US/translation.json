@@ -1252,7 +1252,10 @@
       "signIn": "Sign in",
       "notContributorTitle": "Contributor access needed",
       "notContributorBody": "Your account is not a Casa Media contributor. Contact the media team if you think this is wrong.",
-      "loadFailed": "Could not load your contributor profile."
+      "loadFailed": "Could not load your contributor profile.",
+      "sessionEndedTitle": "Your admin session has ended",
+      "sessionEndedBody": "For security, admin sessions end after a period without use or after several hours. Sign out, then sign in again to continue.",
+      "signOut": "Sign out"
     },
     "invite": {
       "title": "You are invited to contribute",

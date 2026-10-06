@@ -52,6 +52,14 @@ describe('gateState', () => {
     }
   });
 
+  it('says a closed staff session has ended, rather than offering a retry that cannot work', () => {
+    // A manager's staff session closes after the idle or lifetime limit; the
+    // token refresh keeps the same session, so only a new sign-in helps.
+    const closed = { status: 401, message: 'session_revoked' };
+    assert.equal(gateState({ ...base, error: closed, staffSessionClosed: true }).kind, 'sessionEnded');
+    assert.equal(gateState({ ...base, error: closed, staffSessionClosed: false }).kind, 'failed');
+  });
+
   it('treats a transport failure as retryable, not as a refusal', () => {
     assert.equal(gateState({ ...base, error: { message: 'Network Error' } }).kind, 'failed');
     assert.equal(gateState({ ...base, error: { status: 500, message: 'boom' } }).kind, 'failed');
