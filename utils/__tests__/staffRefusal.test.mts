@@ -39,3 +39,10 @@ describe('staffRefusal.core', () => {
     assert.equal(isStaffSessionRefusal(403, 'session_idle'), false);
   });
 });
+
+describe('a staff session closed for its time limit', () => {
+  it('is a closed session like idle or revoked: no token refresh, and the same notice', () => {
+    assert.equal(isStaffSessionRefusal(401, 'session_expired'), true);
+    assert.equal(staffRefusalKey({ response: { status: 401, data: { error: 'session_expired' } } }), 'admin.refusal.sessionEnded');
+  });
+});

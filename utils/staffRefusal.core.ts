@@ -12,6 +12,7 @@ type HttpError = { response?: { status?: number; data?: { error?: unknown } } } 
 
 const KEYS: Record<string, string> = {
   '401:session_idle': 'admin.refusal.sessionEnded',
+  '401:session_expired': 'admin.refusal.sessionEnded',
   '401:session_revoked': 'admin.refusal.sessionEnded',
   '403:reauth_required': 'admin.refusal.reauth',
   '403:mfa_required': 'admin.refusal.mfa',
@@ -31,5 +32,5 @@ export function staffRefusalKey(error: unknown): string | null {
  * Refreshing the token keeps the same session, so it would be refused again.
  */
 export function isStaffSessionRefusal(status: number | undefined, code: unknown): boolean {
-  return status === 401 && (code === 'session_idle' || code === 'session_revoked');
+  return status === 401 && (code === 'session_idle' || code === 'session_expired' || code === 'session_revoked');
 }
