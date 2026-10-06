@@ -176,7 +176,7 @@ export default function DashboardRevenueScreen() {
             <Text className="text-text-secondary text-center mt-8">{t("fanClubDashboard.noTransactions")}</Text>
           }
           renderItem={({ item }) => {
-            const { incoming: isRevenue, labelKey } = ledgerLine(item.type);
+            const { incoming: isRevenue, labelKey } = ledgerLine(item.type, Number(item.amount));
             return (
               <View className="bg-bg-card rounded-xl px-4 py-3 mb-2 flex-row items-center">
                 <View
@@ -200,7 +200,7 @@ export default function DashboardRevenueScreen() {
                 <Text
                   className={`font-bold ${isRevenue ? 'text-green-400' : 'text-rm-gold'}`}
                 >
-                  {isRevenue ? '+' : '-'}${Number(item.amount).toFixed(2)}
+                  {isRevenue ? '+' : '-'}${Math.abs(Number(item.amount)).toFixed(2)}
                 </Text>
               </View>
             );

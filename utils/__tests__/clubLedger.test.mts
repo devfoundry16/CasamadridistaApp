@@ -19,6 +19,11 @@ describe('clubLedger.core', () => {
     assert.deepEqual(ledgerLine('revenue_share_reversal'), { incoming: false, labelKey: 'fanClubDashboard.shareReversal' });
   });
 
+  it('a balance adjustment goes the way its amount does, under its own label', () => {
+    assert.deepEqual(ledgerLine('adjustment', 25), { incoming: true, labelKey: 'fanClubDashboard.adjustment' });
+    assert.deepEqual(ledgerLine('adjustment', -12.5), { incoming: false, labelKey: 'fanClubDashboard.adjustment' });
+  });
+
   it('an unknown type is shown as going out, so money is never overstated', () => {
     assert.equal(ledgerLine('something_new').incoming, false);
   });

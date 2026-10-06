@@ -996,7 +996,8 @@
     "payoutNotAllowed": "Only club owners and admins can request payouts.",
     "payoutReversal": "Payout credited back",
     "unnamedMember": "Unnamed member",
-    "shareReversal": "Share taken back (refund)"
+    "shareReversal": "Share taken back (refund)",
+    "adjustment": "Balance adjustment"
   },
   "admin": {
     "title": "Super Admin Panel",

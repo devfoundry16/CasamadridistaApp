@@ -32,7 +32,8 @@ export interface DashboardMember {
 export interface RevenueTransaction {
   id: string;
   /** 'payout_reversal': a rejected or cancelled payout credited back. */
-  type: 'revenue_share' | 'revenue_share_reversal' | 'payout' | 'payout_reversal';
+  /** 'adjustment': a correction by Casa; its amount is signed. */
+  type: 'revenue_share' | 'revenue_share_reversal' | 'payout' | 'payout_reversal' | 'adjustment';
   amount: number;
   description: string | null;
   created_at: string;

@@ -1000,7 +1000,8 @@
     "payoutNotAllowed": "يمكن لمالكي النادي والمشرفين فقط طلب السحب.",
     "payoutReversal": "استرداد دفعة إلى المحفظة",
     "unnamedMember": "عضو بلا اسم",
-    "shareReversal": "استرداد الحصة (استرجاع)"
+    "shareReversal": "استرداد الحصة (استرجاع)",
+    "adjustment": "تعديل الرصيد"
   },
   "admin": {
     "title": "لوحة المشرف العام",
