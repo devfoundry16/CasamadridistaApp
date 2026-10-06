@@ -16,6 +16,7 @@ import {
   patchPostInPages,
   reportErrorKey,
   reportReady,
+  isAuthRefusal,
 } from '../post.core.ts';
 import { SOCIAL_REPORT_REASONS } from '../../types/social.ts';
 
@@ -138,5 +139,26 @@ describe('patching a cached post', () => {
   it('tolerates a malformed cache entry', () => {
     const odd = { pages: [{ posts: null }, {}] } as any;
     assert.equal(patchPostInPages(odd, 'a', { save_count: 2 }), odd);
+  });
+});
+
+describe('isAuthRefusal', () => {
+  it('is true only for a 401, so the raw "No token provided" never reaches a guest', () => {
+    assert.equal(isAuthRefusal(401), true);
+    for (const status of [400, 403, 409, 500, undefined, null]) assert.equal(isAuthRefusal(status), false);
+  });
+});
+
+describe('return paths for the community sign-in gate', () => {
+  it('accepts the post, media-comments and compose hrefs', async () => {
+    const { isSafeReturnHref } = await import('../returnTo.core.ts');
+    for (const href of [
+      '/community/post/0a1b2c3d-4e5f-6789-abcd-ef0123456789',
+      '/media/comments/0a1b2c3d-4e5f-6789-abcd-ef0123456789',
+      '/community/compose',
+      '/community/report/0a1b2c3d-4e5f-6789-abcd-ef0123456789',
+    ]) {
+      assert.equal(isSafeReturnHref(href), true, href);
+    }
   });
 });

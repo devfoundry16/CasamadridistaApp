@@ -914,7 +914,9 @@
       "invalidTitle": "Not a hashtag",
       "invalidBody": "This link doesn't point to a hashtag."
     },
-    "commentsOff": "Comments are turned off for this post."
+    "commentsOff": "Comments are turned off for this post.",
+    "signInToComment": "Sign in to join the conversation",
+    "signInRequired": "Sign in to continue."
   },
   "membershipPackages": {
     "halaGold": {

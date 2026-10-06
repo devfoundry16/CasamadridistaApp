@@ -15,6 +15,7 @@ import Colors from "@/constants/colors";
 import PostShareSheet from "@/components/Social/PostShareSheet";
 import { socialKeys } from "@/hooks/social/keys";
 import { patchPost, patchPostInPages } from "@/utils/post.core";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 interface Props {
   post: Post;
@@ -24,6 +25,10 @@ interface Props {
 export default function PostActions({ post, onCommentPress }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const requireAuth = useRequireAuth();
+  // A guest is asked to sign in before the optimistic toggle, so the heart never
+  // flashes on and back off; they return to this post afterwards.
+  const signedIn = () => requireAuth({ href: `/community/post/${post.id}`, mode: "login" });
   const [liked, setLiked] = useState(post.liked_by_me);
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [saved, setSaved] = useState(post.saved_by_me ?? false);
@@ -46,6 +51,7 @@ export default function PostActions({ post, onCommentPress }: Props) {
   }, [post.saved_by_me]);
 
   const handleLike = async () => {
+    if (!signedIn()) return;
     hasInteracted.current = true;
     const wasLiked = liked;
     setLiked(!wasLiked);
@@ -78,6 +84,7 @@ export default function PostActions({ post, onCommentPress }: Props) {
   // cannot race a save against its own unsave.
   const handleSave = async () => {
     if (saving.current) return;
+    if (!signedIn()) return;
     saving.current = true;
     hasSaved.current = true;
     const wasSaved = saved;

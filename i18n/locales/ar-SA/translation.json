@@ -918,7 +918,9 @@
       "invalidTitle": "ليس وسماً",
       "invalidBody": "هذا الرابط لا يشير إلى وسم."
     },
-    "commentsOff": "التعليقات متوقفة على هذا المنشور."
+    "commentsOff": "التعليقات متوقفة على هذا المنشور.",
+    "signInToComment": "سجّل الدخول للمشاركة في النقاش",
+    "signInRequired": "سجّل الدخول للمتابعة."
   },
   "membershipPackages": {
     "halaGold": {

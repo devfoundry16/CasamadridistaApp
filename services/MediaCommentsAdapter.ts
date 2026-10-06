@@ -3,6 +3,8 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
 import CommentService, { type Comment, type CommentsPage } from '@/services/CommentService';
 import { normaliseCommentsPage } from '@/services/media/normalise';
+import i18n from '@/i18n';
+import { isAuthRefusal } from '@/utils/post.core';
 
 /**
  * `media_comments` is a separate table from `post_comments` (the plan's
@@ -25,6 +27,7 @@ async function authHeader(): Promise<Record<string, string>> {
 }
 
 function fail(error: any, fallback: string): never {
+  if (isAuthRefusal(error?.response?.status)) throw new Error(i18n.t('community.signInRequired'));
   throw new Error(error?.response?.data?.error || fallback);
 }
 

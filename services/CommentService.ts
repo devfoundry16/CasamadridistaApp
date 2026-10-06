@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
 import i18n from '@/i18n';
+import { isAuthRefusal } from '@/utils/post.core';
 
 export interface Comment {
   id: string;
@@ -61,6 +62,9 @@ class CommentServiceClass {
       );
       return response.data;
     } catch (error: any) {
+      if (isAuthRefusal(error.response?.status)) {
+        throw new Error(i18n.t('community.signInToComment'));
+      }
       if (error.response?.data?.error === 'account_restricted') {
         throw new Error(i18n.t('community.accountRestricted'));
       }

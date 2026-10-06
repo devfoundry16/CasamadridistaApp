@@ -20,6 +20,7 @@ import ActionSheet, { type SheetAction } from '@/components/Social/ActionSheet';
 import RichText from '@/components/Social/RichText';
 import ReportSheet from '@/components/Community/Moderation/ReportSheet';
 import { useUser } from '@/hooks/useUser';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { hrefForToken, isSafeUrl, linkTokens, type RichToken } from '@/utils/richText.core';
 
 interface Props {
@@ -27,6 +28,8 @@ interface Props {
   onReply?: (comment: Comment) => void;
   /** Which comment table this row belongs to. Defaults to the community feed. */
   targetKind?: CommentTargetKind;
+  /** Where a guest who taps Like or Reply comes back to after signing in. */
+  returnHref?: string;
 }
 
 const PLACEHOLDER = require('@/assets/images/placeholder_avatar.png');
@@ -38,17 +41,25 @@ const PLACEHOLDER = require('@/assets/images/placeholder_avatar.png');
  * Report exists for Community comments only — Casa Media comments have no
  * report endpoint.
  */
-export default function CommentRow({ comment, onReply, targetKind = 'post' }: Props) {
+export default function CommentRow({ comment, onReply, targetKind = 'post', returnHref }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useUser();
+  const requireAuth = useRequireAuth();
+  /** True when signed in; otherwise opens the sign-in sheet and returns false. */
+  const signedIn = () => !returnHref || requireAuth({ href: returnHref, mode: 'login' });
   const [liked, setLiked]         = useState(false);
   const [likeCount, setLikeCount] = useState(comment.like_count);
   const [menu, setMenu]           = useState(false);
   const [report, setReport]       = useState(false);
 
+  const handleReply = () => {
+    if (signedIn()) onReply?.(comment);
+  };
+
   const handleLike = async () => {
+    if (!signedIn()) return;
     const wasLiked = liked;
     setLiked(!wasLiked);
     setLikeCount((c) => c + (wasLiked ? -1 : 1));
@@ -128,7 +139,7 @@ export default function CommentRow({ comment, onReply, targetKind = 'post' }: Pr
 
   const onA11yAction = (event: AccessibilityActionEvent) => {
     switch (event.nativeEvent.actionName) {
-      case 'reply':     onReply?.(comment); break;
+      case 'reply':     handleReply(); break;
       case 'like':      handleLike(); break;
       case 'author':    openAuthor(); break;
       case 'longpress': if (actions.length) setMenu(true); break;
@@ -185,7 +196,7 @@ export default function CommentRow({ comment, onReply, targetKind = 'post' }: Pr
             style={{ fontSize: 14, marginTop: 2 }}
           />
           <View className="flex-row items-center mt-1 gap-3">
-            <TouchableOpacity onPress={() => onReply?.(comment)} activeOpacity={0.7}>
+            <TouchableOpacity onPress={handleReply} activeOpacity={0.7}>
               <Text className="text-xs" style={{ color: Colors.text.tertiary }}>{t('community.reply')}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleLike} className="flex-row items-center" activeOpacity={0.7}>

@@ -45,6 +45,9 @@ export default function CommentList({ target }: Props) {
   // locked: true }`. Without this the screen reads as "be the first to comment"
   // on a thread the viewer is not allowed to see or post to.
   const locked = !!data?.pages[0]?.locked;
+  // A guest who signs in from this thread comes back to it.
+  const returnHref =
+    target.kind === 'post' ? `/community/post/${target.id}` : `/media/comments/${target.id}`;
 
   const handleSubmit = useCallback(
     async (body: string) => {
@@ -57,9 +60,9 @@ export default function CommentList({ target }: Props) {
 
   const renderItem = useCallback(
     ({ item }: { item: Comment }) => (
-      <CommentRow comment={item} targetKind={target.kind} onReply={setReplyTo} />
+      <CommentRow comment={item} targetKind={target.kind} onReply={setReplyTo} returnHref={returnHref} />
     ),
-    [target.kind],
+    [target.kind, returnHref],
   );
 
   if (isLoading) {
@@ -106,6 +109,7 @@ export default function CommentList({ target }: Props) {
           replyToName={replyTo?.author?.first_name ?? null}
           onSubmit={handleSubmit}
           onCancelReply={() => setReplyTo(null)}
+          returnHref={returnHref}
         />
       )}
     </View>

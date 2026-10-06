@@ -27,6 +27,7 @@ import CommentRow   from '@/components/Community/Comments/CommentRow';
 import CommentInput, { type CommentInputHandle } from '@/components/Community/Comments/CommentInput';
 import ReportSheet  from '@/components/Community/Moderation/ReportSheet';
 import { useKeyboardOffsets } from '@/hooks/useKeyboardOffsets';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import Colors from '@/constants/colors';
 
 export default function PostDetailPage() {
@@ -39,6 +40,9 @@ export default function PostDetailPage() {
   const commentInputRef             = useRef<CommentInputHandle>(null);
   const target = useMemo<CommentTarget>(() => ({ kind: 'post', id }), [id]);
   const commentsKey = useMemo(() => commentsQueryKey(target), [target]);
+  // Where a guest lands after signing in from any action on this screen.
+  const returnHref = `/community/post/${id}`;
+  const requireAuth = useRequireAuth();
 
   // Header height + bottom safe-area inset, combined into the exact offset the
   // KeyboardAvoidingView needs. See hooks/useKeyboardOffsets.ts for the maths.
@@ -90,7 +94,9 @@ export default function PostDetailPage() {
       <View>
         <PostHeader
           post={post}
-          onReportPress={() => setReportOpen(true)}
+          onReportPress={() => {
+            if (requireAuth({ href: returnHref, mode: 'login' })) setReportOpen(true);
+          }}
           onAuthorPress={post.author_type === 'user' && post.author_id ? () => router.push(`/user/${post.author_id}`) : undefined}
         />
         <PostBody   post={post} truncate={false} />
@@ -107,7 +113,7 @@ export default function PostDetailPage() {
         )}
       </View>
     );
-  }, [post, commentsLoading, t, router]);
+  }, [post, commentsLoading, t, router, requireAuth, returnHref]);
 
   const screenOptions = (
     <Stack.Screen
@@ -162,7 +168,7 @@ export default function PostDetailPage() {
         <FlatList
           data={comments}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <CommentRow comment={item} targetKind="post" onReply={handleReply} />}
+          renderItem={({ item }) => <CommentRow comment={item} targetKind="post" onReply={handleReply} returnHref={returnHref} />}
           ListHeaderComponent={postContent}
           onEndReached={() => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); }}
           onEndReachedThreshold={0.5}
@@ -204,6 +210,7 @@ export default function PostDetailPage() {
             onSubmit={handleSubmit}
             onCancelReply={handleCancelReply}
             bottomInset={bottomInset}
+            returnHref={returnHref}
           />
         )}
       </KeyboardAvoidingView>

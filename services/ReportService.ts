@@ -3,7 +3,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
 import i18n from '@/i18n';
 import type { SocialReportReason } from '@/types/social';
-import { reportErrorKey } from '@/utils/post.core';
+import { isAuthRefusal, reportErrorKey } from '@/utils/post.core';
 
 /**
  * Casa Media's report reasons (`CasaMediaService.report`). Posts and comments
@@ -24,7 +24,7 @@ export type PostReportReason = SocialReportReason;
  */
 function reportError(error: any, fallback: string): Error {
   const code = error?.response?.data?.error;
-  const key = reportErrorKey(code);
+  const key = isAuthRefusal(error?.response?.status) ? 'community.signInRequired' : reportErrorKey(code);
   // `code` rides along so the sheet can tell "already reported" (close) from
   // a mistake the person can fix (stay open).
   return Object.assign(new Error(key ? i18n.t(key) : code || fallback), { code: code ?? null });

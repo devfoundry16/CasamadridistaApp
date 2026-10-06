@@ -8,8 +8,10 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Send, X } from 'lucide-react-native';
+import { LogIn, Send, X } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+import { useUser } from '@/hooks/useUser';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
 export interface CommentInputHandle {
   /** Focus the text field — used when the user taps "Reply" on a comment. */
@@ -37,6 +39,12 @@ interface Props {
    */
   bottomInset?: number;
   placeholder?: string;
+  /**
+   * Where a guest comes back to after signing in. Set, a signed-out viewer gets
+   * a "Sign in to join the conversation" bar instead of a box they cannot post
+   * from — the API would only answer "No token provided".
+   */
+  returnHref?: string;
   /** React 19: `ref` is an ordinary prop; forwardRef is not needed. */
   ref?: React.Ref<CommentInputHandle>;
 }
@@ -48,9 +56,12 @@ export default function CommentInput({
   onCancelReply,
   bottomInset = 0,
   placeholder,
+  returnHref,
   ref,
 }: Props) {
   const { t } = useTranslation();
+  const { user } = useUser();
+  const requireAuth = useRequireAuth();
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<TextInput>(null);
@@ -67,6 +78,8 @@ export default function CommentInput({
   const handleSend = async () => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+    // Backstop: the box is not shown to a guest, but a session can end while it is open.
+    if (returnHref && !requireAuth({ href: returnHref, mode: 'login' })) return;
     setLoading(true);
     try {
       await onSubmit(trimmed);
@@ -82,6 +95,32 @@ export default function CommentInput({
   };
 
   const hasText = text.trim().length > 0;
+
+  if (returnHref && !user?.id) {
+    return (
+      <View
+        className="border-t"
+        style={{
+          borderColor: Colors.border.default,
+          backgroundColor: Colors.background.dark,
+          paddingBottom: bottomInset,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => requireAuth({ href: returnHref, mode: 'login' })}
+          accessibilityRole="button"
+          accessibilityLabel={t('community.signInToComment')}
+          className="flex-row items-center justify-center px-3 py-3"
+          activeOpacity={0.7}
+        >
+          <LogIn size={16} color={Colors.darkGold} />
+          <Text className="text-sm font-semibold" style={{ color: Colors.darkGold, marginStart: 8 }}>
+            {t('community.signInToComment')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View

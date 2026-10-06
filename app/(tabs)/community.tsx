@@ -5,6 +5,7 @@ import { Pencil } from 'lucide-react-native';
 import StoriesRow from '@/components/Media/Stories/StoriesRow';
 import UserStoriesRow from '@/components/Social/stories/UserStoriesRow';
 import { useUser } from '@/hooks/useUser';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import FeedTabs from '@/components/Community/FeedTabs';
 import FeedList from '@/components/Community/FeedList';
 import FanClubPartnershipSection from '@/components/FanClubPartnershipSection';
@@ -17,6 +18,7 @@ export default function CommunityScreen() {
   const router = useRouter();
   const { data: stories } = useStories();
   const { user } = useUser();
+  const requireAuth = useRequireAuth();
   const name = [user?.profile?.first_name, user?.profile?.last_name].filter(Boolean).join(' ') || null;
 
   return (
@@ -31,7 +33,9 @@ export default function CommunityScreen() {
       <FeedList tab={tab} />
 
       <TouchableOpacity
-        onPress={() => router.push('/community/compose')}
+        onPress={() => {
+          if (requireAuth({ href: '/community/compose', mode: 'login' })) router.push('/community/compose');
+        }}
         style={{
           position: 'absolute',
           bottom: 24,

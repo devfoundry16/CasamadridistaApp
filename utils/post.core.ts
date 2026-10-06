@@ -80,6 +80,15 @@ export function reportReady(reason: SocialReportReason | null, description: stri
 
 const REPORT_ERRORS = ['invalid_reason', 'details_required', 'already_reported'];
 
+/**
+ * Did the API refuse for want of a signed-in session? The backend's 401 bodies
+ * ("No token provided", "Invalid or expired token", "authentication_required")
+ * are developer text — show a sign-in prompt instead of passing them through.
+ */
+export function isAuthRefusal(status: number | null | undefined): boolean {
+  return status === 401;
+}
+
 /** The i18n key for a report refusal the person can act on, or null. */
 export function reportErrorKey(code: string | null | undefined): string | null {
   return code && REPORT_ERRORS.includes(code) ? `community.reportErrors.${code}` : null;
