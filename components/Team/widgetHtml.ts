@@ -15,6 +15,13 @@ import Colors from "@/constants/colors";
  * scrollable region inside the WebView, every horizontal pan reaches the
  * swipeable pager unambiguously. That removes the conflict rather than trying
  * to arbitrate it.
+ *
+ * Never force `table-layout: fixed` here. The widget sizes its season column
+ * with the shrink-to-fit trick (`team-detail .table-widget td:first-child
+ * { white-space: nowrap; width: 1% }`), which only works under the default
+ * `auto` layout; under `fixed` the column really is 1% wide and every season
+ * year spills under the next cell's league logo. The body has no side padding
+ * so the widget's own card gets the full width.
  */
 function shell(lang: string, body: string): string {
   return `<!DOCTYPE html>
@@ -24,7 +31,7 @@ function shell(lang: string, body: string): string {
     <style>
       html, body {
         margin: 0;
-        padding: 8px 12px;
+        padding: 8px 0;
         background: ${Colors.background.deepDark};
         overflow-x: hidden;
         -webkit-font-smoothing: antialiased;
@@ -33,7 +40,6 @@ function shell(lang: string, body: string): string {
         max-width: 100% !important;
         overflow-x: hidden !important;
       }
-      table { table-layout: fixed; width: 100%; }
     </style>
   </head>
   <body>
