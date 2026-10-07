@@ -39,7 +39,10 @@ class NotificationServiceClass {
     try {
       const headers = await this.getAuthHeader();
       // `registration` is already the wire body — see `buildDeviceBody`.
-      const { data } = await axios.post(`${BASE}/devices`, registration, { headers });
+      // A finite timeout: PushService sends one registration at a time, so a
+      // request that never ends would hold back every later one, the sign-in
+      // rebind included.
+      const { data } = await axios.post(`${BASE}/devices`, registration, { headers, timeout: 15000 });
       return topicsOf(data);
     } catch (error: any) {
       this.fail(error, 'Failed to register for notifications');

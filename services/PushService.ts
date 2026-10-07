@@ -16,6 +16,7 @@ import {
   SOCIAL_TOPIC,
   withTopic,
 } from '@/utils/pushTopics.core';
+import { listenerTokenOptions, shouldRegister, type PushRegistrationKey } from '@/utils/pushRegistration.core';
 
 const TOKEN_KEY = 'expo_push_token';
 const ANDROID_CHANNEL_ID = 'casa-media';
@@ -60,6 +61,12 @@ class PushServiceClass {
   private token: string | null = null;
   /** The topics the server last said this device has; null until it has said. */
   private topics: string[] | null = null;
+  /** The account the app last registered for; null when signed out. */
+  private userId: string | null = null;
+  /** The last registration the server accepted, so an unchanged one is not sent again. */
+  private last: PushRegistrationKey | null = null;
+  /** The registration being sent now; concurrent callers wait for it instead of sending their own. */
+  private inFlight: Promise<void> | null = null;
 
   /**
    * Foreground presentation. Registered once from the root layout — a banner is
@@ -124,7 +131,8 @@ class PushServiceClass {
    * Ask for permission, fetch the Expo token, register it with the backend.
    * Never throws — a device that cannot receive push must not break the app.
    */
-  async register(): Promise<PushRegistrationOutcome> {
+  async register(userId: string | null = this.userId): Promise<PushRegistrationOutcome> {
+    this.userId = userId;
     // A simulator has no APNs/FCM token; asking would only produce an error.
     if (!Device.isDevice) {
       if (__DEV__) await Notifications.requestPermissionsAsync().catch(() => {});
@@ -157,36 +165,56 @@ class PushServiceClass {
   /**
    * A push token can be rolled by the service while the app is running; the old
    * one silently stops delivering. Re-register the moment that happens.
+   *
+   * The Expo token is derived from the device token the event carries. Asking
+   * for it without `devicePushToken` would ask APNs again, which fires this
+   * listener again: on a real iPhone that looped, POSTing the device 20+ times
+   * a second (expo-notifications warns against exactly this).
    */
   installTokenRefreshListener(): () => void {
-    const sub = Notifications.addPushTokenListener(() => {
+    const sub = Notifications.addPushTokenListener((devicePushToken) => {
       const projectId = resolveProjectId();
       if (!projectId) return;
-      Notifications.getExpoPushTokenAsync({ projectId })
+      Notifications.getExpoPushTokenAsync(listenerTokenOptions(projectId, devicePushToken))
         .then(({ data }) => (data ? this.persistAndRegister(data) : undefined))
         .catch(() => {});
     });
     return () => sub.remove();
   }
 
+  /** One registration at a time: a call made while one is sending waits for it, then checks again. */
   private async persistAndRegister(token: string): Promise<void> {
+    while (this.inFlight) await this.inFlight.catch(() => {});
+    const run = this.sendRegistration(token);
+    this.inFlight = run;
+    try {
+      await run;
+    } finally {
+      if (this.inFlight === run) this.inFlight = null;
+    }
+  }
+
+  private async sendRegistration(token: string): Promise<void> {
     this.token = token;
     try {
       await AsyncStorage.setItem(TOKEN_KEY, token);
     } catch {
       // ignore
     }
+    // `dm`: direct-message pushes (backend dmPushService only sends to devices
+    // that registered it — a build that cannot open a conversation never does).
+    // `social`: likes, comments, mentions, tags and friend requests, unless
+    // switched off in Account. Registration overwrites the row's topics, so the
+    // switch is read every time.
+    const topics = registrationTopics(await this.isSocialEnabled());
+    const key: PushRegistrationKey = { token, userId: this.userId, topicsKey: [...topics].sort().join(',') };
+    if (!shouldRegister(this.last, key)) return;
     try {
       const stored = await NotificationService.registerDevice(
         buildDeviceBody({
           expoPushToken: token,
           platform: Platform.OS === 'ios' ? 'ios' : Platform.OS === 'android' ? 'android' : 'web',
-          // `dm`: direct-message pushes (backend dmPushService only sends to
-          // devices that registered it — a build that cannot open a
-          // conversation never does). `social`: likes, comments, mentions, tags
-          // and friend requests, unless switched off in Account. Registration
-          // overwrites the row's topics, so the switch is read every time.
-          topics: registrationTopics(await this.isSocialEnabled()),
+          topics,
           locale: i18n.language,
           appVersion: Constants.expoConfig?.version ?? null,
           deviceName: Device.modelName ?? null,
@@ -197,6 +225,8 @@ class PushServiceClass {
         }),
       );
       this.topics = stored;
+      // Recorded only once the server has it, so a failed send is tried again.
+      this.last = key;
     } catch {
       // Registration is retried on the next `user.id` change / app launch.
     }
@@ -215,6 +245,7 @@ class PushServiceClass {
     await NotificationService.unregisterDevice(token, await AnalyticsService.getAnonId());
     this.token = null;
     this.topics = null;
+    this.last = null;
     try {
       await AsyncStorage.removeItem(TOKEN_KEY);
     } catch {
@@ -261,6 +292,8 @@ class PushServiceClass {
     try {
       const stored = await NotificationService.updateTopics(token, next, await AnalyticsService.getAnonId());
       this.topics = stored ?? next;
+      // What the server now holds, so the next registration is not sent only to repeat it.
+      if (this.last) this.last = { ...this.last, topicsKey: [...this.topics].sort().join(',') };
     } catch (error) {
       await AsyncStorage.setItem(SOCIAL_PREF_KEY, serialiseSocialPref(previous)).catch(() => {});
       throw error;

@@ -19,7 +19,7 @@ export function usePushRegistration() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    void PushService.register();
+    void PushService.register(user?.id ?? null);
   }, [user?.id]);
 
   useEffect(() => {
