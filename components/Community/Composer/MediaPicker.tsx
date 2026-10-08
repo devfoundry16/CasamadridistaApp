@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Alert, Linking } from 'react-
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
 import * as VideoThumbnails from 'expo-video-thumbnails';
-import { Camera, Image as ImageIcon, Play, Video, X } from 'lucide-react-native';
+import { Camera, Crop, Image as ImageIcon, Images, Play, Video, X } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import Touchable from '@/components/Touchable';
 import ActionSheet, { type SheetAction } from '@/components/Social/ActionSheet';
@@ -11,6 +11,7 @@ import { captureWithCamera, pickFromLibrary, type PickResult } from '@/services/
 import {
   POST_MEDIA_LIMITS,
   cameraOptions,
+  libraryCropRequest,
   libraryRequest,
   mergePostMedia,
   type PickedAsset,
@@ -45,18 +46,21 @@ async function withThumbnail(asset: PickedAsset): Promise<PickedMedia> {
  * The composer's media tray: up to 10 photos, or exactly one video, from the
  * library (multi-select, in the order tapped) or the camera.
  *
- * The OS crop is offered on camera stills only. Neither platform can crop
- * inside a multi-select, and the library stays multi-select so that picking
- * several photos at once always works the same way (see `libraryRequest`).
+ * The OS crop is offered on camera stills and on one library photo at a time
+ * ("One photo, cropped", `libraryCropRequest`). Neither platform can crop
+ * inside a multi-select, so "Choose photos" stays multi-select and uncropped
+ * (see `libraryRequest`).
  *
  * The thumbnail strip follows `components/Social/Composer.tsx`.
  */
 export default function MediaPicker({ media, onChange, disabled = false, start = null }: Props) {
   const { t } = useTranslation();
   const [cameraMenu, setCameraMenu] = useState(false);
+  const [libraryMenu, setLibraryMenu] = useState(false);
 
   const library = libraryRequest(media);
   const camera = cameraOptions(media);
+  const crop = libraryCropRequest(media);
 
   const take = async (result: PickResult) => {
     if (result.denied) {
@@ -95,6 +99,28 @@ export default function MediaPicker({ media, onChange, disabled = false, start =
       Alert.alert(t('common.error'), error?.message ?? '');
     }
   };
+
+  const openCropped = async () => {
+    if (!crop) return;
+    try {
+      await take(await pickFromLibrary({ limits: POST_MEDIA_LIMITS, ...crop }));
+    } catch (error: any) {
+      Alert.alert(t('common.error'), error?.message ?? '');
+    }
+  };
+
+  // Library always asks: a crop is possible exactly when the library is
+  // (libraryCropRequest). The first row is named by what it opens.
+  const libraryActions: SheetAction[] = [
+    {
+      key: 'photos',
+      label: media.length ? t('community.libraryPhotos') : t('community.libraryPhotosOrVideo'),
+      icon: <Images size={20} color={Colors.darkGold} />,
+      onPress: () => void openLibrary(),
+    },
+    { key: 'crop', label: t('community.libraryCrop'), icon: <Crop size={20} color={Colors.darkGold} />, onPress: () => void openCropped() },
+  ];
+  const onLibrary = () => setLibraryMenu(true);
 
   const started = useRef(false);
   useEffect(() => {
@@ -181,7 +207,7 @@ export default function MediaPicker({ media, onChange, disabled = false, start =
         <View className="flex-row px-4 gap-3" style={{ paddingBottom: 14 }}>
           {library ? (
             <TouchableOpacity
-              onPress={() => void openLibrary()}
+              onPress={onLibrary}
               disabled={disabled}
               className="flex-row items-center rounded-full px-4 py-2"
               style={{ backgroundColor: Colors.background.medium }}
@@ -213,6 +239,7 @@ export default function MediaPicker({ media, onChange, disabled = false, start =
       ) : null}
 
       <ActionSheet visible={cameraMenu} onClose={() => setCameraMenu(false)} cancelLabel={t('common.cancel')} actions={cameraActions} />
+      <ActionSheet visible={libraryMenu} onClose={() => setLibraryMenu(false)} cancelLabel={t('common.cancel')} actions={libraryActions} />
     </View>
   );
 }

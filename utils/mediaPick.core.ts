@@ -134,7 +134,9 @@ export function mergePostMedia<T extends Kinded>(
  * Never with crop. iOS and Android can only crop when the picker is limited to
  * one file, and how many photos someone will choose is only known once the
  * picker returns, so a library crop would mean taking multi-select away from
- * the common case. Crop is offered on camera stills instead (`MediaPicker`).
+ * the common case. A cropped single photo is a separate pick
+ * (`libraryCropRequest`), offered beside this one in `MediaPicker`, as is the
+ * crop on camera stills.
  */
 export function libraryRequest(
   current: readonly Kinded[],
@@ -151,6 +153,19 @@ export function libraryRequest(
     selectionLimit: remaining,
     mediaTypes: current.length ? ['images'] : ['images', 'videos'],
   };
+}
+
+/**
+ * One library photo with the OS crop (spec §3, "crop/edit where supported").
+ * Neither platform crops inside a multi-select, so this is its own, single
+ * pick; null when the tray is full or holds a video (a post never mixes them).
+ */
+export function libraryCropRequest(
+  current: readonly Kinded[],
+  max: number = POST_MEDIA_LIMITS.maxGalleryAssets,
+): { selectionLimit: 1; mediaTypes: ['images']; allowsEditing: true } | null {
+  if (current.some((a) => a.kind === 'video') || current.length >= max) return null;
+  return { selectionLimit: 1, mediaTypes: ['images'], allowsEditing: true };
 }
 
 /** What the camera may add to the tray as it stands. */

@@ -13,6 +13,7 @@ import {
   applyLimits,
   cameraOptions,
   libraryRequest,
+  libraryCropRequest,
   mergePostMedia,
   videoFormatFor,
   type PickLimits,
@@ -156,6 +157,26 @@ describe('libraryRequest, started from Create → Photo or Video', () => {
   it('Video opens videos only, one at a time', () => {
     assert.deepEqual(libraryRequest([], undefined, 'videos'), { selectionLimit: 1, mediaTypes: ['videos'] });
     assert.equal(libraryRequest([photo(1)], undefined, 'videos'), null, 'a post never mixes photos and a video');
+  });
+});
+
+describe('libraryCropRequest', () => {
+  // Spec §3 "crop/edit where supported": the OS crops one photo at a time.
+  it('an empty tray, or one with room for photos, can add one cropped photo', () => {
+    const one = { selectionLimit: 1, mediaTypes: ['images'], allowsEditing: true };
+    assert.deepEqual(libraryCropRequest([]), one);
+    assert.deepEqual(libraryCropRequest([photo(1), photo(2)]), one);
+  });
+
+  it('is possible exactly when the library is, so Library always offers the choice', () => {
+    for (const tray of [[], [photo(1), photo(2)], Array.from({ length: 10 }, (_, i) => photo(i)), [video(1)]]) {
+      assert.equal(libraryCropRequest(tray) === null, libraryRequest(tray) === null);
+    }
+  });
+
+  it('a full tray, or one holding a video, cannot', () => {
+    assert.equal(libraryCropRequest(Array.from({ length: 10 }, (_, i) => photo(i))), null);
+    assert.equal(libraryCropRequest([video(1)]), null);
   });
 });
 
