@@ -20,6 +20,7 @@ import PostService from "@/services/PostService";
 import AuthService from "@/services/AuthService";
 import { MapPin, Shield, UserPlus, X } from "lucide-react-native";
 import MediaService, { type UploadSlot } from "@/services/MediaService";
+import { useKeyboardOffsets } from "@/hooks/useKeyboardOffsets";
 import MediaPicker, { type PickedMedia } from "./MediaPicker";
 import TagPicker from "./TagPicker";
 import TagPeopleSheet from "./TagPeopleSheet";
@@ -41,6 +42,7 @@ export default function Composer({ start = null }: { start?: 'images' | 'videos'
   const router = useRouter();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { keyboardVerticalOffset, bottomInset } = useKeyboardOffsets();
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -168,12 +170,17 @@ export default function Composer({ start = null }: { start?: 'images' | 'videos'
   }, [canPost, title, body, media, location, tagged, country, fanClub, postAsFanClub, roles, queryClient, router, t]);
 
   return (
+    // The offset makes the lift include the header (useKeyboardOffsets explains
+    // why); without it the Post bar stayed behind the keyboard on iOS.
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={keyboardVerticalOffset}
       style={styles.root}
     >
       <ScrollView
         keyboardShouldPersistTaps="handled"
+        // Swipe the form down to put the keyboard away.
+        keyboardDismissMode="interactive"
         style={{ flex: 1 }}
         contentContainerStyle={styles.scroll}
       >
@@ -337,7 +344,7 @@ export default function Composer({ start = null }: { start?: 'images' | 'videos'
       </ScrollView>
 
       {/* ── Post button ── */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: 12 + bottomInset }]}>
         <TouchableOpacity
           onPress={handlePost}
           disabled={!canPost}
