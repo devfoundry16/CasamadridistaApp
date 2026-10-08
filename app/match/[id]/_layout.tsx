@@ -3,18 +3,21 @@ import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { I18nManager, View } from 'react-native';
 
+import MatchHeader from '@/components/Match/Center/MatchHeader';
 import MatchIdentityStrip from '@/components/Media/Match/MatchIdentityStrip';
 import { MaterialTopTabs } from '@/components/navigation/MaterialTopTabs';
 import Colors from '@/constants/colors';
 import { useFont } from '@/contexts/FontContext';
+import { useMatchSummary } from '@/hooks/football/matchCenter';
 import { useMatchMedia } from '@/hooks/media/useMatchMedia';
 
 /**
- * The match page is now three tabs (details / media / community).
+ * The match page: Details, Predictions, Lineups, Head-to-Head, Form,
+ * Statistics, Media and Community. The first six come from the match centre
+ * endpoints (/api/match/fixture/:id/*), one query per tab.
  *
- * `router.push('/match/<fixtureId>')` from the team pages still lands on
- * `index`, which is the original widget screen moved here verbatim — turning a
- * leaf route into a directory does not change its href.
+ * `router.push('/match/<fixtureId>')` from the team pages lands on `index`
+ * (Details).
  *
  * Options are copied from `app/(tabs)/team/_layout.tsx`; the comments there
  * explain why `tabBarScrollEnabled`, `tabBarItemStyle` and `sceneStyle` must
@@ -32,8 +35,10 @@ export default function MatchTabsLayout() {
   const { tab } = useGlobalSearchParams<{ tab?: string }>();
   const matchId = Number.parseInt(id ?? '', 10);
 
-  // Header data comes off the unfiltered match-media query, which the Media tab
-  // also uses — one request, shared through the React Query cache.
+  // The header comes from the match centre summary, which knows every
+  // fixture. The Casa Media match is the fallback while it loads or if it
+  // fails; the Media tab shares that query through the React Query cache.
+  const { data: summary } = useMatchSummary(matchId);
   const { data } = useMatchMedia(Number.isFinite(matchId) ? matchId : undefined);
   const match = data?.pages[0]?.match ?? null;
 
@@ -51,15 +56,23 @@ export default function MatchTabsLayout() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background.deepDark }}>
       {/* Mounted once here, so it does not remount per tab. */}
-      <MatchIdentityStrip match={match} fallbackTitle={t('nav.matchDetails')} />
+      {summary ? (
+        <MatchHeader match={summary.match} />
+      ) : (
+        <MatchIdentityStrip match={match} fallbackTitle={t('nav.matchDetails')} />
+      )}
 
       <MaterialTopTabs
         screenOptions={{
           swipeEnabled: true,
           lazy: true,
           lazyPreloadDistance: 0,
-          tabBarScrollEnabled: false,
-          tabBarItemStyle: { width: 'auto' },
+          // Eight tabs do not fit a phone's width: the bar scrolls. Numeric
+          // width, as in app/(tabs)/team/_layout.tsx: react-native-tab-view
+          // only skips its two-pass measurement for a number. 124 fits the
+          // longest label.
+          tabBarScrollEnabled: true,
+          tabBarItemStyle: { width: 124 },
           tabBarActiveTintColor: Colors.text.primary,
           tabBarInactiveTintColor: Colors.text.tertiary,
           tabBarLabelStyle: {
@@ -89,6 +102,11 @@ export default function MatchTabsLayout() {
       >
         {/* Declaration order is tab order. */}
         <MaterialTopTabs.Screen name="index" options={{ title: t('match.tabs.details') }} />
+        <MaterialTopTabs.Screen name="predictions" options={{ title: t('match.tabs.predictions') }} />
+        <MaterialTopTabs.Screen name="lineups" options={{ title: t('match.tabs.lineups') }} />
+        <MaterialTopTabs.Screen name="h2h" options={{ title: t('match.tabs.h2h') }} />
+        <MaterialTopTabs.Screen name="form" options={{ title: t('match.tabs.form') }} />
+        <MaterialTopTabs.Screen name="stats" options={{ title: t('match.tabs.stats') }} />
         <MaterialTopTabs.Screen name="media" options={{ title: t('match.tabs.media') }} />
         <MaterialTopTabs.Screen name="community" options={{ title: t('match.tabs.community') }} />
       </MaterialTopTabs>
