@@ -11,8 +11,8 @@ import PushService from '@/services/PushService';
  *
  * Re-runs on every `user.id` change — including sign-out (`undefined`), which
  * re-registers the same token anonymously so broadcast campaigns still reach the
- * install. Detaching the token from the *account* is `logoutUser`'s job, because
- * it has to happen while the auth token is still present.
+ * install. Detaching the token from the *account* is done before that by
+ * `logoutUser` (sign-out) or `PushService.detachAccount` (session expired).
  */
 export function usePushRegistration() {
   const { user } = useUser();

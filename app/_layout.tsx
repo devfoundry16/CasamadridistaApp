@@ -7,6 +7,7 @@ import SocialRealtimeSync from "@/components/Social/SocialRealtimeSync";
 import { useDeferredLink } from "@/hooks/useDeferredLink";
 import { useNotificationRouting } from "@/hooks/useNotificationRouting";
 import { usePushRegistration } from "@/hooks/usePushRegistration";
+import PushService from "@/services/PushService";
 import AnalyticsService from "@/services/AnalyticsService";
 import UploadManager from "@/services/upload/UploadManager";
 import { FontProvider, useFont } from "@/contexts/FontContext";
@@ -435,6 +436,11 @@ const DataInitializer = () => {
   useEffect(() => {
     AuthService.setupAxiosInterceptors(async () => {
       // Clean up all persisted session data — mirrors what logoutUser thunk does.
+      // Detach this phone from the account first, as sign-out does, or it keeps
+      // receiving that account's pushes. The account token may already be gone
+      // (or be dead), so the phone's anon id authorises it. Once per session,
+      // and before clearUser: that triggers the anonymous re-register.
+      await PushService.detachAccount();
       await AsyncStorage.removeItem('paymentMethods');
       dispatch(clearUser());
       // Only force-navigate if the user is on a protected route. Public screens

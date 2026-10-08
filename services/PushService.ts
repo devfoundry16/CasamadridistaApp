@@ -233,8 +233,10 @@ class PushServiceClass {
   }
 
   /**
-   * Detach the device from the account. MUST run before the auth token is
-   * cleared, otherwise the request is anonymous and the row keeps its user_id.
+   * Turn the device off and detach it from the account. Sign-out runs it while
+   * the auth token is still present; after a failed refresh the phone's anon id
+   * authorises it instead (the backend's canDetachDevice). Either way the app
+   * then re-registers the token anonymously, unbound.
    */
   async unregister(): Promise<void> {
     const token = await this.getStoredToken();
@@ -251,6 +253,18 @@ class PushServiceClass {
     } catch {
       // ignore
     }
+  }
+
+  /**
+   * Session expired: detach from the account, once. The expiry callback runs
+   * for every request that got a 401, and a second unregister landing after the
+   * anonymous re-register would switch that off too, leaving the phone with no
+   * broadcasts until relaunch. The claim is taken before any await.
+   */
+  async detachAccount(): Promise<void> {
+    if (this.userId == null) return;
+    this.userId = null;
+    await this.unregister();
   }
 
   /**

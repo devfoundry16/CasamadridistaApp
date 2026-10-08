@@ -9,7 +9,9 @@ import { isStaffSessionRefusal } from '@/utils/staffRefusal.core';
 
 // Interceptor-free axios instance used for auth endpoints (login, refresh) to avoid
 // the response interceptor triggering on these calls and causing circular refresh loops.
-const rawAxios = axios.create();
+// A timeout so a stalled refresh cannot hold sign-out (and the push detach that
+// waits on it) indefinitely; a timeout is a network failure, not a sign-out.
+const rawAxios = axios.create({ timeout: 10000 });
 
 // Deeplink for password reset. Must match app.json "scheme" (casamadridistaapp).
 // Add this exact URL (or casamadridistaapp://**) in Supabase Dashboard > Authentication > URL Configuration > Redirect URLs.

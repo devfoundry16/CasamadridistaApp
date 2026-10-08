@@ -61,6 +61,9 @@ class NotificationServiceClass {
       await axios.delete(`${BASE}/devices/${encodeURIComponent(token)}`, {
         headers: { ...headers, ...anonIdHeader(anonId) },
         data: anonId ? { anon_id: anonId } : undefined,
+        // Both sign-out paths wait for this; a stalled request must not hold
+        // the app signed in.
+        timeout: 10000,
       });
     } catch {
       // Best-effort: logout must not fail because the device row lingered.
