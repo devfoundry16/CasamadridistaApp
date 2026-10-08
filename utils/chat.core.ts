@@ -671,3 +671,11 @@ export function videoPickProblem(asset: { durationMs?: number | null; fileSize?:
   if ((asset.fileSize ?? 0) > VIDEO_MAX_BYTES) return 'video_too_large';
   return null;
 }
+
+/**
+ * Whether the chat composer can take another photo, from the gallery or the
+ * camera: up to `max`, never beside a video, which travels on its own.
+ */
+export function canAddPhotos({ photoCount, hasVideo, max }: { photoCount: number; hasVideo: boolean; max: number }): boolean {
+  return !hasVideo && photoCount < max;
+}

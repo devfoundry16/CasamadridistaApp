@@ -8,10 +8,10 @@ import {
 } from 'expo-audio';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
-import { ArrowUp, Film, ImagePlus, Mic, Reply, Trash2, X } from 'lucide-react-native';
+import { ArrowUp, Camera, Film, ImagePlus, Mic, Reply, Trash2, X } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, I18nManager, PanResponder, ScrollView, TextInput, View } from 'react-native';
+import { Alert, I18nManager, Linking, PanResponder, ScrollView, TextInput, View } from 'react-native';
 
 import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
@@ -19,7 +19,7 @@ import { typeStyle } from '@/constants/type';
 import { useFont } from '@/contexts/FontContext';
 import type { OutgoingInput, PhotoInput, VideoInput, VoiceInput } from '@/hooks/social/useThread';
 import type { ChatMessage } from '@/types/social';
-import { formatDuration, isCancelGesture, recordingOutcome, RECORD_MAX_MS, videoPickProblem } from '@/utils/chat.core';
+import { canAddPhotos, formatDuration, isCancelGesture, recordingOutcome, RECORD_MAX_MS, videoPickProblem } from '@/utils/chat.core';
 import T from './T';
 import VoiceBubble from './VoiceBubble';
 
@@ -168,6 +168,12 @@ export default function Composer({ onSend, onTyping, bottomInset, disabledReason
     );
   }
 
+  // Gallery and camera photos join the tray the same way.
+  const addPhotos = (assets: ImagePicker.ImagePickerAsset[]) =>
+    setPhotos((current) =>
+      [...current, ...assets.map((a) => ({ uri: a.uri, width: a.width || null, height: a.height || null }))].slice(0, MAX_PHOTOS),
+    );
+
   const pick = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -194,11 +200,33 @@ export default function Composer({ onSend, onTyping, bottomInset, disabledReason
       setVideo({ uri: clip.uri, durationMs: clip.duration ?? 0, width: clip.width || null, height: clip.height || null, mimeType: clip.mimeType ?? null });
       return;
     }
-    setPhotos((current) =>
-      [...current, ...result.assets.map((a) => ({ uri: a.uri, width: a.width || null, height: a.height || null }))].slice(0, MAX_PHOTOS),
-    );
+    addPhotos(result.assets);
   };
 
+  // A photo from the camera joins the tray like one from the gallery.
+  const takePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      // Once refused for good, only Settings can change it: say so, and go there.
+      Alert.alert(
+        t('account.permissionDenied'),
+        t('social.composer.cameraDenied'),
+        permission.canAskAgain
+          ? undefined
+          : [
+              { text: t('common.cancel'), style: 'cancel' },
+              { text: t('community.photoPermissionOpenSettings'), onPress: () => void Linking.openSettings() },
+            ],
+      );
+      return;
+    }
+    // EXIF is not read: the upload re-encodes the photo and drops it anyway.
+    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, exif: false });
+    if (result.canceled) return;
+    addPhotos(result.assets);
+  };
+
+  const canAdd = canAddPhotos({ photoCount: photos.length, hasVideo: !!video, max: MAX_PHOTOS });
   const canSend = text.trim().length > 0 || photos.length > 0 || !!video;
   const send = () => {
     if (voice) {
@@ -293,13 +321,23 @@ export default function Composer({ onSend, onTyping, bottomInset, disabledReason
           <>
             <Touchable
               onPress={pick}
-              disabled={photos.length >= MAX_PHOTOS || !!video}
+              disabled={!canAdd}
               accessibilityRole="button"
               accessibilityLabel={t('social.composer.addMedia')}
               hitSlop={6}
-              style={({ pressed }) => ({ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', opacity: photos.length >= MAX_PHOTOS || video ? 0.4 : pressed ? 0.6 : 1 })}
+              style={({ pressed }) => ({ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', opacity: !canAdd ? 0.4 : pressed ? 0.6 : 1 })}
             >
               <ImagePlus size={22} color={Colors.darkGold} />
+            </Touchable>
+            <Touchable
+              onPress={takePhoto}
+              disabled={!canAdd}
+              accessibilityRole="button"
+              accessibilityLabel={t('social.composer.takePhoto')}
+              hitSlop={6}
+              style={({ pressed }) => ({ width: 36, height: 40, alignItems: 'center', justifyContent: 'center', opacity: !canAdd ? 0.4 : pressed ? 0.6 : 1 })}
+            >
+              <Camera size={22} color={Colors.darkGold} />
             </Touchable>
 
             <TextInput

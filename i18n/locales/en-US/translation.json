@@ -1767,6 +1767,8 @@
       "addPhoto": "Add photo",
       "removePhoto": "Remove photo",
       "addMedia": "Add photos or a video",
+      "takePhoto": "Take a photo",
+      "cameraDenied": "Allow camera access in Settings to take photos for messages.",
       "removeVideo": "Remove video",
       "videoTitle": "Video",
       "video_too_long": "Videos can be up to 60 seconds.",

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  canAddPhotos,
   applyReceipts,
   badgeText,
   bubbleLayout,
@@ -232,5 +233,21 @@ describe('the relationship control', () => {
     assert.equal(badgeText(0), null);
     assert.equal(badgeText(4), '4');
     assert.equal(badgeText(12), '9+');
+  });
+});
+
+describe('canAddPhotos: whether the chat composer can take another photo', () => {
+  // A chat message carries up to 4 photos, or one video on its own; the
+  // gallery and the camera add photos under the same rule.
+  const at = (photoCount: number, hasVideo = false) => canAddPhotos({ photoCount, hasVideo, max: 4 });
+
+  it('an empty tray, or one with room, can', () => {
+    assert.equal(at(0), true);
+    assert.equal(at(3), true);
+  });
+
+  it('four photos, or a video, cannot', () => {
+    assert.equal(at(4), false);
+    assert.equal(at(0, true), false);
   });
 });
