@@ -37,7 +37,7 @@ type TextField = "title" | "body";
 const TITLE_MAX = 200;
 const BODY_MAX = 2000;
 
-export default function Composer() {
+export default function Composer({ start = null }: { start?: 'images' | 'videos' | null } = {}) {
   const router = useRouter();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -227,7 +227,7 @@ export default function Composer() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionLabel}>{t('community.mediaLabel')}</Text>
           </View>
-          <MediaPicker media={media} onChange={setMedia} disabled={submitting} />
+          <MediaPicker media={media} onChange={setMedia} disabled={submitting} start={start} />
 
           <View style={styles.divider} />
 

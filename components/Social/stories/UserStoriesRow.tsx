@@ -8,6 +8,7 @@ import Avatar from '@/components/Social/Avatar';
 import T from '@/components/Social/T';
 import Colors from '@/constants/colors';
 import { useStoryFeed } from '@/hooks/social/useStories';
+import { yourStoryBubble } from '@/utils/createChooser.core';
 
 /**
  * The people's stories row in Community (C1): "Your story" first (add one, or
@@ -22,28 +23,36 @@ export default function UserStoriesRow({ viewerId, viewerName, viewerAvatar }: {
   const groups = feed.data ?? [];
   const mine = groups.find((g) => g.author_id === viewerId);
   const others = groups.filter((g) => g.author_id !== viewerId);
+  const bubble = yourStoryBubble({ viewerId, hasLive: !!mine });
 
   return (
     // Sized by its content: above the feed list a scroll view would otherwise
     // be squeezed, clipping the names under the bubbles.
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, flexShrink: 0 }} contentContainerStyle={{ paddingHorizontal: 16, gap: 14, paddingVertical: 8 }}>
-      <Pressable
-        onPress={() => router.push((mine ? `/stories/${viewerId}?from=row` : '/stories/create') as any)}
-        onLongPress={() => router.push('/stories/create' as any)}
-        accessibilityRole="button"
-        accessibilityLabel={mine ? t('stories.yourStory') : t('stories.add')}
-        style={{ alignItems: 'center', width: 68 }}
-      >
-        <View style={{ padding: 2, borderRadius: 40, borderWidth: 2, borderColor: mine && !mine.all_seen ? Colors.darkGold : 'transparent' }}>
-          <Avatar uri={viewerAvatar} name={viewerName} size={56} />
-          {!mine ? (
-            <View style={{ position: 'absolute', end: 0, bottom: 0, width: 22, height: 22, borderRadius: 11, backgroundColor: Colors.darkGold, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.background.dark }}>
-              <Plus size={14} color="#1A1A1A" />
-            </View>
-          ) : null}
-        </View>
-        <T numberOfLines={1} style={{ fontSize: 11, marginTop: 4 }}>{mine ? t('stories.yourStory') : t('stories.add')}</T>
-      </Pressable>
+      <View style={{ alignItems: 'center', width: 68 }}>
+        <Pressable
+          onPress={() => router.push(bubble.open as any)}
+          onLongPress={() => router.push(bubble.add as any)}
+          accessibilityRole="button"
+          accessibilityLabel={t(bubble.labelKey)}
+          style={{ alignItems: 'center' }}
+        >
+          <View style={{ padding: 2, borderRadius: 40, borderWidth: 2, borderColor: mine && !mine.all_seen ? Colors.darkGold : 'transparent' }}>
+            <Avatar uri={viewerAvatar} name={viewerName} size={56} />
+          </View>
+          <T numberOfLines={1} style={{ fontSize: 11, marginTop: 4 }}>{t(bubble.labelKey)}</T>
+        </Pressable>
+        {/* Always there: with a story live, the bubble plays it and this adds another. */}
+        <Pressable
+          onPress={() => router.push(bubble.add as any)}
+          accessibilityRole="button"
+          accessibilityLabel={t('stories.add')}
+          hitSlop={8}
+          style={{ position: 'absolute', end: 4, top: 42, width: 22, height: 22, borderRadius: 11, backgroundColor: Colors.darkGold, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.background.dark }}
+        >
+          <Plus size={14} color="#1A1A1A" />
+        </Pressable>
+      </View>
       {others.map((g) => (
         <Pressable
           key={g.author_id}

@@ -7,9 +7,11 @@ import Colors from "@/constants/colors";
 interface Props {
   active: FeedTab;
   onSelect: (tab: FeedTab) => void;
+  /** Shown after the tabs, outside their scroll (Community's people search). */
+  trailing?: React.ReactNode;
 }
 
-export default function FeedTabs({ active, onSelect }: Props) {
+export default function FeedTabs({ active, onSelect, trailing }: Props) {
   const { t } = useTranslation();
 
   const TABS: { key: FeedTab; label: string }[] = [
@@ -20,6 +22,7 @@ export default function FeedTabs({ active, onSelect }: Props) {
   ];
 
   return (
+    <View style={styles.bar}>
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
@@ -43,16 +46,21 @@ export default function FeedTabs({ active, onSelect }: Props) {
         );
       })}
     </ScrollView>
+    {trailing}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flexGrow: 0,
-    flexShrink: 0,
+  bar: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.background.medium,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border.default,
+  },
+  scroll: {
+    flex: 1,
   },
   content: {
     flexDirection: "row",

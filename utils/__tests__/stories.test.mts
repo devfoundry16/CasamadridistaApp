@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { pickProblem, ringState, showForMs, step, uploadMimeType, videoProgress, nextAuthor, msUntilExpiry } from '../stories.core.ts';
+import { pickProblem, ringState, showForMs, step, uploadMimeType, videoProgress, nextAuthor, msUntilExpiry, storyIndex, stripTile } from '../stories.core.ts';
 
 const g = (author: string, seen: boolean[]) => ({ author_id: author, all_seen: seen.every(Boolean), stories: seen.map((s, i) => ({ id: `${author}${i}`, seen: s })) });
 
@@ -81,5 +81,21 @@ describe('msUntilExpiry', () => {
   });
   it('a story with no end time is treated as ended', () => {
     assert.equal(msUntilExpiry({ expires_at: null }, now), 0);
+  });
+});
+
+describe('the stories strip on a profile (spec §25)', () => {
+  const stories = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
+  it('opens the viewer at the story tapped', () => {
+    assert.equal(storyIndex(stories, 'b'), 1);
+  });
+  it('starts at the first story when the one asked for has gone or none is asked', () => {
+    assert.equal(storyIndex(stories, 'gone'), 0);
+    assert.equal(storyIndex(stories, undefined), 0);
+    assert.equal(storyIndex([], 'a'), 0);
+  });
+  it('a tile shows a photo itself, a video its poster frame, and marks an unseen one', () => {
+    assert.deepEqual(stripTile({ kind: 'photo', url: 'p.jpg', thumbnail_url: null, seen: false }), { image: 'p.jpg', video: false, unseen: true });
+    assert.deepEqual(stripTile({ kind: 'video', url: null, thumbnail_url: 't.jpg', seen: true }), { image: 't.jpg', video: true, unseen: false });
   });
 });

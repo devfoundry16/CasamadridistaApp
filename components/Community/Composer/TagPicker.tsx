@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, FlatList, TextInput, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Users, X, Search } from 'lucide-react-native';
@@ -10,9 +10,14 @@ interface Props {
   selectedFanClub: FanClub | null;
   onCountryChange: (country: FanClubCountry | null) => void;
   onFanClubChange: (fanClub: FanClub | null) => void;
+  /** Placeholder when nothing is chosen; the composer's tag wording by default. */
+  countryLabel?: string;
+  fanClubLabel?: string;
+  /** Side padding of its own; off when the parent already pads. */
+  inset?: boolean;
 }
 
-export default function TagPicker({ selectedCountry, selectedFanClub, onCountryChange, onFanClubChange }: Props) {
+export default function TagPicker({ selectedCountry, selectedFanClub, onCountryChange, onFanClubChange, countryLabel, fanClubLabel, inset = true }: Props) {
   const { t } = useTranslation();
   const [modalType, setModalType]   = useState<'country' | 'fanclub' | null>(null);
   const [countries, setCountries]   = useState<FanClubCountry[]>([]);
@@ -47,6 +52,12 @@ export default function TagPicker({ selectedCountry, selectedFanClub, onCountryC
 
   const close = () => { setModalType(null); setSearch(''); };
 
+  // On a screen whose ground is the chip's own colour (Friends), an outline
+  // keeps the chip visible.
+  const chipStyle = inset
+    ? { backgroundColor: Colors.background.medium }
+    : { backgroundColor: Colors.background.deepDark, borderWidth: 1, borderColor: Colors.border.default };
+
   const filteredCountries = countries.filter((c) =>
     c.country.toLowerCase().includes(search.toLowerCase())
   );
@@ -56,17 +67,17 @@ export default function TagPicker({ selectedCountry, selectedFanClub, onCountryC
   );
 
   return (
-    <View className="flex-row flex-wrap px-4 gap-2" style={{ paddingBottom: 14 }}>
+    <View className={`flex-row flex-wrap gap-2 ${inset ? 'px-4' : ''}`} style={{ paddingBottom: inset ? 14 : 0 }}>
       {/* Country tag */}
       <TouchableOpacity
         onPress={openCountry}
         className="flex-row items-center rounded-full px-3 py-1.5"
-        style={{ backgroundColor: Colors.background.medium }}
+        style={chipStyle}
         activeOpacity={0.7}
       >
         <MapPin size={13} color={Colors.darkGold} />
         <Text className="ml-1 text-sm" style={{ color: Colors.text.primary }}>
-          {selectedCountry ? selectedCountry.country : t('community.tagCountry')}
+          {selectedCountry ? selectedCountry.country : countryLabel ?? t('community.tagCountry')}
         </Text>
         {selectedCountry && (
           <TouchableOpacity onPress={() => { onCountryChange(null); onFanClubChange(null); }} className="ml-1">
@@ -80,12 +91,12 @@ export default function TagPicker({ selectedCountry, selectedFanClub, onCountryC
         <TouchableOpacity
           onPress={openFanClub}
           className="flex-row items-center rounded-full px-3 py-1.5"
-          style={{ backgroundColor: Colors.background.medium }}
+          style={chipStyle}
           activeOpacity={0.7}
         >
           <Users size={13} color={Colors.darkGold} />
           <Text className="ml-1 text-sm" style={{ color: Colors.text.primary }}>
-            {selectedFanClub ? selectedFanClub.name : t('community.tagFanClub')}
+            {selectedFanClub ? selectedFanClub.name : fanClubLabel ?? t('community.tagFanClub')}
           </Text>
           {selectedFanClub && (
             <TouchableOpacity onPress={() => onFanClubChange(null)} className="ml-1">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
@@ -25,6 +25,8 @@ interface Props {
   media: PickedMedia[];
   onChange: (media: PickedMedia[]) => void;
   disabled?: boolean;
+  /** Open the library once on arrival, on photos or on videos (Create → Photo / Video). */
+  start?: 'images' | 'videos' | null;
 }
 
 const THUMB = 72;
@@ -49,7 +51,7 @@ async function withThumbnail(asset: PickedAsset): Promise<PickedMedia> {
  *
  * The thumbnail strip follows `components/Social/Composer.tsx`.
  */
-export default function MediaPicker({ media, onChange, disabled = false }: Props) {
+export default function MediaPicker({ media, onChange, disabled = false, start = null }: Props) {
   const { t } = useTranslation();
   const [cameraMenu, setCameraMenu] = useState(false);
 
@@ -78,20 +80,30 @@ export default function MediaPicker({ media, onChange, disabled = false }: Props
     onChange(assets);
   };
 
-  const openLibrary = async () => {
-    if (!library) return;
+  const openLibrary = async (only?: 'images' | 'videos') => {
+    const request = only ? libraryRequest(media, undefined, only) : library;
+    if (!request) return;
     try {
       await take(
         await pickFromLibrary({
           limits: POST_MEDIA_LIMITS,
-          selectionLimit: library.selectionLimit,
-          mediaTypes: library.mediaTypes,
+          selectionLimit: request.selectionLimit,
+          mediaTypes: request.mediaTypes,
         }),
       );
     } catch (error: any) {
       Alert.alert(t('common.error'), error?.message ?? '');
     }
   };
+
+  const started = useRef(false);
+  useEffect(() => {
+    if (!start || started.current) return;
+    started.current = true;
+    void openLibrary(start);
+    // Once, on arrival only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [start]);
 
   const openCamera = async (video: boolean) => {
     try {
@@ -169,7 +181,7 @@ export default function MediaPicker({ media, onChange, disabled = false }: Props
         <View className="flex-row px-4 gap-3" style={{ paddingBottom: 14 }}>
           {library ? (
             <TouchableOpacity
-              onPress={openLibrary}
+              onPress={() => void openLibrary()}
               disabled={disabled}
               className="flex-row items-center rounded-full px-4 py-2"
               style={{ backgroundColor: Colors.background.medium }}

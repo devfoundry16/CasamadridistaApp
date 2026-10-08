@@ -8,6 +8,7 @@ import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, Styl
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Avatar from '@/components/Social/Avatar';
+import RichText from '@/components/Social/RichText';
 import SocialReportSheet from '@/components/Social/SocialReportSheet';
 import T from '@/components/Social/T';
 import Colors from '@/constants/colors';
@@ -21,6 +22,8 @@ interface Props {
   groups: UserStoryGroup[];
   viewerId: string | null;
   initialGroup?: number;
+  /** The story to start at within the first person's stories (a profile's strip). */
+  initialStory?: number;
   onClose: () => void;
 }
 
@@ -34,13 +37,17 @@ interface Props {
  * (a view, a mute), and walking live query data by index would jump to
  * someone else mid-story.
  */
-export default function UserStoryViewer({ groups: initialGroups, viewerId, initialGroup = 0, onClose }: Props) {
+export default function UserStoryViewer({ groups: initialGroups, viewerId, initialGroup = 0, initialStory = 0, onClose }: Props) {
   const [groups] = useState(initialGroups);
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const actions = useStoryActions();
-  const [at, setAt] = useState<Position>({ group: Math.min(initialGroup, Math.max(0, groups.length - 1)), story: 0 });
+  const [at, setAt] = useState<Position>(() => {
+    const group = Math.min(initialGroup, Math.max(0, groups.length - 1));
+    const count = groups[group]?.stories.length ?? 0;
+    return { group, story: Math.min(Math.max(0, initialStory), Math.max(0, count - 1)) };
+  });
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const [reply, setReply] = useState('');
@@ -237,7 +244,8 @@ export default function UserStoryViewer({ groups: initialGroups, viewerId, initi
 
       {story.caption ? (
         <View style={[styles.caption, { bottom: insets.bottom + (mine ? 64 : 120) }]}>
-          <T style={{ textAlign: 'center' }}>{story.caption}</T>
+          {/* @mentions and #tags open their screen, closing the viewer first as the author's name does. */}
+          <RichText text={story.caption} style={{ textAlign: 'center' }} onNavigate={onClose} />
         </View>
       ) : null}
 

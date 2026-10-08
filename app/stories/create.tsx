@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { Camera, ImagePlus } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
@@ -11,6 +11,11 @@ import T from '@/components/Social/T';
 import Colors from '@/constants/colors';
 import { usePostStory, type PickedMedia } from '@/hooks/social/useStories';
 import { MAX_VIDEO_MS, pickProblem } from '@/utils/stories.core';
+import MentionSuggestions from '@/components/Community/Composer/MentionSuggestions';
+import type { PersonCard } from '@/types/social';
+import { activeMention, insertMention, type Caret } from '@/utils/mentions.core';
+
+const CAPTION_MAX = 200;
 
 /**
  * Post a story (C1): one photo or a video of up to 15 seconds, from the
@@ -23,6 +28,25 @@ export default function CreateStoryScreen() {
   const post = usePostStory();
   const [media, setMedia] = useState<PickedMedia | null>(null);
   const [caption, setCaption] = useState('');
+  // @-autocomplete, as in the post composer: the caret, and one to impose once
+  // after a mention is inserted (then released, so selection stays native).
+  const [focused, setFocused] = useState(false);
+  const [caret, setCaret] = useState<Caret>({ start: 0, end: 0 });
+  const [forcedCaret, setForcedCaret] = useState<Caret | null>(null);
+  const mention = useMemo(() => (focused ? activeMention(caption, caret) : null), [focused, caption, caret]);
+  const pickMention = useCallback(
+    (person: PersonCard & { username: string }) => {
+      if (!mention) return;
+      const next = insertMention(caption, mention, person.username);
+      // Past the caption's limit the mention would be cut; leave the text alone.
+      if (next.text.length > CAPTION_MAX) return;
+      setCaption(next.text);
+      const at = { start: next.caret, end: next.caret };
+      setCaret(at);
+      setForcedCaret(at);
+    },
+    [mention, caption],
+  );
   const player = useVideoPlayer(media?.type === 'video' ? media.uri : null, (p) => {
     p.loop = true;
     p.muted = true;
@@ -116,10 +140,18 @@ export default function CreateStoryScreen() {
           onChangeText={setCaption}
           placeholder={t('stories.captionPlaceholder')}
           placeholderTextColor={Colors.text.secondary}
-          maxLength={200}
+          maxLength={CAPTION_MAX}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          onSelectionChange={(event) => {
+            setCaret(event.nativeEvent.selection);
+            setForcedCaret(null);
+          }}
+          selection={forcedCaret ?? undefined}
           multiline
           style={{ color: Colors.text.primary, borderWidth: 1, borderColor: Colors.border.default, borderRadius: 12, padding: 12, minHeight: 64, textAlign: 'auto' }}
         />
+        {mention ? <MentionSuggestions query={mention.query} onPick={pickMention} /> : null}
         <View style={{ flexDirection: 'row', gap: 12 }}>
           {media ? (
             <Pressable onPress={() => setMedia(null)} style={[button, { backgroundColor: Colors.background.light }]} accessibilityRole="button">

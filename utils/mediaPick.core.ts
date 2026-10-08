@@ -139,10 +139,14 @@ export function mergePostMedia<T extends Kinded>(
 export function libraryRequest(
   current: readonly Kinded[],
   max: number = POST_MEDIA_LIMITS.maxGalleryAssets,
+  only?: 'images' | 'videos',
 ): { selectionLimit: number; mediaTypes: ('images' | 'videos')[] } | null {
   if (current.some((a) => a.kind === 'video')) return null;
+  // Create → Video: one video, on an empty tray (a post never mixes them).
+  if (only === 'videos') return current.length ? null : { selectionLimit: 1, mediaTypes: ['videos'] };
   const remaining = max - current.length;
   if (remaining <= 0) return null;
+  if (only === 'images') return { selectionLimit: remaining, mediaTypes: ['images'] };
   return {
     selectionLimit: remaining,
     mediaTypes: current.length ? ['images'] : ['images', 'videos'],

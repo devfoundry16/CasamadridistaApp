@@ -1,4 +1,4 @@
-import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Search, Users, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,16 +16,20 @@ import { typeStyle } from '@/constants/type';
 import { useFont } from '@/contexts/FontContext';
 import { useFriendRequests, useFriends, useSuggestions, useUserSearch } from '@/hooks/social/useFriends';
 import { useOnlineIds } from '@/hooks/social/usePresence';
-import { useMyProfile, useRelationshipAction } from '@/hooks/social/useProfile';
+import { useRelationshipAction } from '@/hooks/social/useProfile';
 import SocialService from '@/services/SocialService';
 import type { PersonCard, RelationshipState } from '@/types/social';
 import { presenceLabel, splitOnline } from '@/utils/chat.core';
+import TagPicker from '@/components/Community/Composer/TagPicker';
+import type { FanClub, FanClubCountry } from '@/services/FanClubService';
+import { isSearchingPeople, peopleSearchFilters } from '@/utils/peopleSearch.core';
 
 type Segment = 'requests' | 'friends' | 'suggested';
 
 /**
  * Friends (§7–§9, §21): requests, friends and suggestions — and search across
- * everyone by name or @username, narrowed to your country or your fan club.
+ * everyone by name or @username, narrowed to any country or fan club. Community's
+ * search button opens it with `?focus=search`.
  *
  * My Friends opens with an Online section (C3): friends the presence channel
  * shows live, then friends active in the last few minutes. Presence is watched
@@ -38,16 +42,15 @@ export default function FriendsScreen() {
   const { isArabic } = useFont();
   const [segment, setSegment] = useState<Segment>('friends');
   const [query, setQuery] = useState('');
-  const [sameCountry, setSameCountry] = useState(false);
-  const [sameClub, setSameClub] = useState(false);
+  const [country, setCountry] = useState<FanClubCountry | null>(null);
+  const [fanClub, setFanClub] = useState<FanClub | null>(null);
+  const { focus } = useLocalSearchParams<{ focus?: string }>();
 
-  const { data: me } = useMyProfile();
   const requests = useFriendRequests();
   const friends = useFriends();
   const suggestions = useSuggestions();
-  const country = sameCountry ? me?.user.country_code ?? null : null;
-  const fanClub = sameClub ? me?.user.fan_club_id ?? null : null;
-  const search = useUserSearch(query, country, fanClub);
+  const filters = peopleSearchFilters({ country, fanClub });
+  const search = useUserSearch(query, filters.country, filters.fanClubId);
 
   // Only friends who show their activity: the server refuses the others'
   // presence channel, and a refused join is retried for ever.
@@ -69,7 +72,7 @@ export default function FriendsScreen() {
   );
   useEffect(() => setNow(Date.now()), [friends.data]);
 
-  const searching = query.trim().length >= 2 || sameCountry || sameClub;
+  const searching = isSearchingPeople(query, filters);
   const incoming = useMemo(() => requests.data?.incoming ?? [], [requests.data]);
 
   const sections = useMemo(() => {
@@ -132,6 +135,7 @@ export default function FriendsScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="search"
+            autoFocus={focus === 'search'}
             accessibilityLabel={t('social.friends.searchPlaceholder')}
             style={{ ...typeStyle('body', isArabic), flex: 1, color: Colors.text.primary, paddingVertical: 10, marginStart: 8, textAlign: I18nManager.isRTL ? 'right' : 'left' }}
           />
@@ -142,10 +146,15 @@ export default function FriendsScreen() {
           ) : null}
         </View>
 
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {me?.user.country_code ? <Chip label={t('social.friends.myCountry')} on={sameCountry} onPress={() => setSameCountry((v) => !v)} /> : null}
-          {me?.user.fan_club_id ? <Chip label={t('social.friends.myFanClub')} on={sameClub} onPress={() => setSameClub((v) => !v)} /> : null}
-        </View>
+        <TagPicker
+          selectedCountry={country}
+          selectedFanClub={fanClub}
+          onCountryChange={setCountry}
+          onFanClubChange={setFanClub}
+          countryLabel={t('social.friends.anyCountry')}
+          fanClubLabel={t('social.friends.anyFanClub')}
+          inset={false}
+        />
 
         {!searching ? (
           <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: Colors.border.default }}>
@@ -216,19 +225,4 @@ function Row({ person, state, detail, online }: { person: PersonCard; state: Rel
     ) : null;
 
   return <PersonRow person={person} detail={detail ?? undefined} trailing={trailing} online={online} />;
-}
-
-function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
-  return (
-    <Touchable
-      onPress={onPress}
-      accessibilityRole="switch"
-      accessibilityState={{ checked: on }}
-      style={({ pressed }) => ({ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: on ? Colors.darkGold : Colors.border.light, backgroundColor: on ? 'rgba(188,144,69,0.12)' : 'transparent', opacity: pressed ? 0.7 : 1 })}
-    >
-      <T step="footnote" weight={on ? 'semibold' : 'regular'} color={on ? Colors.darkGold : Colors.text.secondary}>
-        {label}
-      </T>
-    </Touchable>
-  );
 }

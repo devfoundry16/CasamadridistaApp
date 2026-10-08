@@ -148,6 +148,17 @@ describe('libraryRequest', () => {
   });
 });
 
+describe('libraryRequest, started from Create → Photo or Video', () => {
+  it('Photo opens photos only, multi-select', () => {
+    assert.deepEqual(libraryRequest([], undefined, 'images'), { selectionLimit: 10, mediaTypes: ['images'] });
+  });
+
+  it('Video opens videos only, one at a time', () => {
+    assert.deepEqual(libraryRequest([], undefined, 'videos'), { selectionLimit: 1, mediaTypes: ['videos'] });
+    assert.equal(libraryRequest([photo(1)], undefined, 'videos'), null, 'a post never mixes photos and a video');
+  });
+});
+
 describe('cameraOptions', () => {
   it('an empty tray can take a photo or record a video', () => {
     assert.deepEqual(cameraOptions([]), { photo: true, video: true });

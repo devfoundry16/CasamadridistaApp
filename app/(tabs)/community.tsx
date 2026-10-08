@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Pencil } from 'lucide-react-native';
+import { Pencil, Search } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import StoriesRow from '@/components/Media/Stories/StoriesRow';
 import UserStoriesRow from '@/components/Social/stories/UserStoriesRow';
 import { useUser } from '@/hooks/useUser';
@@ -19,6 +20,7 @@ export default function CommunityScreen() {
   const { data: stories } = useStories();
   const { user } = useUser();
   const requireAuth = useRequireAuth();
+  const { t } = useTranslation();
   const name = [user?.profile?.first_name, user?.profile?.last_name].filter(Boolean).join(' ') || null;
 
   return (
@@ -28,7 +30,24 @@ export default function CommunityScreen() {
           which is hidden entirely when there are none. */}
       <UserStoriesRow viewerId={user?.id ?? null} viewerName={name} viewerAvatar={user?.profile?.avatar_url ?? null} />
       {stories?.length ? <StoriesRow groups={stories} compact /> : null}
-      <FeedTabs active={tab} onSelect={setTab} />
+      <FeedTabs
+        active={tab}
+        onSelect={setTab}
+        trailing={
+          // People search (spec §21), signed in only: it is the Friends screen's.
+          user?.id ? (
+            <TouchableOpacity
+              onPress={() => router.push('/social/friends?focus=search' as any)}
+              accessibilityRole="button"
+              accessibilityLabel={t('social.friends.searchPeople')}
+              hitSlop={8}
+              style={{ paddingHorizontal: 14, paddingVertical: 10 }}
+            >
+              <Search size={20} color={Colors.text.secondary} />
+            </TouchableOpacity>
+          ) : null
+        }
+      />
       {tab === 'fan-clubs' && <FanClubPartnershipSection variant="feed" />}
       <FeedList tab={tab} />
 

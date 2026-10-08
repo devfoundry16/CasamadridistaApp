@@ -14,6 +14,8 @@ interface Props extends Omit<TextProps, 'children'> {
   color?: string;
   /** Defaults to `color`: links are told apart by the underline, so they keep contrast on any ground. */
   linkColor?: string;
+  /** Runs before a mention or hashtag opens its screen (a story viewer closes itself first). */
+  onNavigate?: () => void;
 }
 
 function openLink(url: string) {
@@ -43,7 +45,7 @@ function openLink(url: string) {
  * and `style` behave as they would on plain text. Links are nested `Text`, so
  * they inherit the font, size and direction.
  */
-export default function RichText({ text, linkColor, color, onLongPress, ...rest }: Props) {
+export default function RichText({ text, linkColor, color, onLongPress, onNavigate, ...rest }: Props) {
   const router = useRouter();
   const tokens = useMemo(() => tokenize(text), [text]);
   const tint = linkColor ?? color;
@@ -68,7 +70,7 @@ export default function RichText({ text, linkColor, color, onLongPress, ...rest 
         if (!href) return token.value;
         // AppText, so Arabic gets Cairo's bold file rather than a synthesised bold.
         return (
-          <AppText key={i} onPress={() => router.push(href as Href)} onLongPress={onLongPress} accessibilityRole="link" style={{ color: tint, fontWeight: '600' }}>
+          <AppText key={i} onPress={() => { onNavigate?.(); router.push(href as Href); }} onLongPress={onLongPress} accessibilityRole="link" style={{ color: tint, fontWeight: '600' }}>
             {token.value}
           </AppText>
         );

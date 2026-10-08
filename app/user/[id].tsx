@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { AtSign, Ban, Flag, MoreHorizontal, Send, UserX } from 'lucide-react-native';
+import { AtSign, Ban, CircleFadingPlus, Flag, ImageIcon, MoreHorizontal, Send, UserX, Video } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, FlatList, RefreshControl, View, useWindowDimensions } from 'react-native';
@@ -11,6 +11,7 @@ import ActionSheet, { type SheetAction } from '@/components/Social/ActionSheet';
 import FriendPicker from '@/components/Social/FriendPicker';
 import ProfileGridCell from '@/components/Social/ProfileGridCell';
 import ProfileHeader from '@/components/Social/ProfileHeader';
+import ProfileStoryStrip from '@/components/Social/stories/ProfileStoryStrip';
 import ProfileTabs from '@/components/Social/ProfileTabs';
 import SocialReportSheet from '@/components/Social/SocialReportSheet';
 import T from '@/components/Social/T';
@@ -33,6 +34,7 @@ import {
 } from '@/utils/profileGrid.core';
 import { isUuid } from '@/utils/pushPayload.core';
 import { ringState } from '@/utils/stories.core';
+import { CREATE_CHOICES, createHref, type CreateChoice } from '@/utils/createChooser.core';
 
 /**
  * A person's profile (§1–§5).
@@ -50,6 +52,7 @@ export default function UserProfileScreen() {
   const { user } = useUser();
   const requireAuth = useRequireAuth();
   const [menu, setMenu] = useState(false);
+  const [createMenu, setCreateMenu] = useState(false);
   const [report, setReport] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [tab, setTab] = useState<ProfileTab>('posts');
@@ -180,6 +183,19 @@ export default function UserProfileScreen() {
         ? t(`social.profile.empty.${shownTab}Self`)
         : t(`social.profile.empty.${shownTab}`, { name });
 
+  // Create (spec §3): Photo, Video or Story.
+  const createIcons: Record<CreateChoice, React.ReactNode> = {
+    photo: <ImageIcon size={20} color={Colors.darkGold} />,
+    video: <Video size={20} color={Colors.darkGold} />,
+    story: <CircleFadingPlus size={20} color={Colors.darkGold} />,
+  };
+  const createActions: SheetAction[] = CREATE_CHOICES.map((choice) => ({
+    key: choice,
+    label: t(`social.profile.create_${choice}`),
+    icon: createIcons[choice],
+    onPress: () => router.push(createHref(choice) as any),
+  }));
+
   const menuActions: SheetAction[] = [
     { key: 'share', label: t('social.profile.share'), icon: <Send size={20} color={Colors.darkGold} />, onPress: () => setSharing(true) },
     ...(isSelf
@@ -238,10 +254,11 @@ export default function UserProfileScreen() {
             <ProfileHeader
               profile={profile}
               onMessage={openChat}
-              onCreate={isSelf ? () => router.push('/community/compose') : undefined}
+              onCreate={isSelf ? () => setCreateMenu(true) : undefined}
               storyRing={ring}
               onAvatarPress={ring ? () => router.push(`/stories/${id}`) : isSelf ? () => router.push('/stories/create') : undefined}
             />
+            {!blocking && id && stories.data?.stories.length ? <ProfileStoryStrip authorId={id} stories={stories.data.stories} /> : null}
             {blocking ? (
               <T step="footnote" color={Colors.text.tertiary} align="center" style={{ padding: 24 }}>
                 {t('social.profile.youBlocked', { name })}
@@ -269,6 +286,7 @@ export default function UserProfileScreen() {
       />
 
       <ActionSheet visible={menu} onClose={() => setMenu(false)} cancelLabel={t('common.cancel')} actions={menuActions} />
+      <ActionSheet visible={createMenu} title={t('social.profile.create')} onClose={() => setCreateMenu(false)} cancelLabel={t('common.cancel')} actions={createActions} />
       {id ? (
         <FriendPicker
           visible={sharing}

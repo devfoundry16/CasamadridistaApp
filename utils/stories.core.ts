@@ -72,3 +72,15 @@ export function msUntilExpiry(story: { expires_at: string | null }, now: number)
   const at = Date.parse(story.expires_at ?? '');
   return Number.isFinite(at) ? Math.max(0, at - now) : 0;
 }
+
+/** Where the viewer starts in one person's stories: the one asked for, else the first. */
+export function storyIndex(stories: readonly { id: string }[], storyId: string | undefined): number {
+  if (!storyId) return 0;
+  return Math.max(0, stories.findIndex((s) => s.id === storyId));
+}
+
+/** One tile of a profile's stories strip: a photo itself, a video its poster frame. */
+export function stripTile(story: { kind: 'photo' | 'video'; url: string | null; thumbnail_url: string | null; seen: boolean }) {
+  const video = story.kind === 'video';
+  return { image: video ? story.thumbnail_url : story.url ?? story.thumbnail_url, video, unseen: !story.seen };
+}

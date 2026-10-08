@@ -7,15 +7,17 @@ import T from '@/components/Social/T';
 import Colors from '@/constants/colors';
 import { useStoryFeed, useUserStories } from '@/hooks/social/useStories';
 import { useUser } from '@/hooks/useUser';
+import { storyIndex } from '@/utils/stories.core';
 import { useTranslation } from 'react-i18next';
 
 /**
  * A person's stories (C1). From the Community row (`?from=row`) the viewer
  * walks on through everyone in the row; from a profile, a push or a reply
- * card it shows that one person's stories.
+ * card it shows that one person's stories; a profile's strip passes `?at=` the
+ * story tapped.
  */
 export default function StoriesScreen() {
-  const { userId, from } = useLocalSearchParams<{ userId: string; from?: string }>();
+  const { userId, from, at } = useLocalSearchParams<{ userId: string; from?: string; at?: string }>();
   const router = useRouter();
   const { t } = useTranslation();
   const { user } = useUser();
@@ -45,5 +47,13 @@ export default function StoriesScreen() {
       </View>
     );
   }
-  return <UserStoryViewer groups={groups} viewerId={user?.id ?? null} initialGroup={start} onClose={close} />;
+  return (
+    <UserStoryViewer
+      groups={groups}
+      viewerId={user?.id ?? null}
+      initialGroup={start}
+      initialStory={fromRow ? 0 : storyIndex(groups[start]?.stories ?? [], at)}
+      onClose={close}
+    />
+  );
 }
