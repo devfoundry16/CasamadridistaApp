@@ -62,6 +62,15 @@ const defaultOptions: {
 
 function RootLayoutNav() {
   const { t } = useTranslation();
+  // Both navigate on launch, so they live here, where the <Stack> is mounted in
+  // the same commit, not in AppShell. AppShell returns null until the fonts
+  // load, yet useRootNavigationState() (the internal __root slot) already has a
+  // key then: a cold-start push tap routed from there pushed into a tree with
+  // no navigator and looped until React gave up ("Maximum update depth
+  // exceeded"), which kills a release build.
+  useNotificationRouting();
+  // A fresh install that came from a shared Casa Media link opens that link.
+  useDeferredLink();
   const { fontFamilyBold } = useFont();
   const headerTitleStyle = {
     ...defaultOptions.headerTitleStyle,
@@ -470,11 +479,6 @@ function AppShell() {
   usePasswordResetDeeplink();
   useAuthCallbackDeeplink();
   usePushRegistration();
-  // Must be inside the router tree: it waits for useRootNavigationState().key
-  // before navigating, otherwise a cold-start push tap is silently dropped.
-  useNotificationRouting();
-  // A fresh install that came from a shared Casa Media link opens that link.
-  useDeferredLink();
   const [fontsLoaded] = useFonts({
     Cairo_400Regular,
     Cairo_700Bold,

@@ -17,8 +17,11 @@ import { hrefFromPayload, parsePushPayload } from '@/utils/pushPayload';
  *     app, which the plain listener never sees. It also keeps returning that
  *     same response, so each one is de-duplicated by identifier.
  *  2. On a cold start the router is not mounted when the response arrives.
- *     Navigating then is a no-op that silently drops the deep link, so we wait
- *     for `useRootNavigationState().key`.
+ *     `useRootNavigationState().key` is not enough on its own — it is the
+ *     internal root slot, which exists before the app's <Stack> does — so the
+ *     hook must be called from the component that renders the <Stack>
+ *     (`RootLayoutNav`), and the push waits one frame past the commit that
+ *     mounted it.
  */
 export function useNotificationRouting() {
   const navigationState = useRootNavigationState();
@@ -61,5 +64,7 @@ function handle(response: Notifications.NotificationResponse, seen: Set<string>)
   });
 
   const href = hrefFromPayload(payload);
-  if (href) router.push(href as Href);
+  // Never inside the commit that mounted the navigator; `seen` is already set,
+  // so a re-render cannot schedule it twice.
+  if (href) requestAnimationFrame(() => router.push(href as Href));
 }
