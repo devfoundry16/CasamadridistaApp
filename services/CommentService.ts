@@ -43,7 +43,7 @@ class CommentServiceClass {
       const params: Record<string, string> = {};
       if (cursor) params.cursor = cursor;
       const response = await axios.get<CommentsPage>(
-        `${API_BASE_URL}posts/${postId}/comments`,
+        `${API_BASE_URL}posts/${encodeURIComponent(postId)}/comments`,
         { headers, params }
       );
       return response.data;
@@ -78,7 +78,7 @@ class CommentServiceClass {
   async deleteComment(id: string): Promise<void> {
     try {
       const headers = await this.getAuthHeader();
-      await axios.delete(`${API_BASE_URL}comments/${id}`, { headers });
+      await axios.delete(`${API_BASE_URL}comments/${encodeURIComponent(id)}`, { headers });
     } catch (error: any) {
       // 409: a moderator deleting someone else's comment from the app. Removing
       // it is a moderation act with an audit note, done from the dashboard.
@@ -92,7 +92,7 @@ class CommentServiceClass {
   async likeComment(id: string): Promise<void> {
     try {
       const headers = await this.getAuthHeader();
-      await axios.post(`${API_BASE_URL}comments/${id}/like`, {}, { headers });
+      await axios.post(`${API_BASE_URL}comments/${encodeURIComponent(id)}/like`, {}, { headers });
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to like comment');
     }
@@ -101,7 +101,7 @@ class CommentServiceClass {
   async unlikeComment(id: string): Promise<void> {
     try {
       const headers = await this.getAuthHeader();
-      await axios.delete(`${API_BASE_URL}comments/${id}/like`, { headers });
+      await axios.delete(`${API_BASE_URL}comments/${encodeURIComponent(id)}/like`, { headers });
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to unlike comment');
     }

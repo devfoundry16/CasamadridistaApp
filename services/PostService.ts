@@ -34,7 +34,7 @@ class PostServiceClass {
   async getPost(id: string): Promise<Post> {
     try {
       const headers = await this.getAuthHeader();
-      const response = await axios.get<Post>(`${API_BASE_URL}posts/${id}`, { headers });
+      const response = await axios.get<Post>(`${API_BASE_URL}posts/${encodeURIComponent(id)}`, { headers });
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to load post');
@@ -59,7 +59,7 @@ class PostServiceClass {
   async updatePost(id: string, payload: Partial<CreatePostPayload>): Promise<Post> {
     try {
       const headers = await this.getAuthHeader();
-      const response = await axios.patch<Post>(`${API_BASE_URL}posts/${id}`, payload, { headers });
+      const response = await axios.patch<Post>(`${API_BASE_URL}posts/${encodeURIComponent(id)}`, payload, { headers });
       return response.data;
     } catch (error: any) {
       // 409: the post was removed or rejected, and the backend no longer lets
@@ -74,7 +74,7 @@ class PostServiceClass {
   async deletePost(id: string): Promise<void> {
     try {
       const headers = await this.getAuthHeader();
-      await axios.delete(`${API_BASE_URL}posts/${id}`, { headers });
+      await axios.delete(`${API_BASE_URL}posts/${encodeURIComponent(id)}`, { headers });
     } catch (error: any) {
       // 409: a moderator deleting someone else's post from the app. Removing it
       // is a moderation act with an audit note, done from the dashboard.
@@ -88,7 +88,7 @@ class PostServiceClass {
   async likePost(id: string): Promise<void> {
     try {
       const headers = await this.getAuthHeader();
-      await axios.post(`${API_BASE_URL}posts/${id}/like`, {}, { headers });
+      await axios.post(`${API_BASE_URL}posts/${encodeURIComponent(id)}/like`, {}, { headers });
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to like post');
     }
@@ -97,7 +97,7 @@ class PostServiceClass {
   async unlikePost(id: string): Promise<void> {
     try {
       const headers = await this.getAuthHeader();
-      await axios.delete(`${API_BASE_URL}posts/${id}/like`, { headers });
+      await axios.delete(`${API_BASE_URL}posts/${encodeURIComponent(id)}/like`, { headers });
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to unlike post');
     }
@@ -106,7 +106,7 @@ class PostServiceClass {
   async savePost(id: string): Promise<SaveState> {
     try {
       const headers = await this.getAuthHeader();
-      const response = await axios.post<SaveState>(`${API_BASE_URL}posts/${id}/save`, {}, { headers });
+      const response = await axios.post<SaveState>(`${API_BASE_URL}posts/${encodeURIComponent(id)}/save`, {}, { headers });
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to save post');
@@ -116,7 +116,7 @@ class PostServiceClass {
   async unsavePost(id: string): Promise<SaveState> {
     try {
       const headers = await this.getAuthHeader();
-      const response = await axios.delete<SaveState>(`${API_BASE_URL}posts/${id}/save`, { headers });
+      const response = await axios.delete<SaveState>(`${API_BASE_URL}posts/${encodeURIComponent(id)}/save`, { headers });
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to unsave post');
@@ -139,7 +139,7 @@ class PostServiceClass {
   async sharePost(id: string, channel: string = 'native_share'): Promise<void> {
     try {
       const headers = await this.getAuthHeader();
-      await axios.post(`${API_BASE_URL}posts/${id}/share`, { channel }, { headers });
+      await axios.post(`${API_BASE_URL}posts/${encodeURIComponent(id)}/share`, { channel }, { headers });
     } catch {
       // Fire-and-forget
     }

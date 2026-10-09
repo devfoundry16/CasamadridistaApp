@@ -26,6 +26,7 @@ import PostActions  from '@/components/Community/PostCard/PostActions';
 import CommentRow   from '@/components/Community/Comments/CommentRow';
 import CommentInput, { type CommentInputHandle } from '@/components/Community/Comments/CommentInput';
 import { usePostMenu } from '@/components/Community/PostCard/usePostMenu';
+import { isUuid } from '@/utils/pushPayload.core';
 import { useKeyboardOffsets } from '@/hooks/useKeyboardOffsets';
 import Colors from '@/constants/colors';
 
@@ -46,10 +47,13 @@ export default function PostDetailPage() {
   // Must stay above the early returns below — hook order has to be stable.
   const { keyboardVerticalOffset, bottomInset } = useKeyboardOffsets();
 
+  // The id arrives from links anyone can write (casamadridistaapp://community/post/<id>):
+  // only a uuid reaches an API path. Anything else shows "post not found".
+  const validId = isUuid(id);
   const { data: post, isLoading: postLoading, isError: postError } = useQuery({
     queryKey: ['post', id],
     queryFn:  () => PostService.getPost(id),
-    enabled:  !!id,
+    enabled:  validId,
   });
 
   // Deleted by its author from this screen: there is nothing left to show.
@@ -68,7 +72,7 @@ export default function PostDetailPage() {
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     staleTime: 20_000,
-    enabled: !!id,
+    enabled: validId,
   });
 
   const comments = commentsData?.pages.flatMap((p) => p.comments) ?? [];
