@@ -403,7 +403,80 @@
     "emptyStandingsBody": "The table appears once the season's first matches are played. Pick an earlier season to see a completed one.",
     "zoneKnockout": "Knockout stage",
     "zoneKnockoutPlayoff": "Knockout play-off",
-    "zoneEliminated": "Eliminated"
+    "zoneEliminated": "Eliminated",
+    "leaders": {
+      "players": "Players",
+      "teams": "Teams",
+      "scopeTeam": "Real Madrid",
+      "scopeAll": "Entire competition",
+      "positionAll": "All",
+      "position": {
+        "GK": "GK",
+        "DEF": "DEF",
+        "MID": "MID",
+        "FWD": "FWD"
+      },
+      "modeTotal": "Totals",
+      "modePer90": "Per 90",
+      "searchStats": "Search stats",
+      "searchPlayers": "Search players",
+      "searchTeams": "Search teams",
+      "seeAll": "See all",
+      "minMinutes": "Min. {{minutes}} min played",
+      "source": "Data: API-Football · Updated {{time}}",
+      "syncingTitle": "Stats are being prepared",
+      "syncingBody": "This season's player stats are on their way. Check back in a few minutes.",
+      "unavailableTitle": "No player stats for this competition",
+      "unavailableBody": "Our data provider does not publish player stats for it.",
+      "noResults": "No stats match your search",
+      "versus": "vs {{team}}",
+      "group": {
+        "all": "All",
+        "attack": "Attack",
+        "passing": "Passing",
+        "defence": "Defence",
+        "goalkeeping": "Goalkeeping",
+        "discipline": "Discipline",
+        "ratings": "Ratings"
+      },
+      "stat": {
+        "goals": "Goals",
+        "assists": "Assists",
+        "goal_contributions": "Goals + assists",
+        "minutes_per_goal": "Minutes per goal",
+        "shots": "Shots",
+        "shots_on_target": "Shots on target",
+        "key_passes": "Key passes",
+        "dribbles": "Successful dribbles",
+        "penalties_scored": "Penalties scored",
+        "passes": "Passes",
+        "pass_accuracy": "Pass completion",
+        "tackles": "Tackles",
+        "interceptions": "Interceptions",
+        "duels_won": "Duels won",
+        "saves": "Saves",
+        "goals_conceded": "Goals conceded",
+        "yellow_cards": "Yellow cards",
+        "red_cards": "Red cards",
+        "average_rating": "Average rating",
+        "best_match_rating": "Best match rating",
+        "match_performances": "Top match performances"
+      },
+      "teamStat": {
+        "goals_for": "Goals scored",
+        "goals_against": "Goals conceded",
+        "goals_for_per_game": "Goals scored per game",
+        "goals_against_per_game": "Goals conceded per game",
+        "shots_per_game": "Shots",
+        "key_passes_per_game": "Key passes",
+        "yellow_cards": "Yellow cards"
+      },
+      "unit": {
+        "minutes": "min",
+        "per90": "per 90",
+        "perGame": "per game"
+      }
+    }
   },
   "player": {
     "playerInformation": "Player Information",

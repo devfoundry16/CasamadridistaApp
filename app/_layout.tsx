@@ -216,6 +216,14 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="team/leaders/[stat]"
+          options={{
+            // The screen sets the stat's own name once it mounts.
+            title: t("team.leaders.seeAll"),
+            ...options,
+          }}
+        />
+        <Stack.Screen
           name="product/[id]"
           options={{
             title: t("nav.productDetails"),

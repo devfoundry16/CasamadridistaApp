@@ -6,7 +6,8 @@ import Colors from "@/constants/colors";
 
 interface Props {
   title: string;
-  action?: { label: string; onPress: () => void };
+  /** `accessibilityLabel` names what the action opens, when several headings share one label. */
+  action?: { label: string; onPress: () => void; accessibilityLabel?: string };
 }
 
 /**
@@ -34,6 +35,7 @@ export default function SectionHeading({ title, action }: Props) {
           <Touchable
             onPress={action.onPress}
             accessibilityRole="button"
+            accessibilityLabel={action.accessibilityLabel}
             hitSlop={12}
             // 44pt tall target; the label itself is only 13px.
             style={({ pressed }) => ({

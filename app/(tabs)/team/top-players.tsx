@@ -1,184 +1,240 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Text } from "@/components/Text";
-import Touchable from "@/components/Touchable";
 import Colors from "@/constants/colors";
-import { useTopAssists, useTopScorers } from "@/hooks/football/queries";
-import { REAL_MADRID_TEAM_ID } from "@/constants/football";
-import SectionHeading from "@/components/Team/SectionHeading";
-import SurfaceCard from "@/components/Team/SurfaceCard";
 import SegmentedToggle from "@/components/Team/SegmentedToggle";
+import PickerPill from "@/components/Team/PickerPill";
 import EmptyState from "@/components/Team/EmptyState";
 import ErrorState from "@/components/Team/ErrorState";
-import Chip from "@/components/Team/Chip";
-import type { TopPlayerEntry } from "@/types/soccer/topPlayers";
+import ChipRow from "@/components/Team/Leaders/ChipRow";
+import PlayerFilters from "@/components/Team/Leaders/PlayerFilters";
+import SearchField from "@/components/Team/Leaders/SearchField";
+import StatCard from "@/components/Team/Leaders/StatCard";
+import { PlayerEntryRow, TeamEntryRow } from "@/components/Team/Leaders/EntryRows";
+import {
+  findCompetition,
+  formatSeasonLong,
+  initialSelection,
+  selectCompetition,
+  selectSeason,
+  type Selection,
+} from "@/components/Team/Standings/competitions";
+import { useLeaders, useTeamCompetitions, useTeamLeaders } from "@/hooks/football/queries";
+import { useSeason } from "@/hooks/football/useSeason";
+import { LA_LIGA_LEAGUE_ID, REAL_MADRID_TEAM_ID } from "@/constants/football";
+import {
+  STAT_GROUPS,
+  cardParams,
+  leaderParams,
+  minMinutesOf,
+  visibleStats,
+  type LeaderMode,
+  type LeaderScope,
+  type Position,
+  type StatGroup,
+} from "@/utils/topPlayers.core";
 
-type Metric = "goals" | "assists";
+type Board = "players" | "teams";
+type GroupKey = "all" | StatGroup;
 
-function valueFor(entry: TopPlayerEntry, metric: Metric): number {
-  const line = entry.statistics?.[0];
-  if (!line) return 0;
-  return (metric === "goals" ? line.goals?.total : line.goals?.assists) ?? 0;
-}
+/** Cards on the Teams view show this many clubs; "See all" shows the rest. */
+const TEAM_PREVIEW = 5;
 
-function LeaderRow({
-  entry,
-  rank,
-  metric,
-  onPress,
-}: {
-  entry: TopPlayerEntry;
-  rank: number;
-  metric: Metric;
-  onPress: () => void;
-}) {
-  const line = entry.statistics?.[0];
-  const isRealMadrid = line?.team?.id === REAL_MADRID_TEAM_ID;
-
+function Loading() {
   return (
-    <Touchable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={({ pressed }) => ({
-        flexDirection: "row",
-        alignItems: "center",
-        height: 56,
-        paddingHorizontal: 14,
-        backgroundColor: pressed ? Colors.background.light : "transparent",
-        // Real Madrid rows are marked rather than filtered — topscorers is
-        // league-wide, so filtering would empty the tab whenever no RM player
-        // is in the top 20.
-        borderStartWidth: isRealMadrid ? 3 : 0,
-        borderStartColor: Colors.darkGold,
-      })}
-    >
-      <Text
-        className="text-[12px] font-semibold"
-        style={{ color: Colors.text.muted, width: 22 }}
-      >
-        {rank}
-      </Text>
-      <Image
-        source={{ uri: entry.player.photo }}
-        style={{
-          width: 32,
-          height: 32,
-          borderRadius: 16,
-          marginEnd: 10,
-          backgroundColor: Colors.background.light,
-        }}
-        contentFit="cover"
-      />
-      <View className="flex-1">
-        <Text
-          className="text-[14px] font-semibold"
-          style={{ color: Colors.text.primary }}
-          numberOfLines={1}
-        >
-          {entry.player.name}
-        </Text>
-        <Text className="text-[11px]" style={{ color: Colors.text.tertiary }} numberOfLines={1}>
-          {line?.team?.name}
-        </Text>
-      </View>
-      <Text
-        className="text-[17px] font-bold"
-        style={{ color: Colors.darkGold, fontVariant: ["tabular-nums"] }}
-      >
-        {valueFor(entry, metric)}
-      </Text>
-    </Touchable>
+    <View className="py-10 items-center">
+      <ActivityIndicator color={Colors.darkGold} />
+    </View>
   );
 }
 
+/**
+ * Team > Top Players. Leaderboards for every stat our data provider
+ * (API-Football) publishes, ranked by the backend from synced rows. A stat the
+ * provider does not cover is never shown, not even as zeros.
+ */
 export default function TeamTopPlayersTab() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
-  const [metric, setMetric] = useState<Metric>("goals");
-  const [realMadridOnly, setRealMadridOnly] = useState(false);
+  const fallbackSeason = useSeason();
 
-  const scorers = useTopScorers();
-  const assists = useTopAssists();
-  const active = metric === "goals" ? scorers : assists;
+  const [view, setView] = useState<Board>("players");
+  const [selection, setSelection] = useState<Selection | null>(null);
+  const [scope, setScope] = useState<LeaderScope>("all");
+  const [position, setPosition] = useState<Position | null>(null);
+  const [mode, setMode] = useState<LeaderMode>("total");
+  const [group, setGroup] = useState<GroupKey>("all");
+  const [search, setSearch] = useState("");
 
-  const rows = useMemo(() => {
-    const all = active.data ?? [];
-    const filtered = realMadridOnly
-      ? all.filter((e) => e.statistics?.[0]?.team?.id === REAL_MADRID_TEAM_ID)
-      : all;
-    return filtered.slice(0, 20);
-  }, [active.data, realMadridOnly]);
+  // The same competition catalog and selection rules as the Standings tab.
+  const catalog = useTeamCompetitions();
+  useEffect(() => {
+    if (!catalog.data || selection) return;
+    setSelection(initialSelection(catalog.data, catalog.data.currentSeason ?? fallbackSeason));
+  }, [catalog.data, selection, fallbackSeason]);
+  const effective: Selection | null =
+    selection ?? (catalog.isError ? { leagueId: LA_LIGA_LEAGUE_ID, season: fallbackSeason } : null);
+  const competition = findCompetition(catalog.data, effective?.leagueId ?? 0);
+
+  const params = useMemo(() => leaderParams({ scope, position, mode }), [scope, position, mode]);
+  const hub = useLeaders(effective?.leagueId ?? 0, effective?.season ?? 0, params, {
+    enabled: view === "players" && !!effective,
+  });
+  const teams = useTeamLeaders(effective?.leagueId ?? 0, effective?.season ?? 0, {
+    enabled: view === "teams" && !!effective,
+  });
+
+  const ourTeamId = hub.data?.teamId ?? teams.data?.teamId ?? REAL_MADRID_TEAM_ID;
+  const statLabel = (key: string) => t(`team.leaders.stat.${key}`);
+  const cards = useMemo(
+    () => visibleStats(hub.data?.stats ?? [], { group, search, labelOf: (key) => t(`team.leaders.stat.${key}`) }),
+    [hub.data, group, search, t],
+  );
+
+  const updatedAt = view === "players" ? hub.data?.updatedAt : teams.data?.updatedAt;
+  const updatedLabel = updatedAt
+    ? new Date(updatedAt).toLocaleString(i18n.language, {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+
+  const seeAll = (stat: string, kind: "player" | "team", cardMode: LeaderMode = mode) => {
+    if (!effective) return;
+    router.push({
+      pathname: "/team/leaders/[stat]",
+      params: {
+        stat,
+        kind,
+        league: String(effective.leagueId),
+        season: String(effective.season),
+        ...(kind === "player" ? cardParams({ scope, position, mode }, cardMode) : {}),
+      },
+    });
+  };
+
+  const pills = (
+    <View style={{ flexDirection: "row", gap: 8 }}>
+      <PickerPill<number>
+        title={t("team.selectCompetition")}
+        options={(catalog.data?.competitions ?? []).map((c) => ({
+          value: c.id,
+          label: c.name,
+          iconUri: c.logo,
+          caption: c.country ?? undefined,
+        }))}
+        value={effective?.leagueId ?? 0}
+        onChange={(id) => catalog.data && effective && setSelection(selectCompetition(catalog.data, effective, id))}
+        iconUri={competition?.logo}
+        placeholder={catalog.isPending ? "—" : t("team.selectCompetition")}
+        disabled={!catalog.data || !effective}
+        maxWidth={210}
+      />
+      <PickerPill<number>
+        title={t("team.selectSeason")}
+        options={(competition?.seasons ?? []).map((year) => ({ value: year, label: formatSeasonLong(year) }))}
+        value={effective?.season ?? 0}
+        onChange={(year) => catalog.data && effective && setSelection(selectSeason(catalog.data, effective, year))}
+        placeholder="—"
+        disabled={!catalog.data || !effective}
+        numeric
+      />
+    </View>
+  );
+
+  const status = view === "players" ? hub.data?.status : teams.data?.status;
+  const statusState =
+    status === "syncing" ? (
+      <EmptyState title={t("team.leaders.syncingTitle")} body={t("team.leaders.syncingBody")} />
+    ) : status === "unavailable" ? (
+      <EmptyState title={t("team.leaders.unavailableTitle")} body={t("team.leaders.unavailableBody")} />
+    ) : null;
+
+  const playersBody = () => {
+    if (hub.isPending) return <Loading />;
+    if (hub.isError) return <ErrorState title={t("team.errorGeneric")} onRetry={hub.refetch} compact />;
+    if (statusState) return statusState;
+    if (cards.length === 0) {
+      return <EmptyState title={search.trim() ? t("team.leaders.noResults") : t("team.emptyTopPlayers")} />;
+    }
+    return cards.map((stat) => (
+      <StatCard
+        key={stat.key}
+        title={statLabel(stat.key)}
+        minMinutes={minMinutesOf(stat)}
+        onSeeAll={() => seeAll(stat.key, "player", stat.mode)}
+      >
+        {stat.entries.map((entry) => (
+          <PlayerEntryRow key={`${entry.player_id}:${entry.fixture_id ?? entry.team_id}`} entry={entry} unit={stat.unit} ourTeamId={ourTeamId} />
+        ))}
+      </StatCard>
+    ));
+  };
+
+  const teamsBody = () => {
+    if (teams.isPending) return <Loading />;
+    if (teams.isError) return <ErrorState title={t("team.errorGeneric")} onRetry={teams.refetch} compact />;
+    if (statusState) return statusState;
+    const shown = (teams.data?.stats ?? []).filter((s) => s.entries.length > 0);
+    if (shown.length === 0) return <EmptyState title={t("team.emptyTopPlayers")} />;
+    return shown.map((stat) => (
+      <StatCard key={stat.key} title={t(`team.leaders.teamStat.${stat.key}`)} onSeeAll={() => seeAll(stat.key, "team")}>
+        {stat.entries.slice(0, TEAM_PREVIEW).map((entry) => (
+          <TeamEntryRow key={entry.team_id} entry={entry} unit={stat.unit} ourTeamId={ourTeamId} />
+        ))}
+      </StatCard>
+    ));
+  };
 
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: Colors.background.deepDark }}
       contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 16 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
-      <SegmentedToggle<Metric>
+      <SegmentedToggle<Board>
         options={[
-          { key: "goals", label: t("team.goals") },
-          { key: "assists", label: t("team.assists") },
+          { key: "players", label: t("team.leaders.players") },
+          { key: "teams", label: t("team.leaders.teams") },
         ]}
-        value={metric}
-        onChange={setMetric}
+        value={view}
+        onChange={setView}
       />
 
-      <View style={{ flexDirection: "row" }}>
-        <Chip
-          label={t("team.realMadridOnly")}
-          active={realMadridOnly}
-          onPress={() => setRealMadridOnly((v) => !v)}
-        />
-      </View>
+      {pills}
 
-      <View>
-        <SectionHeading
-          title={metric === "goals" ? t("team.goals") : t("team.assists")}
-        />
-        <SurfaceCard padded={false}>
-          {active.isPending ? (
-            <View className="py-10 items-center">
-              <ActivityIndicator color={Colors.darkGold} />
-            </View>
-          ) : active.isError ? (
-            <ErrorState
-              title={t("team.errorGeneric")}
-              onRetry={active.refetch}
-              compact
-            />
-          ) : rows.length === 0 ? (
-            <EmptyState title={t("team.emptyTopPlayers")} />
-          ) : (
-            rows.map((entry, i) => (
-              <View key={entry.player.id}>
-                <LeaderRow
-                  entry={entry}
-                  rank={i + 1}
-                  metric={metric}
-                  onPress={() =>
-                    router.push(
-                      `/player/${entry.statistics?.[0]?.team?.id ?? REAL_MADRID_TEAM_ID}/${entry.player.id}` as never,
-                    )
-                  }
-                />
-                {i < rows.length - 1 ? (
-                  <View
-                    style={{
-                      height: 1,
-                      backgroundColor: Colors.border.default,
-                      marginHorizontal: 14,
-                    }}
-                  />
-                ) : null}
-              </View>
-            ))
-          )}
-        </SurfaceCard>
-      </View>
+      {view === "players" ? (
+        <>
+          <PlayerFilters
+            scope={scope}
+            onScope={setScope}
+            position={position}
+            onPosition={setPosition}
+            mode={mode}
+            onMode={setMode}
+          />
+          <SearchField value={search} onChange={setSearch} placeholder={t("team.leaders.searchStats")} />
+          <ChipRow<GroupKey>
+            options={(["all", ...STAT_GROUPS] as GroupKey[]).map((key) => ({ key, label: t(`team.leaders.group.${key}`) }))}
+            value={group}
+            onChange={setGroup}
+          />
+          {playersBody()}
+        </>
+      ) : (
+        teamsBody()
+      )}
+
+      {updatedLabel && status === "ready" ? (
+        <Text className="text-[11px]" style={{ color: Colors.text.muted, textAlign: "center" }}>
+          {t("team.leaders.source", { time: updatedLabel })}
+        </Text>
+      ) : null}
     </ScrollView>
   );
 }

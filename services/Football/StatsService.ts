@@ -3,7 +3,7 @@ import { development } from "@/config/environment";
 import type { CompetitionCatalog } from "@/types/soccer/competitions";
 import type { LeagueStandings } from "@/types/soccer/standings";
 import type { TeamStatistics } from "@/types/soccer/teamStatistics";
-import type { TopPlayerEntry } from "@/types/soccer/topPlayers";
+import type { Leaderboard, LeadersHub, TeamLeaders } from "@/types/soccer/leaders";
 
 class ApiService {
   private api: AxiosInstance;
@@ -38,13 +38,32 @@ class ApiService {
     return data;
   }
 
-  async fetchTopScorers(leagueId: number, season: number): Promise<TopPlayerEntry[]> {
-    const { data } = await this.api.get(`/topscorers/${leagueId}/${season}`);
+  /** Top Players: the top three of every stat. `params` from leaderParams(). */
+  async fetchLeaders(
+    leagueId: number,
+    season: number,
+    params: Record<string, string>,
+  ): Promise<LeadersHub> {
+    const { data } = await this.api.get(`/leaders/${leagueId}/${season}`, { params });
     return data;
   }
 
-  async fetchTopAssists(leagueId: number, season: number): Promise<TopPlayerEntry[]> {
-    const { data } = await this.api.get(`/topassists/${leagueId}/${season}`);
+  /** Top Players "See all": one stat, ranked across the competition. */
+  async fetchLeaderboard(
+    leagueId: number,
+    season: number,
+    stat: string,
+    params: Record<string, string>,
+  ): Promise<Leaderboard> {
+    const { data } = await this.api.get(
+      `/leaders/${leagueId}/${season}/${encodeURIComponent(stat)}`,
+      { params },
+    );
+    return data;
+  }
+
+  async fetchTeamLeaders(leagueId: number, season: number): Promise<TeamLeaders> {
+    const { data } = await this.api.get(`/team-leaders/${leagueId}/${season}`);
     return data;
   }
 }

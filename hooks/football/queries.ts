@@ -6,8 +6,9 @@ import { LA_LIGA_LEAGUE_ID, REAL_MADRID_TEAM_ID } from "@/constants/football";
 import type { CompetitionCatalog } from "@/types/soccer/competitions";
 import type { LeagueStandings, StandingRow } from "@/types/soccer/standings";
 import type { TeamStatistics } from "@/types/soccer/teamStatistics";
-import type { TopPlayerEntry } from "@/types/soccer/topPlayers";
 import type { Match } from "@/types/soccer/match";
+import type { Leaderboard, LeadersHub, TeamLeaders } from "@/types/soccer/leaders";
+import { keepWhileSameBoard } from "@/utils/topPlayers.core";
 
 export const footballKeys = {
   all: ["football"] as const,
@@ -15,11 +16,14 @@ export const footballKeys = {
   standings: (l: number, s: number) => [...footballKeys.all, "standings", l, s] as const,
   teamStats: (t: number, l: number, s: number) =>
     [...footballKeys.all, "team-stats", t, l, s] as const,
-  topScorers: (l: number, s: number) => [...footballKeys.all, "topscorers", l, s] as const,
-  topAssists: (l: number, s: number) => [...footballKeys.all, "topassists", l, s] as const,
   seasonFixtures: (t: number, s: number) =>
     [...footballKeys.all, "season-fixtures", t, s] as const,
   liveMatch: (t: number) => [...footballKeys.all, "live", t] as const,
+  leaders: (l: number, s: number, p: Record<string, string>) =>
+    [...footballKeys.all, "leaders", l, s, p] as const,
+  leaderboard: (l: number, s: number, stat: string, p: Record<string, string>) =>
+    [...footballKeys.all, "leaderboard", l, s, stat, p] as const,
+  teamLeaders: (l: number, s: number) => [...footballKeys.all, "team-leaders", l, s] as const,
 };
 
 /** staleTime mirrors each server TTL so the client never asks for something
@@ -66,26 +70,6 @@ export function useTeamStatistics(teamId: number, leagueId: number = LA_LIGA_LEA
   });
 }
 
-export function useTopScorers(leagueId: number = LA_LIGA_LEAGUE_ID) {
-  const season = useSeason();
-  return useQuery<TopPlayerEntry[]>({
-    queryKey: footballKeys.topScorers(leagueId, season),
-    queryFn: () => StatsService.fetchTopScorers(leagueId, season),
-    enabled: season > 0,
-    staleTime: 6 * H,
-  });
-}
-
-export function useTopAssists(leagueId: number = LA_LIGA_LEAGUE_ID) {
-  const season = useSeason();
-  return useQuery<TopPlayerEntry[]>({
-    queryKey: footballKeys.topAssists(leagueId, season),
-    queryFn: () => StatsService.fetchTopAssists(leagueId, season),
-    enabled: season > 0,
-    staleTime: 6 * H,
-  });
-}
-
 export function useSeasonFixtures(teamId: number) {
   const season = useSeason();
   return useQuery<Match[]>({
@@ -104,5 +88,55 @@ export function useLiveMatch(teamId: number, enabled: boolean) {
     enabled: enabled && teamId > 0,
     staleTime: 30_000,
     refetchInterval: enabled ? 60_000 : false,
+  });
+}
+
+/** The sync job refreshes these hourly at most; a past season being prepared is re-asked every 30 s. */
+const LEADERS_STALE_MS = 10 * 60_000;
+const syncingPoll = (status?: string) => (status === "syncing" ? 30_000 : false);
+
+/** Top Players: the top three of every stat. `params` from leaderParams(). */
+export function useLeaders(
+  leagueId: number,
+  season: number,
+  params: Record<string, string>,
+  options?: { enabled?: boolean },
+) {
+  return useQuery<LeadersHub>({
+    queryKey: footballKeys.leaders(leagueId, season, params),
+    queryFn: () => StatsService.fetchLeaders(leagueId, season, params),
+    enabled: (options?.enabled ?? true) && leagueId > 0 && season > 0,
+    staleTime: LEADERS_STALE_MS,
+    // A filter change keeps the old cards on screen until the new ones land;
+    // a new competition or season shows the spinner instead.
+    placeholderData: keepWhileSameBoard(leagueId, season),
+    refetchInterval: (query) => syncingPoll(query.state.data?.status),
+  });
+}
+
+/** Top Players "See all": one stat across the competition. */
+export function useLeaderboard(
+  leagueId: number,
+  season: number,
+  stat: string,
+  params: Record<string, string>,
+  options?: { enabled?: boolean },
+) {
+  return useQuery<Leaderboard>({
+    queryKey: footballKeys.leaderboard(leagueId, season, stat, params),
+    queryFn: () => StatsService.fetchLeaderboard(leagueId, season, stat, params),
+    enabled: (options?.enabled ?? true) && leagueId > 0 && season > 0 && !!stat,
+    staleTime: LEADERS_STALE_MS,
+    placeholderData: keepWhileSameBoard(leagueId, season),
+    refetchInterval: (query) => syncingPoll(query.state.data?.status),
+  });
+}
+
+export function useTeamLeaders(leagueId: number, season: number, options?: { enabled?: boolean }) {
+  return useQuery<TeamLeaders>({
+    queryKey: footballKeys.teamLeaders(leagueId, season),
+    queryFn: () => StatsService.fetchTeamLeaders(leagueId, season),
+    enabled: (options?.enabled ?? true) && leagueId > 0 && season > 0,
+    staleTime: LEADERS_STALE_MS,
   });
 }

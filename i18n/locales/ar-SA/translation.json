@@ -404,7 +404,80 @@
     "emptyStandingsBody": "يظهر الجدول بعد لعب أول مباريات الموسم. اختر موسمًا سابقًا لعرض جدول مكتمل.",
     "zoneKnockout": "دور خروج المغلوب",
     "zoneKnockoutPlayoff": "ملحق دور خروج المغلوب",
-    "zoneEliminated": "خارج المنافسة"
+    "zoneEliminated": "خارج المنافسة",
+    "leaders": {
+      "players": "اللاعبون",
+      "teams": "الفرق",
+      "scopeTeam": "ريال مدريد",
+      "scopeAll": "البطولة كاملة",
+      "positionAll": "الكل",
+      "position": {
+        "GK": "حارس",
+        "DEF": "مدافع",
+        "MID": "وسط",
+        "FWD": "مهاجم"
+      },
+      "modeTotal": "المجموع",
+      "modePer90": "لكل 90 دقيقة",
+      "searchStats": "ابحث في الإحصائيات",
+      "searchPlayers": "ابحث عن لاعب",
+      "searchTeams": "ابحث عن فريق",
+      "seeAll": "عرض الكل",
+      "minMinutes": "الحد الأدنى {{minutes}} دقيقة لعب",
+      "source": "البيانات: API-Football · آخر تحديث {{time}}",
+      "syncingTitle": "يجري تجهيز الإحصائيات",
+      "syncingBody": "إحصائيات اللاعبين لهذا الموسم في الطريق. عُد بعد دقائق.",
+      "unavailableTitle": "لا توجد إحصائيات لاعبين لهذه البطولة",
+      "unavailableBody": "مزوّد البيانات لا ينشر إحصائيات اللاعبين لها.",
+      "noResults": "لا توجد إحصائيات تطابق بحثك",
+      "versus": "ضد {{team}}",
+      "group": {
+        "all": "الكل",
+        "attack": "الهجوم",
+        "passing": "التمرير",
+        "defence": "الدفاع",
+        "goalkeeping": "حراسة المرمى",
+        "discipline": "الانضباط",
+        "ratings": "التقييمات"
+      },
+      "stat": {
+        "goals": "الأهداف",
+        "assists": "التمريرات الحاسمة",
+        "goal_contributions": "الأهداف + التمريرات الحاسمة",
+        "minutes_per_goal": "دقائق لكل هدف",
+        "shots": "التسديدات",
+        "shots_on_target": "التسديدات على المرمى",
+        "key_passes": "التمريرات المفتاحية",
+        "dribbles": "المراوغات الناجحة",
+        "penalties_scored": "ركلات الجزاء المسجلة",
+        "passes": "التمريرات",
+        "pass_accuracy": "دقة التمرير",
+        "tackles": "التدخلات",
+        "interceptions": "قطع الكرات",
+        "duels_won": "الالتحامات المكسوبة",
+        "saves": "التصديات",
+        "goals_conceded": "الأهداف المستقبلة",
+        "yellow_cards": "البطاقات الصفراء",
+        "red_cards": "البطاقات الحمراء",
+        "average_rating": "متوسط التقييم",
+        "best_match_rating": "أفضل تقييم في مباراة",
+        "match_performances": "أفضل الأداءات في المباريات"
+      },
+      "teamStat": {
+        "goals_for": "الأهداف المسجلة",
+        "goals_against": "الأهداف المستقبلة",
+        "goals_for_per_game": "الأهداف المسجلة لكل مباراة",
+        "goals_against_per_game": "الأهداف المستقبلة لكل مباراة",
+        "shots_per_game": "التسديدات",
+        "key_passes_per_game": "التمريرات المفتاحية",
+        "yellow_cards": "البطاقات الصفراء"
+      },
+      "unit": {
+        "minutes": "د",
+        "per90": "لكل 90",
+        "perGame": "لكل مباراة"
+      }
+    }
   },
   "player": {
     "playerInformation": "معلومات اللاعب",
