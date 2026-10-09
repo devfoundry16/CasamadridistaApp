@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { AtSign, Ban, CircleFadingPlus, Flag, ImageIcon, MoreHorizontal, Send, UserX, Video } from 'lucide-react-native';
+import { AtSign, Ban, CircleFadingPlus, Film, Flag, ImageIcon, MoreHorizontal, Send, UserX, Video } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, FlatList, RefreshControl, View, useWindowDimensions } from 'react-native';
@@ -183,10 +183,11 @@ export default function UserProfileScreen() {
         ? t(`social.profile.empty.${shownTab}Self`)
         : t(`social.profile.empty.${shownTab}`, { name });
 
-  // Create (spec §3): Photo, Video or Story.
+  // Create (spec §3): Photo, Video, Reel or Story.
   const createIcons: Record<CreateChoice, React.ReactNode> = {
     photo: <ImageIcon size={20} color={Colors.darkGold} />,
     video: <Video size={20} color={Colors.darkGold} />,
+    reel: <Film size={20} color={Colors.darkGold} />,
     story: <CircleFadingPlus size={20} color={Colors.darkGold} />,
   };
   const createActions: SheetAction[] = CREATE_CHOICES.map((choice) => ({

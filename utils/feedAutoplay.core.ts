@@ -61,7 +61,7 @@ export function videoPostsOf<T extends PostLike>(pages: { posts: T[] }[] | undef
   return out;
 }
 
-const FEED_TABS = ['for-you', 'trending', 'recent', 'fan-clubs'] as const;
+const FEED_TABS = ['for-you', 'trending', 'recent', 'fan-clubs', 'reels'] as const;
 export type FeedTabName = (typeof FEED_TABS)[number];
 
 /** The viewer's `feed` link param as a feed tab, or null to open the one post. */

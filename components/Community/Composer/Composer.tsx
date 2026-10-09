@@ -39,6 +39,7 @@ import { DRAFT_VERSION, isDraftEmpty, type PostDraft } from "@/utils/postDraft.c
 import { clearDraft, keepDraftFile, loadDraft, saveDraft } from "@/utils/postDraft";
 import type { Post } from "@/services/FeedService";
 import { AUDIENCES, editPayload, feelingOf, overallProgress, type Audience } from "@/utils/postCompose.core";
+import { reelProblem } from "@/utils/mediaPick.core";
 import { POLL_DURATIONS, POLL_OPTIONS_MAX, POLL_OPTIONS_MIN, POLL_OPTION_MAX_LENGTH, validatePollDraft } from "@/utils/poll.core";
 
 type TextField = "title" | "body";
@@ -47,7 +48,8 @@ const TITLE_MAX = 200;
 const BODY_MAX = 2000;
 
 interface Props {
-  start?: 'images' | 'videos' | null;
+  /** Create → Photo / Video / Reel opens the composer on that picker; 'reel' is reel mode. */
+  start?: 'images' | 'videos' | 'reel' | null;
   /** Edit mode: the author's own post, already loaded. Media stays as posted. */
   editing?: Post;
 }
@@ -66,6 +68,8 @@ export default function Composer({ start = null, editing }: Props = {}) {
   const [audience, setAudience] = useState<Audience>(editing?.audience ?? "public");
   const [feeling, setFeeling] = useState<string | null>(editing?.feeling ?? null);
   const [feelingSheet, setFeelingSheet] = useState(false);
+  // Reel mode: one vertical video of at most 60 s, posted as format 'reel'.
+  const [reelMode, setReelMode] = useState(!editing && start === "reel");
   // A poll being written (new posts only): its options as typed and its length.
   const [pollOptions, setPollOptions] = useState<string[] | null>(null);
   const [pollDays, setPollDays] = useState<number>(1);
@@ -159,7 +163,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
   }, [editing, editingCountry, editingClubId]);
 
   const hasMedia = media.length > 0 || (editing?.media?.length ?? 0) > 0;
-  const isPoll = !editing && pollOptions !== null;
+  const isPoll = !editing && !reelMode && pollOptions !== null;
   const pollCheck = isPoll ? validatePollDraft(pollOptions!, pollDays) : null;
   // A poll needs its title and valid options (a body is optional, also when
   // editing one); anything else, a title and a body or media.
@@ -217,7 +221,14 @@ export default function Composer({ start = null, editing }: Props = {}) {
             setCountry(saved.country);
             setFanClub(saved.fanClub as FanClub | null);
             setPostAsFanClub(saved.postAsFanClub);
-            setMedia(saved.media as PickedMedia[]);
+            // The draft's own mode wins, and a reel draft's video is checked
+            // again: it may come from before reel mode existed.
+            setReelMode(saved.reel === true);
+            setMedia(
+              saved.reel
+                ? (saved.media as PickedMedia[]).filter((m) => !reelProblem(m)).slice(0, 1)
+                : (saved.media as PickedMedia[]),
+            );
             if (saved.poll) {
               setPollOptions(saved.poll.options);
               setPollDays(saved.poll.days);
@@ -271,6 +282,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
           fanClub: fanClub as unknown as Record<string, unknown> | null,
           postAsFanClub,
           poll: pollOptions ? { options: pollOptions, days: pollDays } : null,
+          reel: reelMode,
           media: kept.map((m) => ({
             uri: m.uri,
             kind: m.kind,
@@ -288,7 +300,22 @@ export default function Composer({ start = null, editing }: Props = {}) {
       }
     }, 800);
     return () => clearTimeout(timer);
-  }, [draftUserId, draftReady, submitting, title, body, location, audience, feeling, tagged, country, fanClub, postAsFanClub, media, pollOptions, pollDays]);
+  }, [draftUserId, draftReady, submitting, title, body, location, audience, feeling, tagged, country, fanClub, postAsFanClub, media, pollOptions, pollDays, reelMode]);
+
+  // In reel mode only one vertical video of at most 60 s is kept; anything
+  // else is refused with the reason, rather than posted as a reel.
+  const onMediaChange = useCallback(
+    (next: PickedMedia[]) => {
+      if (!reelMode) {
+        setMedia(next);
+        return;
+      }
+      const fits = next.filter((m) => !reelProblem(m));
+      if (fits.length < next.length) Alert.alert(t("community.compose.reelInvalid"));
+      setMedia(fits.slice(0, 1));
+    },
+    [reelMode, t],
+  );
 
   const handleSave = useCallback(async () => {
     if (!editing || !canPost) return;
@@ -341,6 +368,9 @@ export default function Composer({ start = null, editing }: Props = {}) {
     try {
       // One video, or up to ten photos (MediaPicker never mixes them), or a
       // poll, which takes no media.
+      // A reel is a video post marked format 'reel'; the server confirms its
+      // shape once the video is in.
+      const asReel = reelMode && media.length === 1 && !reelProblem(media[0]);
       const kind: "text" | "image" | "video" | "poll" =
         pollCheck?.ok ? "poll" : media[0]?.kind ?? "text";
       const locationName = normaliseLocation(location);
@@ -352,6 +382,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
         audience: sentAudience,
         ...(feeling ? { feeling } : {}),
         ...(pollCheck?.ok ? { poll: { options: pollCheck.options, duration_days: pollDays } } : {}),
+        ...(asReel ? { format: "reel" as const } : {}),
         country_code: country?.country_code ?? undefined,
         ...(locationName ? { location_name: locationName } : {}),
         ...(tagged.length ? { tagged_user_ids: tagged.slice(0, TAG_MAX).map((p) => p.id) } : {}),
@@ -407,7 +438,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
       setUploadProgress("");
       setUploadFraction(0);
     }
-  }, [canPost, title, body, media, location, tagged, country, fanClub, postAsFanClub, roles, sentAudience, feeling, pollCheck, pollDays, user, queryClient, router, t]);
+  }, [canPost, title, body, media, location, tagged, country, fanClub, postAsFanClub, roles, sentAudience, feeling, pollCheck, pollDays, reelMode, user, queryClient, router, t]);
 
   const submit = editing ? handleSave : handlePost;
 
@@ -429,7 +460,8 @@ export default function Composer({ start = null, editing }: Props = {}) {
         country_code: null,
       },
       fan_club: editing?.fan_club ?? (postAsFanClub && roles?.fanClubName ? { id: roles.fanClubId ?? "", name: roles.fanClubName, logo_url: null, is_verified: false } as Post["fan_club"] : null),
-      kind: editing?.kind ?? (pollOptions ? "poll" : media[0]?.kind ?? "text"),
+      kind: editing?.kind ?? (pollOptions && !reelMode ? "poll" : media[0]?.kind ?? "text"),
+      format: editing?.format ?? (reelMode ? "reel" : "standard"),
       title: title.trim() || null,
       body: body.trim() || null,
       location_name: location.trim() || null,
@@ -447,7 +479,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
             }
           : null),
     } as Post;
-  }, [editing, user, postAsFanClub, roles, media, title, body, location, sentAudience, feeling, tagged, pollOptions, pollDays]);
+  }, [editing, user, postAsFanClub, roles, media, title, body, location, sentAudience, feeling, tagged, pollOptions, pollDays, reelMode]);
 
   return (
     // The offset makes the lift include the header (useKeyboardOffsets explains
@@ -512,7 +544,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
 
           {/* ── Media ── */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>{t('community.mediaLabel')}</Text>
+            <Text style={styles.sectionLabel}>{reelMode ? t("community.compose.reelLabel") : t('community.mediaLabel')}</Text>
           </View>
           {editing ? (
             // Uploaded media is locked server-side (409 media_locked).
@@ -523,7 +555,16 @@ export default function Composer({ start = null, editing }: Props = {}) {
           ) : (
             // Create → Photo/Video opens the library only once "Continue your
             // draft?" is answered: Continue would replace what was just picked.
-            <MediaPicker media={media} onChange={setMedia} disabled={submitting} start={draftReady ? start : null} />
+            <>
+              {reelMode ? <Text style={styles.note}>{t("community.compose.reelHint")}</Text> : null}
+              <MediaPicker
+                media={media}
+                onChange={onMediaChange}
+                videosOnly={reelMode}
+                disabled={submitting}
+                start={draftReady ? (start === "reel" ? "videos" : start) : null}
+              />
+            </>
           )}
 
           {/* ── Poll ── */}
@@ -539,7 +580,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
               <Text style={styles.note}>{t("community.poll.locked")}</Text>
             </>
           ) : null}
-          {!editing && media.length === 0 ? (
+          {!editing && !reelMode && media.length === 0 ? (
             <>
               <View style={styles.divider} />
               <View style={styles.sectionHeader}>

@@ -24,6 +24,8 @@ export interface CreatePostPayload {
   audience?: Audience;
   /** A key from FEELINGS (utils/postCompose.core), or null for none. */
   feeling?: string | null;
+  /** 'reel' for a vertical short video post (kind 'video' only). */
+  format?: 'standard' | 'reel';
   /** kind 'poll' only: 2–4 options, open for 1, 3 or 7 days (utils/poll.core). */
   poll?: { options: string[]; duration_days: number };
 }

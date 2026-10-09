@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Clapperboard, ImagePlus, PlusCircle } from 'lucide-react-native';
+import { Clapperboard, Film, ImagePlus, PlusCircle } from 'lucide-react-native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -15,7 +15,7 @@ import { createHref, type CreateChoice } from '@/utils/createChooser.core';
 /**
  * The top of the Home feed: "What's on your mind?" and one-tap Create Story
  * and Create Video. Each asks a signed-out fan to sign in first and comes back
- * to the same place. There is no Reel type, so there is no Reel tile.
+ * to the same place.
  */
 export default function ComposerRow() {
   const { t } = useTranslation();
@@ -30,6 +30,7 @@ export default function ComposerRow() {
 
   const tiles: { choice: CreateChoice; label: string; Icon: typeof PlusCircle }[] = [
     { choice: 'story', label: t('home.createStory'), Icon: PlusCircle },
+    { choice: 'reel', label: t('home.createReel'), Icon: Film },
     { choice: 'video', label: t('home.createVideo'), Icon: Clapperboard },
     { choice: 'photo', label: t('home.createPhoto'), Icon: ImagePlus },
   ];

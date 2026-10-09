@@ -23,6 +23,7 @@ export default function FeedTabs({ active, onSelect, trailing, tabs = ALL_TABS }
     trending: t('community.tabTrending'),
     "fan-clubs": t('community.tabFanClubs'),
     recent: t('community.tabRecent'),
+    reels: t('community.tabReels'),
   };
   const TABS = tabs.map((key) => ({ key, label: LABELS[key] }));
 

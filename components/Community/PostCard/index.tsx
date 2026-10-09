@@ -78,7 +78,7 @@ function PostCard({ post }: Props) {
       {teaser ? (
         <MediaTeaserCard item={teaser} preview={showPreview} />
       ) : (
-        post.media?.length > 0 && <PostMediaPreview media={post.media} />
+        post.media?.length > 0 && <PostMediaPreview media={post.media} tall={post.format === 'reel'} />
       )}
       <PostActions post={post} onCommentPress={goToPost} />
     </Touchable>

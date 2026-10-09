@@ -5,9 +5,9 @@
  * Pure, so `node --test` can load it.
  */
 
-export type CreateChoice = 'photo' | 'video' | 'story';
+export type CreateChoice = 'photo' | 'video' | 'reel' | 'story';
 
-export const CREATE_CHOICES: readonly CreateChoice[] = ['photo', 'video', 'story'];
+export const CREATE_CHOICES: readonly CreateChoice[] = ['photo', 'video', 'reel', 'story'];
 
 /** Where each choice goes. Photo and Video open the composer on that picker. */
 export function createHref(choice: CreateChoice): string {
@@ -16,10 +16,11 @@ export function createHref(choice: CreateChoice): string {
 }
 
 /** The composer's `start` param, as the library picker's media type; null for none. */
-export function composeStart(param: string | string[] | undefined): 'images' | 'videos' | null {
+export function composeStart(param: string | string[] | undefined): 'images' | 'videos' | 'reel' | null {
   const value = Array.isArray(param) ? param[0] : param;
   if (value === 'photo') return 'images';
   if (value === 'video') return 'videos';
+  if (value === 'reel') return 'reel';
   return null;
 }
 

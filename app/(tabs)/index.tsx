@@ -18,7 +18,7 @@ import { useUser } from "@/hooks/useUser";
 import type { FeedTab } from "@/services/FeedService";
 
 /** Home's feeds. Fan-club posts have their own tab (Fan Clubs). */
-const HOME_TABS: readonly FeedTab[] = ["for-you", "trending", "recent"];
+const HOME_TABS: readonly FeedTab[] = ["for-you", "reels", "trending", "recent"];
 
 /**
  * Home is the community feed (spec 2.1.0 §03): a compact header, then the

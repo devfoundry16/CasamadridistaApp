@@ -43,6 +43,8 @@ export interface PostDraft {
   media: DraftMedia[];
   /** A poll being written: its option texts as typed, and its length in days. */
   poll?: { options: string[]; days: number } | null;
+  /** Reel mode: one vertical video, posted as format 'reel'. */
+  reel?: boolean;
 }
 
 export function draftKey(userId: string): string {
@@ -100,6 +102,7 @@ export function parseDraft(raw: string | null | undefined): PostDraft | null {
       d.poll && Array.isArray(d.poll.options) && d.poll.options.every(isStr) && typeof d.poll.days === 'number'
         ? { options: d.poll.options, days: d.poll.days }
         : null,
+    reel: d.reel === true,
   };
 }
 

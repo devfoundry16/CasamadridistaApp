@@ -1,4 +1,5 @@
 import { describe, it } from 'node:test';
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 import { CREATE_CHOICES, composeStart, createHref, yourStoryBubble } from '../createChooser.core.ts';
@@ -9,20 +10,22 @@ import { CREATE_CHOICES, composeStart, createHref, yourStoryBubble } from '../cr
  * long-press as the only way to add another.
  */
 describe('Create', () => {
-  it('offers Photo, Video and Story, in that order', () => {
-    assert.deepEqual(CREATE_CHOICES, ['photo', 'video', 'story']);
+  it('offers Photo, Video, Reel and Story, in that order', () => {
+    assert.deepEqual(CREATE_CHOICES, ['photo', 'video', 'reel', 'story']);
   });
 
   it('Photo and Video open the composer on that picker; Story opens the story camera', () => {
     assert.equal(createHref('photo'), '/community/compose?start=photo');
     assert.equal(createHref('video'), '/community/compose?start=video');
     assert.equal(createHref('story'), '/stories/create');
+    assert.equal(createHref('reel'), '/community/compose?start=reel');
   });
 
   it('the composer reads the start back, ignoring anything else', () => {
     assert.equal(composeStart('photo'), 'images');
     assert.equal(composeStart('video'), 'videos');
     assert.equal(composeStart(['video']), 'videos');
+    assert.equal(composeStart('reel'), 'reel');
     assert.equal(composeStart('story'), null);
     assert.equal(composeStart(undefined), null);
   });
@@ -44,4 +47,23 @@ describe('yourStoryBubble', () => {
       labelKey: 'stories.yourStory',
     });
   });
+});
+
+describe('reel strings exist in both languages', () => {
+  const load = (locale: string) =>
+    JSON.parse(readFileSync(new URL(`../../i18n/locales/${locale}/translation.json`, import.meta.url), 'utf8'));
+  for (const locale of ['en-US', 'ar-SA']) {
+    it(locale, () => {
+      const d = load(locale);
+      for (const [path, v] of [
+        ['home.createReel', d.home?.createReel],
+        ['community.tabReels', d.community?.tabReels],
+        ['community.compose.reelLabel', d.community?.compose?.reelLabel],
+        ['community.compose.reelInvalid', d.community?.compose?.reelInvalid],
+        ['community.compose.reelHint', d.community?.compose?.reelHint],
+      ] as const) {
+        assert.equal(typeof v, 'string', `${locale} ${path}`);
+      }
+    });
+  }
 });

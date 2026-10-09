@@ -60,7 +60,7 @@ describe('feedTabOf', () => {
   // The viewer's `feed` link param names the feed whose videos it pages
   // through; anything else opens the one post.
   it('accepts the four feed tabs', () => {
-    for (const tab of ['for-you', 'trending', 'recent', 'fan-clubs']) assert.equal(feedTabOf(tab), tab);
+    for (const tab of ['for-you', 'trending', 'recent', 'fan-clubs', 'reels']) assert.equal(feedTabOf(tab), tab);
   });
   it('anything else is no feed', () => {
     assert.equal(feedTabOf('hashtag'), null);

@@ -15,6 +15,8 @@ import { feedMutedNow, useFeedMuted, useIsActiveVideo, useOpenVideo } from '../F
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FEED_HEIGHT = 250;
+/** A reel's 9:16 frame, capped so one card never fills more than most of the screen. */
+const REEL_HEIGHT = Math.min(Math.round((SCREEN_WIDTH * 16) / 9), 560);
 
 /**
  * Nested inside the card's outer pressable on purpose: the deepest view that
@@ -48,7 +50,7 @@ function ImageItem({ media, onPress }: { media: PostMediaType; onPress: () => vo
  * tap opens it full screen. Mounted only while active, so a feed holds a
  * single player (MediaVideoPlayer.tsx, plan §5.8).
  */
-function AutoplayVideo({ media, onOpen }: { media: PostMediaType; onOpen: () => void }) {
+function AutoplayVideo({ media, onOpen, height = FEED_HEIGHT }: { media: PostMediaType; onOpen: () => void; height?: number }) {
   const { t } = useTranslation();
   const [muted, toggleMuted] = useFeedMuted();
   const [progress, setProgress] = useState(0);
@@ -72,7 +74,7 @@ function AutoplayVideo({ media, onOpen }: { media: PostMediaType; onOpen: () => 
   return (
     <Pressable
       onPress={onOpen}
-      style={{ width: SCREEN_WIDTH, height: FEED_HEIGHT, backgroundColor: Colors.background.dark }}
+      style={{ width: SCREEN_WIDTH, height, backgroundColor: Colors.background.dark }}
       accessibilityRole="button"
       accessibilityLabel={t('video.openFullScreen')}
     >
@@ -93,11 +95,11 @@ function AutoplayVideo({ media, onOpen }: { media: PostMediaType; onOpen: () => 
   );
 }
 
-function VideoThumbnail({ media, onPlay }: { media: PostMediaType; onPlay: () => void }) {
+function VideoThumbnail({ media, onPlay, height = FEED_HEIGHT }: { media: PostMediaType; onPlay: () => void; height?: number }) {
   const { t } = useTranslation();
   return (
     <Touchable
-      style={({ pressed }) => ({ width: SCREEN_WIDTH, height: FEED_HEIGHT, backgroundColor: Colors.background.dark, opacity: pressed ? 0.8 : 1 })}
+      style={({ pressed }) => ({ width: SCREEN_WIDTH, height, backgroundColor: Colors.background.dark, opacity: pressed ? 0.8 : 1 })}
       onPress={onPlay}
       accessibilityRole="button"
       accessibilityLabel={t('video.openFullScreen')}
@@ -180,9 +182,11 @@ function Carousel({
 
 interface Props {
   media: PostMediaType[];
+  /** A reel: its one vertical video in a tall 9:16 frame. */
+  tall?: boolean;
 }
 
-export default function PostMediaPreview({ media }: Props) {
+export default function PostMediaPreview({ media, tall = false }: Props) {
   const router = useRouter();
   const postId = media[0]?.post_id ?? '';
   const active = useIsActiveVideo(postId);
@@ -217,10 +221,11 @@ export default function PostMediaPreview({ media }: Props) {
   }
 
   const m = ready[0];
+  const height = tall && m.kind === 'video' ? REEL_HEIGHT : FEED_HEIGHT;
   return (
-    <View className="mt-1" style={{ height: FEED_HEIGHT }}>
+    <View className="mt-1" style={{ height }}>
       {m.kind === 'video' ? (
-        active ? <AutoplayVideo media={m} onOpen={openVideo} /> : <VideoThumbnail media={m} onPlay={openVideo} />
+        active ? <AutoplayVideo media={m} onOpen={openVideo} height={height} /> : <VideoThumbnail media={m} onPlay={openVideo} height={height} />
       ) : (
         <ImageItem media={m} onPress={() => openPhoto(m)} />
       )}

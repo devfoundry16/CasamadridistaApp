@@ -3,7 +3,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
 import type { MediaItem } from '@/types/media/casaMedia';
 
-export type FeedTab = 'for-you' | 'trending' | 'recent' | 'fan-clubs';
+export type FeedTab = 'for-you' | 'trending' | 'recent' | 'fan-clubs' | 'reels';
 
 export interface PostAuthor {
   id: string;
@@ -97,6 +97,8 @@ export interface Post {
   feeling?: string | null;
   /** When the author last changed what the post says; null if never. */
   edited_at?: string | null;
+  /** 'reel': a vertical short video, shown in the Reels tab. Absent reads as standard. */
+  format?: 'standard' | 'reel';
   /** A poll post's options and closing time; the counts come from GET /posts/:id/poll. */
   poll?: { closes_at: string; options: { id: string; position: number; label: string }[] } | null;
 }

@@ -28,6 +28,8 @@ interface Props {
   disabled?: boolean;
   /** Open the library once on arrival, on photos or on videos (Create → Photo / Video). */
   start?: 'images' | 'videos' | null;
+  /** A Reel: the library and the camera offer video only. */
+  videosOnly?: boolean;
 }
 
 const THUMB = 72;
@@ -53,13 +55,14 @@ async function withThumbnail(asset: PickedAsset): Promise<PickedMedia> {
  *
  * The thumbnail strip follows `components/Social/Composer.tsx`.
  */
-export default function MediaPicker({ media, onChange, disabled = false, start = null }: Props) {
+export default function MediaPicker({ media, onChange, disabled = false, start = null, videosOnly = false }: Props) {
   const { t } = useTranslation();
   const [cameraMenu, setCameraMenu] = useState(false);
   const [libraryMenu, setLibraryMenu] = useState(false);
 
   const library = libraryRequest(media);
-  const camera = cameraOptions(media);
+  const options = cameraOptions(media);
+  const camera = videosOnly ? { photo: false, video: options.video } : options;
   const crop = libraryCropRequest(media);
 
   const take = async (result: PickResult) => {
@@ -120,7 +123,8 @@ export default function MediaPicker({ media, onChange, disabled = false, start =
     },
     { key: 'crop', label: t('community.libraryCrop'), icon: <Crop size={20} color={Colors.darkGold} />, onPress: () => void openCropped() },
   ];
-  const onLibrary = () => setLibraryMenu(true);
+  // A Reel goes straight to the video library: no photos, no crop.
+  const onLibrary = () => (videosOnly ? void openLibrary('videos') : setLibraryMenu(true));
 
   const started = useRef(false);
   useEffect(() => {

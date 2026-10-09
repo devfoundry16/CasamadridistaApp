@@ -197,3 +197,16 @@ export function videoFormatFor(asset: PickedAsset): VideoFormat | null {
   if (asset.height > asset.width) return 'vertical_short';
   return (asset.durationMs ?? 0) > LONG_VIDEO_MS ? 'long' : 'horizontal';
 }
+
+/**
+ * Why a picked file cannot be a Reel, or null when it can: one vertical video
+ * of at most the post video limit (60 s). Unknown dimensions are let through;
+ * the server settles the real shape once the video is in
+ * (backend postRules.reelFormatAfterMedia).
+ */
+export function reelProblem(asset: PickedAsset): 'not_video' | 'not_vertical' | 'too_long' | null {
+  if (asset.kind !== 'video') return 'not_video';
+  if ((asset.durationMs ?? 0) > POST_MEDIA_LIMITS.maxVideoDurationSec * 1000) return 'too_long';
+  if (asset.width && asset.height && asset.height <= asset.width) return 'not_vertical';
+  return null;
+}

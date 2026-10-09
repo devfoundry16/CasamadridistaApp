@@ -16,6 +16,7 @@ import {
   libraryCropRequest,
   mergePostMedia,
   videoFormatFor,
+  reelProblem,
   type PickLimits,
   type PickedAsset,
 } from '../mediaPick.core.ts';
@@ -217,5 +218,26 @@ describe('videoFormatFor', () => {
   it('says nothing for a photo or a clip the picker could not measure', () => {
     assert.equal(videoFormatFor(photo(1)), null);
     assert.equal(videoFormatFor(video(1, { width: null, height: null })), null);
+  });
+});
+
+describe('reelProblem', () => {
+  const video = (over: object) => ({ uri: 'file:///v.mp4', kind: 'video' as const, mime: 'video/mp4', width: 1080, height: 1920, durationMs: 15_000, sizeBytes: 1, ...over });
+  it('a vertical video of at most 60 seconds is a reel', () => {
+    assert.equal(reelProblem(video({})), null);
+    assert.equal(reelProblem(video({ durationMs: 60_000 })), null);
+  });
+  it('landscape or square is not', () => {
+    assert.equal(reelProblem(video({ width: 1920, height: 1080 })), 'not_vertical');
+    assert.equal(reelProblem(video({ width: 1080, height: 1080 })), 'not_vertical');
+  });
+  it('over 60 seconds is not', () => {
+    assert.equal(reelProblem(video({ durationMs: 61_000 })), 'too_long');
+  });
+  it('a photo is not a reel', () => {
+    assert.equal(reelProblem(video({ kind: 'image' })), 'not_video');
+  });
+  it('unknown dimensions are let through: the server settles them', () => {
+    assert.equal(reelProblem(video({ width: null, height: null })), null);
   });
 });

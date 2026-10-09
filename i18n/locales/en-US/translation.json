@@ -524,7 +524,8 @@
     "createVideo": "Video",
     "createPhoto": "Photo",
     "memberStrip": "Join the official Madridista fan club.",
-    "memberStripCta": "Become a member"
+    "memberStripCta": "Become a member",
+    "createReel": "Reel"
   },
   "wallet": {
     "loading": "Loading wallet",
@@ -1042,7 +1043,10 @@
       "draftTitle": "Continue your draft?",
       "draftBody": "You have a post you didn't finish.",
       "draftContinue": "Continue",
-      "draftDiscard": "Discard"
+      "draftDiscard": "Discard",
+      "reelLabel": "Reel",
+      "reelInvalid": "Reels are vertical videos up to 60 seconds.",
+      "reelHint": "One vertical video, up to 60 seconds."
     },
     "poll": {
       "label": "Poll",
@@ -1071,7 +1075,8 @@
       "closesInMinutes_other": "Closes in {{count}} minutes",
       "removeOption": "Remove option",
       "durationNote": "Counted from when you post it."
-    }
+    },
+    "tabReels": "Reels"
   },
   "membershipPackages": {
     "halaGold": {
@@ -1774,7 +1779,8 @@
         "saved": "Tap the bookmark on a post to save it here. Only you can see what you save.",
         "media": "{{name}} hasn't published in Casa Media yet.",
         "mediaSelf": "What you publish in Casa Media will appear here."
-      }
+      },
+      "create_reel": "Reel"
     },
     "presence": {
       "online": "Online",

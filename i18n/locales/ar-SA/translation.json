@@ -525,7 +525,8 @@
     "createVideo": "فيديو",
     "createPhoto": "صورة",
     "memberStrip": "انضم إلى نادي المدريديستا الرسمي.",
-    "memberStripCta": "اشترك الآن"
+    "memberStripCta": "اشترك الآن",
+    "createReel": "ريل"
   },
   "wallet": {
     "loading": "جاري تحميل المحفظة",
@@ -1047,7 +1048,10 @@
       "draftTitle": "هل تريد متابعة المسودة؟",
       "draftBody": "لديك منشور لم تكمله.",
       "draftContinue": "متابعة",
-      "draftDiscard": "تجاهل"
+      "draftDiscard": "تجاهل",
+      "reelLabel": "ريل",
+      "reelInvalid": "الريلز مقاطع فيديو عمودية حتى 60 ثانية.",
+      "reelHint": "مقطع فيديو عمودي واحد حتى 60 ثانية."
     },
     "poll": {
       "label": "استطلاع",
@@ -1096,7 +1100,8 @@
       "closesInMinutes_other": "ينتهي خلال {{count}} دقيقة",
       "removeOption": "إزالة الخيار",
       "durationNote": "تُحتسب المدة من وقت النشر."
-    }
+    },
+    "tabReels": "ريلز"
   },
   "membershipPackages": {
     "halaGold": {
@@ -1823,7 +1828,8 @@
         "saved": "اضغط على علامة الحفظ في أي منشور ليظهر هنا. لا يرى محفوظاتك أحد غيرك.",
         "media": "لم ينشر {{name}} في كاسا ميديا بعد.",
         "mediaSelf": "ما تنشره في كاسا ميديا سيظهر هنا."
-      }
+      },
+      "create_reel": "ريل"
     },
     "presence": {
       "online": "متصل الآن",
