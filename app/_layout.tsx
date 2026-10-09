@@ -275,6 +275,20 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="community/videos/[postId]"
+          options={{
+            headerShown: false,
+            // An ordinary pushed screen that slides up, NOT a modal: on iOS a
+            // screen pushed from a full-screen modal (a #hashtag, @mention or
+            // profile tapped in the viewer) opens behind it. No
+            // `statusBarStyle` here: on a pushed screen it crashes iOS without
+            // UIViewControllerBasedStatusBarAppearance; the screen sets it.
+            animation: "slide_from_bottom",
+            contentStyle: { backgroundColor: "#000000" },
+            navigationBarColor: "#000000",
+          }}
+        />
+        <Stack.Screen
           name="auth/login"
           options={{
             headerShown: false,

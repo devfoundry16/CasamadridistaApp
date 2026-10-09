@@ -76,7 +76,8 @@
     "contributorCreate": "New post",
     "contributorMyContent": "My content",
     "contributorUploads": "Uploads",
-    "contributorStats": "Post stats"
+    "contributorStats": "Post stats",
+    "fanClubsTab": "Fan Clubs"
   },
   "registration": {
     "title": "Member Registration",
@@ -444,7 +445,13 @@
     "strengthUnitedMadridista": "United Madridista",
     "strengthPrizeInTotal": "Prize in Total",
     "strengthDailyUpdate": "Daily update",
-    "strengthMadridistaFamily": "Madridista Family"
+    "strengthMadridistaFamily": "Madridista Family",
+    "composerPrompt": "What's on your mind?",
+    "createStory": "Story",
+    "createVideo": "Video",
+    "createPhoto": "Photo",
+    "memberStrip": "Join the official Madridista fan club.",
+    "memberStripCta": "Become a member"
   },
   "wallet": {
     "loading": "Loading wallet",
@@ -919,7 +926,9 @@
     },
     "commentsOff": "Comments are turned off for this post.",
     "signInToComment": "Sign in to join the conversation",
-    "signInRequired": "Sign in to continue."
+    "signInRequired": "Sign in to continue.",
+    "reportPost": "Report post",
+    "postMenu": "More options"
   },
   "membershipPackages": {
     "halaGold": {
@@ -1979,5 +1988,17 @@
     "too_long": "Videos can be up to 15 seconds.",
     "too_large": "That file is too large.",
     "muteFailed": "Couldn't mute. Try again."
+  },
+  "fanClubsTab": {
+    "browse": "Browse fan clubs",
+    "feedTitle": "From the fan clubs"
+  },
+  "video": {
+    "mute": "Mute",
+    "unmute": "Turn sound on",
+    "close": "Close video",
+    "play": "Play",
+    "pause": "Pause",
+    "openFullScreen": "Open video full screen"
   }
 }

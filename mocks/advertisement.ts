@@ -1,11 +1,3 @@
-export interface StrengthStat {
-  icon: string;
-  value: number;
-  suffix: string;
-  label: string;
-  color: string;
-}
-
 export interface SquadPlayer {
   id: string;
   name: string;
@@ -18,37 +10,6 @@ export interface CompanyHead {
   photo: string;
   quote: string;
 }
-
-export const strengthStats: StrengthStat[] = [
-  {
-    icon: "users",
-    value: 7000,
-    suffix: "+",
-    label: "United Madridista",
-    color: "#FFD700",
-  },
-  {
-    icon: "gift",
-    value: 500,
-    suffix: "+",
-    label: "Prize in Total",
-    color: "#FFD700",
-  },
-  {
-    icon: "calendar",
-    value: 100,
-    suffix: "%",
-    label: "Daily update",
-    color: "#FFD700",
-  },
-  {
-    icon: "heart",
-    value: 1,
-    suffix: "",
-    label: "Madridista Family",
-    color: "#FFD700",
-  },
-];
 
 export const squadPlayers: SquadPlayer[] = [
   {

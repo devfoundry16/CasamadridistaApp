@@ -7,19 +7,24 @@ import Colors from "@/constants/colors";
 interface Props {
   active: FeedTab;
   onSelect: (tab: FeedTab) => void;
-  /** Shown after the tabs, outside their scroll (Community's people search). */
+  /** Shown after the tabs, outside their scroll (the people search). */
   trailing?: React.ReactNode;
+  /** Which tabs, in order. Home leaves out fan-clubs: that feed has its own tab. */
+  tabs?: readonly FeedTab[];
 }
 
-export default function FeedTabs({ active, onSelect, trailing }: Props) {
+const ALL_TABS: readonly FeedTab[] = ["for-you", "trending", "fan-clubs", "recent"];
+
+export default function FeedTabs({ active, onSelect, trailing, tabs = ALL_TABS }: Props) {
   const { t } = useTranslation();
 
-  const TABS: { key: FeedTab; label: string }[] = [
-    { key: "for-you",    label: t('community.tabForYou') },
-    { key: "trending",   label: t('community.tabTrending') },
-    { key: "fan-clubs",  label: t('community.tabFanClubs') },
-    { key: "recent",     label: t('community.tabRecent') },
-  ];
+  const LABELS: Record<FeedTab, string> = {
+    "for-you": t('community.tabForYou'),
+    trending: t('community.tabTrending'),
+    "fan-clubs": t('community.tabFanClubs'),
+    recent: t('community.tabRecent'),
+  };
+  const TABS = tabs.map((key) => ({ key, label: LABELS[key] }));
 
   return (
     <View style={styles.bar}>

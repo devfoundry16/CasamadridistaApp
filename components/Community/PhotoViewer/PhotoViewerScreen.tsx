@@ -104,7 +104,7 @@ export default function PhotoViewerScreen({ postId, initialMediaId }: Props) {
 
   const close = useCallback(() => {
     if (router.canGoBack()) router.back();
-    else router.replace('/(tabs)/community'); // cold deep-link
+    else router.replace('/'); // cold deep-link: the feed is on Home
   }, [router]);
 
   // Warm the neighbours so paging is instant.

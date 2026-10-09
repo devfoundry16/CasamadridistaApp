@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
+  feedMenuActions,
   LOCATION_MAX,
   POST_REPORT_REASONS,
   carouselIndex,
@@ -160,5 +161,14 @@ describe('return paths for the community sign-in gate', () => {
     ]) {
       assert.equal(isSafeReturnHref(href), true, href);
     }
+  });
+});
+
+describe('feedMenuActions', () => {
+  it('anyone may report someone else\'s post; signing in happens on tap', () => {
+    assert.deepEqual(feedMenuActions({ isOwn: false }), ['report']);
+  });
+  it('nobody reports their own post', () => {
+    assert.deepEqual(feedMenuActions({ isOwn: true }), []);
   });
 });

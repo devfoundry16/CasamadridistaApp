@@ -7,9 +7,9 @@ import { useUser } from "@/hooks/useUser";
 import {
   Clapperboard,
   Gamepad2,
+  Globe,
   Home,
   LayoutGrid,
-  MessageCircle,
   ShoppingBag,
   User,
   Users,
@@ -163,14 +163,16 @@ export default function TabLayout() {
       <Tabs.Screen
         name="community"
         options={{
-          title: t("nav.community"),
-          headerTitle: t("nav.madristaFeed"),
+          // The general feed is Home now; this tab is the fan clubs. The route
+          // stays `community` so old links still land here.
+          title: t("nav.fanClubsTab"),
+          headerTitle: t("nav.fanClubsTab"),
           headerTitleAlign: "center",
           headerTitleStyle: {
             ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
           },
           tabBarIcon: ({ color, size }) => (
-            <MessageCircle size={size} color={color} />
+            <Globe size={size} color={color} />
           ),
         }}
       />

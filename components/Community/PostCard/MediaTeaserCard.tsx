@@ -20,9 +20,9 @@ interface Props {
 /**
  * A Casa Media item surfaced inside the community feed.
  *
- * Deliberately a cover + CTA, never an inline player: the feed already mounts a
- * `VideoView` per visible post for user video, and a second one for exclusive
- * content would double the decode cost while giving the item away for free.
+ * Deliberately a cover + CTA, never an inline player: the feed plays one fan
+ * video at a time (FeedPlayback), and playing exclusive content here would add
+ * a second player while giving the item away for free.
  * Tapping goes to the media item screen, where the access check happens.
  */
 function MediaTeaserCard({ item, preview = true }: Props) {

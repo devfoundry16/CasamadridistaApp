@@ -71,9 +71,9 @@ export function hrefFromPayloadWithScheme(
     // A warning or an appeal decision opens the person's appeals screen.
     case 'safety_notice':
       return '/social/appeals';
-    // Mentioned in a story: the author's stories.
+    // Mentioned in a story: the author's stories, else the feed on Home.
     case 'story_mention':
-      return isUuid(payload.user_id) ? `/stories/${payload.user_id}` : '/community';
+      return isUuid(payload.user_id) ? `/stories/${payload.user_id}` : '/';
     case 'custom':
     default:
       return safePathFromUrl(payload.url, scheme);

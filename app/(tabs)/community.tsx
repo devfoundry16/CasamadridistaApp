@@ -1,80 +1,75 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Pencil, Search } from 'lucide-react-native';
+import { ChevronRight, Globe, Search } from 'lucide-react-native';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import StoriesRow from '@/components/Media/Stories/StoriesRow';
-import UserStoriesRow from '@/components/Social/stories/UserStoriesRow';
-import { useUser } from '@/hooks/useUser';
-import { useRequireAuth } from '@/hooks/useRequireAuth';
-import FeedTabs from '@/components/Community/FeedTabs';
+import { I18nManager, View } from 'react-native';
+
 import FeedList from '@/components/Community/FeedList';
 import FanClubPartnershipSection from '@/components/FanClubPartnershipSection';
-import type { FeedTab } from '@/services/FeedService';
-import { useStories } from '@/hooks/media/useStories';
+import { Text } from '@/components/Text';
+import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
+import { useUser } from '@/hooks/useUser';
 
-export default function CommunityScreen() {
-  const [tab, setTab] = useState<FeedTab>('for-you');
-  const router = useRouter();
-  const { data: stories } = useStories();
-  const { user } = useUser();
-  const requireAuth = useRequireAuth();
+/**
+ * The Fan Clubs tab. The general feed moved to Home (spec 2.1.0 §03: no two
+ * copies of one feed); this tab is about clubs: partnership, the directory,
+ * finding people, and the fan-club feed.
+ *
+ * The route stays `community`: `(tabs)/fan-clubs` would collide with the
+ * `/fan-clubs` directory stack, and old `/community` links keep working.
+ */
+export default function FanClubsTab() {
   const { t } = useTranslation();
-  const name = [user?.profile?.first_name, user?.profile?.last_name].filter(Boolean).join(' ') || null;
+  const router = useRouter();
+  const { user } = useUser();
+
+  const header = (
+    <View style={{ paddingBottom: 4 }}>
+      <FanClubPartnershipSection variant="feed" />
+      <Row icon={Globe} label={t('fanClubsTab.browse')} onPress={() => router.push('/fan-clubs')} />
+      {/* People search (spec §21), signed in only: it is the Friends screen's. */}
+      {user?.id ? (
+        <Row icon={Search} label={t('social.friends.searchPeople')} onPress={() => router.push('/social/friends?focus=search' as never)} />
+      ) : null}
+      <Text className="text-[13px] font-bold" style={{ color: Colors.darkGold, marginHorizontal: 16, marginTop: 16, marginBottom: 4 }}>
+        {t('fanClubsTab.feedTitle')}
+      </Text>
+    </View>
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background.medium }}>
-      {/* Stories sit above the feed tabs, the way every social feed places
-          them: yours and other fans' first, then Casa Media's official row,
-          which is hidden entirely when there are none. */}
-      <UserStoriesRow viewerId={user?.id ?? null} viewerName={name} viewerAvatar={user?.profile?.avatar_url ?? null} />
-      {stories?.length ? <StoriesRow groups={stories} compact /> : null}
-      <FeedTabs
-        active={tab}
-        onSelect={setTab}
-        trailing={
-          // People search (spec §21), signed in only: it is the Friends screen's.
-          user?.id ? (
-            <TouchableOpacity
-              onPress={() => router.push('/social/friends?focus=search' as any)}
-              accessibilityRole="button"
-              accessibilityLabel={t('social.friends.searchPeople')}
-              hitSlop={8}
-              style={{ paddingHorizontal: 14, paddingVertical: 10 }}
-            >
-              <Search size={20} color={Colors.text.secondary} />
-            </TouchableOpacity>
-          ) : null
-        }
-      />
-      {tab === 'fan-clubs' && <FanClubPartnershipSection variant="feed" />}
-      <FeedList tab={tab} />
-
-      <TouchableOpacity
-        onPress={() => {
-          if (requireAuth({ href: '/community/compose', mode: 'login' })) router.push('/community/compose');
-        }}
-        style={{
-          position: 'absolute',
-          bottom: 24,
-          right: 20,
-          width: 56,
-          height: 56,
-          borderRadius: 28,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: Colors.darkGold,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
-          shadowRadius: 6,
-          elevation: 8,
-        }}
-        activeOpacity={0.85}
-      >
-        <Pencil size={24} color={Colors.textWhite} />
-      </TouchableOpacity>
+      <FeedList tab="fan-clubs" header={header} />
     </View>
+  );
+}
+
+function Row({ icon: Icon, label, onPress }: { icon: typeof Globe; label: string; onPress: () => void }) {
+  return (
+    <Touchable
+      onPress={onPress}
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        minHeight: 52,
+        marginHorizontal: 12,
+        marginTop: 8,
+        paddingHorizontal: 14,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: Colors.border.default,
+        backgroundColor: Colors.background.card,
+        opacity: pressed ? 0.75 : 1,
+      })}
+    >
+      <Icon size={20} color={Colors.darkGold} />
+      <Text className="text-[14px] font-semibold" style={{ flex: 1, color: Colors.text.primary }}>
+        {label}
+      </Text>
+      <ChevronRight size={18} color={Colors.text.tertiary} style={{ transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] }} />
+    </Touchable>
   );
 }

@@ -1,304 +1,80 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import LaLigaStandings from "@/components/Home/LaLigaStandings";
-import ExclusiveFromMadridModule from "@/components/Home/ExclusiveFromMadridModule";
-import StrengthSection from "@/components/Home/StrengthSection";
-import OffSeasonMatchCard from "@/components/Home/OffSeasonMatchCard";
-import UpcomingMatchesCarousel from "@/components/Home/UpcomingMatchCard";
-import VisionSection from "@/components/Home/VisionSection";
-import { Spinner } from "@/components/Spinner";
-import UpcomingForm from "@/components/UpcomingForm";
-import { useFootball } from "@/hooks/useFootball";
-import { useEnvironment } from "@/hooks/useEnvironment";
-import { useIsMatchWindow } from "@/hooks/media/useMatchWindow";
-
-import MatchService from "@/services/Football/MatchService";
-import { Match } from "@/types/soccer/match";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Text } from "@/components/Text";
-import { Alert, Dimensions, Pressable, ScrollView, View } from "react-native";
+import { Search } from "lucide-react-native";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { TouchableOpacity, View } from "react-native";
 
+import FeedList from "@/components/Community/FeedList";
+import FeedTabs from "@/components/Community/FeedTabs";
+import ComposerRow from "@/components/Home/ComposerRow";
+import ExclusiveFromMadridModule from "@/components/Home/ExclusiveFromMadridModule";
+import MembershipStrip from "@/components/Home/MembershipStrip";
+import StoriesRow from "@/components/Media/Stories/StoriesRow";
+import UserStoriesRow from "@/components/Social/stories/UserStoriesRow";
+import Colors from "@/constants/colors";
+import { useIsMatchWindow } from "@/hooks/media/useMatchWindow";
+import { useStories } from "@/hooks/media/useStories";
+import { useUser } from "@/hooks/useUser";
+import type { FeedTab } from "@/services/FeedService";
+
+/** Home's feeds. Fan-club posts have their own tab (Fan Clubs). */
+const HOME_TABS: readonly FeedTab[] = ["for-you", "trending", "recent"];
+
+/**
+ * Home is the community feed (spec 2.1.0 §03): a compact header, then the
+ * posts. Match and team data live in the Team tab, so the old hero, fixture
+ * block, standings and promo sections are gone.
+ *
+ * Everything above the posts is the list's own header, so it scrolls with
+ * them and the feed is one list, not a list inside a ScrollView.
+ */
 export default function HomeScreen() {
+  const [tab, setTab] = useState<FeedTab>("for-you");
   const router = useRouter();
   const { t } = useTranslation();
-  const { teamInfoList, fetchProfileData, fetchLiveMatchData, isLoading } =
-    useFootball();
-  const { football } = useEnvironment();
-  // True for a fixture within ±24h of kickoff, not just one in play — see the
-  // hook's docstring before reading this as "a match is on right now".
+  const { user } = useUser();
+  const { data: stories } = useStories();
+  // True for a fixture within ±24h of kickoff (see the hook): match-day media
+  // leads Home only then.
   const isMatchWindow = useIsMatchWindow();
-  const [homeTeamLastMatches, setHomeTeamLastMatches] = useState<Match[]>([]);
-  const [awayTeamLastMatches, setAwayTeamLastMatches] = useState<Match[]>([]);
-  const RealMadridId = 541;
-  const [liveMatch, setLiveMatch] = useState<Match>();
-  const [isLive, setIsLive] = useState<boolean>(false);
+  const name = [user?.profile?.first_name, user?.profile?.last_name].filter(Boolean).join(" ") || null;
 
-  const nextMatches = teamInfoList.find(
-    (p) => p.team.id === RealMadridId,
-  )?.nextMatches;
-
-  const lastMatches = teamInfoList.find(
-    (p) => p.team.id === RealMadridId,
-  )?.lastMatches;
-
-  const hasUpcomingMatches = (nextMatches?.length ?? 0) > 0;
-  const nextMatch = nextMatches?.at(0);
-  const carouselMatches = hasUpcomingMatches
-    ? (nextMatches ?? [])
-    : (lastMatches ?? []);
-  const carouselVariant = hasUpcomingMatches ? "upcoming" : "recent";
-  const realMadridTeam = teamInfoList.find(
-    (p) => p.team.id === RealMadridId,
-  )?.team;
-  const seasonYear = Number(football.currentSeason);
-  const nextSeasonLabel = `${seasonYear}-${seasonYear + 1}`;
-  const isOffSeason = !liveMatch && !hasUpcomingMatches;
-  const [strengthSectionY, setStrengthSectionY] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(false);
-
-  const handleStrengthSectionLayout = (event: any) => {
-    const { y } = event.nativeEvent.layout;
-    setStrengthSectionY(y);
-  };
-  const mainScrollY = useRef(0);
-
-  const handleScroll = (event: any) => {
-    const scrollY = event.nativeEvent.contentOffset.y;
-    mainScrollY.current = scrollY;
-
-    if (!hasAnimated && strengthSectionY > 0) {
-      const viewportHeight = Dimensions.get("window").height;
-      const triggerPoint = strengthSectionY - viewportHeight * 0.7;
-
-      if (scrollY >= triggerPoint) {
-        setShouldAnimate(true);
-        setHasAnimated(true);
-      }
-    }
-  };
-
-  const checkLiveMatch = useCallback(async () => {
-    try {
-      const liveMatchData = await fetchLiveMatchData(RealMadridId);
-
-      // Check if match is actually live based on fixture status
-      if (liveMatchData && liveMatchData.fixture?.status) {
-        const status = liveMatchData.fixture.status.short;
-        // Match is live if status is: 1H, 2H, HT, ET, P, BT, LIVE, or if elapsed time exists
-        const isMatchLive =
-          status === "1H" ||
-          status === "2H" ||
-          status === "HT" ||
-          status === "ET" ||
-          status === "P" ||
-          status === "BT" ||
-          status === "LIVE" ||
-          (liveMatchData.fixture.status.elapsed != null &&
-            liveMatchData.fixture.status.elapsed > 0);
-
-        if (isMatchLive) {
-          setLiveMatch(liveMatchData);
-          setIsLive(true);
-        } else {
-          // Match is not live anymore
-          setLiveMatch(undefined);
-          setIsLive(false);
-        }
-      } else {
-        // No live match found
-        setLiveMatch(undefined);
-        setIsLive(false);
-      }
-    } catch (error: any) {
-      // If error, don't show alert for every failed check, just log it
-      console.log("Live match check failed:", error.message);
-      // Only clear live match if we're sure there's no match
-      setLiveMatch(undefined);
-      setIsLive(false);
-    }
-  }, [fetchLiveMatchData, RealMadridId]);
-
-  const loadInitialData = useCallback(async () => {
-    try {
-      if (teamInfoList.length && !isLive) fetchProfileData(RealMadridId);
-      MatchService.fetchNextMatch(RealMadridId).then((result) => {
-        if (!result?.teams) return;
-        MatchService.fetchLastMatches(result.teams.home.id).then((data) => {
-          setHomeTeamLastMatches(data);
-        });
-        MatchService.fetchLastMatches(result.teams.away.id).then((data) => {
-          setAwayTeamLastMatches(data);
-        });
-      });
-    } catch (error: any) {
-      Alert.alert(
-        t("common.error"),
-        error.message || t("common.failedToLoadData"),
-      );
-    }
-  }, []);
-
-  // Initial check for live match on mount
-  useEffect(() => {
-    checkLiveMatch();
-  }, []);
-
-  useEffect(() => {
-    loadInitialData();
-  }, [loadInitialData, isLive]);
-
-  // When there's a live match, fetch last 5 matches for the LIVE match's teams (not the "next" match's teams)
-  useEffect(() => {
-    if (
-      liveMatch?.teams?.home?.id != null &&
-      liveMatch?.teams?.away?.id != null
-    ) {
-      MatchService.fetchLastMatches(liveMatch.teams.home.id).then((data) => {
-        setHomeTeamLastMatches(data);
-      });
-      MatchService.fetchLastMatches(liveMatch.teams.away.id).then((data) => {
-        setAwayTeamLastMatches(data);
-      });
-    }
-  }, [liveMatch]);
-
-  // Poll for live match updates every 15 seconds
-  useEffect(() => {
-    const timer = setInterval(checkLiveMatch, 15000); // Check every 15 seconds
-    return () => {
-      clearInterval(timer);
-    };
-  }, [checkLiveMatch]);
-
-  useEffect(() => {
-    setHasAnimated(false);
-    setShouldAnimate(false);
-  }, [teamInfoList, fetchProfileData]);
-
-  if (isLoading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-bg-deep-dark">
-        <Spinner content={t("common.loadingContext")} />
+  const header = (
+    <View>
+      {isMatchWindow ? <ExclusiveFromMadridModule /> : null}
+      <MembershipStrip />
+      <ComposerRow />
+      {/* Stories: yours and other fans' first, then Casa Media's official row,
+          which is hidden entirely when there are none. */}
+      <View style={{ marginTop: 8 }}>
+        <UserStoriesRow viewerId={user?.id ?? null} viewerName={name} viewerAvatar={user?.profile?.avatar_url ?? null} />
+        {stories?.length ? <StoriesRow groups={stories} compact /> : null}
       </View>
-    );
-  }
+      <FeedTabs
+        active={tab}
+        onSelect={setTab}
+        tabs={HOME_TABS}
+        trailing={
+          // People search (spec §21), signed in only: it is the Friends screen's.
+          user?.id ? (
+            <TouchableOpacity
+              onPress={() => router.push("/social/friends?focus=search" as never)}
+              accessibilityRole="button"
+              accessibilityLabel={t("social.friends.searchPeople")}
+              hitSlop={8}
+              style={{ paddingHorizontal: 14, paddingVertical: 10 }}
+            >
+              <Search size={20} color={Colors.text.secondary} />
+            </TouchableOpacity>
+          ) : null
+        }
+      />
+    </View>
+  );
 
   return (
-    <ScrollView
-      className="flex-1 bg-bg-gray"
-      showsVerticalScrollIndicator={false}
-      onScroll={handleScroll}
-      scrollEventThrottle={16}
-    >
-      {/*
-        §18 — "during active match days this module can move higher on Home".
-        The match carousel lives *inside* the hero View below, so the module is
-        already the next thing after the hero; above it is the only genuinely
-        higher slot. Two guarded slots rather than a sortable section list,
-        which is the house pattern for conditional layout on this screen.
-
-        The module is mounted in one slot or the other, so flipping the window
-        unmounts and remounts it. That is cheap while it is purely query-backed
-        and cached — but anything stateful added inside it (an animation, a
-        scroll offset) would reset at the boundary.
-      */}
-      {isMatchWindow ? <ExclusiveFromMadridModule /> : null}
-
-      <View className="items-center">
-        <Image
-          source={{
-            uri: "https://casamadridista.com/wp-content/uploads/2025/09/435345345.webp",
-          }}
-          style={{
-            width: Dimensions.get("window").width,
-            height: 778,
-          }}
-          contentFit="cover"
-        />
-        <View className="absolute left-0 right-0 items-center pb-[300px] pt-[10%]">
-          <Text className="text-[25px] font-bold text-center text-white mb-3.5">
-            {t("home.fanClub")}
-          </Text>
-          <Text className="text-lg text-white opacity-80 text-center">
-            {t("home.joinLargest")}
-          </Text>
-          <Pressable
-            className="py-3.5 px-3 rounded-xl items-center mt-6 bg-rm-gold"
-            onPress={() => router.push("/memberships/royal-investor")}
-          >
-            <Text className="text-base font-semibold text-white">
-              {t("home.becomeMember")}
-            </Text>
-          </Pressable>
-
-          <View className="w-[90%] p-4">
-            <View className="mb-6">
-              <View className="flex-col items-center justify-center mb-4 mt-5">
-                <Text className="text-lg font-bold text-white mb-3.5">
-                  {liveMatch
-                    ? liveMatch.fixture.status.long +
-                      ` ${liveMatch.fixture.status.elapsed != null ? liveMatch.fixture.status.elapsed + "' " + t("home.elapsed") : ""}` +
-                      (liveMatch.fixture.status.extra != null
-                        ? ` ${t("home.extraTime")} ${liveMatch.fixture.status.extra}'`
-                        : "")
-                    : isOffSeason
-                      ? t("home.seasonBreak")
-                      : t("home.upcoming")}
-                </Text>
-                {liveMatch ? (
-                  <UpcomingForm
-                    setLive={setIsLive}
-                    nextMatch={liveMatch}
-                    homeTeamLastMatches={homeTeamLastMatches}
-                    awayTeamLastMatches={awayTeamLastMatches}
-                  />
-                ) : nextMatch ? (
-                  <UpcomingForm
-                    setLive={setIsLive}
-                    nextMatch={nextMatch}
-                    homeTeamLastMatches={homeTeamLastMatches}
-                    awayTeamLastMatches={awayTeamLastMatches}
-                  />
-                ) : (
-                  isOffSeason && (
-                    <OffSeasonMatchCard
-                      teamId={RealMadridId}
-                      teamName={realMadridTeam?.name ?? t("player.realMadrid")}
-                      teamLogo={
-                        realMadridTeam?.logo ??
-                        "https://media.api-sports.io/football/teams/541.png"
-                      }
-                      lastMatches={lastMatches ?? []}
-                      nextSeasonLabel={nextSeasonLabel}
-                    />
-                  )
-                )}
-              </View>
-            </View>
-          </View>
-        </View>
-        <UpcomingMatchesCarousel
-          data={carouselMatches}
-          variant={carouselVariant}
-        />
-      </View>
-
-      {/* Casa Media in its default slot. Renders nothing when there is no
-          exclusive content, so Home never grows a permanently empty block —
-          and nothing while the payload is still loading, so it cannot appear
-          here and then jump above the hero when `live_match` arrives. */}
-      {!isMatchWindow ? <ExclusiveFromMadridModule /> : null}
-
-      <LaLigaStandings />
-      <StrengthSection
-        shouldAnimate={shouldAnimate}
-        handleStrengthSectionLayout={handleStrengthSectionLayout}
-      />
-      <VisionSection />
-      {/* <SquadSection /> */}
-    </ScrollView>
+    <View style={{ flex: 1, backgroundColor: Colors.background.medium }}>
+      <FeedList tab={tab} header={header} />
+    </View>
   );
 }

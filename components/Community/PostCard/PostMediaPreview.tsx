@@ -1,14 +1,17 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, FlatList, Pressable, StyleSheet, Dimensions, I18nManager } from 'react-native';
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Play } from 'lucide-react-native';
+import { Play, Volume2, VolumeX } from 'lucide-react-native';
 import type { PostMedia as PostMediaType } from '@/services/FeedService';
 import Colors from '@/constants/colors';
 import Touchable from '@/components/Touchable';
 import { carouselIndex } from '@/utils/post.core';
+import { playableUri } from '@/utils/feedAutoplay.core';
+import { videoProgress } from '@/utils/stories.core';
+import { feedMutedNow, useFeedMuted, useIsActiveVideo, useOpenVideo } from '../FeedPlayback';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FEED_HEIGHT = 250;
@@ -39,30 +42,65 @@ function ImageItem({ media, onPress }: { media: PostMediaType; onPress: () => vo
   );
 }
 
-function VideoPlayerInline({ media }: { media: PostMediaType }) {
-  const src = media.hls_url ?? media.public_url;
-  const player = useVideoPlayer(
-    src ? { uri: src } : null,
-    (p) => {
-      p.loop = false;
-      p.play();
-    }
-  );
+/**
+ * The feed's one playing video: the post the list picked (first ready video in
+ * view). Muted by the app-wide sound choice, looping, no native controls; a
+ * tap opens it full screen. Mounted only while active, so a feed holds a
+ * single player (MediaVideoPlayer.tsx, plan §5.8).
+ */
+function AutoplayVideo({ media, onOpen }: { media: PostMediaType; onOpen: () => void }) {
+  const { t } = useTranslation();
+  const [muted, toggleMuted] = useFeedMuted();
+  const [progress, setProgress] = useState(0);
+  const src = playableUri(media);
+  const player = useVideoPlayer(src ? { uri: src } : null, (p) => {
+    p.loop = true;
+    p.muted = feedMutedNow();
+    p.timeUpdateEventInterval = 0.25;
+    p.play();
+  });
+
+  useEffect(() => {
+    player.muted = muted;
+  }, [player, muted]);
+
+  useEffect(() => {
+    const sub = player.addListener('timeUpdate', ({ currentTime }) => setProgress(videoProgress(currentTime, player.duration)));
+    return () => sub.remove();
+  }, [player]);
+
   return (
-    <VideoView
-      player={player}
-      style={{ width: SCREEN_WIDTH, height: FEED_HEIGHT }}
-      contentFit="cover"
-      nativeControls
-    />
+    <Pressable
+      onPress={onOpen}
+      style={{ width: SCREEN_WIDTH, height: FEED_HEIGHT, backgroundColor: Colors.background.dark }}
+      accessibilityRole="button"
+      accessibilityLabel={t('video.openFullScreen')}
+    >
+      <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="cover" nativeControls={false} />
+      <Pressable
+        onPress={toggleMuted}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={muted ? t('video.unmute') : t('video.mute')}
+        style={styles.muteButton}
+      >
+        {muted ? <VolumeX size={18} color="#fff" /> : <Volume2 size={18} color="#fff" />}
+      </Pressable>
+      <View style={styles.progressTrack}>
+        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+      </View>
+    </Pressable>
   );
 }
 
 function VideoThumbnail({ media, onPlay }: { media: PostMediaType; onPlay: () => void }) {
+  const { t } = useTranslation();
   return (
     <Touchable
       style={({ pressed }) => ({ width: SCREEN_WIDTH, height: FEED_HEIGHT, backgroundColor: Colors.background.dark, opacity: pressed ? 0.8 : 1 })}
       onPress={onPlay}
+      accessibilityRole="button"
+      accessibilityLabel={t('video.openFullScreen')}
     >
       <Image
         source={{ uri: media.thumbnail_url ?? undefined }}
@@ -97,15 +135,14 @@ export function DotIndicator({ count, activeIndex }: { count: number; activeInde
   );
 }
 
+/** Several photos. A video post carries exactly one video, so none play here. */
 function Carousel({
   items,
-  playingId,
-  onPlay,
+  onOpenVideo,
   onOpenPhoto,
 }: {
   items: PostMediaType[];
-  playingId: string | null;
-  onPlay: (id: string) => void;
+  onOpenVideo: () => void;
   onOpenPhoto: (media: PostMediaType) => void;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -118,7 +155,6 @@ function Carousel({
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        extraData={playingId}
         // Up to ten full-width photos per post: mount the visible one and its
         // neighbours, not all ten, for every card in the feed.
         initialNumToRender={1}
@@ -131,11 +167,7 @@ function Carousel({
         }}
         renderItem={({ item }) =>
           item.kind === 'video' ? (
-            playingId === item.id ? (
-              <VideoPlayerInline media={item} />
-            ) : (
-              <VideoThumbnail media={item} onPlay={() => onPlay(item.id)} />
-            )
+            <VideoThumbnail media={item} onPlay={onOpenVideo} />
           ) : (
             <ImageItem media={item} onPress={() => onOpenPhoto(item)} />
           )
@@ -152,7 +184,14 @@ interface Props {
 
 export default function PostMediaPreview({ media }: Props) {
   const router = useRouter();
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  const postId = media[0]?.post_id ?? '';
+  const active = useIsActiveVideo(postId);
+  const openInFeed = useOpenVideo();
+  // Full screen: over the list's videos inside a feed, the one post elsewhere.
+  const openVideo = useCallback(() => {
+    if (openInFeed) openInFeed(postId);
+    else router.push({ pathname: '/community/videos/[postId]', params: { postId } });
+  }, [openInFeed, postId, router]);
 
   const openPhoto = useCallback(
     (m: PostMediaType) => {
@@ -172,12 +211,7 @@ export default function PostMediaPreview({ media }: Props) {
   if (ready.length > 1) {
     return (
       <View className="mt-1">
-        <Carousel
-          items={ready}
-          playingId={playingId}
-          onPlay={setPlayingId}
-          onOpenPhoto={openPhoto}
-        />
+        <Carousel items={ready} onOpenVideo={openVideo} onOpenPhoto={openPhoto} />
       </View>
     );
   }
@@ -186,11 +220,7 @@ export default function PostMediaPreview({ media }: Props) {
   return (
     <View className="mt-1" style={{ height: FEED_HEIGHT }}>
       {m.kind === 'video' ? (
-        playingId === m.id ? (
-          <VideoPlayerInline media={m} />
-        ) : (
-          <VideoThumbnail media={m} onPlay={() => setPlayingId(m.id)} />
-        )
+        active ? <AutoplayVideo media={m} onOpen={openVideo} /> : <VideoThumbnail media={m} onPlay={openVideo} />
       ) : (
         <ImageItem media={m} onPress={() => openPhoto(m)} />
       )}
@@ -211,6 +241,29 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.55)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  muteButton: {
+    position: 'absolute',
+    top: 10,
+    end: 10,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  progressTrack: {
+    position: 'absolute',
+    start: 0,
+    end: 0,
+    bottom: 0,
+    height: 3,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+  },
+  progressFill: {
+    height: 3,
+    backgroundColor: Colors.darkGold,
   },
   dots: {
     flexDirection: 'row',

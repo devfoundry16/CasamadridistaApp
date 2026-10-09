@@ -31,7 +31,7 @@ export default function StoriesScreen() {
   }, [fromRow, feed.data, single.data]);
   const start = Math.max(0, groups.findIndex((g) => g.author_id === userId));
   const loading = fromRow ? feed.isLoading : single.isLoading;
-  const close = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/community' as any));
+  const close = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   if (loading) {
     return (

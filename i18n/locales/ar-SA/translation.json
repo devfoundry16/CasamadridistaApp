@@ -76,7 +76,8 @@
     "contributorCreate": "منشور جديد",
     "contributorMyContent": "محتواي",
     "contributorUploads": "الرفع",
-    "contributorStats": "إحصاءات المنشور"
+    "contributorStats": "إحصاءات المنشور",
+    "fanClubsTab": "الأندية"
   },
   "registration": {
     "title": "تسجيل العضوية",
@@ -445,7 +446,13 @@
     "strengthUnitedMadridista": "مدريديستا متحدون",
     "strengthPrizeInTotal": "إجمالي الجوائز",
     "strengthDailyUpdate": "تحديث يومي",
-    "strengthMadridistaFamily": "عائلة مدريدية"
+    "strengthMadridistaFamily": "عائلة مدريدية",
+    "composerPrompt": "بماذا تفكر؟",
+    "createStory": "قصة",
+    "createVideo": "فيديو",
+    "createPhoto": "صورة",
+    "memberStrip": "انضم إلى نادي المدريديستا الرسمي.",
+    "memberStripCta": "اشترك الآن"
   },
   "wallet": {
     "loading": "جاري تحميل المحفظة",
@@ -924,7 +931,9 @@
     },
     "commentsOff": "التعليقات متوقفة على هذا المنشور.",
     "signInToComment": "سجّل الدخول للمشاركة في النقاش",
-    "signInRequired": "سجّل الدخول للمتابعة."
+    "signInRequired": "سجّل الدخول للمتابعة.",
+    "reportPost": "الإبلاغ عن المنشور",
+    "postMenu": "خيارات أخرى"
   },
   "membershipPackages": {
     "halaGold": {
@@ -2043,5 +2052,17 @@
     "too_long": "يمكن أن تصل مدة الفيديو إلى 15 ثانية.",
     "too_large": "الملف كبير جداً.",
     "muteFailed": "تعذّر الكتم. حاول مرة أخرى."
+  },
+  "fanClubsTab": {
+    "browse": "تصفح أندية المشجعين",
+    "feedTitle": "من أندية المشجعين"
+  },
+  "video": {
+    "mute": "كتم الصوت",
+    "unmute": "تشغيل الصوت",
+    "close": "إغلاق الفيديو",
+    "play": "تشغيل",
+    "pause": "إيقاف مؤقت",
+    "openFullScreen": "فتح الفيديو بملء الشاشة"
   }
 }

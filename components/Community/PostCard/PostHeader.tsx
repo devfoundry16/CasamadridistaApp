@@ -95,7 +95,14 @@ export default function PostHeader({ post, onAuthorPress, onReportPress }: Props
       </View>
 
       {onReportPress && (
-        <TouchableOpacity onPress={onReportPress} activeOpacity={0.7} style={styles.moreButton}>
+        <TouchableOpacity
+          onPress={onReportPress}
+          activeOpacity={0.7}
+          style={styles.moreButton}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={t('community.postMenu')}
+        >
           <MoreHorizontal size={18} color={Colors.text.tertiary} />
         </TouchableOpacity>
       )}

@@ -124,3 +124,14 @@ export function patchPostInPages<T extends HasId, D extends { pages: { posts: T[
   });
   return changed ? { ...data, pages } : data;
 }
+
+export type FeedMenuAction = 'report';
+
+/**
+ * What a feed card's "..." menu offers. Someone else's post can be reported
+ * (signing in is asked for on tap); your own cannot. An empty list hides the
+ * button.
+ */
+export function feedMenuActions({ isOwn }: { isOwn: boolean }): FeedMenuAction[] {
+  return isOwn ? [] : ['report'];
+}
