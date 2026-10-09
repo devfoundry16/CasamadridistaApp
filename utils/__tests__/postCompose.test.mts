@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { AUDIENCES, FEELINGS, editPayload, feelingOf } from '../postCompose.core.ts';
+import { AUDIENCES, FEELINGS, editPayload, feelingOf, overallProgress } from '../postCompose.core.ts';
 
 /**
  * The composer's new settings (spec 2.1.0 §03): who a post is for, a feeling
@@ -62,6 +62,18 @@ describe('editPayload', () => {
   it('removing a feeling sends null', () => {
     assert.deepEqual(editPayload({ ...original, feeling: 'sad' }, draft), { feeling: null });
   });
+  it('country and fan club tags are sent only when they changed', () => {
+    const tagged = { ...original, country_code: 'ES', tagged_fan_club_id: 'club-1' };
+    const same = { ...draft, countryCode: 'ES', fanClubId: 'club-1' };
+    assert.deepEqual(editPayload(tagged, same), {});
+    assert.deepEqual(editPayload(tagged, { ...same, countryCode: 'AE', fanClubId: null }), {
+      country_code: 'AE',
+      tagged_fan_club_id: null,
+    });
+  });
+  it('a draft that never touched the tags leaves them alone', () => {
+    assert.deepEqual(editPayload({ ...original, country_code: 'ES', tagged_fan_club_id: 'club-1' }, draft), {});
+  });
 });
 
 describe('AUDIENCES', () => {
@@ -87,4 +99,19 @@ describe('every composer label exists in both languages', () => {
       }
     });
   }
+});
+
+describe('overallProgress', () => {
+  it('spreads the bar evenly across the files, one at a time', () => {
+    assert.equal(overallProgress(0, 0, 4), 0);
+    assert.equal(overallProgress(0, 0.5, 4), 0.125);
+    assert.equal(overallProgress(2, 0, 4), 0.5);
+    assert.equal(overallProgress(3, 1, 4), 1);
+  });
+  it('never leaves 0..1, whatever it is fed', () => {
+    assert.equal(overallProgress(0, 2, 1), 1);
+    assert.equal(overallProgress(0, -1, 1), 0);
+    assert.equal(overallProgress(0, Number.NaN, 2), 0);
+    assert.equal(overallProgress(0, 0.5, 0), 0);
+  });
 });

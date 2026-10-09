@@ -43,6 +43,8 @@ interface EditablePost {
   audience?: Audience | null;
   feeling?: string | null;
   tagged?: { id: string }[] | null;
+  country_code?: string | null;
+  tagged_fan_club_id?: string | null;
 }
 
 export interface ComposerDraft {
@@ -53,6 +55,10 @@ export interface ComposerDraft {
   audience: Audience;
   feeling: string | null;
   taggedIds: string[];
+  /** The country tag; undefined while the picker has not loaded, so it is left alone. */
+  countryCode?: string | null;
+  /** The tagged fan club; undefined as for countryCode. */
+  fanClubId?: string | null;
 }
 
 export interface EditPayload {
@@ -62,6 +68,8 @@ export interface EditPayload {
   audience?: Audience;
   feeling?: string | null;
   tagged_user_ids?: string[];
+  country_code?: string | null;
+  tagged_fan_club_id?: string | null;
 }
 
 const sameSet = (a: string[], b: string[]) => a.length === b.length && a.every((x) => b.includes(x));
@@ -83,5 +91,22 @@ export function editPayload(original: EditablePost, draft: ComposerDraft): EditP
   if ((draft.feeling ?? null) !== (original.feeling ?? null)) out.feeling = draft.feeling ?? null;
   const before = (original.tagged ?? []).map((p) => p.id);
   if (!sameSet(before, draft.taggedIds)) out.tagged_user_ids = draft.taggedIds;
+  if (draft.countryCode !== undefined && draft.countryCode !== (original.country_code ?? null)) {
+    out.country_code = draft.countryCode;
+  }
+  if (draft.fanClubId !== undefined && draft.fanClubId !== (original.tagged_fan_club_id ?? null)) {
+    out.tagged_fan_club_id = draft.fanClubId;
+  }
   return out;
+}
+
+/**
+ * The composer's one progress bar while it uploads `total` files one after
+ * another: `index` files are done, the current one is `fraction` of the way.
+ * Always 0..1.
+ */
+export function overallProgress(index: number, fraction: number, total: number): number {
+  if (!(total > 0)) return 0;
+  const f = Number.isFinite(fraction) ? Math.min(1, Math.max(0, fraction)) : 0;
+  return Math.min(1, Math.max(0, (index + f) / total));
 }

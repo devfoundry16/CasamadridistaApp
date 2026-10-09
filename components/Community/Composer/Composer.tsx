@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -30,13 +30,15 @@ import MentionSuggestions from "./MentionSuggestions";
 import Avatar from "@/components/Social/Avatar";
 import type { PersonCard } from "@/types/social";
 import { activeMention, insertMention, TAG_MAX, type Caret } from "@/utils/mentions.core";
-import type { FanClubCountry, FanClub } from "@/services/FanClubService";
+import FanClubService, { type FanClubCountry, type FanClub } from "@/services/FanClubService";
 import Colors from "@/constants/colors";
 import { LOCATION_MAX, normaliseLocation, patchPost, patchPostInPages } from "@/utils/post.core";
 import { socialKeys } from "@/hooks/social/keys";
 import { useUser } from "@/hooks/useUser";
+import { DRAFT_VERSION, isDraftEmpty, type PostDraft } from "@/utils/postDraft.core";
+import { clearDraft, keepDraftFile, loadDraft, saveDraft } from "@/utils/postDraft";
 import type { Post } from "@/services/FeedService";
-import { AUDIENCES, editPayload, feelingOf, type Audience } from "@/utils/postCompose.core";
+import { AUDIENCES, editPayload, feelingOf, overallProgress, type Audience } from "@/utils/postCompose.core";
 
 type TextField = "title" | "body";
 
@@ -63,12 +65,17 @@ export default function Composer({ start = null, editing }: Props = {}) {
   const [audience, setAudience] = useState<Audience>(editing?.audience ?? "public");
   const [feeling, setFeeling] = useState<string | null>(editing?.feeling ?? null);
   const [feelingSheet, setFeelingSheet] = useState(false);
+  // Edit mode: the tags are sent only once the author changes them, so a
+  // picker still loading its country list never clears them.
+  const [tagsTouched, setTagsTouched] = useState(false);
   const [preview, setPreview] = useState(false);
   const [country, setCountry] = useState<FanClubCountry | null>(null);
   const [fanClub, setFanClub] = useState<FanClub | null>(null);
   const [postAsFanClub, setPostAsFanClub] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
+  // 0..1 across every file of the post (postCompose.core overallProgress).
+  const [uploadFraction, setUploadFraction] = useState(0);
   const [tagged, setTagged] = useState<PersonCard[]>((editing?.tagged ?? []) as PersonCard[]);
   const [tagSheet, setTagSheet] = useState(false);
 
@@ -119,12 +126,152 @@ export default function Composer({ start = null, editing }: Props = {}) {
 
   const isFanClubAdmin = roles?.fanClubAdmin ?? false;
 
+  // Edit mode: show the post's country and fan club tags in the picker. The
+  // post carries the country code and a slim fan club; the picker wants full
+  // rows, so both are looked up once.
+  const editingCountry = editing?.country_code ?? null;
+  const editingClubId = editing?.tagged_fan_club_id ?? null;
+  useEffect(() => {
+    if (!editing) return;
+    let live = true;
+    if (editingCountry) {
+      FanClubService.getCountries()
+        .then((list) => {
+          const match = list.find((c) => c.country_code?.toUpperCase() === editingCountry.toUpperCase());
+          if (live && match) setCountry((current) => current ?? match);
+        })
+        .catch(() => {});
+    }
+    if (editingClubId) {
+      FanClubService.getClubById(editingClubId)
+        .then((club) => {
+          if (live) setFanClub((current) => current ?? club);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      live = false;
+    };
+  }, [editing, editingCountry, editingClubId]);
+
   const hasMedia = media.length > 0 || (editing?.media?.length ?? 0) > 0;
   const canPost = !submitting && title.trim().length > 0 && (body.trim().length > 0 || hasMedia);
   // Only a personal post has an audience: a fan club post speaks for the club.
   const audienceApplies = editing ? editing.author_type === "user" : !postAsFanClub;
   const sentAudience: Audience = audienceApplies ? audience : "public";
   const pickedFeeling = feelingOf(feeling);
+
+  // ── Draft (a new post only): offered back on open, saved as you type ──
+  const draftUserId = !editing ? user?.id : undefined;
+  // Until the author has answered "Continue your draft?" FOR THIS ACCOUNT,
+  // nothing is saved: an empty composer would otherwise overwrite the draft it
+  // is offering. Tied to the user id, because a composer opened before sign-in
+  // gets its user later.
+  const [draftReadyFor, setDraftReadyFor] = useState<string | null>(null);
+  const draftReady = !draftUserId || draftReadyFor === draftUserId;
+  const posted = useRef(false);
+  // One copy per picked file, made once; the save after it reuses the promise.
+  const keptFiles = useRef(new Map<string, Promise<string>>());
+  // Only the newest save may write: an older one still copying a video loses.
+  const saveSeq = useRef(0);
+
+  useEffect(() => {
+    if (!draftUserId) return;
+    let live = true;
+    loadDraft(draftUserId).then((saved) => {
+      if (!live) return;
+      if (!saved || isDraftEmpty(saved)) {
+        setDraftReadyFor(draftUserId);
+        return;
+      }
+      Alert.alert(t("community.compose.draftTitle"), t("community.compose.draftBody"), [
+        {
+          text: t("community.compose.draftDiscard"),
+          style: "destructive",
+          onPress: () => {
+            void clearDraft(draftUserId);
+            setDraftReadyFor(draftUserId);
+          },
+        },
+        {
+          text: t("community.compose.draftContinue"),
+          onPress: () => {
+            setTitle(saved.title);
+            setBody(saved.body);
+            setLocation(saved.location);
+            setAudience(saved.audience);
+            setFeeling(saved.feeling);
+            setTagged(saved.tagged as PersonCard[]);
+            setCountry(saved.country);
+            setFanClub(saved.fanClub as FanClub | null);
+            setPostAsFanClub(saved.postAsFanClub);
+            setMedia(saved.media as PickedMedia[]);
+            setDraftReadyFor(draftUserId);
+          },
+        },
+      ]);
+    });
+    return () => {
+      live = false;
+    };
+    // Once, on open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftUserId]);
+
+  useEffect(() => {
+    if (!draftUserId || !draftReady || submitting) return;
+    const keep = (uri: string) => {
+      let copy = keptFiles.current.get(uri);
+      if (!copy) {
+        copy = keepDraftFile(draftUserId, uri);
+        keptFiles.current.set(uri, copy);
+        copy.catch(() => keptFiles.current.delete(uri));
+      }
+      return copy;
+    };
+    const timer = setTimeout(async () => {
+      if (posted.current) return;
+      const seq = ++saveSeq.current;
+      try {
+        // Copies that survive a restart, each made once per picked file.
+        const kept = await Promise.all(
+          media.map(async (m) => ({
+            ...m,
+            uri: await keep(m.uri),
+            ...(m.thumbnailUri ? { thumbnailUri: await keep(m.thumbnailUri) } : {}),
+          })),
+        );
+        if (posted.current || seq !== saveSeq.current) return;
+        const draft: PostDraft = {
+          v: DRAFT_VERSION,
+          savedAt: new Date().toISOString(),
+          title,
+          body,
+          location,
+          audience,
+          feeling,
+          tagged: tagged.map((p) => ({ id: p.id, name: p.name, username: p.username ?? null, avatar_url: p.avatar_url ?? null })),
+          country,
+          fanClub: fanClub as unknown as Record<string, unknown> | null,
+          postAsFanClub,
+          media: kept.map((m) => ({
+            uri: m.uri,
+            kind: m.kind,
+            mime: m.mime,
+            width: m.width,
+            height: m.height,
+            durationMs: m.durationMs,
+            sizeBytes: m.sizeBytes,
+            ...(m.thumbnailUri ? { thumbnailUri: m.thumbnailUri } : {}),
+          })),
+        };
+        await saveDraft(draftUserId, draft);
+      } catch {
+        // A draft that fails to save never blocks posting.
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [draftUserId, draftReady, submitting, title, body, location, audience, feeling, tagged, country, fanClub, postAsFanClub, media]);
 
   const handleSave = useCallback(async () => {
     if (!editing || !canPost) return;
@@ -135,6 +282,8 @@ export default function Composer({ start = null, editing }: Props = {}) {
       audience: sentAudience,
       feeling,
       taggedIds: tagged.slice(0, TAG_MAX).map((p) => p.id),
+      countryCode: tagsTouched ? country?.country_code ?? null : undefined,
+      fanClubId: tagsTouched ? fanClub?.id ?? null : undefined,
     });
     if (!Object.keys(payload).length) {
       router.back();
@@ -163,7 +312,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
     } finally {
       setSubmitting(false);
     }
-  }, [editing, canPost, title, body, location, sentAudience, feeling, tagged, queryClient, router, t]);
+  }, [editing, canPost, title, body, location, sentAudience, feeling, tagged, tagsTouched, country, fanClub, queryClient, router, t]);
 
   const handlePost = useCallback(async () => {
     if (!canPost) return;
@@ -210,13 +359,20 @@ export default function Composer({ start = null, editing }: Props = {}) {
             ? t('community.uploadingMediaCount', { current: position + 1, total: media.length })
             : t('community.uploadingMedia'),
         );
+        // Rounded to whole percent: iOS reports every chunk, and an unchanged
+        // value skips the re-render.
+        const onProgress = (fraction: number) =>
+          setUploadFraction(Math.round(overallProgress(position, fraction, media.length) * 100) / 100);
         if (item.kind === "image") {
-          await MediaService.uploadImage(item.uri, post.id, position, slots[position]);
+          await MediaService.uploadImage(item.uri, post.id, position, slots[position], onProgress);
         } else {
-          await MediaService.uploadVideo(item.uri, post.id, position, slots[position]);
+          await MediaService.uploadVideo(item.uri, post.id, position, slots[position], onProgress, item);
         }
       }
 
+      // Posted: the draft is done with, and no pending save may bring it back.
+      posted.current = true;
+      if (user?.id) void clearDraft(user.id);
       queryClient.invalidateQueries({ queryKey: ["feed"] });
       // Your profile's grid and post count, if you came here from "+ Create".
       queryClient.invalidateQueries({ queryKey: [...socialKeys.all, "profile"] });
@@ -229,8 +385,9 @@ export default function Composer({ start = null, editing }: Props = {}) {
     } finally {
       setSubmitting(false);
       setUploadProgress("");
+      setUploadFraction(0);
     }
-  }, [canPost, title, body, media, location, tagged, country, fanClub, postAsFanClub, roles, sentAudience, feeling, queryClient, router, t]);
+  }, [canPost, title, body, media, location, tagged, country, fanClub, postAsFanClub, roles, sentAudience, feeling, user, queryClient, router, t]);
 
   const submit = editing ? handleSave : handlePost;
 
@@ -333,7 +490,9 @@ export default function Composer({ start = null, editing }: Props = {}) {
             // Uploaded media is locked server-side (409 media_locked).
             <Text style={styles.note}>{t("community.compose.mediaLocked")}</Text>
           ) : (
-            <MediaPicker media={media} onChange={setMedia} disabled={submitting} start={start} />
+            // Create → Photo/Video opens the library only once "Continue your
+            // draft?" is answered: Continue would replace what was just picked.
+            <MediaPicker media={media} onChange={setMedia} disabled={submitting} start={draftReady ? start : null} />
           )}
 
           <View style={styles.divider} />
@@ -476,7 +635,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
             </>
           )}
 
-          {!editing && !postAsFanClub && (
+          {(editing ? editing.author_type === "user" : !postAsFanClub) && (
             <>
               <View style={styles.divider} />
               <View style={styles.sectionHeader}>
@@ -485,8 +644,14 @@ export default function Composer({ start = null, editing }: Props = {}) {
               <TagPicker
                 selectedCountry={country}
                 selectedFanClub={fanClub}
-                onCountryChange={setCountry}
-                onFanClubChange={setFanClub}
+                onCountryChange={(c) => {
+                  setCountry(c);
+                  setTagsTouched(true);
+                }}
+                onFanClubChange={(c) => {
+                  setFanClub(c);
+                  setTagsTouched(true);
+                }}
               />
             </>
           )}
@@ -508,7 +673,19 @@ export default function Composer({ start = null, editing }: Props = {}) {
         {editing ? <Text style={styles.note}>{t("community.compose.reviewNote")}</Text> : null}
 
         {uploadProgress ? (
-          <Text style={styles.progress}>{uploadProgress}</Text>
+          <View
+            accessible
+            accessibilityRole="progressbar"
+            accessibilityValue={{ min: 0, max: 100, now: Math.round(uploadFraction * 100) }}
+            style={styles.progressBox}
+          >
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${Math.round(uploadFraction * 100)}%` }]} />
+            </View>
+            <Text style={styles.progress}>
+              {uploadProgress} {Math.round(uploadFraction * 100)}%
+            </Text>
+          </View>
         ) : null}
       </ScrollView>
 
@@ -741,6 +918,20 @@ const styles = StyleSheet.create({
   },
   postButtonTextDisabled: {
     color: Colors.text.muted,
+  },
+  progressBox: {
+    gap: 6,
+  },
+  progressTrack: {
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+    backgroundColor: Colors.background.light,
+  },
+  progressFill: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.darkGold,
   },
   progress: {
     fontSize: 13,

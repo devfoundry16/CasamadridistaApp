@@ -1038,7 +1038,11 @@
       "mediaLocked": "Photos and videos can't be changed after posting.",
       "reviewNote": "Changes to the title, text or location are checked again before others see them.",
       "edited": "Edited",
-      "friendsOnly": "Friends only"
+      "friendsOnly": "Friends only",
+      "draftTitle": "Continue your draft?",
+      "draftBody": "You have a post you didn't finish.",
+      "draftContinue": "Continue",
+      "draftDiscard": "Discard"
     }
   },
   "membershipPackages": {

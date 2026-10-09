@@ -4,7 +4,8 @@
  * Handles client-side upload flow:
  *  1. Ask backend for a signed upload URL → { uploadUrl, mediaId, provider }
  *  2. Client-side compress image (expo-image-manipulator) or video (expo-video-thumbnails for poster)
- *  3. PUT compressed bytes directly to the upload URL (Supabase signed URL or CF Stream TUS)
+ *  3. Send the bytes straight to the upload URL the way the slot asks: a PUT to a
+ *     Supabase signed URL, or a multipart POST to Cloudflare Images or Stream
  *  4. Notify backend the upload is complete → /api/media/uploads/:id/complete
  */
 
@@ -22,7 +23,7 @@ export interface UploadSlot {
   mediaId: string;
   provider: string;
   externalId: string;
-  /** 'POST' (multipart, field `field`) for a Cloudflare Images slot; absent for a PUT. */
+  /** 'POST' (multipart, field `field`) for a Cloudflare Images or Stream slot; absent for a PUT. */
   method?: string;
   field?: string;
   thumbnailUploadUrl?: string;
@@ -109,7 +110,7 @@ class MediaServiceClass {
 
   async completeUpload(
     mediaId: string,
-    meta: { width?: number; height?: number; size_bytes?: number; thumbnail_url?: string; blurhash?: string }
+    meta: { width?: number; height?: number; size_bytes?: number; duration_ms?: number; thumbnail_url?: string; blurhash?: string }
   ): Promise<void> {
     try {
       const headers = await this.getAuthHeader();
@@ -126,7 +127,13 @@ class MediaServiceClass {
    * pending until its last reserved item completes, and the backend refuses
    * new slots (409 `media_locked`) once any item has completed.
    */
-  async uploadImage(localUri: string, postId: string, position = 0, slot?: UploadSlot): Promise<UploadedMedia> {
+  async uploadImage(
+    localUri: string,
+    postId: string,
+    position = 0,
+    slot?: UploadSlot,
+    onProgress?: (fraction: number) => void,
+  ): Promise<UploadedMedia> {
     // 1. Compress
     const compressed = await this.compressImage(localUri);
 
@@ -134,7 +141,7 @@ class MediaServiceClass {
     const uploadSlot = slot ?? await this.requestUploadSlot('image', postId, position);
 
     // 3. Upload bytes, the way the slot asks (PUT for Supabase, POST for Cloudflare)
-    const status = await uploadToSlot(uploadSlot.uploadUrl, compressed.uri, uploadSlot, 'image/jpeg');
+    const status = await uploadToSlot(uploadSlot.uploadUrl, compressed.uri, uploadSlot, 'image/jpeg', onProgress);
     if (status >= 300) throw new Error(`Upload failed with status ${status}`);
 
     // 4. Complete. The backend derives image URLs from the storage key. A
@@ -154,11 +161,21 @@ class MediaServiceClass {
   }
 
   // ---- Full video upload flow ----
-  // For Cloudflare Stream (TUS), the uploadUrl is a TUS endpoint.
-  // For Supabase, it's a signed URL (plain PUT).
+  // Cloudflare Stream: a one-time URL that takes a multipart POST (the slot
+  // says so). Supabase: a signed URL that takes a plain PUT.
 
-  /** `slot`: as for `uploadImage`. */
-  async uploadVideo(localUri: string, postId: string, position = 0, slot?: UploadSlot): Promise<UploadedMedia> {
+  /**
+   * `slot`: as for `uploadImage`. `measured` is what the picker reported, sent
+   * with the completion (a Stream video's own values arrive in its webhook).
+   */
+  async uploadVideo(
+    localUri: string,
+    postId: string,
+    position = 0,
+    slot?: UploadSlot,
+    onProgress?: (fraction: number) => void,
+    measured: { width?: number | null; height?: number | null; durationMs?: number | null; sizeBytes?: number | null } = {},
+  ): Promise<UploadedMedia> {
     console.log('[MediaService] uploadVideo start', { postId });
 
     // 1. Generate local thumbnail for compose preview
@@ -171,10 +188,9 @@ class MediaServiceClass {
     console.log('[MediaService] upload slot ready, mediaId:', uploadSlot.mediaId,
       'hasThumbSlot:', !!uploadSlot.thumbnailUploadUrl);
 
-    // 3. Upload video bytes to Supabase signed URL
-    console.log('[MediaService] uploading video bytes...');
-    await this.uploadToSignedUrl(uploadSlot.uploadUrl, localUri, 'video/mp4');
-    console.log('[MediaService] video bytes uploaded');
+    // 3. Upload the video bytes the way the slot asks (POST for Stream, PUT for Supabase)
+    const status = await uploadToSlot(uploadSlot.uploadUrl, localUri, uploadSlot, 'video/mp4', onProgress);
+    if (status >= 300) throw new Error(`Upload failed with status ${status}`);
 
     // 4. Upload thumbnail image to Supabase and get its public URL
     let publicThumbnailUrl: string | undefined;
@@ -190,8 +206,13 @@ class MediaServiceClass {
 
     // 5. Notify backend — pass the server-issued thumbnail slot's public URL,
     //    never a local file URI (the backend accepts nothing else)
+    const whole = (n: number | null | undefined) => (typeof n === 'number' && n > 0 ? Math.round(n) : undefined);
     await this.completeUpload(uploadSlot.mediaId, {
       thumbnail_url: publicThumbnailUrl,
+      width: whole(measured.width),
+      height: whole(measured.height),
+      duration_ms: whole(measured.durationMs),
+      size_bytes: whole(measured.sizeBytes),
     });
     console.log('[MediaService] completeUpload done');
 

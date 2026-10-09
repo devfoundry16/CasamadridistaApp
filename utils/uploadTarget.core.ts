@@ -2,8 +2,8 @@
  * How the bytes of an upload slot are sent, and the retry for a completion
  * that reaches the server before the store has the file.
  *
- * A Supabase slot takes a raw PUT; a Cloudflare Images slot a multipart POST
- * with field `file`. The app tells the server it can do both
+ * A Supabase slot takes a raw PUT; a Cloudflare Images or Stream slot a
+ * multipart POST with field `file`. The app tells the server it can do both
  * (`upload_methods`), so the server may hand it either kind of slot.
  *
  * No React Native imports, so `node --test` covers it

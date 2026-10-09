@@ -16,6 +16,7 @@ import {
   setUser,
 } from "../slices/userSlice";
 import { RootState } from "../store";
+import { clearDraft } from "@/utils/postDraft";
 
 // Login thunk
 export const loginUser = createAsyncThunk(
@@ -273,13 +274,18 @@ export const loadUserData = createAsyncThunk(
 // Logout thunk
 export const logoutUser = createAsyncThunk(
   "user/logout",
-  async (_, { dispatch }) => {
+  async (_, { dispatch, getState }) => {
+    const userId = (getState() as RootState).user.user?.id;
     // MUST run first: unregistering needs the auth token that AuthService.logout
     // is about to delete, otherwise the request is anonymous and the device row
     // stays bound to the account that just signed out.
     await PushService.unregister();
     await AuthService.logout();
     await AsyncStorage.removeItem("paymentMethods");
+    // A post draft (its text and copied photos) is private to the account. Not
+    // in AuthService.logout: that also runs when a token refresh fails, and a
+    // draft should survive having to sign in again.
+    if (userId) await clearDraft(userId);
     // The redirect latch stays claimed for the whole auth episode. Without this
     // the *next* sign-in in the same app session finds it already claimed and
     // silently skips finishAuthRedirect — the user lands on the account tab
@@ -325,10 +331,12 @@ export const deletePaymentMethod = createAsyncThunk(
 
 export const deleteUser = createAsyncThunk(
   "user/deleteUser",
-  async (_: any, { dispatch }) => {
+  async (_: any, { dispatch, getState }) => {
+    const userId = (getState() as RootState).user.user?.id;
     await PushService.unregister();
     await AuthService.deleteAccount();
     await AsyncStorage.removeItem("paymentMethods");
+    if (userId) await clearDraft(userId);
     resetAuthRedirectClaim();
     dispatch(clearUser());
   }
