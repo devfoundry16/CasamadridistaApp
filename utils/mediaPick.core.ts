@@ -59,6 +59,35 @@ function fileName(asset: PickedAsset): string {
   return tail && tail.length ? tail : asset.kind;
 }
 
+/** The fields of an expo-image-picker asset that `pickedFrom` reads. */
+export interface PickerAsset {
+  uri: string;
+  type?: string | null;
+  mimeType?: string | null;
+  width?: number | null;
+  height?: number | null;
+  duration?: number | null;
+  fileSize?: number | null;
+}
+
+/**
+ * One picker asset as the upload code sees it. The picker reports a video's
+ * length in fractional milliseconds (15044.548752834467), and every
+ * `duration_ms` column is an INTEGER, so it is rounded here.
+ */
+export function pickedFrom(asset: PickerAsset): PickedAsset {
+  const isVideo = asset.type === 'video';
+  return {
+    uri: asset.uri,
+    kind: isVideo ? 'video' : 'image',
+    mime: asset.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg'),
+    width: asset.width || null,
+    height: asset.height || null,
+    durationMs: isVideo && asset.duration ? Math.round(asset.duration) : null,
+    sizeBytes: asset.fileSize ?? null,
+  };
+}
+
 /**
  * Apply the size and duration ceilings.
  *

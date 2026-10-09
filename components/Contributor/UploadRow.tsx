@@ -8,7 +8,7 @@ import { Text } from '@/components/Text';
 import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import UploadManager from '@/services/upload/UploadManager';
-import { MAX_ATTEMPTS, type UploadEntry } from '@/services/upload/uploadPolicy.core';
+import { MAX_ATTEMPTS, attemptsShown, type UploadEntry } from '@/services/upload/uploadPolicy.core';
 import { formatBytes } from './labels';
 
 interface Props {
@@ -85,7 +85,7 @@ function UploadRow({ entry, onCancel }: Props) {
               className="text-[11px]"
               style={{ color: Colors.text.muted, writingDirection: 'ltr' }}
             >
-              {`${entry.attempts}/${MAX_ATTEMPTS}`}
+              {`${attemptsShown(entry.attempts)}/${MAX_ATTEMPTS}`}
             </Text>
           ) : null}
         </View>

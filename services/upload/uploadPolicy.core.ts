@@ -103,6 +103,11 @@ export const RETRY_BACKOFF_MS: readonly number[] = [2000, 4000, 8000];
 
 export const MAX_ATTEMPTS = RETRY_BACKOFF_MS.length;
 
+/** The try count to show: the last failure still increments it, past the limit. */
+export function attemptsShown(attempts: number): number {
+  return Math.min(attempts, MAX_ATTEMPTS);
+}
+
 /**
  * Delay before attempt number `attempts + 1`, or null when the ladder is spent.
  *

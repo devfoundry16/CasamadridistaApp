@@ -15,6 +15,7 @@ import {
   libraryRequest,
   libraryCropRequest,
   mergePostMedia,
+  pickedFrom,
   videoFormatFor,
   reelProblem,
   type PickLimits,
@@ -239,5 +240,22 @@ describe('reelProblem', () => {
   });
   it('unknown dimensions are let through: the server settles them', () => {
     assert.equal(reelProblem(video({ width: null, height: null })), null);
+  });
+});
+
+describe('pickedFrom', () => {
+  it('rounds a fractional video length to whole milliseconds', () => {
+    // The picker reports 15044.548752834467 for a 15 s clip; every duration_ms
+    // column is an INTEGER and refused it.
+    const picked = pickedFrom({ uri: 'file:///v.mov', type: 'video', mimeType: 'video/quicktime', width: 1080, height: 1920, duration: 15044.548752834467, fileSize: 9_650_000 });
+    assert.deepEqual(picked, { uri: 'file:///v.mov', kind: 'video', mime: 'video/quicktime', width: 1080, height: 1920, durationMs: 15045, sizeBytes: 9_650_000 });
+  });
+
+  it('gives a photo no length and fills a missing MIME type', () => {
+    assert.deepEqual(pickedFrom({ uri: 'file:///p.jpg', type: 'image', width: 0, height: 0, duration: 12.5 }), {
+      uri: 'file:///p.jpg', kind: 'image', mime: 'image/jpeg', width: null, height: null, durationMs: null, sizeBytes: null,
+    });
+    assert.equal(pickedFrom({ uri: 'file:///v.mp4', type: 'video' }).mime, 'video/mp4');
+    assert.equal(pickedFrom({ uri: 'file:///v.mp4', type: 'video', duration: null }).durationMs, null);
   });
 });

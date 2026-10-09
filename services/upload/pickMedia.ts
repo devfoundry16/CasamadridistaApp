@@ -2,6 +2,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 import {
   applyLimits,
+  pickedFrom,
   videoFormatFor,
   type PickLimits,
   type PickResult,
@@ -11,20 +12,6 @@ import {
 // Re-exported so the contributor screens keep importing from here.
 export { applyLimits, videoFormatFor };
 export type { PickLimits, PickResult, PickedAsset };
-
-function toPicked(asset: ImagePicker.ImagePickerAsset): PickedAsset {
-  const isVideo = asset.type === 'video';
-  return {
-    uri: asset.uri,
-    kind: isVideo ? 'video' : 'image',
-    mime: asset.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg'),
-    width: asset.width || null,
-    height: asset.height || null,
-    // expo-image-picker reports video duration in milliseconds.
-    durationMs: isVideo ? (asset.duration ?? null) : null,
-    sizeBytes: asset.fileSize ?? null,
-  };
-}
 
 export interface PickOptions {
   /** A contributor's server-stated `ContributorLimits`, or `POST_MEDIA_LIMITS`. */
@@ -66,7 +53,7 @@ export async function pickFromLibrary(options: PickOptions): Promise<PickResult>
   });
 
   if (result.canceled) return { assets: [], rejected: [], cancelled: true };
-  return applyLimits(result.assets.map(toPicked), options.limits);
+  return applyLimits(result.assets.map(pickedFrom), options.limits);
 }
 
 /** Camera capture — the secondary path (plan §5.5). */
@@ -86,7 +73,7 @@ export async function captureWithCamera(
   });
 
   if (result.canceled) return { assets: [], rejected: [], cancelled: true };
-  return applyLimits(result.assets.map(toPicked), options.limits);
+  return applyLimits(result.assets.map(pickedFrom), options.limits);
 }
 
 /**

@@ -25,6 +25,7 @@ import {
   RETRY_BACKOFF_MS,
   SLOT_EXPIRY_SKEW_MS,
   backoffDelayMs,
+  attemptsShown,
   clampProgress,
   deserializeQueue,
   hasDeliveredBytes,
@@ -584,5 +585,14 @@ describe('resumable (tus) uploads', () => {
     const legacy = JSON.parse(serializeQueue([entry({ method: 'POST' })]));
     delete legacy[0].transport;
     assert.equal(parseEntry(legacy[0])?.transport, null);
+  });
+});
+
+describe('attemptsShown', () => {
+  it('never counts past the retry limit', () => {
+    // The final failure still increments `attempts`, which showed "4/3".
+    assert.equal(attemptsShown(1), 1);
+    assert.equal(attemptsShown(MAX_ATTEMPTS), MAX_ATTEMPTS);
+    assert.equal(attemptsShown(MAX_ATTEMPTS + 1), MAX_ATTEMPTS);
   });
 });
