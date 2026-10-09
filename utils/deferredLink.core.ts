@@ -13,8 +13,8 @@
  *            links on the clipboard at first launch.
  *
  * Both carriers are text an outsider can write, so the only destinations
- * accepted are the two a shared link can name: a media item and a match's
- * media page.
+ * accepted are the three a shared link can name: a media item, a match's
+ * media page and a community post.
  *
  * Zero imports, so `utils/__tests__/deferredLink.test.mts` runs it under
  * `node --test`. `utils/deferredLink.ts` owns the device calls.
@@ -29,11 +29,14 @@ export const REFERRER_KEY = 'casa_return';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ITEM_PATH = /^\/media\/item\/([^/?#]+)$/;
 const MATCH_PATH = /^\/match\/(\d{1,12})\/media$/;
+const POST_PATH = /^\/community\/post\/([^/?#]+)$/;
 
 /** An in-app path a shared link is allowed to open, or null. */
 function allowedPath(path: string): string | null {
   const item = ITEM_PATH.exec(path);
   if (item) return UUID.test(item[1]) ? `/media/item/${item[1]}` : null;
+  const post = POST_PATH.exec(path);
+  if (post) return UUID.test(post[1]) ? `/community/post/${post[1]}` : null;
   return MATCH_PATH.test(path) ? path : null;
 }
 
@@ -65,6 +68,8 @@ export function pathFromLink(link: string | null | undefined): string | null {
   const path = match[2] ?? '/';
   const item = /^\/m\/([^/]+)\/?$/.exec(path);
   if (item) return allowedPath(`/media/item/${item[1]}`);
+  const post = /^\/p\/([^/]+)\/?$/.exec(path);
+  if (post) return allowedPath(`/community/post/${post[1]}`);
   return allowedPath(path.replace(/\/$/, ''));
 }
 

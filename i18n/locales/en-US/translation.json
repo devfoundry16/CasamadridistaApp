@@ -2000,5 +2000,21 @@
     "play": "Play",
     "pause": "Pause",
     "openFullScreen": "Open video full screen"
+  },
+  "postShare": {
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied",
+    "shareVia": "Share via…",
+    "qrTitle": "Scan to open this post",
+    "qrHint": "Anyone with the link can see this post.",
+    "saveToPhotos": "Save to Photos",
+    "saved": "Saved to Photos",
+    "deletePost": "Delete post",
+    "deleteConfirmTitle": "Delete this post?",
+    "deleteConfirmBody": "It is removed for everyone, with its likes and comments. This cannot be undone.",
+    "deleted": "Post deleted",
+    "more": "More",
+    "sendTo": "Send to",
+    "qrCode": "QR code"
   }
 }

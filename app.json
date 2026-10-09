@@ -44,12 +44,17 @@
             {
               "scheme": "https",
               "host": "dashboard.casamadridista.com",
-              "pathPrefix": "/m"
+              "pathPrefix": "/m/"
             },
             {
               "scheme": "https",
               "host": "dashboard.casamadridista.com",
-              "pathPrefix": "/match"
+              "pathPrefix": "/match/"
+            },
+            {
+              "scheme": "https",
+              "host": "dashboard.casamadridista.com",
+              "pathPrefix": "/p/"
             }
           ],
           "category": [

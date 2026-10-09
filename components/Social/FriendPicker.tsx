@@ -1,5 +1,5 @@
 import { Check, Search, X } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, FlatList, Modal, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +24,10 @@ interface Props {
   id: string;
   /** Shown at the top so the sender knows what they are sending. */
   subject?: string | null;
+  /** Friends ticked when it opens (an avatar tapped in the share sheet). */
+  initialSelected?: string[];
+  /** After a send that reached at least one friend. */
+  onSent?: () => void;
 }
 
 /**
@@ -31,15 +35,21 @@ interface Props {
  * note, send once. The server delivers one message into each 1:1 conversation
  * and reports per recipient, so a partial failure names who did not receive it.
  */
-export default function FriendPicker({ visible, onClose, kind, id, subject }: Props) {
+export default function FriendPicker({ visible, onClose, kind, id, subject, initialSelected, onSent }: Props) {
   const { t } = useTranslation();
   const { isArabic } = useFont();
   const insets = useSafeAreaInsets();
-  const { data: friends = [], isLoading } = useFriends();
+  const { data: friends = [], isLoading } = useFriends({ enabled: visible });
   const share = useShareToFriends();
   const [query, setQuery] = useState('');
   const [note, setNote] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
+
+  // Each opening starts from the friends the caller picked, or none.
+  useEffect(() => {
+    if (visible) setSelected(initialSelected?.slice(0, MAX_RECIPIENTS) ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase().replace(/^@/, '');
@@ -69,6 +79,7 @@ export default function FriendPicker({ visible, onClose, kind, id, subject }: Pr
       {
         onSuccess: (results) => {
           const failed = results.filter((r) => !r.ok);
+          if (failed.length < results.length) onSent?.();
           if (!failed.length) {
             Alert.alert(t('social.share.sentTitle'), t('social.share.sentBody', { count: results.length }));
             close();

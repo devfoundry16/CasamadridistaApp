@@ -124,8 +124,8 @@ export function useDownloadMedia() {
   );
 
   const save = useCallback(
-    async (url: string, media: DownloadableMedia, options?: { shareOnly?: boolean }) => {
-      if (inFlight.current) return; // guard double-taps
+    async (url: string, media: DownloadableMedia, options?: { shareOnly?: boolean }): Promise<boolean> => {
+      if (inFlight.current) return false; // guard double-taps
       inFlight.current = true;
 
       // Web build (`web.output: 'static'`).
@@ -139,11 +139,12 @@ export function useDownloadMedia() {
             link.rel = 'noopener';
             link.click();
             flash('saved');
+            return true;
           }
+          return false;
         } finally {
           inFlight.current = false;
         }
-        return;
       }
 
       if (options?.shareOnly) {
@@ -154,7 +155,7 @@ export function useDownloadMedia() {
           setStatus('idle');
           inFlight.current = false;
         }
-        return;
+        return false;
       }
 
       setStatus('saving');
@@ -164,12 +165,12 @@ export function useDownloadMedia() {
         if (outcome === 'blocked' && permissionIsFatal(outcome)) {
           setStatus('idle');
           promptPermanentlyDenied(url, media);
-          return;
+          return false;
         }
         if (outcome === 'denied' && permissionIsFatal(outcome)) {
           setStatus('idle');
           Alert.alert(t('community.photoPermissionTitle'), t('community.photoPermissionMessage'));
-          return;
+          return false;
         }
 
         // NOTE: the new FileSystem API exposes no progress callback
@@ -187,6 +188,7 @@ export function useDownloadMedia() {
 
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
         flash('saved');
+        return true;
       } catch (error) {
         if (__DEV__) console.warn('[useDownloadMedia] save failed', error);
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
@@ -200,6 +202,7 @@ export function useDownloadMedia() {
             },
           },
         ]);
+        return false;
       } finally {
         try {
           if (file?.exists) file.delete();

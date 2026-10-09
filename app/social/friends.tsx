@@ -19,7 +19,7 @@ import { useOnlineIds } from '@/hooks/social/usePresence';
 import { useRelationshipAction } from '@/hooks/social/useProfile';
 import SocialService from '@/services/SocialService';
 import type { PersonCard, RelationshipState } from '@/types/social';
-import { presenceLabel, splitOnline } from '@/utils/chat.core';
+import { presenceLabel, presenceWatchList, splitOnline } from '@/utils/chat.core';
 import TagPicker from '@/components/Community/Composer/TagPicker';
 import type { FanClub, FanClubCountry } from '@/services/FanClubService';
 import { isSearchingPeople, peopleSearchFilters } from '@/utils/peopleSearch.core';
@@ -54,7 +54,8 @@ export default function FriendsScreen() {
 
   // Only friends who show their activity: the server refuses the others'
   // presence channel, and a refused join is retried for ever.
-  const watchable = useMemo(() => (friends.data ?? []).filter((f) => f.last_active_at).map((f) => f.id), [friends.data]);
+  // One realtime channel per watched friend: the 50 most recently active.
+  const watchable = useMemo(() => presenceWatchList(friends.data ?? [], 50), [friends.data]);
   const live = useOnlineIds(watchable);
 
   // "Active 5 minutes ago" and the Online section must not freeze while the

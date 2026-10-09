@@ -97,18 +97,36 @@ describe('isFreshInstall', () => {
 });
 
 describe('the link domain is one value everywhere', () => {
-  it('app.json claims exactly the hosts the app reads links from, on /m and /match only', async () => {
+  it('app.json claims exactly the hosts the app reads links from, on /m/, /match/ and /p/ only', async () => {
     const fs = await import('node:fs');
     const app = JSON.parse(fs.readFileSync(new URL('../../app.json', import.meta.url), 'utf8')).expo;
     assert.deepEqual(app.ios.associatedDomains, LINK_HOSTS.map((h) => `applinks:${h}`));
     const data = app.android.intentFilters[0].data;
     assert.deepEqual([...new Set(data.map((d: { host: string }) => d.host))], [...LINK_HOSTS]);
-    assert.deepEqual([...new Set(data.map((d: { pathPrefix: string }) => d.pathPrefix))].sort(), ['/m', '/match']);
+    // With the trailing slash: a bare "/m" or "/p" prefix would also claim
+    // dashboard pages such as /media, /moderation, /payouts and /permissions.
+    assert.deepEqual([...new Set(data.map((d: { pathPrefix: string }) => d.pathPrefix))].sort(), ['/m/', '/match/', '/p/']);
     assert.equal(app.android.intentFilters[0].autoVerify, true);
   });
   it('share links are built on that host', async () => {
     const fs = await import('node:fs');
     const src = fs.readFileSync(new URL('../../constants/media.ts', import.meta.url), 'utf8');
     assert.match(src, new RegExp(`EXPO_PUBLIC_MEDIA_LINK_DOMAIN \\?\\? '${LINK_HOSTS[0].replace(/\./g, '\\.')}'`));
+  });
+});
+
+describe('shared community posts', () => {
+  const POST = 'a0000000-0000-4000-8000-000000000001';
+  it('a /p/<id> link opens the post', () => {
+    assert.equal(pathFromLink(`https://dashboard.casamadridista.com/p/${POST}`), `/community/post/${POST}`);
+    assert.equal(pathFromLink(`https://dashboard.casamadridista.com/p/${POST}/`), `/community/post/${POST}`);
+  });
+  it('the Play referrer may carry the post path', () => {
+    assert.equal(pathFromReferrer(buildReferrer(`/community/post/${POST}`)), `/community/post/${POST}`);
+  });
+  it('anything but a uuid is refused, and so are other community paths', () => {
+    assert.equal(pathFromLink('https://dashboard.casamadridista.com/p/not-a-uuid'), null);
+    assert.equal(pathFromReferrer(buildReferrer('/community/compose')), null);
+    assert.equal(pathFromReferrer(buildReferrer(`/community/post/${POST}/edit`)), null);
   });
 });

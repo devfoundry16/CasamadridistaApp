@@ -125,13 +125,40 @@ export function patchPostInPages<T extends HasId, D extends { pages: { posts: T[
   return changed ? { ...data, pages } : data;
 }
 
-export type FeedMenuAction = 'report';
+export type FeedMenuAction = 'report' | 'delete';
 
 /**
- * What a feed card's "..." menu offers. Someone else's post can be reported
- * (signing in is asked for on tap); your own cannot. An empty list hides the
- * button.
+ * What a post's "..." menu offers. Someone else's post can be reported
+ * (signing in is asked for on tap); your own can be deleted. Never both.
  */
 export function feedMenuActions({ isOwn }: { isOwn: boolean }): FeedMenuAction[] {
-  return isOwn ? [] : ['report'];
+  return isOwn ? ['delete'] : ['report'];
+}
+
+/**
+ * An infinite-query cache with one post taken out, after its author deleted
+ * it. Pages that did not hold it are kept as the same objects; a cache without
+ * it (or none) is returned unchanged.
+ */
+export function removePostFromPages<T extends HasId, D extends { pages: { posts: T[] }[] }>(
+  data: D | undefined,
+  id: string,
+): D | undefined {
+  if (!data || !data.pages.some((p) => p.posts.some((x) => x.id === id))) return data;
+  return {
+    ...data,
+    pages: data.pages.map((p) => (p.posts.some((x) => x.id === id) ? { ...p, posts: p.posts.filter((x) => x.id !== id) } : p)),
+  };
+}
+
+/**
+ * A person's own post: the gate for Save and Delete (share sheet, "..." menu).
+ * A fan club or Casa post records its admin or manager as author_id, and is
+ * never "theirs" here.
+ */
+export function isOwnPost(
+  post: { author_type?: string | null; author_id?: string | null } | undefined,
+  userId: string | null | undefined,
+): boolean {
+  return !!userId && post?.author_type === 'user' && post.author_id === userId;
 }

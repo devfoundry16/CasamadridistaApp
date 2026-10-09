@@ -366,6 +366,10 @@ function RootLayoutNav() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="p/[id]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="notifications/index"
           options={{ title: t("notifications.title"), ...options }}
         />

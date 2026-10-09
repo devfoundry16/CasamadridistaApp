@@ -25,9 +25,8 @@ import PostMedia    from '@/components/Community/PostCard/PostMedia';
 import PostActions  from '@/components/Community/PostCard/PostActions';
 import CommentRow   from '@/components/Community/Comments/CommentRow';
 import CommentInput, { type CommentInputHandle } from '@/components/Community/Comments/CommentInput';
-import ReportSheet  from '@/components/Community/Moderation/ReportSheet';
+import { usePostMenu } from '@/components/Community/PostCard/usePostMenu';
 import { useKeyboardOffsets } from '@/hooks/useKeyboardOffsets';
-import { useRequireAuth } from '@/hooks/useRequireAuth';
 import Colors from '@/constants/colors';
 
 export default function PostDetailPage() {
@@ -35,14 +34,12 @@ export default function PostDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [reportOpen, setReportOpen] = useState(false);
   const [replyTo, setReplyTo]       = useState<Comment | null>(null);
   const commentInputRef             = useRef<CommentInputHandle>(null);
   const target = useMemo<CommentTarget>(() => ({ kind: 'post', id }), [id]);
   const commentsKey = useMemo(() => commentsQueryKey(target), [target]);
   // Where a guest lands after signing in from any action on this screen.
   const returnHref = `/community/post/${id}`;
-  const requireAuth = useRequireAuth();
 
   // Header height + bottom safe-area inset, combined into the exact offset the
   // KeyboardAvoidingView needs. See hooks/useKeyboardOffsets.ts for the maths.
@@ -54,6 +51,10 @@ export default function PostDetailPage() {
     queryFn:  () => PostService.getPost(id),
     enabled:  !!id,
   });
+
+  // Deleted by its author from this screen: there is nothing left to show.
+  const leave = useCallback(() => (router.canGoBack() ? router.back() : router.replace('/')), [router]);
+  const menu = usePostMenu(post, { onDeleted: leave });
 
   const {
     data: commentsData,
@@ -94,14 +95,12 @@ export default function PostDetailPage() {
       <View>
         <PostHeader
           post={post}
-          onReportPress={() => {
-            if (requireAuth({ href: returnHref, mode: 'login' })) setReportOpen(true);
-          }}
+          onReportPress={menu.openMenu}
           onAuthorPress={post.author_type === 'user' && post.author_id ? () => router.push(`/user/${post.author_id}`) : undefined}
         />
         <PostBody   post={post} truncate={false} />
         {post.media?.length > 0 && <PostMedia media={post.media} paused={false} />}
-        <PostActions post={post} />
+        <PostActions post={post} onDeleted={leave} />
         <View style={styles.divider} />
         <Text style={styles.commentsLabel}>
           {post.comment_count} {post.comment_count === 1 ? t('community.commentSingular') : t('community.commentPlural')}
@@ -113,7 +112,7 @@ export default function PostDetailPage() {
         )}
       </View>
     );
-  }, [post, commentsLoading, t, router, requireAuth, returnHref]);
+  }, [post, commentsLoading, t, router, menu.openMenu, leave]);
 
   const screenOptions = (
     <Stack.Screen
@@ -163,7 +162,7 @@ export default function PostDetailPage() {
         // ReportSheet is an RN <Modal> sibling. Its TextInput still emits global
         // keyboard events, which would otherwise re-layout the comment list
         // underneath the modal for no visible benefit.
-        enabled={!reportOpen}
+        enabled={!menu.reportOpen}
       >
         <FlatList
           data={comments}
@@ -214,7 +213,7 @@ export default function PostDetailPage() {
           />
         )}
       </KeyboardAvoidingView>
-      <ReportSheet visible={reportOpen} postId={post.id} onClose={() => setReportOpen(false)} />
+      {menu.sheets}
     </>
   );
 }

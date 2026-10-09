@@ -4,13 +4,26 @@ import { useQuery } from '@tanstack/react-query';
 import { useUser } from '@/hooks/useUser';
 import SocialService from '@/services/SocialService';
 import { socialKeys } from './keys';
+import { collectPages } from '@/utils/shareSheet.core';
 
-export function useFriends() {
+/** The most friends loaded for searching on the phone (50 a page). */
+const FRIENDS_MAX = 500;
+
+/**
+ * Every friend, not just the first page of 50: the friend picker searches on
+ * the phone, and a friend on page two must still be found.
+ */
+export function useFriends({ enabled = true }: { enabled?: boolean } = {}) {
   const { user } = useUser();
   return useQuery({
     queryKey: socialKeys.friends(),
-    queryFn: async () => (await SocialService.friends()).friends,
-    enabled: !!user?.id,
+    queryFn: () =>
+      collectPages(async (before) => {
+        const page = await SocialService.friends(before);
+        return { items: page.friends, next: page.next_before };
+      }, FRIENDS_MAX),
+    // A share sheet mounts with every feed card: it loads friends only when open.
+    enabled: !!user?.id && enabled,
     staleTime: 60_000,
   });
 }

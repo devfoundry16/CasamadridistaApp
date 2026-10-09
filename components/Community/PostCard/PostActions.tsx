@@ -20,9 +20,11 @@ import { useRequireAuth } from "@/hooks/useRequireAuth";
 interface Props {
   post: Post;
   onCommentPress?: () => void;
+  /** After the author deleted the post from the share sheet. */
+  onDeleted?: () => void;
 }
 
-export default function PostActions({ post, onCommentPress }: Props) {
+export default function PostActions({ post, onCommentPress, onDeleted }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const requireAuth = useRequireAuth();
@@ -183,7 +185,7 @@ export default function PostActions({ post, onCommentPress }: Props) {
           fill={saved ? Colors.darkGold : "none"}
         />
       </TouchableOpacity>
-      <PostShareSheet visible={shareOpen} post={post} onClose={() => setShareOpen(false)} />
+      <PostShareSheet visible={shareOpen} post={post} onClose={() => setShareOpen(false)} onDeleted={onDeleted} />
     </View>
   );
 }

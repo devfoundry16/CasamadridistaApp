@@ -1,14 +1,8 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next';
-import { Flag } from 'lucide-react-native';
 import type { Post } from '@/services/FeedService';
-import ActionSheet, { type SheetAction } from '@/components/Social/ActionSheet';
-import ReportSheet from '@/components/Community/Moderation/ReportSheet';
-import { useUser } from '@/hooks/useUser';
-import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { feedMenuActions } from '@/utils/post.core';
+import { usePostMenu } from './usePostMenu';
 import { normaliseItem } from '@/services/media/normalise';
 import PostHeader from './PostHeader';
 import PostBody from './PostBody';
@@ -24,11 +18,6 @@ interface Props {
 
 function PostCard({ post }: Props) {
   const router = useRouter();
-  const { t } = useTranslation();
-  const { user } = useUser();
-  const requireAuth = useRequireAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
 
   const goToPost = useCallback(() => {
     router.push(`/community/post/${post.id}`);
@@ -53,18 +42,7 @@ function PostCard({ post }: Props) {
   // its post body, shown just above the card; a fan's share has no body.
   const showPreview = !!teaser?.description && teaser.description.trim() !== (post.body ?? '').trim();
 
-  // The "..." menu: Report on someone else's post (signing in on tap). Your
-  // own post has nothing to offer yet, so the button is hidden.
-  const isOwn = !!user?.id && post.author_type === 'user' && post.author_id === user.id;
-  const menu: SheetAction[] = feedMenuActions({ isOwn }).map((key) => ({
-    key,
-    label: t('community.reportPost'),
-    icon: <Flag size={20} color={Colors.status.error} />,
-    destructive: true,
-    onPress: () => {
-      if (requireAuth({ href: `/community/post/${post.id}`, mode: 'login' })) setReportOpen(true);
-    },
-  }));
+  const menu = usePostMenu(post);
 
   return (
     <>
@@ -72,13 +50,13 @@ function PostCard({ post }: Props) {
       onPress={goToPost}
       // The card is one accessible element, which hides the "..." button
       // inside it from VoiceOver/TalkBack: the menu comes back as an action.
-      accessibilityActions={menu.length ? [{ name: 'menu', label: t('community.postMenu') }] : undefined}
+      accessibilityActions={menu.openMenu ? [{ name: 'menu', label: menu.actionLabel }] : undefined}
       onAccessibilityAction={(e) => {
-        if (e.nativeEvent.actionName === 'menu') setMenuOpen(true);
+        if (e.nativeEvent.actionName === 'menu') menu.openMenu?.();
       }}
       style={({ pressed }) => [styles.container, { opacity: pressed ? 0.85 : 1 }]}
     >
-      <PostHeader post={post} onAuthorPress={goToAuthor} onReportPress={menu.length ? () => setMenuOpen(true) : undefined} />
+      <PostHeader post={post} onAuthorPress={goToAuthor} onReportPress={menu.openMenu} />
       <PostBody post={post} truncate />
       {teaser ? (
         <MediaTeaserCard item={teaser} preview={showPreview} />
@@ -89,10 +67,7 @@ function PostCard({ post }: Props) {
     </Touchable>
     {/* Siblings of the card, not children: a touch inside a Modal still
         bubbles through the React tree and must not open the post. */}
-    {menu.length ? (
-      <ActionSheet visible={menuOpen} onClose={() => setMenuOpen(false)} cancelLabel={t('common.cancel')} actions={menu} />
-    ) : null}
-    {reportOpen ? <ReportSheet visible postId={post.id} onClose={() => setReportOpen(false)} /> : null}
+    {menu.sheets}
     </>
   );
 }

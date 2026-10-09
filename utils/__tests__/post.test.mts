@@ -9,12 +9,14 @@ import { describe, it } from 'node:test';
 
 import {
   feedMenuActions,
+  isOwnPost,
   LOCATION_MAX,
   POST_REPORT_REASONS,
   carouselIndex,
   normaliseLocation,
   patchPost,
   patchPostInPages,
+  removePostFromPages,
   reportErrorKey,
   reportReady,
   isAuthRefusal,
@@ -168,7 +170,37 @@ describe('feedMenuActions', () => {
   it('anyone may report someone else\'s post; signing in happens on tap', () => {
     assert.deepEqual(feedMenuActions({ isOwn: false }), ['report']);
   });
-  it('nobody reports their own post', () => {
-    assert.deepEqual(feedMenuActions({ isOwn: true }), []);
+  it('nobody reports their own post; its author may delete it', () => {
+    assert.deepEqual(feedMenuActions({ isOwn: true }), ['delete']);
+  });
+});
+
+describe('removePostFromPages', () => {
+  const pages = { pages: [{ posts: [{ id: 'a' }, { id: 'b' }] }, { posts: [{ id: 'c' }] }], pageParams: [null, 'x'] };
+  it('drops the deleted post from whichever page holds it, and keeps the rest as they were', () => {
+    const out = removePostFromPages(pages, 'b')!;
+    assert.deepEqual(out.pages.map((p) => p.posts.map((x) => x.id)), [['a'], ['c']]);
+    assert.deepEqual(out.pageParams, [null, 'x']);
+    assert.equal(out.pages[1], pages.pages[1], 'untouched pages are the same objects');
+  });
+  it('a cache without the post, or no cache, is returned as is', () => {
+    assert.equal(removePostFromPages(pages, 'zzz'), pages);
+    assert.equal(removePostFromPages(undefined, 'a'), undefined);
+  });
+});
+
+describe('isOwnPost', () => {
+  // The gate for Save and Delete: a person's own post only. A fan club or Casa
+  // post records an admin or manager as author_id, and is never "theirs" here.
+  const post = (over: object = {}) => ({ author_type: 'user', author_id: 'me', ...over });
+  it('your own post', () => assert.equal(isOwnPost(post(), 'me'), true));
+  it("someone else's", () => assert.equal(isOwnPost(post({ author_id: 'them' }), 'me'), false));
+  it('a fan club or Casa post you published as its admin', () => {
+    assert.equal(isOwnPost(post({ author_type: 'fan_club' }), 'me'), false);
+    assert.equal(isOwnPost(post({ author_type: 'casa' }), 'me'), false);
+  });
+  it('signed out, or no post', () => {
+    assert.equal(isOwnPost(post(), null), false);
+    assert.equal(isOwnPost(undefined, 'me'), false);
   });
 });

@@ -679,3 +679,19 @@ export function videoPickProblem(asset: { durationMs?: number | null; fileSize?:
 export function canAddPhotos({ photoCount, hasVideo, max }: { photoCount: number; hasVideo: boolean; max: number }): boolean {
   return !hasVideo && photoCount < max;
 }
+
+/**
+ * The friends whose presence to watch: the most recently active ones that
+ * share their activity, at most `max`. Each watched friend is one realtime
+ * channel, and a connection has a limited number (hooks/social/usePresence.ts).
+ */
+export function presenceWatchList(
+  friends: { id: string; last_active_at: string | null }[],
+  max: number,
+): string[] {
+  return friends
+    .filter((f) => f.last_active_at)
+    .sort((a, b) => b.last_active_at!.localeCompare(a.last_active_at!))
+    .slice(0, max)
+    .map((f) => f.id);
+}
