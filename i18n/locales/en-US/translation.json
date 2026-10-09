@@ -1347,7 +1347,9 @@
     "newFromBernabeu": "New from the Bernabéu",
     "watchNow": "WATCH NOW",
     "watchInCasaMedia": "WATCH IN CASA MEDIA",
-    "exclusiveLabel": "EXCLUSIVE FROM MADRID"
+    "exclusiveLabel": "EXCLUSIVE FROM MADRID",
+    "itemGone": "This is no longer available.",
+    "itemGoneBody": "It may have been removed."
   },
   "notifications": {
     "title": "Notifications",

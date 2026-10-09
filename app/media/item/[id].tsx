@@ -18,6 +18,7 @@ import MediaCover from '@/components/Media/MediaCover';
 import { MediaSurfaceProvider } from '@/components/Media/MediaSurfaceContext';
 import { relativeTime } from '@/components/Media/time';
 import MediaVideoPlayer from '@/components/Media/Video/MediaVideoPlayer';
+import EmptyState from '@/components/Team/EmptyState';
 import ErrorState from '@/components/Team/ErrorState';
 import { Text } from '@/components/Text';
 import Touchable from '@/components/Touchable';
@@ -34,6 +35,7 @@ import {
   needsPlayback,
   playerHeight,
 } from '@/utils/mediaItem.core';
+import { isGone } from '@/utils/loadError.core';
 import { isPlayableVideo, isViewableMediaPhoto } from '@/utils/mediaUrl';
 
 /**
@@ -57,7 +59,7 @@ export default function MediaItemScreen() {
   // contract, and the server would drop it anyway.
   const eventSurface = isMediaSurface(surface) ? surface : undefined;
 
-  const { data: item, isLoading, isError, refetch } = useMediaItem(id);
+  const { data: item, isLoading, isError, error, refetch } = useMediaItem(id);
   // This device's own upload queue for the item: what a preview is missing.
   const uploads = useItemUploadReadiness(id);
 
@@ -98,10 +100,42 @@ export default function MediaItemScreen() {
     [router, id],
   );
 
+  // Always on screen, loading and failing included: the header is hidden, so
+  // without it a removed item was a dead end.
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/media'));
+  const backButton = (
+    <Touchable
+      onPress={goBack}
+      accessibilityRole="button"
+      accessibilityLabel={t('common.back')}
+      style={({ pressed }) => ({
+        position: 'absolute',
+        top: insets.top + 6,
+        // `start`, not `left`: the back affordance mirrors under RTL.
+        start: 10,
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      {/* The glyph itself has a direction; `start` only mirrors its position. */}
+      {I18nManager.isRTL ? (
+        <ChevronRight size={22} color={Colors.textWhite} />
+      ) : (
+        <ChevronLeft size={22} color={Colors.textWhite} />
+      )}
+    </Touchable>
+  );
+
   if (isLoading) {
     return (
       <View style={centered}>
         <ActivityIndicator size="large" color={Colors.darkGold} />
+        {backButton}
       </View>
     );
   }
@@ -109,7 +143,17 @@ export default function MediaItemScreen() {
   if (isError || !item) {
     return (
       <View style={centered}>
-        <ErrorState title={t('casaMedia.loadFailed')} onRetry={refetch} />
+        {isGone(error) ? (
+          // Removed, or never existed: Try again could never work.
+          <EmptyState
+            title={t('casaMedia.itemGone')}
+            body={t('casaMedia.itemGoneBody')}
+            action={{ label: t('common.back'), onPress: goBack }}
+          />
+        ) : (
+          <ErrorState title={t('casaMedia.loadFailed')} onRetry={refetch} />
+        )}
+        {backButton}
       </View>
     );
   }
@@ -219,31 +263,7 @@ export default function MediaItemScreen() {
           ) : null}
         </ScrollView>
 
-        <Touchable
-          onPress={() => (router.canGoBack() ? router.back() : router.replace('/media'))}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}
-          style={({ pressed }) => ({
-            position: 'absolute',
-            top: insets.top + 6,
-            // `start`, not `left`: the back affordance mirrors under RTL.
-            start: 10,
-            width: 38,
-            height: 38,
-            borderRadius: 19,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            opacity: pressed ? 0.7 : 1,
-          })}
-        >
-          {/* The glyph itself has a direction; `start` only mirrors its position. */}
-          {I18nManager.isRTL ? (
-            <ChevronRight size={22} color={Colors.textWhite} />
-          ) : (
-            <ChevronLeft size={22} color={Colors.textWhite} />
-          )}
-        </Touchable>
+        {backButton}
       </View>
     </MediaSurfaceProvider>
   );

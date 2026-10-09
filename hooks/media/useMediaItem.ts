@@ -4,6 +4,7 @@ import CasaMediaService from '@/services/CasaMediaService';
 import type { MediaItem } from '@/types/media/casaMedia';
 import { findCachedMediaItem } from './cache';
 import { mediaKeys } from './keys';
+import { retryUnlessGone } from '@/utils/loadError.core';
 
 /**
  * The width baked into the signed photo URLs. The server whitelists
@@ -32,6 +33,8 @@ export function useMediaItem(id: string | undefined) {
     queryFn: () => CasaMediaService.getItem(id!, SIGNED_TARGET_PX),
     enabled: !!id,
     staleTime: 5 * 60_000,
+    // A removed item answers 404 at once; retrying it only kept the spinner up.
+    retry: retryUnlessGone,
     initialData: (): MediaItem | undefined =>
       id ? findCachedMediaItem(queryClient, id) : undefined,
     initialDataUpdatedAt: 0,

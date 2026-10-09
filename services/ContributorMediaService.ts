@@ -19,6 +19,7 @@ import type {
 import { normaliseMe } from '@/services/media/contributorMe';
 import type { ContributorInvite } from '@/utils/contributorGate.core';
 import { UPLOAD_METHODS } from '@/utils/uploadTarget.core';
+import { loadError } from '@/utils/loadError.core';
 
 // `normaliseMe` and the fallback limits live in a pure module so the recorded
 // `/contributor/me` response can be replayed under `node --test`.
@@ -69,9 +70,7 @@ class ContributorMediaServiceClass {
    * that was a heuristic that would misread any prose 500.
    */
   private fail(error: any, fallback: string): never {
-    const failure: ApiError = new Error(error?.response?.data?.error || fallback);
-    if (typeof error?.response?.status === 'number') failure.status = error.response.status;
-    throw failure;
+    throw loadError(error, fallback) as ApiError;
   }
 
   private params(input: Record<string, unknown>): Record<string, string | number> {

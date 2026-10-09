@@ -38,6 +38,7 @@ import {
 } from '@/services/media/normalise';
 import { anonIdHeader, pickSignedWidth } from '@/services/media/wire';
 import AnalyticsService from '@/services/AnalyticsService';
+import { loadError } from '@/utils/loadError.core';
 
 const BASE = `${API_BASE_URL}casa-media`;
 
@@ -102,7 +103,9 @@ class CasaMediaServiceClass {
   }
 
   private fail(error: any, fallback: string): never {
-    throw new Error(error?.response?.data?.error || fallback);
+    // The status travels with the message, so a screen can tell a removed item
+    // (404) from a failure to load (utils/loadError.core isGone).
+    throw loadError(error, fallback);
   }
 
   /**

@@ -1372,7 +1372,9 @@
     "newFromBernabeu": "جديد من البرنابيو",
     "watchNow": "شاهد الآن",
     "watchInCasaMedia": "شاهد في كاسا ميديا",
-    "exclusiveLabel": "حصري من مدريد"
+    "exclusiveLabel": "حصري من مدريد",
+    "itemGone": "هذا المحتوى لم يعد متاحاً.",
+    "itemGoneBody": "ربما تمت إزالته."
   },
   "notifications": {
     "title": "الإشعارات",
