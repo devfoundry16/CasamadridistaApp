@@ -18,6 +18,10 @@ describe('shareSheetRows', () => {
   it('your own text post has nothing to save', () => {
     assert.deepEqual(shareSheetRows({ isOwn: true, saveable: false }), ['friends', 'copy_link', 'share', 'qr', 'delete']);
   });
+  it('a friends-only post has no public link to copy, share or scan; friends can still be sent it', () => {
+    assert.deepEqual(shareSheetRows({ isOwn: false, saveable: true, isPublic: false }), ['friends']);
+    assert.deepEqual(shareSheetRows({ isOwn: true, saveable: true, isPublic: false }), ['friends', 'save', 'delete']);
+  });
 });
 
 describe('saveableFiles', () => {

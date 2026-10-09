@@ -1001,7 +1001,45 @@
     "signInToComment": "Sign in to join the conversation",
     "signInRequired": "Sign in to continue.",
     "reportPost": "Report post",
-    "postMenu": "More options"
+    "postMenu": "More options",
+    "compose": {
+      "audienceLabel": "Who can see this",
+      "audience": {
+        "public": "Public",
+        "friends": "Friends"
+      },
+      "feelingLabel": "Feeling / activity",
+      "feelingTitle": "How are you feeling?",
+      "feelingNone": "None",
+      "feelingLine": "is feeling {{emoji}} {{feeling}}",
+      "activityLine": "is {{emoji}} {{feeling}}",
+      "feeling": {
+        "happy": "happy",
+        "excited": "excited",
+        "proud": "proud",
+        "grateful": "grateful",
+        "hopeful": "hopeful",
+        "nervous": "nervous",
+        "sad": "sad",
+        "angry": "angry",
+        "watching_match": "watching the match",
+        "at_stadium": "at the stadium",
+        "celebrating": "celebrating",
+        "travelling": "travelling"
+      },
+      "preview": "Preview",
+      "previewTitle": "Preview",
+      "keepEditing": "Keep editing",
+      "post": "Post",
+      "editTitle": "Edit post",
+      "editAction": "Edit post",
+      "save": "Save",
+      "saved": "Post updated",
+      "mediaLocked": "Photos and videos can't be changed after posting.",
+      "reviewNote": "Changes to the title, text or location are checked again before others see them.",
+      "edited": "Edited",
+      "friendsOnly": "Friends only"
+    }
   },
   "membershipPackages": {
     "halaGold": {

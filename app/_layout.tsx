@@ -258,6 +258,20 @@ function RootLayoutNav() {
             },
           }}
         />
+        <Stack.Screen
+          name="community/edit/[id]"
+          options={{
+            title: t("community.compose.editTitle"),
+            headerShown: true,
+            headerStyle: { backgroundColor: Colors.darkGold },
+            headerTintColor: Colors.textWhite,
+            headerTitleAlign: "center",
+            headerTitleStyle: {
+              color: Colors.textWhite,
+              ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
+            },
+          }}
+        />
         {/* The title is the tag, set by the screen. */}
         <Stack.Screen
           name="community/hashtag/[tag]"

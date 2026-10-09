@@ -9,10 +9,24 @@ export type ShareRow = 'friends' | 'copy_link' | 'share' | 'qr' | 'save' | 'dele
  * out of it (the link copied, the phone's share sheet, a QR code), then the
  * author's own tools. Someone else's post never gets Save or Delete.
  *
+ * A friends-only post has no public link: its /p/ page is anonymous, so it is
+ * a 404 for everyone, friends included, and the outside ways are left out.
+ * Sending it to a friend in the app still works (the server checks each
+ * reader).
+ *
  * @param saveable a photo or video post with something ready to save
+ * @param isPublic false for a friends-only post
  */
-export function shareSheetRows({ isOwn, saveable }: { isOwn: boolean; saveable: boolean }): ShareRow[] {
-  const rows: ShareRow[] = ['friends', 'copy_link', 'share', 'qr'];
+export function shareSheetRows({
+  isOwn,
+  saveable,
+  isPublic = true,
+}: {
+  isOwn: boolean;
+  saveable: boolean;
+  isPublic?: boolean;
+}): ShareRow[] {
+  const rows: ShareRow[] = isPublic ? ['friends', 'copy_link', 'share', 'qr'] : ['friends'];
   if (isOwn && saveable) rows.push('save');
   if (isOwn) rows.push('delete');
   return rows;

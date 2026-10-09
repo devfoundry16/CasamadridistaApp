@@ -64,7 +64,9 @@ export default function PostShareSheet({ visible, post, onClose, onDeleted }: Pr
   const url = postWebUrl(post.id);
   const isOwn = isOwnPost(post, user?.id);
   const files = saveableFiles(post.media);
-  const rows = shareSheetRows({ isOwn, saveable: files.length > 0 });
+  // A friends-only post has no public link to hand out: its /p/ page is
+  // anonymous, so it is a 404 for everyone, friends included.
+  const rows = shareSheetRows({ isOwn, saveable: files.length > 0, isPublic: post.audience !== 'friends' });
 
   /** Close this sheet, then open something else once it has gone (iOS). */
   const thenOpen = (open: () => void) => {

@@ -91,6 +91,12 @@ export interface Post {
   media_item?: MediaItem | null;
   /** People the author tagged, in the order they were tagged. Absent reads as none. */
   tagged?: TaggedUser[];
+  /** 'friends': the author and the author's friends only (the server enforces it). Absent reads as public. */
+  audience?: 'public' | 'friends';
+  /** A key from utils/postCompose.core FEELINGS, or null. */
+  feeling?: string | null;
+  /** When the author last changed what the post says; null if never. */
+  edited_at?: string | null;
 }
 
 export interface FeedPage {

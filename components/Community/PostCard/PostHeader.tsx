@@ -2,12 +2,13 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
-import { MapPin, MoreHorizontal } from 'lucide-react-native';
+import { MapPin, MoreHorizontal, Users } from 'lucide-react-native';
 import { formatDistanceToNow } from 'date-fns';
 import type { Post } from '@/services/FeedService';
 import VerifiedBadge from '../VerifiedBadge';
 import FanClubBadge from '../FanClubBadge';
 import Colors from '@/constants/colors';
+import { feelingOf } from '@/utils/postCompose.core';
 
 interface Props {
   post: Post;
@@ -55,6 +56,14 @@ export default function PostHeader({ post, onAuthorPress, onReportPress }: Props
     : null;
   const location    = post.location_name?.trim() || null;
   const timeAgo     = formatDistanceToNow(new Date(post.created_at), { addSuffix: false });
+  const friendsOnly = post.audience === 'friends';
+  const feeling     = feelingOf(post.feeling);
+  const feelingText = feeling
+    ? t(feeling.kind === 'activity' ? 'community.compose.activityLine' : 'community.compose.feelingLine', {
+        emoji: feeling.emoji,
+        feeling: t(`community.compose.feeling.${feeling.key}`),
+      })
+    : null;
 
   return (
     <View style={styles.container}>
@@ -74,8 +83,19 @@ export default function PostHeader({ post, onAuthorPress, onReportPress }: Props
             {isVerified && <VerifiedBadge size={13} />}
             {isFanClub && <FanClubBadge small />}
           </TouchableOpacity>
-          <Text style={styles.time} numberOfLines={1}>· {timeAgo}</Text>
+          <Text style={styles.time} numberOfLines={1}>
+            · {timeAgo}
+            {post.edited_at ? ` · ${t('community.compose.edited')}` : ''}
+          </Text>
+          {friendsOnly ? (
+            <View accessible accessibilityLabel={t('community.compose.friendsOnly')} style={styles.audience}>
+              <Users size={12} color={Colors.text.tertiary} />
+            </View>
+          ) : null}
         </View>
+        {feelingText ? (
+          <Text style={styles.feeling} numberOfLines={1}>{feelingText}</Text>
+        ) : null}
         {subtitle || location ? (
           <View style={styles.subRow}>
             {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
@@ -129,7 +149,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    marginLeft: 12,
+    marginStart: 12,
   },
   nameRow: {
     flexDirection: 'row',
@@ -148,8 +168,16 @@ const styles = StyleSheet.create({
   time: {
     fontSize: 12,
     color: Colors.text.tertiary,
-    marginLeft: 4,
+    marginStart: 4,
     flexShrink: 0,
+  },
+  audience: {
+    marginStart: 4,
+  },
+  feeling: {
+    fontSize: 12,
+    color: Colors.text.secondary,
+    marginTop: 1,
   },
   subtitle: {
     fontSize: 12,
@@ -170,7 +198,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   moreButton: {
-    paddingLeft: 8,
+    paddingStart: 8,
     paddingTop: 2,
   },
 });

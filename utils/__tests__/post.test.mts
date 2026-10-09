@@ -170,8 +170,12 @@ describe('feedMenuActions', () => {
   it('anyone may report someone else\'s post; signing in happens on tap', () => {
     assert.deepEqual(feedMenuActions({ isOwn: false }), ['report']);
   });
-  it('nobody reports their own post; its author may delete it', () => {
-    assert.deepEqual(feedMenuActions({ isOwn: true }), ['delete']);
+  it('nobody reports their own post; its author may edit or delete it', () => {
+    assert.deepEqual(feedMenuActions({ isOwn: true }), ['edit', 'delete']);
+  });
+  it('a shared Casa Media teaser has nothing of its own to edit, only delete', () => {
+    assert.deepEqual(feedMenuActions({ isOwn: true, kind: 'media_teaser' }), ['delete']);
+    assert.deepEqual(feedMenuActions({ isOwn: false, kind: 'media_teaser' }), ['report']);
   });
 });
 

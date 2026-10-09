@@ -1006,7 +1006,45 @@
     "signInToComment": "سجّل الدخول للمشاركة في النقاش",
     "signInRequired": "سجّل الدخول للمتابعة.",
     "reportPost": "الإبلاغ عن المنشور",
-    "postMenu": "خيارات أخرى"
+    "postMenu": "خيارات أخرى",
+    "compose": {
+      "audienceLabel": "من يمكنه رؤية هذا",
+      "audience": {
+        "public": "عام",
+        "friends": "الأصدقاء"
+      },
+      "feelingLabel": "الشعور / النشاط",
+      "feelingTitle": "بماذا تشعر؟",
+      "feelingNone": "بدون",
+      "feelingLine": "يشعر بـ{{feeling}} {{emoji}}",
+      "activityLine": "{{feeling}} {{emoji}}",
+      "feeling": {
+        "happy": "السعادة",
+        "excited": "الحماس",
+        "proud": "الفخر",
+        "grateful": "الامتنان",
+        "hopeful": "الأمل",
+        "nervous": "التوتر",
+        "sad": "الحزن",
+        "angry": "الغضب",
+        "watching_match": "يشاهد المباراة",
+        "at_stadium": "في الملعب",
+        "celebrating": "يحتفل",
+        "travelling": "مسافر"
+      },
+      "preview": "معاينة",
+      "previewTitle": "معاينة",
+      "keepEditing": "متابعة التعديل",
+      "post": "نشر",
+      "editTitle": "تعديل المنشور",
+      "editAction": "تعديل المنشور",
+      "save": "حفظ",
+      "saved": "تم تحديث المنشور",
+      "mediaLocked": "لا يمكن تغيير الصور ومقاطع الفيديو بعد النشر.",
+      "reviewNote": "تتم مراجعة التغييرات على العنوان أو النص أو الموقع مرة أخرى قبل أن يراها الآخرون.",
+      "edited": "معدّل",
+      "friendsOnly": "الأصدقاء فقط"
+    }
   },
   "membershipPackages": {
     "halaGold": {

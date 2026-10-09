@@ -125,14 +125,17 @@ export function patchPostInPages<T extends HasId, D extends { pages: { posts: T[
   return changed ? { ...data, pages } : data;
 }
 
-export type FeedMenuAction = 'report' | 'delete';
+export type FeedMenuAction = 'report' | 'edit' | 'delete';
 
 /**
  * What a post's "..." menu offers. Someone else's post can be reported
- * (signing in is asked for on tap); your own can be deleted. Never both.
+ * (signing in is asked for on tap); your own can be edited or deleted. A
+ * Casa Media teaser you shared has no title, text or media of its own, so
+ * there is nothing to edit.
  */
-export function feedMenuActions({ isOwn }: { isOwn: boolean }): FeedMenuAction[] {
-  return isOwn ? ['delete'] : ['report'];
+export function feedMenuActions({ isOwn, kind }: { isOwn: boolean; kind?: string }): FeedMenuAction[] {
+  if (!isOwn) return ['report'];
+  return kind === 'media_teaser' ? ['delete'] : ['edit', 'delete'];
 }
 
 /**

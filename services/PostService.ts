@@ -5,6 +5,7 @@ import type { Post } from './FeedService';
 import i18n from '@/i18n';
 import { normaliseGridPage } from '@/services/social/normalise';
 import type { ProfileGridPage } from '@/types/social';
+import type { Audience, EditPayload } from '@/utils/postCompose.core';
 
 export interface CreatePostPayload {
   kind: 'text' | 'image' | 'video';
@@ -18,6 +19,10 @@ export interface CreatePostPayload {
   location_name?: string;
   /** People tagged in the post, at most 20 (`mentions.core` TAG_MAX). */
   tagged_user_ids?: string[];
+  /** Personal posts only; a fan club post is always public. */
+  audience?: Audience;
+  /** A key from FEELINGS (utils/postCompose.core), or null for none. */
+  feeling?: string | null;
 }
 
 export interface SaveState {
@@ -56,7 +61,8 @@ class PostServiceClass {
     }
   }
 
-  async updatePost(id: string, payload: Partial<CreatePostPayload>): Promise<Post> {
+  /** Only what changed (postCompose.core editPayload). The response is the bare row: re-fetch to render. */
+  async updatePost(id: string, payload: EditPayload): Promise<Post> {
     try {
       const headers = await this.getAuthHeader();
       const response = await axios.patch<Post>(`${API_BASE_URL}posts/${encodeURIComponent(id)}`, payload, { headers });
