@@ -41,6 +41,8 @@ export interface PostDraft {
   fanClub: Record<string, unknown> | null;
   postAsFanClub: boolean;
   media: DraftMedia[];
+  /** A poll being written: its option texts as typed, and its length in days. */
+  poll?: { options: string[]; days: number } | null;
 }
 
 export function draftKey(userId: string): string {
@@ -94,6 +96,10 @@ export function parseDraft(raw: string | null | undefined): PostDraft | null {
     fanClub: d.fanClub && isStr(d.fanClub.id) ? d.fanClub : null,
     postAsFanClub: d.postAsFanClub === true,
     media: mediaOf(d.media),
+    poll:
+      d.poll && Array.isArray(d.poll.options) && d.poll.options.every(isStr) && typeof d.poll.days === 'number'
+        ? { options: d.poll.options, days: d.poll.days }
+        : null,
   };
 }
 
@@ -107,7 +113,8 @@ export function isDraftEmpty(d: PostDraft): boolean {
     d.tagged.length === 0 &&
     d.media.length === 0 &&
     !d.country &&
-    !d.fanClub
+    !d.fanClub &&
+    !(d.poll?.options ?? []).some((o) => o.trim())
   );
 }
 

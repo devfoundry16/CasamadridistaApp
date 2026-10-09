@@ -9,6 +9,9 @@ import PostBody from './PostBody';
 import PostMediaPreview from './PostMediaPreview';
 import PostActions from './PostActions';
 import MediaTeaserCard from './MediaTeaserCard';
+import PollCard from './PollCard';
+import { usePollVote } from '@/hooks/usePostPoll';
+import { useTranslation } from 'react-i18next';
 import Colors from '@/constants/colors';
 import Touchable from '@/components/Touchable';
 
@@ -18,6 +21,14 @@ interface Props {
 
 function PostCard({ post }: Props) {
   const router = useRouter();
+  const { t } = useTranslation();
+  const isPoll = post.kind === 'poll' && !!post.poll;
+  // The card is one accessible element, which hides the poll's option buttons
+  // from VoiceOver/TalkBack: each open option comes back as an action.
+  const { tally: poll, open: pollOpen, choose } = usePollVote(post, isPoll);
+  const pollActions = isPoll && pollOpen && poll
+    ? poll.options.map((o) => ({ name: `vote:${o.id}`, label: t('community.poll.voteA11y', { option: o.label }) }))
+    : [];
 
   const goToPost = useCallback(() => {
     router.push(`/community/post/${post.id}`);
@@ -50,14 +61,20 @@ function PostCard({ post }: Props) {
       onPress={goToPost}
       // The card is one accessible element, which hides the "..." button
       // inside it from VoiceOver/TalkBack: the menu comes back as an action.
-      accessibilityActions={menu.openMenu ? [{ name: 'menu', label: menu.actionLabel }] : undefined}
+      accessibilityActions={[
+        ...(menu.openMenu ? [{ name: 'menu', label: menu.actionLabel }] : []),
+        ...pollActions,
+      ]}
       onAccessibilityAction={(e) => {
-        if (e.nativeEvent.actionName === 'menu') menu.openMenu?.();
+        const name = e.nativeEvent.actionName;
+        if (name === 'menu') menu.openMenu?.();
+        else if (name.startsWith('vote:')) choose(name.slice('vote:'.length));
       }}
       style={({ pressed }) => [styles.container, { opacity: pressed ? 0.85 : 1 }]}
     >
       <PostHeader post={post} onAuthorPress={goToAuthor} onReportPress={menu.openMenu} />
       <PostBody post={post} truncate />
+      {isPoll ? <PollCard post={post} /> : null}
       {teaser ? (
         <MediaTeaserCard item={teaser} preview={showPreview} />
       ) : (

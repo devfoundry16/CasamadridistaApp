@@ -21,6 +21,7 @@ import {
 } from '@/services/MediaCommentsAdapter';
 import PostHeader   from '@/components/Community/PostCard/PostHeader';
 import PostBody     from '@/components/Community/PostCard/PostBody';
+import PollCard     from '@/components/Community/PostCard/PollCard';
 import PostMedia    from '@/components/Community/PostCard/PostMedia';
 import PostActions  from '@/components/Community/PostCard/PostActions';
 import CommentRow   from '@/components/Community/Comments/CommentRow';
@@ -103,6 +104,7 @@ export default function PostDetailPage() {
           onAuthorPress={post.author_type === 'user' && post.author_id ? () => router.push(`/user/${post.author_id}`) : undefined}
         />
         <PostBody   post={post} truncate={false} />
+        {post.kind === 'poll' && post.poll ? <PollCard post={post} /> : null}
         {post.media?.length > 0 && <PostMedia media={post.media} paused={false} />}
         <PostActions post={post} onDeleted={leave} />
         <View style={styles.divider} />

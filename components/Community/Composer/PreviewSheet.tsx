@@ -50,6 +50,21 @@ export default function PreviewSheet({ visible, post, media, submitting, confirm
           <View style={{ backgroundColor: Colors.background.card, borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.border.default }}>
             <PostHeader post={post} />
             <PostBody post={post} truncate={false} />
+            {post.poll ? (
+              // The options as they will read; votes start once it is posted.
+              <View style={{ paddingHorizontal: 16, paddingBottom: 12, gap: 8 }}>
+                {[...post.poll.options].sort((a, b) => a.position - b.position).map((o) => (
+                  <View
+                    key={o.id}
+                    style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: Colors.border.default, backgroundColor: Colors.background.medium }}
+                  >
+                    <Text style={{ color: Colors.text.primary, fontSize: 14, fontWeight: '600' }} numberOfLines={2}>
+                      {o.label}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
             {shown.length ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, padding: 12 }}>
                 {shown.map((m) => (

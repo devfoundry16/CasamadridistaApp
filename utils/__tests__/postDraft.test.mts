@@ -92,3 +92,19 @@ describe('unreferencedFiles', () => {
     assert.deepEqual(unreferencedFiles(['a.jpg', 'old.jpg', 'v.mp4', 'v.jpg', 'gone.mp4'], dir, d), ['old.jpg', 'gone.mp4']);
   });
 });
+
+describe('a poll in a draft', () => {
+  it('round-trips its options and length', () => {
+    const back = parseDraft(serializeDraft(draft({ poll: { options: ['Vini', ''], days: 3 } })));
+    assert.deepEqual(back?.poll, { options: ['Vini', ''], days: 3 });
+  });
+  it('a malformed poll is dropped, the rest of the draft kept', () => {
+    const back = parseDraft(JSON.stringify({ ...draft(), poll: { options: 'Vini', days: 3 } }));
+    assert.equal(back?.poll, null);
+    assert.equal(back?.title, 'Hala');
+  });
+  it('a poll with any option typed is worth keeping', () => {
+    assert.equal(isDraftEmpty(draft({ title: '', body: '', poll: { options: ['', 'x'], days: 1 } })), false);
+    assert.equal(isDraftEmpty(draft({ title: '', body: '', poll: { options: ['', ''], days: 1 } })), true);
+  });
+});

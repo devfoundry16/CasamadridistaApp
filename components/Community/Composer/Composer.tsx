@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostService from "@/services/PostService";
 import AuthService from "@/services/AuthService";
-import { Globe, MapPin, Shield, Smile, UserPlus, Users, X } from "lucide-react-native";
+import { BarChart3, Globe, MapPin, Plus, Shield, Smile, UserPlus, Users, X } from "lucide-react-native";
 import MediaService, { type UploadSlot } from "@/services/MediaService";
 import { useKeyboardOffsets } from "@/hooks/useKeyboardOffsets";
 import MediaPicker, { type PickedMedia } from "./MediaPicker";
@@ -39,6 +39,7 @@ import { DRAFT_VERSION, isDraftEmpty, type PostDraft } from "@/utils/postDraft.c
 import { clearDraft, keepDraftFile, loadDraft, saveDraft } from "@/utils/postDraft";
 import type { Post } from "@/services/FeedService";
 import { AUDIENCES, editPayload, feelingOf, overallProgress, type Audience } from "@/utils/postCompose.core";
+import { POLL_DURATIONS, POLL_OPTIONS_MAX, POLL_OPTIONS_MIN, POLL_OPTION_MAX_LENGTH, validatePollDraft } from "@/utils/poll.core";
 
 type TextField = "title" | "body";
 
@@ -65,6 +66,9 @@ export default function Composer({ start = null, editing }: Props = {}) {
   const [audience, setAudience] = useState<Audience>(editing?.audience ?? "public");
   const [feeling, setFeeling] = useState<string | null>(editing?.feeling ?? null);
   const [feelingSheet, setFeelingSheet] = useState(false);
+  // A poll being written (new posts only): its options as typed and its length.
+  const [pollOptions, setPollOptions] = useState<string[] | null>(null);
+  const [pollDays, setPollDays] = useState<number>(1);
   // Edit mode: the tags are sent only once the author changes them, so a
   // picker still loading its country list never clears them.
   const [tagsTouched, setTagsTouched] = useState(false);
@@ -155,7 +159,15 @@ export default function Composer({ start = null, editing }: Props = {}) {
   }, [editing, editingCountry, editingClubId]);
 
   const hasMedia = media.length > 0 || (editing?.media?.length ?? 0) > 0;
-  const canPost = !submitting && title.trim().length > 0 && (body.trim().length > 0 || hasMedia);
+  const isPoll = !editing && pollOptions !== null;
+  const pollCheck = isPoll ? validatePollDraft(pollOptions!, pollDays) : null;
+  // A poll needs its title and valid options (a body is optional, also when
+  // editing one); anything else, a title and a body or media.
+  const pollPost = editing ? editing.kind === "poll" : isPoll;
+  const canPost =
+    !submitting &&
+    title.trim().length > 0 &&
+    (isPoll ? !!pollCheck?.ok : pollPost || body.trim().length > 0 || hasMedia);
   // Only a personal post has an audience: a fan club post speaks for the club.
   const audienceApplies = editing ? editing.author_type === "user" : !postAsFanClub;
   const sentAudience: Audience = audienceApplies ? audience : "public";
@@ -206,6 +218,10 @@ export default function Composer({ start = null, editing }: Props = {}) {
             setFanClub(saved.fanClub as FanClub | null);
             setPostAsFanClub(saved.postAsFanClub);
             setMedia(saved.media as PickedMedia[]);
+            if (saved.poll) {
+              setPollOptions(saved.poll.options);
+              setPollDays(saved.poll.days);
+            }
             setDraftReadyFor(draftUserId);
           },
         },
@@ -254,6 +270,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
           country,
           fanClub: fanClub as unknown as Record<string, unknown> | null,
           postAsFanClub,
+          poll: pollOptions ? { options: pollOptions, days: pollDays } : null,
           media: kept.map((m) => ({
             uri: m.uri,
             kind: m.kind,
@@ -271,7 +288,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
       }
     }, 800);
     return () => clearTimeout(timer);
-  }, [draftUserId, draftReady, submitting, title, body, location, audience, feeling, tagged, country, fanClub, postAsFanClub, media]);
+  }, [draftUserId, draftReady, submitting, title, body, location, audience, feeling, tagged, country, fanClub, postAsFanClub, media, pollOptions, pollDays]);
 
   const handleSave = useCallback(async () => {
     if (!editing || !canPost) return;
@@ -322,8 +339,10 @@ export default function Composer({ start = null, editing }: Props = {}) {
     // so there is never a half-posted post and a retry starts clean.
     let createdId: string | null = null;
     try {
-      // One video, or up to ten photos: MediaPicker never mixes them.
-      const kind: "text" | "image" | "video" = media[0]?.kind ?? "text";
+      // One video, or up to ten photos (MediaPicker never mixes them), or a
+      // poll, which takes no media.
+      const kind: "text" | "image" | "video" | "poll" =
+        pollCheck?.ok ? "poll" : media[0]?.kind ?? "text";
       const locationName = normaliseLocation(location);
 
       const post = await PostService.createPost({
@@ -332,6 +351,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
         body: body.trim() || undefined,
         audience: sentAudience,
         ...(feeling ? { feeling } : {}),
+        ...(pollCheck?.ok ? { poll: { options: pollCheck.options, duration_days: pollDays } } : {}),
         country_code: country?.country_code ?? undefined,
         ...(locationName ? { location_name: locationName } : {}),
         ...(tagged.length ? { tagged_user_ids: tagged.slice(0, TAG_MAX).map((p) => p.id) } : {}),
@@ -387,7 +407,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
       setUploadProgress("");
       setUploadFraction(0);
     }
-  }, [canPost, title, body, media, location, tagged, country, fanClub, postAsFanClub, roles, sentAudience, feeling, user, queryClient, router, t]);
+  }, [canPost, title, body, media, location, tagged, country, fanClub, postAsFanClub, roles, sentAudience, feeling, pollCheck, pollDays, user, queryClient, router, t]);
 
   const submit = editing ? handleSave : handlePost;
 
@@ -409,7 +429,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
         country_code: null,
       },
       fan_club: editing?.fan_club ?? (postAsFanClub && roles?.fanClubName ? { id: roles.fanClubId ?? "", name: roles.fanClubName, logo_url: null, is_verified: false } as Post["fan_club"] : null),
-      kind: editing?.kind ?? media[0]?.kind ?? "text",
+      kind: editing?.kind ?? (pollOptions ? "poll" : media[0]?.kind ?? "text"),
       title: title.trim() || null,
       body: body.trim() || null,
       location_name: location.trim() || null,
@@ -418,8 +438,16 @@ export default function Composer({ start = null, editing }: Props = {}) {
       tagged: tagged.map((p) => ({ id: p.id, username: p.username ?? null, name: p.name, avatar_url: p.avatar_url ?? null })),
       created_at: editing?.created_at ?? now,
       media: editing?.media ?? [],
+      poll:
+        editing?.poll ??
+        (pollOptions
+          ? {
+              closes_at: new Date(Date.now() + pollDays * 86_400_000).toISOString(),
+              options: pollOptions.map((label, position) => ({ id: `preview-${position}`, position, label: label.trim() })),
+            }
+          : null),
     } as Post;
-  }, [editing, user, postAsFanClub, roles, media, title, body, location, sentAudience, feeling, tagged]);
+  }, [editing, user, postAsFanClub, roles, media, title, body, location, sentAudience, feeling, tagged, pollOptions, pollDays]);
 
   return (
     // The offset makes the lift include the header (useKeyboardOffsets explains
@@ -489,11 +517,118 @@ export default function Composer({ start = null, editing }: Props = {}) {
           {editing ? (
             // Uploaded media is locked server-side (409 media_locked).
             <Text style={styles.note}>{t("community.compose.mediaLocked")}</Text>
+          ) : isPoll ? (
+            // A poll takes no photos or videos (the server refuses them too).
+            <Text style={styles.note}>{t("community.poll.noMedia")}</Text>
           ) : (
             // Create → Photo/Video opens the library only once "Continue your
             // draft?" is answered: Continue would replace what was just picked.
             <MediaPicker media={media} onChange={setMedia} disabled={submitting} start={draftReady ? start : null} />
           )}
+
+          {/* ── Poll ── */}
+          {editing?.kind === "poll" && editing.poll ? (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>{t("community.poll.label")}</Text>
+              </View>
+              {[...editing.poll.options].sort((a, b) => a.position - b.position).map((o) => (
+                <Text key={o.id} style={styles.pollLocked}>{o.label}</Text>
+              ))}
+              <Text style={styles.note}>{t("community.poll.locked")}</Text>
+            </>
+          ) : null}
+          {!editing && media.length === 0 ? (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>{t("community.poll.label")}</Text>
+              </View>
+              {pollOptions ? (
+                <View style={styles.pollEditor}>
+                  {pollOptions.map((value, i) => (
+                    <View key={i} style={styles.pollRow}>
+                      <TextInput
+                        value={value}
+                        onChangeText={(text) => setPollOptions((list) => (list ? list.map((v, j) => (j === i ? text : v)) : list))}
+                        placeholder={t("community.poll.optionPlaceholder", { n: i + 1 })}
+                        placeholderTextColor={Colors.text.muted}
+                        maxLength={POLL_OPTION_MAX_LENGTH}
+                        editable={!submitting}
+                        accessibilityLabel={t("community.poll.optionPlaceholder", { n: i + 1 })}
+                        style={styles.pollInput}
+                      />
+                      {pollOptions.length > POLL_OPTIONS_MIN ? (
+                        <TouchableOpacity
+                          onPress={() => setPollOptions((list) => (list ? list.filter((_, j) => j !== i) : list))}
+                          disabled={submitting}
+                          hitSlop={8}
+                          accessibilityRole="button"
+                          accessibilityLabel={t("community.poll.removeOption")}
+                        >
+                          <X size={16} color={Colors.text.tertiary} />
+                        </TouchableOpacity>
+                      ) : null}
+                    </View>
+                  ))}
+                  {pollOptions.length < POLL_OPTIONS_MAX ? (
+                    <TouchableOpacity
+                      onPress={() => setPollOptions((list) => (list ? [...list, ""] : list))}
+                      disabled={submitting}
+                      style={styles.tagButton}
+                      activeOpacity={0.8}
+                      accessibilityRole="button"
+                    >
+                      <Plus size={16} color={Colors.darkGold} />
+                      <Text style={styles.tagButtonText}>{t("community.poll.addOption")}</Text>
+                    </TouchableOpacity>
+                  ) : null}
+                  <Text style={styles.subLabel}>{t("community.poll.duration")}</Text>
+                  <Text style={styles.note}>{t("community.poll.durationNote")}</Text>
+                  <View style={styles.pollDays} accessibilityRole="radiogroup">
+                    {POLL_DURATIONS.map((d) => {
+                      const on = pollDays === d;
+                      return (
+                        <TouchableOpacity
+                          key={d}
+                          onPress={() => setPollDays(d)}
+                          disabled={submitting}
+                          activeOpacity={0.8}
+                          accessibilityRole="radio"
+                          accessibilityState={{ checked: on }}
+                          style={[styles.choice, on && styles.choiceOn]}
+                        >
+                          <Text style={[styles.choiceText, on && styles.choiceTextOn]}>{t("community.poll.days", { count: d })}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setPollOptions(null)}
+                    disabled={submitting}
+                    accessibilityRole="button"
+                    style={styles.pollRemove}
+                  >
+                    <Text style={styles.pollRemoveText}>{t("community.poll.remove")}</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.chips}>
+                  <TouchableOpacity
+                    onPress={() => setPollOptions(["", ""])}
+                    disabled={submitting}
+                    style={styles.tagButton}
+                    activeOpacity={0.8}
+                    accessibilityRole="button"
+                  >
+                    <BarChart3 size={16} color={Colors.darkGold} />
+                    <Text style={styles.tagButtonText}>{t("community.poll.add")}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
+          ) : null}
 
           <View style={styles.divider} />
 
@@ -904,6 +1039,53 @@ const styles = StyleSheet.create({
   },
   emoji: {
     fontSize: 16,
+  },
+  pollEditor: {
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    gap: 8,
+  },
+  pollRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border.default,
+    backgroundColor: Colors.background.medium,
+  },
+  pollInput: {
+    flex: 1,
+    color: Colors.text.primary,
+    fontSize: 15,
+    paddingVertical: 10,
+    textAlign: I18nManager.isRTL ? 'right' : 'left',
+  },
+  pollDays: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  subLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.text.tertiary,
+    marginTop: 4,
+  },
+  pollRemove: {
+    alignSelf: 'flex-start',
+    paddingVertical: 4,
+  },
+  pollRemoveText: {
+    color: Colors.status.error,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  pollLocked: {
+    color: Colors.text.primary,
+    fontSize: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
   },
   note: {
     fontSize: 13,

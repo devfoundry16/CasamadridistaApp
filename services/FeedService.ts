@@ -60,7 +60,7 @@ export interface Post {
    * `media_teaser` is a Casa Media share posted into the feed. It carries
    * `media_item` and is rendered by `PostCard/MediaTeaserCard`, never inline.
    */
-  kind: 'text' | 'image' | 'video' | 'media_teaser';
+  kind: 'text' | 'image' | 'video' | 'media_teaser' | 'poll';
   title: string | null;
   body: string | null;
   language: string;
@@ -97,6 +97,8 @@ export interface Post {
   feeling?: string | null;
   /** When the author last changed what the post says; null if never. */
   edited_at?: string | null;
+  /** A poll post's options and closing time; the counts come from GET /posts/:id/poll. */
+  poll?: { closes_at: string; options: { id: string; position: number; label: string }[] } | null;
 }
 
 export interface FeedPage {

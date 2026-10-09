@@ -6,9 +6,10 @@ import i18n from '@/i18n';
 import { normaliseGridPage } from '@/services/social/normalise';
 import type { ProfileGridPage } from '@/types/social';
 import type { Audience, EditPayload } from '@/utils/postCompose.core';
+import type { PollTally } from '@/utils/poll.core';
 
 export interface CreatePostPayload {
-  kind: 'text' | 'image' | 'video';
+  kind: 'text' | 'image' | 'video' | 'poll';
   title?: string;
   body?: string;
   country_code?: string;
@@ -23,6 +24,8 @@ export interface CreatePostPayload {
   audience?: Audience;
   /** A key from FEELINGS (utils/postCompose.core), or null for none. */
   feeling?: string | null;
+  /** kind 'poll' only: 2–4 options, open for 1, 3 or 7 days (utils/poll.core). */
+  poll?: { options: string[]; duration_days: number };
 }
 
 export interface SaveState {
@@ -44,6 +47,24 @@ class PostServiceClass {
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to load post');
     }
+  }
+
+  /** A poll's options, and its results once this viewer may see them. */
+  async getPoll(postId: string): Promise<PollTally> {
+    const headers = await this.getAuthHeader();
+    const { data } = await axios.get<PollTally>(`${API_BASE_URL}posts/${encodeURIComponent(postId)}/poll`, { headers });
+    return data;
+  }
+
+  /** Vote (or change the vote). Rejects with the axios error: 409 when the poll has closed. */
+  async votePoll(postId: string, optionId: string): Promise<PollTally> {
+    const headers = await this.getAuthHeader();
+    const { data } = await axios.post<PollTally>(
+      `${API_BASE_URL}posts/${encodeURIComponent(postId)}/poll/vote`,
+      { option_id: optionId },
+      { headers },
+    );
+    return data;
   }
 
   async createPost(payload: CreatePostPayload): Promise<Post> {
