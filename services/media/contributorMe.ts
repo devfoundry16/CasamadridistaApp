@@ -22,9 +22,9 @@ import type {
  * arrival at a stadium.
  */
 export const DEFAULT_LIMITS: ContributorLimits = {
-  maxVideoDurationSec: 600,
-  maxVideoBytes: 200 * 1024 * 1024,
-  maxImageBytes: 25 * 1024 * 1024,
+  maxVideoDurationSec: 1800,
+  maxVideoBytes: 1024 * 1024 * 1024,
+  maxImageBytes: 50 * 1024 * 1024,
   maxGalleryAssets: 20,
 };
 

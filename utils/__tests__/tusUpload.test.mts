@@ -16,6 +16,7 @@ import {
   nextChunk,
   readOffset,
   shouldUseTus,
+  CF_ONE_SHOT_MAX_BYTES,
   tusProgress,
 } from '../tusUpload.core.ts';
 
@@ -111,6 +112,12 @@ describe('shouldUseTus', () => {
 
   it('the first attempt is one request, so it finishes with the app in the background', () => {
     assert.equal(shouldUseTus({ ...big, attempts: 0 }), false);
+  });
+
+  it('a video over the one-shot ceiling starts resumable, since one request would be refused', () => {
+    assert.equal(shouldUseTus({ ...big, sizeBytes: CF_ONE_SHOT_MAX_BYTES + 1, attempts: 0 }), true);
+    assert.equal(shouldUseTus({ ...big, sizeBytes: 328 * MIB, attempts: 0 }), true);
+    assert.equal(shouldUseTus({ ...big, sizeBytes: CF_ONE_SHOT_MAX_BYTES, attempts: 0 }), false);
   });
 
   it('once an attempt has failed, a big video goes up in resumable chunks', () => {

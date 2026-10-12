@@ -30,6 +30,12 @@ function FanClubCard({ club, onJoin }: FanClubCardProps) {
     : t('fanClubs.foundedUnknown');
 
   const description = club.description || [foundingLabel, club.address].filter(Boolean).join(' · ');
+  // The club's officers, labelled, each only when the club has named one.
+  const roles = [
+    { key: 'fanClubs.rolePresident', name: club.president },
+    { key: 'fanClubs.roleVicePresident', name: club.vice_president },
+    { key: 'fanClubs.roleSecretary', name: club.secretary },
+  ].filter((r): r is { key: string; name: string } => !!r.name?.trim());
 
   return (
     <View
@@ -61,15 +67,16 @@ function FanClubCard({ club, onJoin }: FanClubCardProps) {
           >
             {description}
           </Text>
-          {club.president && (
+          {roles.map(({ key, name }) => (
             <Text
+              key={key}
               className="text-xs opacity-50 mt-0.5"
               style={{ color: Colors.text.primary }}
               numberOfLines={1}
             >
-              {club.president}
+              {t(key, { name })}
             </Text>
-          )}
+          ))}
         </View>
       </View>
 

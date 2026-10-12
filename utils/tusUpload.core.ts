@@ -16,6 +16,12 @@
  */
 export const TUS_CHUNK_BYTES = 8 * 1024 * 1024;
 
+/**
+ * Cloudflare Stream's ceiling for a one-shot (direct creator) upload. A bigger
+ * file can only go up resumable, so it is never offered a one-shot slot.
+ */
+export const CF_ONE_SHOT_MAX_BYTES = 200 * 1024 * 1024;
+
 /** Every tus request names the protocol version. */
 export const TUS_HEADERS = { 'Tus-Resumable': '1.0.0' } as const;
 
@@ -96,16 +102,19 @@ interface Sized {
  * content video too big for one chunk goes up in chunks, so no later failure
  * costs more than one of them.
  *
+ * A video over Cloudflare's one-shot ceiling (CF_ONE_SHOT_MAX_BYTES) skips that
+ * first single request: it would be refused on arrival, so it starts resumable.
+ *
  * Photos and covers go to storage that does not speak tus, and the size has to
  * be known — the server creates the upload with it.
  */
 export function shouldUseTus(entry: Sized): boolean {
   return (
-    entry.attempts > 0 &&
     entry.kind === 'video' &&
     entry.role === 'content' &&
     typeof entry.sizeBytes === 'number' &&
-    entry.sizeBytes > TUS_CHUNK_BYTES
+    entry.sizeBytes > TUS_CHUNK_BYTES &&
+    (entry.attempts > 0 || entry.sizeBytes > CF_ONE_SHOT_MAX_BYTES)
   );
 }
 

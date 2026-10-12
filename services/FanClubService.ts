@@ -10,6 +10,7 @@ export interface FanClub {
   address: string | null;
   description: string | null;
   president: string | null;
+  vice_president: string | null;
   secretary: string | null;
   contact: string | null;
   logo_url: string | null;
