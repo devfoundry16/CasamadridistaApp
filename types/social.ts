@@ -94,6 +94,8 @@ export interface ProfileGridItem {
   media_count: number;
   is_video: boolean;
   created_at: string | null;
+  /** Pinned to the top of its author's profile. */
+  pinned: boolean;
 }
 
 export interface ProfileGridPage {

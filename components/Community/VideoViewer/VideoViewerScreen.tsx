@@ -92,6 +92,12 @@ export default function VideoViewerScreen({ postId, feed }: Props) {
   // the page keeps its poster, so the previous video never shows under it.
   const currentUri = current?.media?.[0] ? playableUri(current.media[0]) : null;
   const [loadedUri, setLoadedUri] = useState<string | null>(null);
+
+  // Each video watched here is an open, for its author's Insights.
+  const currentPostId = current?.id;
+  useEffect(() => {
+    if (currentPostId) void FeedService.recordViews([currentPostId], 'open');
+  }, [currentPostId]);
   useEffect(() => {
     if (!currentUri) return;
     let stale = false;

@@ -1079,7 +1079,41 @@
       "removeOption": "Remove option",
       "durationNote": "Counted from when you post it."
     },
-    "tabReels": "Reels"
+    "tabReels": "Reels",
+    "pin": {
+      "pin": "Pin to profile",
+      "unpin": "Unpin from profile",
+      "limit": "You can pin up to 3 posts. Unpin one first.",
+      "notApproved": "This post can be pinned once it is approved.",
+      "failed": "Could not change the pin. Try again."
+    },
+    "insights": {
+      "title": "Insights",
+      "open": "Insights",
+      "loadFailed": "Could not load the insights.",
+      "reach": "Reach",
+      "views": "Views",
+      "people": "People reached",
+      "opens": "Opened",
+      "trackedSince": "Views counted since {{date}}, once per person per day.",
+      "last30": "Views, last 30 days",
+      "chartLabel_one": "{{count}} view in the last 30 days",
+      "chartLabel_other": "{{count}} views in the last 30 days",
+      "engagement": "Engagement",
+      "likes": "Likes",
+      "comments": "Comments",
+      "saves": "Saves",
+      "shares": "Shares",
+      "sharesBy": "Shares by channel",
+      "channel": {
+        "native_share": "Shared to apps",
+        "copy_link": "Link copied",
+        "qr": "QR code",
+        "dm": "Sent in messages",
+        "save": "Saved to photos"
+      },
+      "ownViews": "Your own views are not counted."
+    }
   },
   "membershipPackages": {
     "halaGold": {
@@ -1770,7 +1804,8 @@
         "video": "Video post",
         "photos": "Post with several photos",
         "photo": "Photo post",
-        "text": "Text post"
+        "text": "Text post",
+        "pinned": "Pinned"
       },
       "empty": {
         "posts": "{{name}} hasn't posted yet.",

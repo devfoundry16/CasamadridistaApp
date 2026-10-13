@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { AlignLeft, Copy, Play } from 'lucide-react-native';
+import { AlignLeft, Copy, Pin, Play } from 'lucide-react-native';
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
@@ -17,13 +17,14 @@ interface Props {
 
 /**
  * One square of the profile grid — the `GalleryGrid` cell, with a corner badge
- * for a video or several photos. A text post has no thumbnail, so it gets a
- * text tile instead.
+ * for a video or several photos, and a pin on the leading corner for a post
+ * pinned to the profile. A text post has no thumbnail, so it gets a text tile
+ * instead.
  */
 function ProfileGridCell({ item, size, onPress }: Props) {
   const { t } = useTranslation();
   const badge = gridBadge(item);
-  const label =
+  const kind =
     badge === 'video'
       ? t('social.profile.grid.video')
       : badge === 'multi'
@@ -31,6 +32,7 @@ function ProfileGridCell({ item, size, onPress }: Props) {
         : item.thumb_url
           ? t('social.profile.grid.photo')
           : t('social.profile.grid.text');
+  const label = item.pinned ? `${t('social.profile.grid.pinned')}, ${kind}` : kind;
 
   return (
     <Touchable
@@ -55,6 +57,12 @@ function ProfileGridCell({ item, size, onPress }: Props) {
             <AlignLeft size={Math.max(18, Math.round(size / 5))} color={Colors.darkGold} />
           </View>
         )}
+        {item.pinned ? (
+          // `start`: the pin sits on the leading corner, apart from the kind badge.
+          <View pointerEvents="none" style={[styles.badge, styles.pin]}>
+            <Pin size={14} color="#fff" fill="#fff" />
+          </View>
+        ) : null}
         {badge ? (
           // `end`, not `right`: the badge sits on the trailing corner in both directions.
           <View pointerEvents="none" style={styles.badge}>
@@ -86,6 +94,10 @@ const styles = StyleSheet.create({
     padding: 3,
     borderRadius: 10,
     backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  pin: {
+    end: undefined,
+    start: 6,
   },
 });
 

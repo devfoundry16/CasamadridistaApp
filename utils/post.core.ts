@@ -125,17 +125,30 @@ export function patchPostInPages<T extends HasId, D extends { pages: { posts: T[
   return changed ? { ...data, pages } : data;
 }
 
-export type FeedMenuAction = 'report' | 'edit' | 'delete';
+export type FeedMenuAction = 'report' | 'pin' | 'unpin' | 'insights' | 'edit' | 'delete';
 
 /**
  * What a post's "..." menu offers. Someone else's post can be reported
- * (signing in is asked for on tap); your own can be edited or deleted. A
- * Casa Media teaser you shared has no title, text or media of its own, so
- * there is nothing to edit.
+ * (signing in is asked for on tap). Your own can be pinned to your profile
+ * once approved (a pin can always be taken off), measured in Insights,
+ * edited or deleted. A Casa Media teaser you shared has no title, text or
+ * media of its own, so it can only be deleted.
  */
-export function feedMenuActions({ isOwn, kind }: { isOwn: boolean; kind?: string }): FeedMenuAction[] {
+export function feedMenuActions({
+  isOwn,
+  kind,
+  status,
+  pinned,
+}: {
+  isOwn: boolean;
+  kind?: string;
+  status?: string;
+  pinned?: boolean;
+}): FeedMenuAction[] {
   if (!isOwn) return ['report'];
-  return kind === 'media_teaser' ? ['delete'] : ['edit', 'delete'];
+  if (kind === 'media_teaser') return ['delete'];
+  const pin: FeedMenuAction[] = pinned ? ['unpin'] : status === 'approved' ? ['pin'] : [];
+  return [...pin, 'insights', 'edit', 'delete'];
 }
 
 /**

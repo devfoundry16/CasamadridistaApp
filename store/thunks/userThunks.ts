@@ -17,6 +17,7 @@ import {
 } from "../slices/userSlice";
 import { RootState } from "../store";
 import { clearDraft } from "@/utils/postDraft";
+import FeedService from "@/services/FeedService";
 
 // Login thunk
 export const loginUser = createAsyncThunk(
@@ -286,6 +287,8 @@ export const logoutUser = createAsyncThunk(
     // in AuthService.logout: that also runs when a token refresh fails, and a
     // draft should survive having to sign in again.
     if (userId) await clearDraft(userId);
+    // The next account on this phone counts its own views.
+    FeedService.resetViews();
     // The redirect latch stays claimed for the whole auth episode. Without this
     // the *next* sign-in in the same app session finds it already claimed and
     // silently skips finishAuthRedirect — the user lands on the account tab
@@ -337,6 +340,7 @@ export const deleteUser = createAsyncThunk(
     await AuthService.deleteAccount();
     await AsyncStorage.removeItem("paymentMethods");
     if (userId) await clearDraft(userId);
+    FeedService.resetViews();
     resetAuthRedirectClaim();
     dispatch(clearUser());
   }

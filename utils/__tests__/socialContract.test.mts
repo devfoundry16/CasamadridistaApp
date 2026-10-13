@@ -185,13 +185,14 @@ describe('small envelopes', () => {
 
 // GET social/users/:id/posts?layout=grid and GET posts/saved?layout=grid: the
 // same `{ posts, nextCursor }` envelope as the full posts list, with light rows.
-const WIRE_GRID = {"posts":[{"id":"p1","kind":"image","thumb_url":"https://x/t1.jpg","media_count":3,"is_video":false,"created_at":"2026-09-20T10:00:00Z"},{"id":"p2","kind":"video","thumb_url":"https://x/t2.jpg","media_count":1,"is_video":true,"created_at":"2026-09-19T10:00:00Z"},{"id":"p3","kind":"text","thumb_url":null,"media_count":0,"is_video":false,"created_at":"2026-09-18T10:00:00Z"}],"nextCursor":"2026-09-18T10:00:00Z"};
+const WIRE_GRID = {"posts":[{"id":"p1","kind":"image","thumb_url":"https://x/t1.jpg","media_count":3,"is_video":false,"created_at":"2026-09-20T10:00:00Z","pinned":true},{"id":"p2","kind":"video","thumb_url":"https://x/t2.jpg","media_count":1,"is_video":true,"created_at":"2026-09-19T10:00:00Z"},{"id":"p3","kind":"text","thumb_url":null,"media_count":0,"is_video":false,"created_at":"2026-09-18T10:00:00Z"}],"nextCursor":"2026-09-18T10:00:00Z"};
 
 describe('profile grid', () => {
   it('folds the light rows and keeps the cursor', () => {
     const page = normaliseGridPage(WIRE_GRID);
     assert.equal(page.nextCursor, '2026-09-18T10:00:00Z');
-    assert.deepEqual(page.items[0], { id: 'p1', kind: 'image', thumb_url: 'https://x/t1.jpg', media_count: 3, is_video: false, created_at: '2026-09-20T10:00:00Z' });
+    assert.deepEqual(page.items[0], { id: 'p1', kind: 'image', thumb_url: 'https://x/t1.jpg', media_count: 3, is_video: false, created_at: '2026-09-20T10:00:00Z', pinned: true });
+    assert.equal(page.items[1].pinned, false, 'a cell without the flag is not pinned');
     assert.equal(page.items[1].is_video, true);
     assert.equal(page.items[2].thumb_url, null, 'a text post has no thumbnail');
   });

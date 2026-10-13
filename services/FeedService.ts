@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '@/config/supabase';
 import type { MediaItem } from '@/types/media/casaMedia';
+import { forgetViewed, newlyViewed, viewSessionFor, type ViewSession } from '@/utils/postViews.core';
 
 export type FeedTab = 'for-you' | 'trending' | 'recent' | 'fan-clubs' | 'reels';
 
@@ -75,6 +76,8 @@ export interface Post {
   view_count: number;
   hot_score: number;
   is_pinned: boolean;
+  /** Set while pinned to the top of its author's profile (up to 3 there). */
+  profile_pinned_at?: string | null;
   is_sponsored: boolean;
   created_at: string;
   updated_at: string;
@@ -147,13 +150,34 @@ class FeedServiceClass {
     }
   }
 
-  async recordViews(postIds: string[]): Promise<void> {
+  /** Posts already sent today, per kind: the server counts one view per viewer per day. */
+  private viewSession: ViewSession | null = null;
+
+  /**
+   * Posts seen in a feed (`feed`) or opened on their own screen or in the
+   * video viewer (`open`). Each post is sent once per UTC day and kind, and
+   * only when signed in: a view needs a viewer. Fire-and-forget; a call that
+   * fails is sent again the next time the post is on screen.
+   */
+  async recordViews(postIds: string[], source: 'feed' | 'open' = 'feed'): Promise<void> {
+    let fresh: string[] = [];
+    let sent: Set<string> | null = null;
     try {
       const headers = await this.getAuthHeader();
-      await axios.post(`${API_BASE_URL}posts/views`, { post_ids: postIds }, { headers });
+      if (!headers.Authorization) return;
+      this.viewSession = viewSessionFor(this.viewSession);
+      sent = this.viewSession[source];
+      fresh = newlyViewed(sent, postIds);
+      if (!fresh.length) return;
+      await axios.post(`${API_BASE_URL}posts/views`, { post_ids: fresh, source }, { headers });
     } catch {
-      // Fire-and-forget: silently fail
+      if (sent) forgetViewed(sent, fresh);
     }
+  }
+
+  /** Forget what was sent, so a different account counts its own views. */
+  resetViews(): void {
+    this.viewSession = null;
   }
 }
 

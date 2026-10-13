@@ -30,6 +30,8 @@ export interface GridCell {
   media_count: number;
   is_video: boolean;
   created_at: string | null;
+  /** Pinned to the top of its author's profile; a Casa Media item never is. */
+  pinned: boolean;
 }
 
 /**
@@ -51,6 +53,7 @@ export function mediaGridCell(item: {
     media_count: Math.max(1, item.asset_count),
     is_video: isVideo,
     created_at: item.published_at,
+    pinned: false,
   };
 }
 

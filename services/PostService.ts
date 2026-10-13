@@ -7,6 +7,7 @@ import { normaliseGridPage } from '@/services/social/normalise';
 import type { ProfileGridPage } from '@/types/social';
 import type { Audience, EditPayload } from '@/utils/postCompose.core';
 import type { PollTally } from '@/utils/poll.core';
+import { normaliseInsights, type PostInsights } from '@/utils/postInsights.core';
 
 export interface CreatePostPayload {
   kind: 'text' | 'image' | 'video' | 'poll';
@@ -162,6 +163,33 @@ class PostServiceClass {
       return normaliseGridPage(response.data);
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to load saved posts');
+    }
+  }
+
+  /**
+   * Pin your own approved post to the top of your profile (at most 3), or take
+   * the pin off. A refusal throws the server's code (`pin_limit`,
+   * `post_not_pinnable`) as the message, for pinErrorKey.
+   */
+  async setPinned(id: string, pinned: boolean): Promise<{ pinned: boolean; profile_pinned_at?: string | null }> {
+    try {
+      const headers = await this.getAuthHeader();
+      const url = `${API_BASE_URL}posts/${encodeURIComponent(id)}/pin`;
+      const response = pinned ? await axios.post(url, {}, { headers }) : await axios.delete(url, { headers });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed');
+    }
+  }
+
+  /** Your own post's Insights. Anyone else's post answers 404. */
+  async getInsights(id: string): Promise<PostInsights> {
+    try {
+      const headers = await this.getAuthHeader();
+      const response = await axios.get(`${API_BASE_URL}posts/${encodeURIComponent(id)}/insights`, { headers });
+      return normaliseInsights(response.data);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to load insights');
     }
   }
 

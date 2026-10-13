@@ -170,11 +170,17 @@ describe('feedMenuActions', () => {
   it('anyone may report someone else\'s post; signing in happens on tap', () => {
     assert.deepEqual(feedMenuActions({ isOwn: false }), ['report']);
   });
-  it('nobody reports their own post; its author may edit or delete it', () => {
-    assert.deepEqual(feedMenuActions({ isOwn: true }), ['edit', 'delete']);
+  it('nobody reports their own post; its author may pin it, see its insights, edit or delete it', () => {
+    assert.deepEqual(feedMenuActions({ isOwn: true, status: 'approved' }), ['pin', 'insights', 'edit', 'delete']);
+    assert.deepEqual(feedMenuActions({ isOwn: true, status: 'approved', pinned: true }), ['unpin', 'insights', 'edit', 'delete']);
   });
-  it('a shared Casa Media teaser has nothing of its own to edit, only delete', () => {
-    assert.deepEqual(feedMenuActions({ isOwn: true, kind: 'media_teaser' }), ['delete']);
+  it('a post not yet approved cannot be pinned yet, but a pin can always be taken off', () => {
+    assert.deepEqual(feedMenuActions({ isOwn: true, status: 'pending' }), ['insights', 'edit', 'delete']);
+    assert.deepEqual(feedMenuActions({ isOwn: true }), ['insights', 'edit', 'delete']);
+    assert.deepEqual(feedMenuActions({ isOwn: true, status: 'removed', pinned: true }), ['unpin', 'insights', 'edit', 'delete']);
+  });
+  it('a shared Casa Media teaser has nothing of its own to edit, pin or measure, only delete', () => {
+    assert.deepEqual(feedMenuActions({ isOwn: true, kind: 'media_teaser', status: 'approved' }), ['delete']);
     assert.deepEqual(feedMenuActions({ isOwn: false, kind: 'media_teaser' }), ['report']);
   });
 });

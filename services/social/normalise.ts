@@ -145,6 +145,7 @@ export function normaliseGridPage(raw: unknown): ProfileGridPage {
         media_count: num(row.media_count),
         is_video: bool(row.is_video),
         created_at: str(row.created_at),
+        pinned: bool(row.pinned),
       };
     })
     .filter((row): row is ProfileGridItem => row !== null);

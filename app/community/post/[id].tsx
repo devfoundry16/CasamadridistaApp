@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   FlatList,
   View,
@@ -12,6 +12,7 @@ import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import PostService from '@/services/PostService';
+import FeedService from '@/services/FeedService';
 import { type Comment } from '@/services/CommentService';
 import {
   commentsQueryKey,
@@ -56,6 +57,12 @@ export default function PostDetailPage() {
     queryFn:  () => PostService.getPost(id),
     enabled:  validId,
   });
+
+  // Opening a post is a view of it, for its author's Insights.
+  const loadedId = post?.id;
+  useEffect(() => {
+    if (loadedId) void FeedService.recordViews([loadedId], 'open');
+  }, [loadedId]);
 
   // Deleted by its author from this screen: there is nothing left to show.
   const leave = useCallback(() => (router.canGoBack() ? router.back() : router.replace('/')), [router]);

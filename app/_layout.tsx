@@ -259,6 +259,20 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="community/insights/[id]"
+          options={{
+            title: t("community.insights.title"),
+            headerShown: true,
+            headerStyle: { backgroundColor: Colors.darkGold },
+            headerTintColor: Colors.textWhite,
+            headerTitleAlign: "center",
+            headerTitleStyle: {
+              color: Colors.textWhite,
+              ...(fontFamilyBold ? { fontFamily: fontFamilyBold } : {}),
+            },
+          }}
+        />
+        <Stack.Screen
           name="community/edit/[id]"
           options={{
             title: t("community.compose.editTitle"),

@@ -47,6 +47,7 @@ describe('mediaGridCell', () => {
       media_count: 6,
       is_video: false,
       created_at: '2026-03-01T19:00:00Z',
+      pinned: false,
     });
   });
 
