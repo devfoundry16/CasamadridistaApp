@@ -1,5 +1,5 @@
 import { useGlobalSearchParams, useRouter } from 'expo-router';
-import { Shirt } from 'lucide-react-native';
+import { Shirt, Star } from 'lucide-react-native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -10,11 +10,14 @@ import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import { useMatchLineups, useWithSummary } from '@/hooks/football/matchCenter';
 import type { Absence, LineupPlayer, TeamLineup, TeamRef } from '@/types/soccer/matchCenter';
+import { ratingBand, ratingIndex, topRated, type MatchRatings, type RatingBand } from '@/utils/matchExtras.core';
 
 /**
  * Lineups: the official XI, bench, coach and formation once announced, and
  * the players each club is missing. There is no predicted XI: the provider
- * does not supply one, and the app does not make one up.
+ * does not supply one, and the app does not make one up. Once the match is
+ * under way, each player the provider rated shows their rating, and the best
+ * three lead the tab.
  */
 export default function MatchLineupsTab() {
   const { id } = useGlobalSearchParams();
@@ -26,8 +29,11 @@ export default function MatchLineupsTab() {
     <TabScroll query={query} isEmpty={() => false} empty={{ icon: Shirt, title: t('match.center.noData') }}>
       {(data) => (
         <>
+          <TopRatedCard ratings={data.ratings} />
           {data.lineups.length ? (
-            data.lineups.map((team) => <LineupCard key={team.team.id ?? team.team.name} lineup={team} />)
+            data.lineups.map((team) => (
+              <LineupCard key={team.team.id ?? team.team.name} lineup={team} ratings={ratingIndex(data.ratings)} />
+            ))
           ) : (
             <Card>
               <View style={{ alignItems: 'center', paddingVertical: 12, gap: 8 }}>
@@ -46,6 +52,11 @@ export default function MatchLineupsTab() {
             </Card>
           ) : null}
 
+          {data.ratings && (data.ratings.home.length || data.ratings.away.length) ? (
+            <Text className="text-[11px] text-center" style={{ color: Colors.text.muted, marginTop: 4 }}>
+              {t('match.center.ratingsSource')}
+            </Text>
+          ) : null}
           <Updated at={data.fetched_at} />
         </>
       )}
@@ -53,7 +64,50 @@ export default function MatchLineupsTab() {
   );
 }
 
-function LineupCard({ lineup }: { lineup: TeamLineup }) {
+const BAND_COLORS: Record<RatingBand, string> = {
+  great: Colors.status.success,
+  good: Colors.darkGold,
+  fair: Colors.status.warning,
+  poor: Colors.status.error,
+};
+
+/** A rating on its band's colour; dark text, which reads on all four. */
+function RatingChip({ rating }: { rating: number }) {
+  const { t } = useTranslation();
+  return (
+    <View
+      accessible
+      accessibilityLabel={t('match.center.ratingA11y', { rating: rating.toFixed(1) })}
+      style={{ minWidth: 34, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: BAND_COLORS[ratingBand(rating)], alignItems: 'center' }}
+    >
+      <Text className="text-[12px] font-bold" style={{ color: '#1A1A1A', fontVariant: ['tabular-nums'], writingDirection: 'ltr' }}>
+        {rating.toFixed(1)}
+      </Text>
+    </View>
+  );
+}
+
+/** The match's three best-rated players, across both sides. */
+function TopRatedCard({ ratings }: { ratings: MatchRatings | undefined }) {
+  const { t } = useTranslation();
+  const top = topRated(ratings, 3);
+  if (!top.length) return null;
+  return (
+    <Card title={t('match.center.topRated')}>
+      {top.map((p) => (
+        <View key={`${p.side}-${p.id}`} style={{ flexDirection: 'row', alignItems: 'center', minHeight: 40, gap: 12 }}>
+          <Star size={16} color={Colors.darkGold} />
+          <Text className="text-[14px]" style={{ flex: 1, color: Colors.text.primary }} numberOfLines={1}>
+            {p.name}
+          </Text>
+          <RatingChip rating={p.rating} />
+        </View>
+      ))}
+    </Card>
+  );
+}
+
+function LineupCard({ lineup, ratings }: { lineup: TeamLineup; ratings: Map<number, number> }) {
   const { t } = useTranslation();
   return (
     <Card>
@@ -71,12 +125,12 @@ function LineupCard({ lineup }: { lineup: TeamLineup }) {
 
       <SubHeading label={t('match.center.startingXI')} />
       {lineup.startXI.map((p, i) => (
-        <PlayerLine key={p.id ?? `xi-${i}`} player={p} teamId={lineup.team.id} />
+        <PlayerLine key={p.id ?? `xi-${i}`} player={p} teamId={lineup.team.id} rating={p.id != null ? ratings.get(p.id) : undefined} />
       ))}
 
       {lineup.substitutes.length ? <SubHeading label={t('match.center.substitutes')} /> : null}
       {lineup.substitutes.map((p, i) => (
-        <PlayerLine key={p.id ?? `sub-${i}`} player={p} teamId={lineup.team.id} />
+        <PlayerLine key={p.id ?? `sub-${i}`} player={p} teamId={lineup.team.id} rating={p.id != null ? ratings.get(p.id) : undefined} />
       ))}
 
       {lineup.coach?.name ? (
@@ -99,7 +153,7 @@ function SubHeading({ label }: { label: string }) {
   );
 }
 
-function PlayerLine({ player, teamId }: { player: LineupPlayer; teamId: number | null }) {
+function PlayerLine({ player, teamId, rating }: { player: LineupPlayer; teamId: number | null; rating?: number }) {
   const router = useRouter();
   const canOpen = player.id != null && teamId != null;
   return (
@@ -126,6 +180,7 @@ function PlayerLine({ player, teamId }: { player: LineupPlayer; teamId: number |
           {player.pos}
         </Text>
       ) : null}
+      {rating != null ? <RatingChip rating={rating} /> : null}
     </Touchable>
   );
 }

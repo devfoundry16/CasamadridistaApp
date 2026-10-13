@@ -59,6 +59,9 @@ export function hrefFromPayloadWithScheme(
         : null;
     case 'media_match':
       return payload.match_id ? `/match/${payload.match_id}/media` : null;
+    // A kickoff reminder the phone scheduled for itself: the match screen.
+    case 'match_reminder':
+      return payload.match_id ? `/match/${payload.match_id}` : null;
     case 'media_digest':
       // Legacy type — the backend now sends `media_match` for match digests.
       // A digest that names a fixture should still land on that fixture's media

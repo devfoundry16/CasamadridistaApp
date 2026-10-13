@@ -1530,7 +1530,29 @@
         "failed_to_score": "Matches without scoring",
         "home_wins": "Home wins",
         "away_wins": "Away wins"
-      }
+      },
+      "topRated": "Top rated",
+      "ratingsSource": "Ratings: API-Football",
+      "ratingA11y": "Rating {{rating}}",
+      "reminderTitle": "Kickoff reminder",
+      "reminder60": "Remind me 1 hour before",
+      "reminder15": "Remind me 15 minutes before",
+      "reminder0": "Remind me at kickoff",
+      "addToCalendar": "Add to calendar",
+      "reminderOff": "Turn off reminder",
+      "reminderSet": "Reminder set.",
+      "reminderDenied": "Allow notifications for Casa Madridista in Settings to get kickoff reminders.",
+      "reminderPast": "That time has already passed.",
+      "reminderBody": "Kickoff at {{time}}",
+      "reminderNow": "Kickoff now",
+      "reminderButton": "Set a kickoff reminder",
+      "reminderOn": "Kickoff reminder on",
+      "reminderChannel": "Kickoff reminders",
+      "openSettings": "Open Settings",
+      "previewTitle": "Match preview",
+      "previewBadge": "AI-generated",
+      "previewSource": "Written by AI from API-Football data · {{time}}",
+      "previewHidden": "Hidden from fans until the preview setting is turned on."
     }
   },
   "contributor": {

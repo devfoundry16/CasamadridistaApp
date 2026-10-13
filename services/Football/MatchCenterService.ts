@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, isAxiosError } from 'axios';
 
 import { development } from '@/config/environment';
 import { API_BASE_URL } from '@/config/supabase';
@@ -7,6 +7,7 @@ import type {
   MatchFormResponse,
   MatchH2HResponse,
   MatchLineupsResponse,
+  MatchPreview,
   MatchStatsResponse,
   MatchSummaryResponse,
   PollPick,
@@ -53,6 +54,26 @@ class MatchCenterApi {
     });
     return data;
   }
+
+  /**
+   * The AI preview, or null when there is none to show. Signed in, so an admin
+   * can read it before it is switched on for fans.
+   */
+  async preview(id: number): Promise<MatchPreview | null> {
+    try {
+      const { data } = await axios.get<MatchPreview>(`${API_BASE_URL}match/fixture/${id}/preview`, {
+        headers: await this.authHeader(),
+        timeout: 15_000,
+      });
+      return data;
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 404) return null;
+      throw error;
+    }
+  }
+
+  /** The match as a calendar file, opened in the browser (iOS offers "Add to Calendar"). */
+  calendarUrl = (id: number) => `${API_BASE_URL}match/fixture/${id}/calendar.ics`;
 
   async vote(id: number, pick: PollPick): Promise<PredictionTally> {
     const { data } = await axios.post<PredictionTally>(

@@ -6,6 +6,7 @@ import { View } from 'react-native';
 
 import CustomWebView from '@/components/CustomWebView';
 import { Card, Crest, ResultDot, TabScroll, Updated } from '@/components/Match/Center/parts';
+import PreviewCard from '@/components/Match/Center/PreviewCard';
 import WatchExclusiveBanner from '@/components/Media/Match/WatchExclusiveBanner';
 import { isFinishedStatus } from '@/components/Media/Match/MatchIdentityStrip';
 import { Text } from '@/components/Text';
@@ -16,8 +17,9 @@ import { useEnvironment } from '@/hooks/useEnvironment';
 import type { MatchSummary, StandingRef, TeamForm } from '@/types/soccer/matchCenter';
 
 /**
- * Details: competition, kickoff and stadium, both clubs' places in the table
- * and their last five results. Live and finished matches also keep the
+ * Details: competition, kickoff and stadium, the AI preview before kickoff
+ * (once switched on), both clubs' places in the table and their last five
+ * results. Live and finished matches also keep the
  * API-Sports match widget, which draws the events timeline.
  *
  * The id comes from the GLOBAL params: entered at `/match/123/media`, this
@@ -51,6 +53,8 @@ export default function MatchDetailsTab() {
           ) : null}
 
           <InfoCard match={match} />
+
+          {match.state === 'upcoming' ? <PreviewCard matchId={match.id} /> : null}
 
           {standings ? <StandingsCard match={match} home={standings.home} away={standings.away} /> : null}
 

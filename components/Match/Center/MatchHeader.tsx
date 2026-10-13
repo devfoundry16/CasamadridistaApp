@@ -6,10 +6,12 @@ import Colors from '@/constants/colors';
 import type { MatchSummary } from '@/types/soccer/matchCenter';
 
 import { Crest, Score } from './parts';
+import ReminderBell from './ReminderBell';
 
 /**
  * The sticky match header: competition and round, crest–score–crest, then the
- * kickoff in the phone's own timezone and the stadium. Built from the match
+ * kickoff in the phone's own timezone and the stadium, and before kickoff the
+ * reminder bell (remind me, add to calendar). Built from the match
  * centre summary, so it works for any fixture, not only those in the Casa
  * Media mirror.
  */
@@ -32,9 +34,15 @@ export default function MatchHeader({ match }: { match: MatchSummary }) {
       }}
     >
       {competition ? (
-        <Text className="text-[11px] text-center" style={{ color: Colors.text.tertiary }} numberOfLines={1}>
+        <Text className="text-[11px] text-center" style={{ color: Colors.text.tertiary, paddingHorizontal: 36 }} numberOfLines={1}>
           {competition}
         </Text>
+      ) : null}
+      {match.state === 'upcoming' && Date.parse(match.date) > Date.now() ? (
+        // `end`: the trailing corner in both directions.
+        <View style={{ position: 'absolute', top: 2, end: 8 }}>
+          <ReminderBell match={match} />
+        </View>
       ) : null}
 
       <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>

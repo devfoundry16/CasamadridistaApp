@@ -1583,7 +1583,29 @@
         "failed_to_score": "مباريات دون تسجيل",
         "home_wins": "انتصارات على الأرض",
         "away_wins": "انتصارات خارج الأرض"
-      }
+      },
+      "topRated": "الأعلى تقييماً",
+      "ratingsSource": "التقييمات: API-Football",
+      "ratingA11y": "التقييم {{rating}}",
+      "reminderTitle": "تذكير بموعد المباراة",
+      "reminder60": "ذكّرني قبل ساعة",
+      "reminder15": "ذكّرني قبل 15 دقيقة",
+      "reminder0": "ذكّرني عند انطلاق المباراة",
+      "addToCalendar": "إضافة إلى التقويم",
+      "reminderOff": "إيقاف التذكير",
+      "reminderSet": "تم ضبط التذكير.",
+      "reminderDenied": "اسمح بإشعارات كاسا مادريديستا من الإعدادات لتصلك تذكيرات المباريات.",
+      "reminderPast": "لقد فات هذا الوقت بالفعل.",
+      "reminderBody": "انطلاق المباراة الساعة {{time}}",
+      "reminderNow": "المباراة تنطلق الآن",
+      "reminderButton": "ضبط تذكير بالمباراة",
+      "reminderOn": "تذكير المباراة مفعّل",
+      "reminderChannel": "تذكيرات المباريات",
+      "openSettings": "فتح الإعدادات",
+      "previewTitle": "تقديم المباراة",
+      "previewBadge": "مكتوب بالذكاء الاصطناعي",
+      "previewSource": "كتبه الذكاء الاصطناعي من بيانات API-Football · {{time}}",
+      "previewHidden": "مخفي عن المشجعين حتى يتم تفعيل إعداد التقديم."
     }
   },
   "contributor": {

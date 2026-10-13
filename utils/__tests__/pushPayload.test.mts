@@ -66,6 +66,11 @@ describe('pushPayload.core — hrefFromPayload', () => {
     assert.equal(href({ v: 1, type: 'media_match', match_id: 7 }), '/match/7/media');
   });
 
+  it('a kickoff reminder opens the match itself', () => {
+    assert.equal(href({ v: 1, type: 'match_reminder', match_id: 1635614 }), '/match/1635614');
+    assert.equal(href({ v: 1, type: 'match_reminder' }), null);
+  });
+
   it('routes a match to its media tab', () => {
     assert.equal(href({ v: 1, type: 'media_match', match_id: 12345 }), '/match/12345/media');
     assert.equal(href({ v: 1, type: 'media_match' }), null); // no id ⇒ nowhere

@@ -6,6 +6,7 @@
 export type PushPayloadType =
   | 'media_item'
   | 'media_match'
+  | 'match_reminder'
   | 'media_digest'
   | 'custom'
   // A manager invited this account to contribute to Casa Media.

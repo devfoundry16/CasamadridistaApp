@@ -1,3 +1,4 @@
+import type { MatchRatings } from '@/utils/matchExtras.core';
 import type { PollPick, PredictionTally } from '@/utils/matchCenter.core';
 
 /** Shapes of /api/match/fixture/:id/* (backend/utils/matchCenterRules.js). */
@@ -114,7 +115,21 @@ export interface MatchLineupsResponse {
   state: MatchState;
   lineups: TeamLineup[];
   injuries: { home: Absence[]; away: Absence[] };
+  /** API-Football's per-match ratings, live and after full time; absent before kickoff. */
+  ratings?: MatchRatings;
+  ratings_source?: string;
   fetched_at: string;
+}
+
+/** The AI match preview (GET /match/fixture/:id/preview). */
+export interface MatchPreview {
+  fixture_id: number;
+  en: string;
+  ar: string;
+  generated_at: string;
+  source: string;
+  /** True while admins alone can read it: the setting is still off for fans. */
+  hidden_from_fans: boolean;
 }
 
 export interface StatRow {

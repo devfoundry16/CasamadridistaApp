@@ -106,6 +106,17 @@ export function useMatchStats(id: number) {
   });
 }
 
+/** The AI preview, keyed by account: an admin may see one fans cannot yet. */
+export function useMatchPreview(id: number) {
+  const { user } = useUser();
+  return useQuery({
+    queryKey: [...matchCenterKeys.tab(id, 'preview'), user?.id ?? null] as const,
+    queryFn: () => MatchCenterService.preview(id),
+    enabled: valid(id),
+    staleTime: 30 * MIN,
+  });
+}
+
 /** Keyed by account, so a sign-in or sign-out never shows someone else's pick. */
 export function useMatchPredictions(id: number) {
   const { user } = useUser();
