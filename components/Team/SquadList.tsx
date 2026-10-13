@@ -9,6 +9,7 @@ import PlayerRow, { type SquadMetric } from "./PlayerRow";
 import SectionHeading from "./SectionHeading";
 import SurfaceCard from "./SurfaceCard";
 import EmptyState from "./EmptyState";
+import { squadGroups } from "@/utils/squadGroups.core";
 import Chip from "./Chip";
 
 interface Props {
@@ -34,16 +35,9 @@ export default function SquadList({ teamId, showMetricChips = true }: Props) {
     | undefined;
   const coach = coachWithTeam?.player as Coach | undefined;
 
-  // Memoised: the original ran four .filter() passes on every render.
-  const groups = useMemo(() => {
-    const all = squad?.player ?? [];
-    return [
-      { key: "goalkeepers", players: all.filter((p) => p.position === "Goalkeeper") },
-      { key: "defenders", players: all.filter((p) => p.position === "Defender") },
-      { key: "midfielders", players: all.filter((p) => p.position === "Midfielder") },
-      { key: "forwards", players: all.filter((p) => p.position === "Attacker") },
-    ];
-  }, [squad]);
+  // Each player once: the data provider has listed some players two or three
+  // times (squadGroups.core).
+  const groups = useMemo(() => squadGroups(squad?.player), [squad]);
 
   const total = groups.reduce((n, g) => n + g.players.length, 0);
 
