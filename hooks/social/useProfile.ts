@@ -4,6 +4,7 @@ import { useUser } from '@/hooks/useUser';
 import SocialService from '@/services/SocialService';
 import type { FriendAction, RelationshipState, SocialProfile } from '@/types/social';
 import { optimisticState } from '@/utils/chat.core';
+import { withFollow } from '@/utils/follow.core';
 import { socialKeys } from './keys';
 
 /** A profile by user id. `null` data means not found — or blocked; the same answer. */
@@ -73,11 +74,47 @@ function withState(profile: SocialProfile, state: RelationshipState): SocialProf
   return {
     ...profile,
     relationship: {
+      ...profile.relationship,
       state,
       // A block closes messaging at once; anything else keeps what the server
       // last said until the refetch in onSettled replaces it.
       can_message: state === 'blocking' || state === 'self' ? false : profile.relationship.can_message,
+      // A block ends a follow either way (the server removes it).
+      following: state === 'blocking' ? false : profile.relationship.following,
     },
     stats: { ...profile.stats, friends: Math.max(0, profile.stats.friends + friendsDelta) },
   };
+}
+
+/**
+ * Follow or stop following a person: the profile shows it at once (the button
+ * and the follower count), rolls back if the server refuses, and takes the
+ * server's count on success.
+ */
+export function useFollowAction(userId: string) {
+  const queryClient = useQueryClient();
+  const key = socialKeys.profile(userId);
+
+  return useMutation({
+    mutationFn: (following: boolean) => SocialService.setFollowing(userId, following),
+    onMutate: async (following) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData<SocialProfile | null>(key);
+      if (previous) queryClient.setQueryData<SocialProfile>(key, withFollow(previous, following));
+      return { previous };
+    },
+    onError: (_error, _following, context) => {
+      if (context?.previous !== undefined) queryClient.setQueryData(key, context.previous);
+    },
+    onSuccess: (result) => {
+      const current = queryClient.getQueryData<SocialProfile | null>(key);
+      if (current) {
+        queryClient.setQueryData<SocialProfile>(key, {
+          ...current,
+          relationship: { ...current.relationship, following: result.following },
+          stats: { ...current.stats, followers: result.followers },
+        });
+      }
+    },
+  });
 }

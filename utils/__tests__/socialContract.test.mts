@@ -38,7 +38,7 @@ const B = '00000000-0000-4000-8000-00000000000b';
 const CONV = 'c0000000-0000-4000-8000-000000000001';
 
 // profileService.getProfile(A, B) — A and B are friends, B is a member.
-const WIRE_PROFILE = {"user":{"id":"00000000-0000-4000-8000-00000000000b","username":"alifayad","name":"Ali Fayad","avatar_url":"https://x/a.jpg","country_code":"LB","is_member":true,"is_verified":false,"bio":"Hala Madrid 🤍","joined_at":"2024-03-01T00:00:00Z","last_active_at":"2026-09-13T10:00:00Z"},"stats":{"posts":128,"friends":46,"joined_year":2024},"relationship":{"state":"friends","can_message":true}};
+const WIRE_PROFILE = {"user":{"id":"00000000-0000-4000-8000-00000000000b","username":"alifayad","name":"Ali Fayad","avatar_url":"https://x/a.jpg","country_code":"LB","is_member":true,"is_verified":false,"bio":"Hala Madrid 🤍","joined_at":"2024-03-01T00:00:00Z","last_active_at":"2026-09-13T10:00:00Z"},"stats":{"posts":128,"friends":46,"followers":310,"joined_year":2024},"relationship":{"state":"friends","can_message":true,"following":true}};
 
 // messageService.inbox(A)
 const WIRE_INBOX = {"conversations":[{"id":"c0000000-0000-4000-8000-000000000001","other":{"id":"00000000-0000-4000-8000-00000000000b","username":"alifayad","name":"Ali Fayad","avatar_url":"https://x/a.jpg","country_code":"LB","is_member":false,"is_verified":false},"is_request":false,"unread_count":0,"can_write":true,"last_message":{"id":"11111111-1111-4111-8111-111111111111","sender_id":"00000000-0000-4000-8000-00000000000a","kind":"text","embed_kind":null,"status":"visible","created_at":"2026-09-13T10:00:00Z","preview":{"key":"text","text":"Vamos"},"receipt":"delivered"},"last_message_at":"2026-09-13T10:00:00Z"}],"next_before":null,"unread":{"inbox":2,"requests":1}};
@@ -77,9 +77,15 @@ describe('profile', () => {
     assert.equal(p.user.name, 'Ali Fayad');
     assert.equal(p.user.is_member, true);
     assert.equal(p.user.bio, 'Hala Madrid 🤍');
-    assert.deepEqual(p.stats, { posts: 128, friends: 46, joined_year: 2024 });
-    assert.deepEqual(p.relationship, { state: 'friends', can_message: true });
+    assert.deepEqual(p.stats, { posts: 128, friends: 46, followers: 310, joined_year: 2024 });
+    assert.deepEqual(p.relationship, { state: 'friends', can_message: true, following: true });
     assert.equal('show_activity' in p.user, false, 'settings are only present on your own profile');
+  });
+
+  it('a profile from before follows reads as no followers and not following', () => {
+    const p = normaliseProfile({ ...WIRE_PROFILE, stats: { posts: 1, friends: 2, joined_year: 2024 }, relationship: { state: 'none', can_message: true } })!;
+    assert.equal(p.stats.followers, 0);
+    assert.equal(p.relationship.following, false);
   });
 
   it('an account without a name still renders, by handle', () => {

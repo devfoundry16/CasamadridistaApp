@@ -45,6 +45,7 @@ export function hrefFromPayloadWithScheme(
       return isUuid(payload.conversation_id) ? `/social/chat/${payload.conversation_id}` : '/social/messages';
     case 'friend_request':
     case 'friend_accept':
+    case 'follow':
       return isUuid(payload.user_id) ? `/user/${payload.user_id}` : '/social/friends';
     // Activity on a post: a like, a comment, a mention (in the post or one of
     // its comments) or a tag. All of them open the post.

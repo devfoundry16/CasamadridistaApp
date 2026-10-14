@@ -11,6 +11,7 @@
 export const SOCIAL_TITLE_TYPES = [
   'friend_request',
   'friend_accept',
+  'follow',
   'post_like',
   'post_comment',
   'mention',

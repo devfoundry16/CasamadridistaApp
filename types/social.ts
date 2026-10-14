@@ -105,8 +105,9 @@ export interface ProfileGridPage {
 
 export interface SocialProfile {
   user: ProfileUser;
-  stats: { posts: number; friends: number; joined_year: number | null };
-  relationship: { state: RelationshipState; can_message: boolean };
+  stats: { posts: number; friends: number; followers: number; joined_year: number | null };
+  /** `following`: the viewer follows this person (one way, apart from friends). */
+  relationship: { state: RelationshipState; can_message: boolean; following: boolean };
 }
 
 /** Your own appeal against a moderation decision (admin §25). */

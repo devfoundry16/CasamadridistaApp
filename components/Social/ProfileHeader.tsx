@@ -8,7 +8,9 @@ import Colors from '@/constants/colors';
 import { usePresence } from '@/hooks/social/usePresence';
 import type { SocialProfile } from '@/types/social';
 import Touchable from '@/components/Touchable';
+import { canFollow } from '@/utils/follow.core';
 import Avatar from './Avatar';
+import FollowButton from './FollowButton';
 import RelationshipControl from './RelationshipControl';
 import SocialButton from './SocialButton';
 import T from './T';
@@ -122,6 +124,9 @@ export default function ProfileHeader({ profile, onMessage, onCreate, storyRing 
             onMessage={onMessage}
           />
         </View>
+        {!isSelf && canFollow(relationship.state) ? (
+          <FollowButton userId={user.id} following={relationship.following} />
+        ) : null}
         {isSelf && onCreate ? (
           <SocialButton label={t('social.profile.create')} tone="gold" icon={<Plus size={16} color={Colors.text.dark} strokeWidth={2.6} />} onPress={onCreate} />
         ) : null}
@@ -131,6 +136,8 @@ export default function ProfileHeader({ profile, onMessage, onCreate, storyRing 
         <Stat value={stats.posts} label={t('social.profile.posts')} />
         <View style={styles.divider} />
         <Stat value={stats.friends} label={t('social.profile.friends')} />
+        <View style={styles.divider} />
+        <Stat value={stats.followers} label={t('social.profile.followers')} />
         <View style={styles.divider} />
         <Stat value={stats.joined_year} label={t('social.profile.joined')} raw />
       </View>

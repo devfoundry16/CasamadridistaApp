@@ -7,6 +7,7 @@ import { TouchableOpacity, View } from "react-native";
 import FeedList from "@/components/Community/FeedList";
 import FeedTabs from "@/components/Community/FeedTabs";
 import ComposerRow from "@/components/Home/ComposerRow";
+import ReelStrip from "@/components/Home/ReelStrip";
 import ExclusiveFromMadridModule from "@/components/Home/ExclusiveFromMadridModule";
 import MembershipStrip from "@/components/Home/MembershipStrip";
 import StoriesRow from "@/components/Media/Stories/StoriesRow";
@@ -50,6 +51,8 @@ export default function HomeScreen() {
         <UserStoriesRow viewerId={user?.id ?? null} viewerName={name} viewerAvatar={user?.profile?.avatar_url ?? null} />
         {stories?.length ? <StoriesRow groups={stories} compact /> : null}
       </View>
+      {/* The newest reels; not on the Reels tab, which is the same list. */}
+      {tab !== "reels" ? <ReelStrip onSeeAll={() => setTab("reels")} /> : null}
       <FeedTabs
         active={tab}
         onSelect={setTab}

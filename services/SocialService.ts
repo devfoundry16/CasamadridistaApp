@@ -203,6 +203,15 @@ class SocialServiceClass {
     return (data?.state ?? 'none') as RelationshipState;
   }
 
+  /** Follow (one way, no approval) or stop following; answers the new follower count. */
+  async setFollowing(userId: string, following: boolean): Promise<{ following: boolean; followers: number }> {
+    const data = await this.send<{ following?: boolean; followers?: number }>(
+      following ? 'post' : 'delete',
+      `/users/${encodeURIComponent(userId)}/follow`,
+    );
+    return { following: data?.following === true, followers: typeof data?.followers === 'number' ? data.followers : 0 };
+  }
+
   /* ---------------- conversations ---------------- */
 
   async inbox(box: 'inbox' | 'requests', before?: string | null): Promise<InboxPage> {

@@ -18,6 +18,8 @@ export type PushPayloadType =
   // Casa Social (`backend/services/notifications/payload.js` SOCIAL_TYPES).
   | 'friend_request'
   | 'friend_accept'
+  // Someone started following this person: opens the follower's profile.
+  | 'follow'
   | 'dm'
   | 'post_like'
   | 'post_comment'

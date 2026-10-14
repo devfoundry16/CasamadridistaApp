@@ -109,11 +109,13 @@ export function normaliseProfile(raw: unknown): SocialProfile | null {
     stats: {
       posts: num(stats.posts),
       friends: num(stats.friends),
+      followers: num(stats.followers),
       joined_year: typeof stats.joined_year === 'number' ? stats.joined_year : null,
     },
     relationship: {
       state: normaliseRelationship(rel.state),
       can_message: bool(rel.can_message),
+      following: bool(rel.following),
     },
   };
 }

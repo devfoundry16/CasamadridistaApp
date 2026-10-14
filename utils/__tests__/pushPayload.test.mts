@@ -145,6 +145,8 @@ describe('pushPayload.core — social payloads', () => {
   it('a DM push opens its conversation; a friend push opens the profile', () => {
     assert.equal(href({ v: 1, type: 'dm', conversation_id: CONV }), `/social/chat/${CONV}`);
     assert.equal(href({ v: 1, type: 'friend_request', user_id: USER }), `/user/${USER}`);
+    assert.equal(href({ v: 1, type: 'follow', user_id: USER }), `/user/${USER}`, 'a new follower opens their profile');
+    assert.equal(href({ v: 1, type: 'follow', user_id: 'x?y=1' }), '/social/friends');
     assert.equal(href({ v: 1, type: 'friend_accept', user_id: USER }), `/user/${USER}`);
   });
 

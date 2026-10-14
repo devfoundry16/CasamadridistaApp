@@ -80,3 +80,40 @@ export function viewerIndex(videos: { id: string }[], openId: string): number {
   const at = videos.findIndex((v) => v.id === openId);
   return at === -1 ? 0 : at;
 }
+
+/** Tiles in the Reels strip on Home. */
+export const REEL_STRIP_MAX = 10;
+
+export interface ReelTile {
+  id: string;
+  thumb: string | null;
+  blurhash: string | null;
+  durationMs: number | null;
+  authorName: string | null;
+}
+
+interface ReelLike extends PostLike {
+  author?: { first_name?: string | null; last_name?: string | null } | null;
+  media?: (MediaLike & { thumbnail_url?: string | null; blurhash?: string | null; duration_ms?: number | null })[];
+}
+
+/**
+ * The Reels strip's tiles: the ready reels of the loaded Reels feed pages, in
+ * order, each once (videoPostsOf), so every tile is one the full-screen viewer
+ * plays and a tap never lands on a reel it would skip.
+ */
+export function reelStripItems(pages: { posts: ReelLike[] }[] | undefined, max = REEL_STRIP_MAX): ReelTile[] {
+  return videoPostsOf(pages)
+    .slice(0, max)
+    .map((post) => {
+      const media = post.media?.[0];
+      const name = [post.author?.first_name, post.author?.last_name].filter(Boolean).join(' ').trim();
+      return {
+        id: post.id,
+        thumb: media?.thumbnail_url ?? null,
+        blurhash: media?.blurhash ?? null,
+        durationMs: typeof media?.duration_ms === 'number' ? media.duration_ms : null,
+        authorName: name || null,
+      };
+    });
+}

@@ -528,7 +528,10 @@
     "createPhoto": "Photo",
     "memberStrip": "Join the official Madridista fan club.",
     "memberStripCta": "Become a member",
-    "createReel": "Reel"
+    "createReel": "Reel",
+    "reelsTitle": "Reels",
+    "reelsSeeAll": "See all",
+    "openReel": "Open reel by {{name}}"
   },
   "wallet": {
     "loading": "Loading wallet",
@@ -1840,7 +1843,12 @@
         "media": "{{name}} hasn't published in Casa Media yet.",
         "mediaSelf": "What you publish in Casa Media will appear here."
       },
-      "create_reel": "Reel"
+      "create_reel": "Reel",
+      "follow": "Follow",
+      "following": "Following",
+      "followers": "Followers",
+      "unfollow": "Unfollow",
+      "followFailed": "Could not change that. Try again."
     },
     "presence": {
       "online": "Online",
@@ -2077,7 +2085,8 @@
       "socialSettingHint": "Likes, comments, mentions, tags and friend requests",
       "settingFailed": "Couldn't change your notification settings. Please try again.",
       "openSettings": "Turn on notifications in Settings",
-      "openSettingsHint": "Opens this app's settings"
+      "openSettingsHint": "Opens this app's settings",
+      "follow": "{{name}} started following you"
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",

@@ -529,7 +529,10 @@
     "createPhoto": "صورة",
     "memberStrip": "انضم إلى نادي المدريديستا الرسمي.",
     "memberStripCta": "اشترك الآن",
-    "createReel": "ريل"
+    "createReel": "ريل",
+    "reelsTitle": "الريلز",
+    "reelsSeeAll": "عرض الكل",
+    "openReel": "فتح ريل {{name}}"
   },
   "wallet": {
     "loading": "جاري تحميل المحفظة",
@@ -1893,7 +1896,12 @@
         "media": "لم ينشر {{name}} في كاسا ميديا بعد.",
         "mediaSelf": "ما تنشره في كاسا ميديا سيظهر هنا."
       },
-      "create_reel": "ريل"
+      "create_reel": "ريل",
+      "follow": "متابعة",
+      "following": "تتابعه",
+      "followers": "المتابِعون",
+      "unfollow": "إلغاء المتابعة",
+      "followFailed": "تعذّر تنفيذ ذلك. حاول مرة أخرى."
     },
     "presence": {
       "online": "متصل الآن",
@@ -2161,7 +2169,8 @@
       "socialSettingHint": "الإعجابات والتعليقات والإشارات وطلبات الصداقة",
       "settingFailed": "تعذّر تغيير إعدادات الإشعارات. يرجى المحاولة مرة أخرى.",
       "openSettings": "فعّل الإشعارات من الإعدادات",
-      "openSettingsHint": "يفتح إعدادات التطبيق"
+      "openSettingsHint": "يفتح إعدادات التطبيق",
+      "follow": "بدأ {{name}} بمتابعتك"
     },
     "errors": {
       "generic": "حدث خطأ ما. حاول مرة أخرى.",

@@ -19,6 +19,7 @@ describe('socialTitleKey', () => {
     assert.equal(socialTitleKey({ type: 'mention', actor_name: 'Ali', comment_id: 'c1' }), 'social.notifications.mention_comment');
     assert.equal(socialTitleKey({ type: 'post_comment', actor_name: 'Ali', reply: true }), 'social.notifications.post_comment_reply');
     assert.equal(socialTitleKey({ type: 'friend_request', actor_name: 'Ali' }), 'social.notifications.friend_request');
+    assert.equal(socialTitleKey({ type: 'follow', actor_name: 'Ali' }), 'social.notifications.follow');
   });
 
   it('falls back to the stored title without an actor, or for a type it does not localise', () => {
