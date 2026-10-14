@@ -1,5 +1,6 @@
 import * as Clipboard from 'expo-clipboard';
-import { Check, Download, Link2, MoreHorizontal, QrCode, Send, Share2, Trash2, X } from 'lucide-react-native';
+import { BarChart3, Check, Download, Gauge, Link2, MoreHorizontal, Pencil, Pin, PinOff, QrCode, Send, Share2, Trash2, X } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AccessibilityInfo, ActivityIndicator, Alert, Modal, Platform, ScrollView, Share, View } from 'react-native';
@@ -9,15 +10,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import { postWebUrl } from '@/constants/media';
-import { useFriends } from '@/hooks/social/useFriends';
+import { useFeedSpeed } from '@/components/Community/FeedPlayback';
+import { useFollowing, useFriends } from '@/hooks/social/useFriends';
+import { usePinPost } from '@/hooks/usePinPost';
 import { useDeletePost } from '@/hooks/useDeletePost';
 import { useDownloadMedia } from '@/hooks/useDownloadMedia';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useUser } from '@/hooks/useUser';
 import type { Post } from '@/services/FeedService';
 import PostService from '@/services/PostService';
-import { isOwnPost } from '@/utils/post.core';
-import { saveableFiles, shareSheetRows } from '@/utils/shareSheet.core';
+import { feedMenuActions, isOwnPost } from '@/utils/post.core';
+import { speedLabel } from '@/utils/playbackSpeed.core';
+import { saveableFiles, sendToPeople, shareSheetRows } from '@/utils/shareSheet.core';
 import Avatar from './Avatar';
 import FriendPicker from './FriendPicker';
 import T from './T';
@@ -30,7 +34,7 @@ interface Props {
   onDeleted?: () => void;
 }
 
-/** How many friends the "Send to" row shows before "More". */
+/** How many people the "Send to" row shows before "More": friends, then people you follow. */
 const SUGGESTED = 8;
 /** iOS drops a second Modal presented while the first is still closing. */
 const HANDOFF_MS = 320;
@@ -38,10 +42,11 @@ const HANDOFF_MS = 320;
 /**
  * The post share sheet (spec 2.1.0 §04).
  *
- * Send to friends inside the app; out of it through the https link (copied,
- * the phone's own share sheet, a QR code), which opens the app or the web page
- * at /p/<id>. The author also gets Save to Photos and Delete; nobody else ever
- * sees them. Nothing here posts straight into another app: WhatsApp, Telegram
+ * Send to friends and people you follow inside the app; out of it through the
+ * https link (copied, the phone's own share sheet, a QR code), which opens the
+ * app or the web page at /p/<id>. A video gets a playback speed row. The
+ * author's own tools (Pin, Insights, Edit, Save to Photos, Delete) sit apart
+ * under "Your post"; nobody else ever sees them. Nothing here posts straight into another app: WhatsApp, Telegram
  * and the rest come through the phone's share sheet.
  */
 export default function PostShareSheet({ visible, post, onClose, onDeleted }: Props) {
@@ -49,7 +54,11 @@ export default function PostShareSheet({ visible, post, onClose, onDeleted }: Pr
   const insets = useSafeAreaInsets();
   const requireAuth = useRequireAuth();
   const { user } = useUser();
+  const router = useRouter();
   const { data: friends = [] } = useFriends({ enabled: visible });
+  const { data: following = [] } = useFollowing({ enabled: visible });
+  const { setPinned } = usePinPost();
+  const [speed, cycleSpeed] = useFeedSpeed();
   const { save, isSaving } = useDownloadMedia();
   const { confirmAndDelete } = useDeletePost();
   const [picker, setPicker] = useState<{ open: boolean; preselect?: string[] }>({ open: false });
@@ -66,7 +75,16 @@ export default function PostShareSheet({ visible, post, onClose, onDeleted }: Pr
   const files = saveableFiles(post.media);
   // A friends-only post has no public link to hand out: its /p/ page is
   // anonymous, so it is a 404 for everyone, friends included.
-  const rows = shareSheetRows({ isOwn, saveable: files.length > 0, isPublic: post.audience !== 'friends' });
+  // The owner's tools are the "..." menu's own (feedMenuActions), so the two agree.
+  const ownerTools = isOwn ? feedMenuActions({ isOwn, kind: post.kind, status: post.status, pinned: !!post.profile_pinned_at }) : [];
+  const rows = shareSheetRows({
+    isOwn,
+    saveable: files.length > 0,
+    isPublic: post.audience !== 'friends',
+    isVideo: post.kind === 'video',
+    ownerTools,
+  });
+  const hasOwnerGroup = rows.some((r) => ['pin', 'unpin', 'insights', 'edit', 'save', 'delete'].includes(r));
 
   /** Close this sheet, then open something else once it has gone (iOS). */
   const thenOpen = (open: () => void) => {
@@ -124,7 +142,8 @@ export default function PostShareSheet({ visible, post, onClose, onDeleted }: Pr
   // The confirm is an Alert: shown only once this sheet has closed (iOS).
   const remove = () => thenOpen(() => confirmAndDelete(post.id, onDeleted));
 
-  const shown = friends.slice(0, SUGGESTED);
+  const shown = sendToPeople(friends, following, SUGGESTED);
+  const openAfter = (path: '/community/edit/[id]' | '/community/insights/[id]') => thenOpen(() => router.push({ pathname: path, params: { id: post.id } }));
 
   return (
     <>
@@ -191,7 +210,38 @@ export default function PostShareSheet({ visible, post, onClose, onDeleted }: Pr
             />
           ) : null}
           {rows.includes('share') ? <Row icon={<Share2 size={20} color={Colors.darkGold} />} label={t('postShare.shareVia')} onPress={shareVia} /> : null}
-          {rows.includes('qr') ? <Row icon={<QrCode size={20} color={Colors.darkGold} />} label={t('postShare.qrCode')} onPress={showQr} last={!isOwn} /> : null}
+          {rows.includes('qr') ? <Row icon={<QrCode size={20} color={Colors.darkGold} />} label={t('postShare.qrCode')} onPress={showQr} last={!rows.includes('speed') && !hasOwnerGroup} /> : null}
+          {rows.includes('speed') ? (
+            <Row
+              icon={<Gauge size={20} color={Colors.darkGold} />}
+              label={`${t('postShare.speed')} · ${speedLabel(speed)}`}
+              onPress={cycleSpeed}
+              last={!hasOwnerGroup}
+            />
+          ) : null}
+
+          {/* The author's own tools, apart from the ways to share (spec row 3). */}
+          {hasOwnerGroup ? (
+            <T step="caption" color={Colors.text.tertiary} style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 4 }}>
+              {t('postShare.yourPost')}
+            </T>
+          ) : null}
+          {rows.includes('pin') || rows.includes('unpin') ? (
+            <Row
+              icon={rows.includes('pin') ? <Pin size={20} color={Colors.darkGold} /> : <PinOff size={20} color={Colors.darkGold} />}
+              label={rows.includes('pin') ? t('community.pin.pin') : t('community.pin.unpin')}
+              onPress={() => {
+                setPinned(post.id, rows.includes('pin'));
+                onClose();
+              }}
+            />
+          ) : null}
+          {rows.includes('insights') ? (
+            <Row icon={<BarChart3 size={20} color={Colors.darkGold} />} label={t('community.insights.open')} onPress={() => openAfter('/community/insights/[id]')} />
+          ) : null}
+          {rows.includes('edit') ? (
+            <Row icon={<Pencil size={20} color={Colors.darkGold} />} label={t('community.compose.editAction')} onPress={() => openAfter('/community/edit/[id]')} />
+          ) : null}
           {rows.includes('save') ? (
             <Row
               icon={isSaving ? <ActivityIndicator color={Colors.darkGold} /> : <Download size={20} color={Colors.darkGold} />}

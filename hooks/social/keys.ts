@@ -12,6 +12,8 @@ export const socialKeys = {
   search: (q: string, country: string | null, fanClubId: string | null) =>
     [...socialKeys.all, 'search', q, country, fanClubId] as const,
   friends: () => [...socialKeys.all, 'friends'] as const,
+  /** The people you follow: Send to offers them after friends. */
+  following: () => [...socialKeys.all, 'following'] as const,
   requests: () => [...socialKeys.all, 'requests'] as const,
   suggestions: () => [...socialKeys.all, 'suggestions'] as const,
   blocked: () => [...socialKeys.all, 'blocked'] as const,

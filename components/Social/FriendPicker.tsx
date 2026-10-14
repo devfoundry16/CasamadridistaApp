@@ -8,7 +8,8 @@ import Touchable from '@/components/Touchable';
 import Colors from '@/constants/colors';
 import { typeStyle } from '@/constants/type';
 import { useFont } from '@/contexts/FontContext';
-import { useFriends } from '@/hooks/social/useFriends';
+import { useFollowing, useFriends } from '@/hooks/social/useFriends';
+import { sendToPeople } from '@/utils/shareSheet.core';
 import { useShareToFriends } from '@/hooks/social/useShareToFriends';
 import type { EmbedKind, PersonCard } from '@/types/social';
 import Avatar from './Avatar';
@@ -39,7 +40,11 @@ export default function FriendPicker({ visible, onClose, kind, id, subject, init
   const { t } = useTranslation();
   const { isArabic } = useFont();
   const insets = useSafeAreaInsets();
-  const { data: friends = [], isLoading } = useFriends({ enabled: visible });
+  const { data: friendList = [], isLoading } = useFriends({ enabled: visible });
+  const { data: following = [] } = useFollowing({ enabled: visible });
+  // Friends first, then people you follow (a message to someone who is not a
+  // friend arrives as a message request, the server's rule).
+  const friends = useMemo(() => sendToPeople(friendList, following), [friendList, following]);
   const share = useShareToFriends();
   const [query, setQuery] = useState('');
   const [note, setNote] = useState('');
@@ -161,7 +166,7 @@ export default function FriendPicker({ visible, onClose, kind, id, subject, init
             }}
             ListEmptyComponent={
               <T step="footnote" color={Colors.text.tertiary} align="center" style={{ padding: 32 }}>
-                {friends.length ? t('social.share.noMatches') : t('social.share.noFriends')}
+                {friends.length ? t('social.share.noMatches') : t('social.share.noPeople')}
               </T>
             }
           />

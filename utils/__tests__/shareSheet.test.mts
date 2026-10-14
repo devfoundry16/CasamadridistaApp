@@ -2,7 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { collectPages, saveableFiles, shareSheetRows } from '../shareSheet.core.ts';
+import { collectPages, saveableFiles, sendToPeople, shareSheetRows } from '../shareSheet.core.ts';
+import { PLAYBACK_SPEEDS, nextSpeed, speedLabel } from '../playbackSpeed.core.ts';
 
 /**
  * The post share sheet (spec 2.1.0 §04): sharing destinations for everyone,
@@ -22,6 +23,63 @@ describe('shareSheetRows', () => {
     assert.deepEqual(shareSheetRows({ isOwn: false, saveable: true, isPublic: false }), ['friends']);
     assert.deepEqual(shareSheetRows({ isOwn: true, saveable: true, isPublic: false }), ['friends', 'save', 'delete']);
   });
+});
+
+describe('shareSheetRows: speed and the owner group', () => {
+  it('a video gets a Playback speed row, for anyone, after the ways out', () => {
+    assert.deepEqual(shareSheetRows({ isOwn: false, saveable: false, isVideo: true }), ['friends', 'copy_link', 'share', 'qr', 'speed']);
+  });
+  it('your own post: Pin, Insights and Edit (as the "..." menu gives them) before Save and Delete', () => {
+    assert.deepEqual(
+      shareSheetRows({ isOwn: true, saveable: true, isVideo: true, ownerTools: ['pin', 'insights', 'edit', 'delete'] }),
+      ['friends', 'copy_link', 'share', 'qr', 'speed', 'pin', 'insights', 'edit', 'save', 'delete'],
+    );
+    assert.deepEqual(
+      shareSheetRows({ isOwn: true, saveable: false, ownerTools: ['unpin', 'insights', 'edit', 'delete'] }),
+      ['friends', 'copy_link', 'share', 'qr', 'unpin', 'insights', 'edit', 'delete'],
+    );
+  });
+  it("someone else's post never gets an owner tool, whatever is passed", () => {
+    assert.deepEqual(shareSheetRows({ isOwn: false, saveable: true, ownerTools: ['pin', 'edit', 'insights'] }), ['friends', 'copy_link', 'share', 'qr']);
+  });
+});
+
+describe('sendToPeople', () => {
+  const p = (id: string) => ({ id, name: id });
+  it('friends first, then people you follow who are not friends, each once', () => {
+    assert.deepEqual(sendToPeople([p('a'), p('b')], [p('b'), p('c'), p('d')]).map((x) => x.id), ['a', 'b', 'c', 'd']);
+  });
+  it('capped for the avatar row; missing lists are empty', () => {
+    assert.deepEqual(sendToPeople([p('a')], [p('c'), p('d')], 2).map((x) => x.id), ['a', 'c']);
+    assert.deepEqual(sendToPeople(undefined, undefined), []);
+  });
+});
+
+describe('playback speed', () => {
+  it('cycles 1 → 1.5 → 2 → 0.5 → 1; anything unknown starts again at 1', () => {
+    assert.deepEqual([...PLAYBACK_SPEEDS], [0.5, 1, 1.5, 2]);
+    assert.equal(nextSpeed(1), 1.5);
+    assert.equal(nextSpeed(1.5), 2);
+    assert.equal(nextSpeed(2), 0.5);
+    assert.equal(nextSpeed(0.5), 1);
+    assert.equal(nextSpeed(3), 1);
+  });
+  it('reads as 0.5×, 1×, 1.5×, 2×', () => {
+    assert.deepEqual(PLAYBACK_SPEEDS.map(speedLabel), ['0.5×', '1×', '1.5×', '2×']);
+  });
+});
+
+describe('share sheet extras: strings in both languages', () => {
+  const load = (locale: string) =>
+    JSON.parse(readFileSync(new URL(`../../i18n/locales/${locale}/translation.json`, import.meta.url), 'utf8'));
+  for (const locale of ['en-US', 'ar-SA']) {
+    it(locale, () => {
+      const all = load(locale);
+      for (const key of ['yourPost', 'speed']) assert.equal(typeof all.postShare[key], 'string', `${locale} postShare.${key}`);
+      for (const key of ['speed', 'speedA11y']) assert.equal(typeof all.video[key], 'string', `${locale} video.${key}`);
+      assert.equal(typeof all.social.share.noPeople, 'string', `${locale} social.share.noPeople`);
+    });
+  }
 });
 
 describe('saveableFiles', () => {

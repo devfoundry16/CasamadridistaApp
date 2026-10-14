@@ -2029,7 +2029,8 @@
       "partialBody": "Couldn't send to {{names}}. They're still selected so you can try again.",
       "noFriends": "Add friends to share with them here.",
       "noMatches": "No friends match.",
-      "postFallback": "Check out this post on Casa Madridista!"
+      "postFallback": "Check out this post on Casa Madridista!",
+      "noPeople": "Add friends or follow people to send them posts."
     },
     "report": {
       "titleMessage": "Report message",
@@ -2219,7 +2220,9 @@
     "close": "Close video",
     "play": "Play",
     "pause": "Pause",
-    "openFullScreen": "Open video full screen"
+    "openFullScreen": "Open video full screen",
+    "speed": "Speed",
+    "speedA11y": "Playback speed, {{speed}} times"
   },
   "postShare": {
     "copyLink": "Copy link",
@@ -2235,6 +2238,8 @@
     "deleted": "Post deleted",
     "more": "More",
     "sendTo": "Send to",
-    "qrCode": "QR code"
+    "qrCode": "QR code",
+    "yourPost": "Your post",
+    "speed": "Playback speed"
   }
 }

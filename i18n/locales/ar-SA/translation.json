@@ -2113,7 +2113,8 @@
       "partialBody": "تعذّر الإرسال إلى {{names}}. ما زالوا محددين لتعيد المحاولة.",
       "noFriends": "أضف أصدقاء لتشارك معهم هنا.",
       "noMatches": "لا يوجد أصدقاء مطابقون.",
-      "postFallback": "شاهد هذا المنشور على Casa Madridista!"
+      "postFallback": "شاهد هذا المنشور على Casa Madridista!",
+      "noPeople": "أضف أصدقاء أو تابع أشخاصاً لترسل إليهم المنشورات."
     },
     "report": {
       "titleMessage": "الإبلاغ عن رسالة",
@@ -2307,7 +2308,9 @@
     "close": "إغلاق الفيديو",
     "play": "تشغيل",
     "pause": "إيقاف مؤقت",
-    "openFullScreen": "فتح الفيديو بملء الشاشة"
+    "openFullScreen": "فتح الفيديو بملء الشاشة",
+    "speed": "السرعة",
+    "speedA11y": "سرعة التشغيل {{speed}} ضعف"
   },
   "postShare": {
     "copyLink": "نسخ الرابط",
@@ -2323,6 +2326,8 @@
     "deleted": "تم حذف المنشور",
     "more": "المزيد",
     "sendTo": "إرسال إلى",
-    "qrCode": "رمز QR"
+    "qrCode": "رمز QR",
+    "yourPost": "منشورك",
+    "speed": "سرعة التشغيل"
   }
 }

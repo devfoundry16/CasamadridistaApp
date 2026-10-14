@@ -5,6 +5,7 @@ import { API_BASE_URL } from '@/config/supabase';
 import { UPLOAD_METHODS } from '@/utils/uploadTarget.core';
 import {
   normaliseBlocked,
+  normaliseFollowing,
   normaliseConversationHeader,
   normaliseFriends,
   normaliseGridPage,
@@ -192,6 +193,11 @@ class SocialServiceClass {
 
   async suggestions(): Promise<SuggestedPerson[]> {
     return normaliseSuggestions(await this.get('/friends/suggestions'));
+  }
+
+  /** The people you follow, newest first. */
+  async following(): Promise<PersonCard[]> {
+    return normaliseFollowing(await this.get('/following'));
   }
 
   async blocked(): Promise<(PersonCard & { blocked_at: string | null })[]> {

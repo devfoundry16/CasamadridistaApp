@@ -79,3 +79,14 @@ export function useUserSearch(query: string, country: string | null, fanClubId: 
     staleTime: 30_000,
   });
 }
+
+/** The people you follow, for "Send to" after your friends. */
+export function useFollowing({ enabled = true }: { enabled?: boolean } = {}) {
+  const { user } = useUser();
+  return useQuery({
+    queryKey: socialKeys.following(),
+    queryFn: () => SocialService.following(),
+    enabled: !!user?.id && enabled,
+    staleTime: 60_000,
+  });
+}

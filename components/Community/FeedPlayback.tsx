@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useSyncExternalStore } from 'react';
 
+import { nextSpeed } from '@/utils/playbackSpeed.core';
+
 /**
  * Feed video playback state, kept outside React state on purpose.
  *
@@ -43,6 +45,20 @@ export function useFeedMuted(): [boolean, () => void] {
 }
 
 export const feedMutedNow = () => muted.get();
+
+/**
+ * Playback speed is one choice too, for the session: set in the full-screen
+ * viewer or from a video's share sheet, kept for the next video. Starts at 1×.
+ */
+const speed = createValue<number>(1);
+
+export function useFeedSpeed(): [number, () => void] {
+  const value = useSyncExternalStore(speed.subscribe, speed.get);
+  const cycle = useCallback(() => speed.set(nextSpeed(speed.get())), []);
+  return [value, cycle];
+}
+
+export const feedSpeedNow = () => speed.get();
 
 /** The post whose video plays in one list: one player per screen. */
 export type ActiveVideoStore = ReturnType<typeof createValue<string | null>>;

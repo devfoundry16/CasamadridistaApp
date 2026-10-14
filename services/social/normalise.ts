@@ -182,6 +182,12 @@ export function normaliseRequests(raw: unknown): FriendRequests {
   return { incoming: people(w.incoming, at), outgoing: people(w.outgoing, at) };
 }
 
+/** GET /social/following: `{ people }`, newest follow first. */
+export function normaliseFollowing(raw: unknown): PersonCard[] {
+  const list = Array.isArray((raw as Wire)?.people) ? ((raw as Wire).people as unknown[]) : [];
+  return list.map(normalisePerson).filter((p): p is PersonCard => p !== null);
+}
+
 export function normaliseBlocked(raw: unknown): (PersonCard & { blocked_at: string | null })[] {
   return people((raw as Wire)?.users, (w) => ({ blocked_at: str(w.blocked_at) }));
 }

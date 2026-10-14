@@ -2,12 +2,20 @@
  * The post share sheet (spec 2.1.0 §04). Pure, so `node --test` can load it.
  */
 
-export type ShareRow = 'friends' | 'copy_link' | 'share' | 'qr' | 'save' | 'delete';
+export type OwnerTool = 'pin' | 'unpin' | 'insights' | 'edit';
+export type ShareRow = 'friends' | 'copy_link' | 'share' | 'qr' | 'speed' | OwnerTool | 'save' | 'delete';
+
+const OWNER_TOOLS: readonly string[] = ['pin', 'unpin', 'insights', 'edit'];
 
 /**
- * The rows the sheet shows, in order: sending to friends in the app, the ways
- * out of it (the link copied, the phone's share sheet, a QR code), then the
- * author's own tools. Someone else's post never gets Save or Delete.
+ * The rows the sheet shows, in order: sending to people in the app, the ways
+ * out of it (the link copied, the phone's share sheet, a QR code), the
+ * playback speed for a video, then the author's own tools, kept apart from
+ * the destinations (spec row 3). Someone else's post never gets an owner tool.
+ *
+ * `ownerTools` comes from the "..." menu's own rule (post.core
+ * feedMenuActions), so the menu and the sheet always offer the same: Pin or
+ * Unpin, Insights, Edit. Save and Delete stay the sheet's.
  *
  * A friends-only post has no public link: its /p/ page is anonymous, so it is
  * a 404 for everyone, friends included, and the outside ways are left out.
@@ -21,15 +29,41 @@ export function shareSheetRows({
   isOwn,
   saveable,
   isPublic = true,
+  isVideo = false,
+  ownerTools = [],
 }: {
   isOwn: boolean;
   saveable: boolean;
   isPublic?: boolean;
+  isVideo?: boolean;
+  ownerTools?: readonly string[];
 }): ShareRow[] {
   const rows: ShareRow[] = isPublic ? ['friends', 'copy_link', 'share', 'qr'] : ['friends'];
+  if (isVideo) rows.push('speed');
+  if (isOwn) rows.push(...(ownerTools.filter((t) => OWNER_TOOLS.includes(t)) as OwnerTool[]));
   if (isOwn && saveable) rows.push('save');
   if (isOwn) rows.push('delete');
   return rows;
+}
+
+/**
+ * Who "Send to" offers: friends first, then people the viewer follows who are
+ * not already friends, each once, up to `max`.
+ */
+export function sendToPeople<P extends { id: string }>(
+  friends: readonly P[] | null | undefined,
+  following: readonly P[] | null | undefined,
+  max = Infinity,
+): P[] {
+  const seen = new Set<string>();
+  const out: P[] = [];
+  for (const person of [...(friends ?? []), ...(following ?? [])]) {
+    if (out.length >= max) break;
+    if (!person?.id || seen.has(person.id)) continue;
+    seen.add(person.id);
+    out.push(person);
+  }
+  return out;
 }
 
 /**

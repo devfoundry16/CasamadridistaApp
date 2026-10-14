@@ -6,18 +6,19 @@ import { useVideoPlayer, VideoView, type VideoPlayer } from 'expo-video';
 import { Volume2, VolumeX, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, AppState, FlatList, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, AppState, FlatList, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PostActions from '@/components/Community/PostCard/PostActions';
 import PostBody from '@/components/Community/PostCard/PostBody';
 import PostHeader from '@/components/Community/PostCard/PostHeader';
-import { feedMutedNow, useFeedMuted } from '@/components/Community/FeedPlayback';
+import { feedMutedNow, useFeedMuted, useFeedSpeed } from '@/components/Community/FeedPlayback';
 import Colors from '@/constants/colors';
 import FeedService, { type Post } from '@/services/FeedService';
 import PostService from '@/services/PostService';
 import { playableUri, videoPostsOf, viewerIndex, type FeedTabName } from '@/utils/feedAutoplay.core';
 import { videoProgress } from '@/utils/stories.core';
+import { speedLabel } from '@/utils/playbackSpeed.core';
 
 interface Props {
   postId: string;
@@ -48,6 +49,7 @@ export default function VideoViewerScreen({ postId, feed }: Props) {
   const insets = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();
   const [muted, toggleMuted] = useFeedMuted();
+  const [speed, cycleSpeed] = useFeedSpeed();
 
   const feedQuery = useInfiniteQuery({
     queryKey: ['feed', feed],
@@ -116,6 +118,11 @@ export default function VideoViewerScreen({ postId, feed }: Props) {
   useEffect(() => {
     player.muted = muted;
   }, [player, muted]);
+
+  // The chosen speed, set again once each new video has loaded.
+  useEffect(() => {
+    player.playbackRate = speed;
+  }, [player, speed, loadedUri]);
 
   useEffect(() => {
     if (loadedUri !== currentUri) return;
@@ -216,15 +223,27 @@ export default function VideoViewerScreen({ postId, feed }: Props) {
         <Pressable onPress={close} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('video.close')} style={styles.round}>
           <X size={22} color="#fff" />
         </Pressable>
-        <Pressable
-          onPress={toggleMuted}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={muted ? t('video.unmute') : t('video.mute')}
-          style={styles.round}
-        >
-          {muted ? <VolumeX size={20} color="#fff" /> : <Volume2 size={20} color="#fff" />}
-        </Pressable>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Pressable
+            onPress={cycleSpeed}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t('video.speedA11y', { speed })}
+            style={styles.round}
+          >
+            {/* Digits and ×, pinned LTR so "1.5×" never reverses in Arabic. */}
+            <Text style={{ color: '#fff', fontSize: 13, fontWeight: '700', writingDirection: 'ltr' }}>{speedLabel(speed)}</Text>
+          </Pressable>
+          <Pressable
+            onPress={toggleMuted}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={muted ? t('video.unmute') : t('video.mute')}
+            style={styles.round}
+          >
+            {muted ? <VolumeX size={20} color="#fff" /> : <Volume2 size={20} color="#fff" />}
+          </Pressable>
+        </View>
       </View>
     </View>
   );

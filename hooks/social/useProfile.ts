@@ -106,6 +106,8 @@ export function useFollowAction(userId: string) {
     onError: (_error, _following, context) => {
       if (context?.previous !== undefined) queryClient.setQueryData(key, context.previous);
     },
+    // Send to lists the people you follow: it picks up the change.
+    onSettled: () => void queryClient.invalidateQueries({ queryKey: socialKeys.following() }),
     onSuccess: (result) => {
       const current = queryClient.getQueryData<SocialProfile | null>(key);
       if (current) {
