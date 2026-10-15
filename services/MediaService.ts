@@ -88,6 +88,19 @@ class MediaServiceClass {
     }
   }
 
+  /**
+   * Drop an upload that never finished (DELETE /api/media/:id): a slot whose
+   * upload failed. The server refuses an item already in.
+   */
+  async deleteUpload(mediaId: string): Promise<void> {
+    try {
+      const headers = await this.getAuthHeader();
+      await axios.delete(`${API_BASE_URL}media/${encodeURIComponent(mediaId)}`, { headers });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to cancel upload');
+    }
+  }
+
   // ---- Upload bytes (Supabase signed URL path) ----
 
   async uploadToSignedUrl(signedUrl: string, localUri: string, mimeType: string): Promise<void> {

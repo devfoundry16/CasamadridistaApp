@@ -110,3 +110,54 @@ export function overallProgress(index: number, fraction: number, total: number):
   const f = Number.isFinite(fraction) ? Math.min(1, Math.max(0, fraction)) : 0;
   return Math.min(1, Math.max(0, (index + f) / total));
 }
+
+/** Most photos a post holds: backend postRules.MEDIA_PER_POST_MAX. */
+const MEDIA_PER_POST_MAX = 10;
+
+/**
+ * Whether the composer offers to change a post's photos or video: your own
+ * approved photo or video post, as the server requires
+ * (mediaEditRules.mediaEditRefusal). The composer only edits your own posts.
+ */
+export function mediaEditable(post: { kind?: string; status?: string; author_type?: string }): boolean {
+  return post.author_type === 'user' && post.status === 'approved' && (post.kind === 'image' || post.kind === 'video');
+}
+
+export const MEDIA_EDIT_PROBLEMS = ['media_required', 'too_many_media', 'one_video'] as const;
+export type MediaEditProblem = (typeof MEDIA_EDIT_PROBLEMS)[number];
+
+export interface MediaEditPlan {
+  /** Ids of the posted items taken off. */
+  remove: string[];
+  /** How many new items follow. */
+  add: number;
+  changed: boolean;
+  /** Anything added sends the post back to review until it is checked. */
+  review: boolean;
+  /** Why the server would refuse it (mediaEditRules), or null. */
+  problem: MediaEditProblem | null;
+}
+
+/**
+ * What POST /posts/:id/media-edit gets from the composer: the posted items
+ * no longer kept, and how many new ones were picked. A photo post keeps 1–10
+ * photos; a video post swaps its one video for one new one.
+ */
+export function mediaEditPlan(
+  kind: 'image' | 'video',
+  current: readonly { id: string }[],
+  kept: readonly { id: string }[],
+  added: number,
+): MediaEditPlan {
+  const keptIds = new Set(kept.map((m) => m.id));
+  const remove = current.filter((m) => !keptIds.has(m.id)).map((m) => m.id);
+  const changed = remove.length > 0 || added > 0;
+  const after = kept.length + added;
+  let problem: MediaEditProblem | null = null;
+  if (changed) {
+    if (kind === 'video') problem = after === 1 && added <= 1 ? null : 'one_video';
+    else if (after > MEDIA_PER_POST_MAX) problem = 'too_many_media';
+    else if (after < 1) problem = 'media_required';
+  }
+  return { remove, add: added, changed, review: added > 0, problem };
+}

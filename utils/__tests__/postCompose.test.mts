@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { AUDIENCES, FEELINGS, editPayload, feelingOf, overallProgress } from '../postCompose.core.ts';
+import { AUDIENCES, FEELINGS, MEDIA_EDIT_PROBLEMS, editPayload, feelingOf, mediaEditPlan, mediaEditable, overallProgress } from '../postCompose.core.ts';
 
 /**
  * The composer's new settings (spec 2.1.0 §03): who a post is for, a feeling
@@ -94,8 +94,12 @@ describe('every composer label exists in both languages', () => {
         'audienceLabel', 'feelingLabel', 'feelingNone', 'feelingTitle', 'feelingLine', 'activityLine',
         'preview', 'previewTitle', 'keepEditing', 'post', 'editTitle', 'save', 'saved', 'mediaLocked',
         'reviewNote', 'edited', 'friendsOnly', 'editAction',
+        'mediaUnderReview', 'mediaEditNotice', 'removeMedia', 'mediaEditFailed', 'tryAgain', 'cancelUpload',
       ]) {
         assert.equal(typeof c[key], 'string', `${locale} community.compose.${key}`);
+      }
+      for (const problem of MEDIA_EDIT_PROBLEMS) {
+        assert.equal(typeof c.mediaEditProblem?.[problem], 'string', `${locale} community.compose.mediaEditProblem.${problem}`);
       }
     });
   }
@@ -113,5 +117,53 @@ describe('overallProgress', () => {
     assert.equal(overallProgress(0, -1, 1), 0);
     assert.equal(overallProgress(0, Number.NaN, 2), 0);
     assert.equal(overallProgress(0, 0.5, 0), 0);
+  });
+});
+
+describe('mediaEditable', () => {
+  // The server's rule (mediaEditRules.mediaEditRefusal): your own approved
+  // photo or video post. The composer only offers the change when it would pass.
+  const post = (over: Record<string, unknown> = {}) => ({ kind: 'image', status: 'approved', author_type: 'user', ...over });
+  it('an approved photo or video post of your own', () => {
+    assert.equal(mediaEditable(post()), true);
+    assert.equal(mediaEditable(post({ kind: 'video' })), true);
+  });
+  it('not a post under review, a text post, a poll, a teaser, or a fan club post', () => {
+    assert.equal(mediaEditable(post({ status: 'pending' })), false);
+    for (const kind of ['text', 'poll', 'media_teaser']) assert.equal(mediaEditable(post({ kind })), false, kind);
+    assert.equal(mediaEditable(post({ author_type: 'fan_club' })), false);
+  });
+});
+
+describe('mediaEditPlan', () => {
+  const ids = (...list: string[]) => list.map((id) => ({ id }));
+
+  it('nothing changed is no edit', () => {
+    assert.deepEqual(mediaEditPlan('image', ids('a', 'b'), ids('a', 'b'), 0), { remove: [], add: 0, changed: false, review: false, problem: null });
+  });
+
+  it('removing photos only: the post stays live', () => {
+    assert.deepEqual(mediaEditPlan('image', ids('a', 'b', 'c'), ids('a', 'c'), 0), { remove: ['b'], add: 0, changed: true, review: false, problem: null });
+  });
+
+  it('adding photos sends the post back to review', () => {
+    const plan = mediaEditPlan('image', ids('a'), ids('a'), 2);
+    assert.deepEqual(plan, { remove: [], add: 2, changed: true, review: true, problem: null });
+  });
+
+  it('a photo post keeps 1 to 10 photos', () => {
+    assert.equal(mediaEditPlan('image', ids('a'), [], 0).problem, 'media_required');
+    assert.equal(mediaEditPlan('image', ids('a', 'b'), ids('a', 'b'), 9).problem, 'too_many_media');
+    assert.equal(mediaEditPlan('image', ids('a'), [], 1).problem, null);
+  });
+
+  it('a video post swaps its one video for one new one', () => {
+    assert.deepEqual(mediaEditPlan('video', ids('v'), [], 1), { remove: ['v'], add: 1, changed: true, review: true, problem: null });
+    assert.equal(mediaEditPlan('video', ids('v'), [], 0).problem, 'one_video', 'the old one removed, no new one yet');
+    assert.equal(mediaEditPlan('video', ids('v'), ids('v'), 1).problem, 'one_video');
+  });
+
+  it('every problem has a name the strings use', () => {
+    assert.deepEqual([...MEDIA_EDIT_PROBLEMS], ['media_required', 'too_many_media', 'one_video']);
   });
 });

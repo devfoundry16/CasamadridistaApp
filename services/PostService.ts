@@ -81,6 +81,27 @@ class PostServiceClass {
     return data;
   }
 
+  /**
+   * Change a post's photos or video (POST /posts/:id/media-edit): the posted
+   * items to take off, and how many new ones follow. Answers the places the
+   * new items take; they are then uploaded through the usual slots. Anything
+   * added sends the post back to review until it is checked. A refusal is
+   * thrown with the server's code as its message.
+   */
+  async editMedia(postId: string, edit: { remove: string[]; add: number }): Promise<{ status: string; positions: number[] }> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.post<{ status: string; positions: number[] }>(
+        `${API_BASE_URL}posts/${encodeURIComponent(postId)}/media-edit`,
+        edit,
+        { headers },
+      );
+      return { status: data.status, positions: Array.isArray(data.positions) ? data.positions : [] };
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to update media');
+    }
+  }
+
   async createPost(payload: CreatePostPayload): Promise<Post> {
     try {
       const headers = await this.getAuthHeader();

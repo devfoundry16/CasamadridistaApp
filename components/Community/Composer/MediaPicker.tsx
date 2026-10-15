@@ -28,8 +28,12 @@ interface Props {
   disabled?: boolean;
   /** Open the library once on arrival, on photos or on videos (Create → Photo / Video). */
   start?: 'images' | 'videos' | null;
-  /** A Reel: the library and the camera offer video only. */
+  /** A Reel, or a new video for a video post: the library and the camera offer video only. */
   videosOnly?: boolean;
+  /** More photos for a photo post: the library and the camera offer photos only. */
+  imagesOnly?: boolean;
+  /** Posted items kept beside these (editing a post): they count toward the limit. */
+  taken?: number;
 }
 
 const THUMB = 72;
@@ -55,15 +59,29 @@ async function withThumbnail(asset: PickedAsset): Promise<PickedMedia> {
  *
  * The thumbnail strip follows `components/Social/Composer.tsx`.
  */
-export default function MediaPicker({ media, onChange, disabled = false, start = null, videosOnly = false }: Props) {
+export default function MediaPicker({
+  media,
+  onChange,
+  disabled = false,
+  start = null,
+  videosOnly = false,
+  imagesOnly = false,
+  taken = 0,
+}: Props) {
   const { t } = useTranslation();
   const [cameraMenu, setCameraMenu] = useState(false);
   const [libraryMenu, setLibraryMenu] = useState(false);
 
-  const library = libraryRequest(media);
-  const options = cameraOptions(media);
-  const camera = videosOnly ? { photo: false, video: options.video } : options;
-  const crop = libraryCropRequest(media);
+  // What this tray may still hold, the kept posted items aside.
+  const max = POST_MEDIA_LIMITS.maxGalleryAssets - taken;
+  const library = libraryRequest(media, max, imagesOnly ? 'images' : undefined);
+  const options = cameraOptions(media, max);
+  const camera = videosOnly
+    ? { photo: false, video: options.video }
+    : imagesOnly
+      ? { photo: options.photo, video: false }
+      : options;
+  const crop = libraryCropRequest(media, max);
 
   const take = async (result: PickResult) => {
     if (result.denied) {
@@ -81,14 +99,15 @@ export default function MediaPicker({ media, onChange, disabled = false, start =
     }
     if (!result.assets.length) return;
 
-    const incoming = await Promise.all(result.assets.map(withThumbnail));
-    const { assets, dropped } = mergePostMedia(media, incoming);
+    const picked = imagesOnly ? result.assets.filter((a) => a.kind === 'image') : result.assets;
+    const incoming = await Promise.all(picked.map(withThumbnail));
+    const { assets, dropped } = mergePostMedia(media, incoming, max);
     if (dropped) Alert.alert(t('community.mediaLimitTitle'), t('community.mediaLimitBody'));
     onChange(assets);
   };
 
   const openLibrary = async (only?: 'images' | 'videos') => {
-    const request = only ? libraryRequest(media, undefined, only) : library;
+    const request = only ? libraryRequest(media, max, only) : library;
     if (!request) return;
     try {
       await take(
@@ -117,7 +136,7 @@ export default function MediaPicker({ media, onChange, disabled = false, start =
   const libraryActions: SheetAction[] = [
     {
       key: 'photos',
-      label: media.length ? t('community.libraryPhotos') : t('community.libraryPhotosOrVideo'),
+      label: media.length || imagesOnly ? t('community.libraryPhotos') : t('community.libraryPhotosOrVideo'),
       icon: <Images size={20} color={Colors.darkGold} />,
       onPress: () => void openLibrary(),
     },
@@ -203,7 +222,7 @@ export default function MediaPicker({ media, onChange, disabled = false, start =
 
       {!hasVideo && media.length ? (
         <Text className="px-4" style={{ color: Colors.text.tertiary, fontSize: 12, marginTop: -6, marginBottom: 10 }}>
-          {t('community.photoCount', { current: media.length, max: POST_MEDIA_LIMITS.maxGalleryAssets })}
+          {t('community.photoCount', { current: taken + media.length, max: POST_MEDIA_LIMITS.maxGalleryAssets })}
         </Text>
       ) : null}
 
@@ -220,7 +239,7 @@ export default function MediaPicker({ media, onChange, disabled = false, start =
             >
               <ImageIcon size={16} color={Colors.darkGold} />
               <Text className="text-sm" style={{ color: Colors.text.primary, marginStart: 8 }}>
-                {media.length ? t('community.addMore') : t('community.library')}
+                {media.length || taken ? t('community.addMore') : t('community.library')}
               </Text>
             </TouchableOpacity>
           ) : null}

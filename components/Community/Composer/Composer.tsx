@@ -18,7 +18,8 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostService from "@/services/PostService";
 import AuthService from "@/services/AuthService";
-import { BarChart3, Globe, MapPin, Plus, Shield, Smile, UserPlus, Users, X } from "lucide-react-native";
+import { BarChart3, Globe, MapPin, Play, Plus, Shield, Smile, UserPlus, Users, X } from "lucide-react-native";
+import { Image } from "expo-image";
 import MediaService, { type UploadSlot } from "@/services/MediaService";
 import { useKeyboardOffsets } from "@/hooks/useKeyboardOffsets";
 import MediaPicker, { type PickedMedia } from "./MediaPicker";
@@ -37,8 +38,17 @@ import { socialKeys } from "@/hooks/social/keys";
 import { useUser } from "@/hooks/useUser";
 import { DRAFT_VERSION, isDraftEmpty, type PostDraft } from "@/utils/postDraft.core";
 import { clearDraft, keepDraftFile, loadDraft, saveDraft } from "@/utils/postDraft";
-import type { Post } from "@/services/FeedService";
-import { AUDIENCES, editPayload, feelingOf, overallProgress, type Audience } from "@/utils/postCompose.core";
+import type { Post, PostMedia } from "@/services/FeedService";
+import {
+  AUDIENCES,
+  MEDIA_EDIT_PROBLEMS,
+  editPayload,
+  feelingOf,
+  mediaEditPlan,
+  mediaEditable,
+  overallProgress,
+  type Audience,
+} from "@/utils/postCompose.core";
 import { reelProblem } from "@/utils/mediaPick.core";
 import { POLL_DURATIONS, POLL_OPTIONS_MAX, POLL_OPTIONS_MIN, POLL_OPTION_MAX_LENGTH, validatePollDraft } from "@/utils/poll.core";
 
@@ -50,7 +60,10 @@ const BODY_MAX = 2000;
 interface Props {
   /** Create → Photo / Video / Reel opens the composer on that picker; 'reel' is reel mode. */
   start?: 'images' | 'videos' | 'reel' | null;
-  /** Edit mode: the author's own post, already loaded. Media stays as posted. */
+  /**
+   * Edit mode: the author's own post, already loaded. The photos or video of
+   * an approved photo or video post can be changed too (mediaEditable).
+   */
   editing?: Post;
 }
 
@@ -88,6 +101,18 @@ export default function Composer({ start = null, editing }: Props = {}) {
   const [uploadFraction, setUploadFraction] = useState(0);
   const [tagged, setTagged] = useState<PersonCard[]>((editing?.tagged ?? []) as PersonCard[]);
   const [tagSheet, setTagSheet] = useState(false);
+
+  // Edit mode: the posted photos or video, in carousel order. Those still here
+  // on Save are kept; new ones picked beside them (`media`) are added.
+  const postedMedia = useMemo<PostMedia[]>(
+    () => [...(editing?.media ?? [])].sort((a, b) => (a.position ?? 0) - (b.position ?? 0)),
+    [editing],
+  );
+  const [keptMedia, setKeptMedia] = useState<PostMedia[]>(postedMedia);
+  const mediaEditing = !!editing && mediaEditable(editing);
+  const mediaPlan = mediaEditing
+    ? mediaEditPlan(editing.kind as "image" | "video", postedMedia, keptMedia, media.length)
+    : null;
 
   // @-autocomplete: which text field has focus, where its caret is, and a
   // caret to impose once after a mention is inserted (then released, so the
@@ -164,7 +189,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
     };
   }, [editing, editingCountry, editingClubId]);
 
-  const hasMedia = media.length > 0 || (editing?.media?.length ?? 0) > 0;
+  const hasMedia = media.length > 0 || (editing ? keptMedia.length > 0 : false);
   const isPoll = !editing && !reelMode && pollOptions !== null;
   const pollCheck = isPoll ? validatePollDraft(pollOptions!, pollDays) : null;
   // A poll needs its title and valid options (a body is optional, also when
@@ -173,6 +198,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
   const canPost =
     !submitting &&
     title.trim().length > 0 &&
+    !mediaPlan?.problem &&
     (isPoll ? !!pollCheck?.ok : pollPost || body.trim().length > 0 || hasMedia);
   // Only a personal post has an audience: a fan club post speaks for the club.
   const audienceApplies = editing ? editing.author_type === "user" : !postAsFanClub;
@@ -320,6 +346,63 @@ export default function Composer({ start = null, editing }: Props = {}) {
     [reelMode, t],
   );
 
+  /**
+   * The new items of a media edit, at the places the server answered: every
+   * slot reserved before any upload completes (the post is decided once the
+   * last one is in), then one upload at a time. A failure offers Try again
+   * (the same slots) or Cancel upload, which drops the slots not uploaded;
+   * the server then decides the post on what it has. A reservation that never
+   * went through leaves the post for the media.editSweep job.
+   */
+  const uploadEdited = useCallback(
+    async (postId: string, positions: number[]) => {
+      const slots: (UploadSlot | undefined)[] = [];
+      const done = new Set<number>();
+      const askRetry = () =>
+        new Promise<boolean>((resolve) =>
+          Alert.alert(
+            t("community.compose.mediaEditFailed"),
+            undefined,
+            [
+              { text: t("community.compose.cancelUpload"), style: "destructive", onPress: () => resolve(false) },
+              { text: t("community.compose.tryAgain"), onPress: () => resolve(true) },
+            ],
+            { cancelable: false },
+          ),
+        );
+      for (;;) {
+        try {
+          setUploadProgress(t("community.uploadingMedia"));
+          for (let i = 0; i < media.length; i++) {
+            if (!slots[i]) slots[i] = await MediaService.requestUploadSlot(media[i].kind, postId, positions[i]);
+          }
+          for (let i = 0; i < media.length; i++) {
+            if (done.has(i)) continue;
+            const item = media[i];
+            setUploadProgress(
+              media.length > 1
+                ? t("community.uploadingMediaCount", { current: i + 1, total: media.length })
+                : t("community.uploadingMedia"),
+            );
+            const onProgress = (fraction: number) =>
+              setUploadFraction(Math.round(overallProgress(i, fraction, media.length) * 100) / 100);
+            if (item.kind === "image") await MediaService.uploadImage(item.uri, postId, positions[i], slots[i], onProgress);
+            else await MediaService.uploadVideo(item.uri, postId, positions[i], slots[i], onProgress, item);
+            done.add(i);
+          }
+          return;
+        } catch {
+          if (await askRetry()) continue;
+          await Promise.all(
+            slots.map((slot, i) => (slot && !done.has(i) ? MediaService.deleteUpload(slot.mediaId).catch(() => {}) : null)),
+          );
+          return;
+        }
+      }
+    },
+    [media, t],
+  );
+
   const handleSave = useCallback(async () => {
     if (!editing || !canPost) return;
     const payload = editPayload(editing, {
@@ -332,15 +415,22 @@ export default function Composer({ start = null, editing }: Props = {}) {
       countryCode: tagsTouched ? country?.country_code ?? null : undefined,
       fanClubId: tagsTouched ? fanClub?.id ?? null : undefined,
     });
-    if (!Object.keys(payload).length) {
+    const mediaChange = mediaPlan?.changed ? mediaPlan : null;
+    if (!Object.keys(payload).length && !mediaChange) {
       router.back();
       return;
     }
     setSubmitting(true);
     try {
-      await PostService.updatePost(editing.id, payload);
-      // What can be patched now is; the rest (status, tagged people, edited
-      // marker) comes back with the refetch.
+      // The words first: a media edit needs the post approved, and the text's
+      // own check runs (and decides) at once.
+      if (Object.keys(payload).length) await PostService.updatePost(editing.id, payload);
+      if (mediaChange) {
+        const { positions } = await PostService.editMedia(editing.id, { remove: mediaChange.remove, add: mediaChange.add });
+        if (mediaChange.add) await uploadEdited(editing.id, positions);
+      }
+      // What can be patched now is; the rest (status, media, tagged people,
+      // edited marker) comes back with the refetch.
       const patch: Partial<Post> = {};
       if (payload.title !== undefined) patch.title = payload.title;
       if (payload.body !== undefined) patch.body = payload.body;
@@ -355,11 +445,19 @@ export default function Composer({ start = null, editing }: Props = {}) {
       setPreview(false);
       router.back();
     } catch (err: any) {
-      Alert.alert(t("common.error"), err.message ?? t("community.failedToPost"));
+      const code = String(err?.message ?? "");
+      const message = (MEDIA_EDIT_PROBLEMS as readonly string[]).includes(code)
+        ? t(`community.compose.mediaEditProblem.${code}`)
+        : code === "media_not_editable" || code === "media_pending"
+          ? t("community.compose.mediaUnderReview")
+          : err?.message ?? t("community.failedToPost");
+      Alert.alert(t("common.error"), message);
     } finally {
       setSubmitting(false);
+      setUploadProgress("");
+      setUploadFraction(0);
     }
-  }, [editing, canPost, title, body, location, sentAudience, feeling, tagged, tagsTouched, country, fanClub, queryClient, router, t]);
+  }, [editing, canPost, title, body, location, sentAudience, feeling, tagged, tagsTouched, country, fanClub, mediaPlan, uploadEdited, queryClient, router, t]);
 
   const handlePost = useCallback(async () => {
     if (!canPost) return;
@@ -472,7 +570,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
       feeling,
       tagged: tagged.map((p) => ({ id: p.id, username: p.username ?? null, name: p.name, avatar_url: p.avatar_url ?? null })),
       created_at: editing?.created_at ?? now,
-      media: editing?.media ?? [],
+      media: editing ? keptMedia : [],
       poll:
         editing?.poll ??
         (pollOptions
@@ -483,7 +581,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
             }
           : null),
     } as Post;
-  }, [editing, user, postAsFanClub, roles, media, title, body, location, sentAudience, feeling, tagged, pollOptions, pollDays, pollMultiple, reelMode]);
+  }, [editing, keptMedia, user, postAsFanClub, roles, media, title, body, location, sentAudience, feeling, tagged, pollOptions, pollDays, pollMultiple, reelMode]);
 
   return (
     // The offset makes the lift include the header (useKeyboardOffsets explains
@@ -550,9 +648,63 @@ export default function Composer({ start = null, editing }: Props = {}) {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionLabel}>{reelMode ? t("community.compose.reelLabel") : t('community.mediaLabel')}</Text>
           </View>
-          {editing ? (
-            // Uploaded media is locked server-side (409 media_locked).
-            <Text style={styles.note}>{t("community.compose.mediaLocked")}</Text>
+          {editing && mediaEditing ? (
+            // The posted items, each removable, then new ones beside them: more
+            // photos for a photo post, or the new video once the old one is off.
+            <>
+              {keptMedia.length ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.keptStrip}>
+                  {keptMedia.map((m, i) => (
+                    <View key={m.id}>
+                      <Image
+                        source={{ uri: m.thumbnail_url ?? m.public_url ?? undefined }}
+                        placeholder={m.blurhash ?? undefined}
+                        style={styles.keptThumb}
+                        contentFit="cover"
+                        accessibilityLabel={m.kind === "video" ? t("community.video") : t("community.photoNumber", { number: i + 1 })}
+                      />
+                      {m.kind === "video" ? (
+                        <View pointerEvents="none" style={styles.keptPlay}>
+                          <Play size={10} color="#fff" fill="#fff" />
+                        </View>
+                      ) : null}
+                      <TouchableOpacity
+                        onPress={() => setKeptMedia((list) => list.filter((k) => k.id !== m.id))}
+                        disabled={submitting}
+                        hitSlop={8}
+                        accessibilityRole="button"
+                        accessibilityLabel={m.kind === "video" ? t("community.removeVideo") : t("community.compose.removeMedia")}
+                        style={styles.keptRemove}
+                      >
+                        <X size={12} color={Colors.text.primary} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              ) : null}
+              {editing.kind === "image" || keptMedia.length === 0 ? (
+                <MediaPicker
+                  media={media}
+                  onChange={setMedia}
+                  imagesOnly={editing.kind === "image"}
+                  videosOnly={editing.kind === "video"}
+                  taken={keptMedia.length}
+                  disabled={submitting}
+                />
+              ) : null}
+              {mediaPlan?.problem ? (
+                <Text style={styles.note}>{t(`community.compose.mediaEditProblem.${mediaPlan.problem}`)}</Text>
+              ) : mediaPlan?.review ? (
+                <Text style={styles.note}>{t("community.compose.mediaEditNotice")}</Text>
+              ) : null}
+            </>
+          ) : editing ? (
+            // A post under review, or a kind with no media to change.
+            <Text style={styles.note}>
+              {editing.kind === "image" || editing.kind === "video"
+                ? t("community.compose.mediaUnderReview")
+                : t("community.compose.mediaLocked")}
+            </Text>
           ) : isPoll ? (
             // A poll takes no photos or videos (the server refuses them too).
             <Text style={styles.note}>{t("community.poll.noMedia")}</Text>
@@ -1162,6 +1314,38 @@ const styles = StyleSheet.create({
     color: Colors.text.tertiary,
     paddingHorizontal: 16,
     paddingBottom: 14,
+  },
+  // The posted items in edit mode: the same 72pt tray as MediaPicker's.
+  keptStrip: {
+    paddingHorizontal: 16,
+    paddingTop: 6,
+    paddingBottom: 14,
+    gap: 10,
+  },
+  keptThumb: {
+    width: 72,
+    height: 72,
+    borderRadius: 8,
+    backgroundColor: Colors.background.medium,
+  },
+  keptPlay: {
+    position: 'absolute',
+    bottom: 4,
+    start: 4,
+    borderRadius: 10,
+    padding: 3,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+  keptRemove: {
+    position: 'absolute',
+    top: -6,
+    end: -6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.background.light,
   },
   postButtonText: {
     color: Colors.textWhite,
