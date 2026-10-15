@@ -16,14 +16,15 @@ import { feedMutedNow, useFeedMuted, useFeedSpeed } from '@/components/Community
 import Colors from '@/constants/colors';
 import FeedService, { type Post } from '@/services/FeedService';
 import PostService from '@/services/PostService';
-import { playableUri, videoPostsOf, viewerIndex, type FeedTabName } from '@/utils/feedAutoplay.core';
+import SocialService from '@/services/SocialService';
+import { playableUri, seekMore, videoPostsOf, viewerIndex, type ViewerSource } from '@/utils/feedAutoplay.core';
 import { videoProgress } from '@/utils/stories.core';
 import { speedLabel } from '@/utils/playbackSpeed.core';
 
 interface Props {
   postId: string;
-  /** The feed whose videos to page through; null opens the one post. */
-  feed: FeedTabName | null;
+  /** What to page through: a feed tab, or one person's reels; null opens the one post. */
+  source: ViewerSource | null;
 }
 
 /**
@@ -33,8 +34,10 @@ interface Props {
  * feed's own infinite query (same key and fetcher as FeedList): nothing is
  * fetched twice, and more pages load near the end. It never refetches the
  * pages on open, and it tracks the open video by id, so a reordered feed
- * cannot swap the video under the viewer. Opened anywhere else, or cold from
- * a link, it shows the one post.
+ * cannot swap the video under the viewer. Opened from a profile's Reels tab,
+ * it pages through that person's reels, reading a few pages ahead when the
+ * tapped reel is further down. Opened anywhere else, or cold from a link, it
+ * shows the one post.
  *
  * One player for the whole viewer (plan §5.8): its source is swapped when the
  * page changes, and the other pages show their poster.
@@ -43,7 +46,7 @@ interface Props {
  * mention or profile tapped here must open on top of it, and on iOS a screen
  * pushed from a full-screen modal opens behind it.
  */
-export default function VideoViewerScreen({ postId, feed }: Props) {
+export default function VideoViewerScreen({ postId, source }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -52,23 +55,38 @@ export default function VideoViewerScreen({ postId, feed }: Props) {
   const [speed, cycleSpeed] = useFeedSpeed();
 
   const feedQuery = useInfiniteQuery({
-    queryKey: ['feed', feed],
-    queryFn: ({ pageParam }) => FeedService.getFeed(feed ?? 'for-you', pageParam ?? null),
+    queryKey: source?.key ?? ['feed', null],
+    queryFn: ({ pageParam }) =>
+      source?.kind === 'profile'
+        ? SocialService.userPosts(source.userId, 'reels', pageParam ?? null)
+        : FeedService.getFeed(source?.kind === 'feed' ? source.tab : 'for-you', pageParam ?? null),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     staleTime: 30_000,
     // Read the list's pages as they are: a refetch could reorder them.
     refetchOnMount: false,
-    enabled: feed !== null,
+    enabled: source !== null,
   });
   const fromFeed = useMemo(() => videoPostsOf(feedQuery.data?.pages), [feedQuery.data]);
   const inFeed = fromFeed.some((p) => p.id === postId);
 
-  // The one post, when there is no feed or the feed does not hold it.
+  // A reel tapped on a profile may sit a few pages down: read on until it is
+  // found, the list ends or the limit is reached. A failed page stops it.
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = feedQuery;
+  const seeking =
+    source !== null &&
+    feedQuery.isFetched &&
+    !feedQuery.isFetchNextPageError &&
+    seekMore({ found: inFeed, pages: feedQuery.data?.pages.length ?? 0, hasNext: hasNextPage }, source.seekPages);
+  useEffect(() => {
+    if (seeking && !isFetchingNextPage) void fetchNextPage();
+  }, [seeking, isFetchingNextPage, fetchNextPage]);
+
+  // The one post, when there is no source or the source does not hold it.
   const single = useQuery({
     queryKey: ['post', postId],
     queryFn: () => PostService.getPost(postId),
-    enabled: !!postId && (feed === null || (feedQuery.isFetched && !inFeed)),
+    enabled: !!postId && (source === null || (feedQuery.isFetched && !inFeed && !seeking)),
   });
 
   const videos: Post[] = useMemo(() => {
@@ -140,7 +158,6 @@ export default function VideoViewerScreen({ postId, feed }: Props) {
   }, []);
 
   // Near the end of the loaded videos, load the next page of the feed.
-  const { hasNextPage, isFetchingNextPage, fetchNextPage } = feedQuery;
   useEffect(() => {
     if (inFeed && index >= videos.length - 2 && hasNextPage && !isFetchingNextPage) void fetchNextPage();
   }, [inFeed, index, videos.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
@@ -161,7 +178,8 @@ export default function VideoViewerScreen({ postId, feed }: Props) {
     [router],
   );
 
-  const loading = (feed !== null && feedQuery.isPending) || (!inFeed && single.isPending && single.fetchStatus !== 'idle');
+  const loading =
+    (source !== null && (feedQuery.isPending || seeking)) || (!inFeed && single.isPending && single.fetchStatus !== 'idle');
   if (!current) {
     return (
       <View style={[styles.fill, styles.center]}>

@@ -6,7 +6,7 @@
  * `components/Media/GalleryGrid.tsx`.
  */
 
-export type ProfileTab = 'posts' | 'videos' | 'tagged' | 'media' | 'saved';
+export type ProfileTab = 'posts' | 'videos' | 'reels' | 'tagged' | 'media' | 'saved';
 
 /**
  * Media is what a Casa Media contributor published there, so it only exists on
@@ -16,6 +16,7 @@ export function profileTabs(isSelf: boolean, isContributor = false): ProfileTab[
   return [
     'posts',
     'videos',
+    'reels',
     'tagged',
     ...(isContributor ? (['media'] as const) : []),
     ...(isSelf ? (['saved'] as const) : []),

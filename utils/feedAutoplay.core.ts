@@ -70,6 +70,37 @@ export function feedTabOf(param: string | string[] | undefined): FeedTabName | n
   return (FEED_TABS as readonly string[]).includes(value ?? '') ? (value as FeedTabName) : null;
 }
 
+/** Pages the viewer reads looking for a tapped reel on a profile: the first and five more. */
+export const VIEWER_SEEK_PAGES = 6;
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * What the viewer pages through. Every key starts with 'feed', so a like or a
+ * save patched into ['feed'] reaches the viewer's copy too. `seekPages` is how
+ * many pages it may read looking for the opened post: a feed was open behind
+ * the viewer, so the post is in its loaded pages already.
+ */
+export type ViewerSource =
+  | { kind: 'feed'; tab: FeedTabName; key: readonly ['feed', FeedTabName]; seekPages: number }
+  | { kind: 'profile'; userId: string; key: readonly ['feed', 'profile', string, 'reels']; seekPages: number };
+
+/** The viewer's `feed` or `profile` link param as its source, or null to open the one post. */
+export function viewerSourceOf(params: { feed?: string | string[]; profile?: string | string[] }): ViewerSource | null {
+  const tab = feedTabOf(params.feed);
+  if (tab) return { kind: 'feed', tab, key: ['feed', tab], seekPages: 1 };
+  const profile = Array.isArray(params.profile) ? params.profile[0] : params.profile;
+  if (profile && UUID.test(profile)) {
+    return { kind: 'profile', userId: profile, key: ['feed', 'profile', profile, 'reels'], seekPages: VIEWER_SEEK_PAGES };
+  }
+  return null;
+}
+
+/** Whether to read another page looking for the opened post. */
+export function seekMore(state: { found: boolean; pages: number; hasNext: boolean }, limit: number): boolean {
+  return !state.found && state.hasNext && state.pages < limit;
+}
+
 /**
  * The page of the open video in the viewer's list: by id, so a refreshed or
  * reordered feed keeps showing the same post. A post that left the list falls

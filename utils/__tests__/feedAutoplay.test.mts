@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { feedTabOf, pickActiveVideo, videoPostsOf, playableUri, viewerIndex } from '../feedAutoplay.core.ts';
+import { feedTabOf, pickActiveVideo, videoPostsOf, playableUri, viewerIndex, viewerSourceOf, seekMore, VIEWER_SEEK_PAGES } from '../feedAutoplay.core.ts';
 
 /**
  * Only one video plays in the feed at a time (one player per screen): the
@@ -80,5 +80,48 @@ describe('viewerIndex', () => {
   it('a video no longer in the list falls back to the first, never past the end', () => {
     assert.equal(viewerIndex(list, 'gone'), 0);
     assert.equal(viewerIndex([], 'a'), -1);
+  });
+});
+
+describe('viewerSourceOf', () => {
+  // What the viewer pages through: a feed tab, one person's reels, or nothing
+  // (the one post). Every key starts with 'feed', so a like or save patched
+  // into ['feed'] reaches the viewer's copy too.
+  const USER = '00000000-0000-4000-8000-00000000000b';
+
+  it('a feed tab pages through that feed, without looking further for the post', () => {
+    assert.deepEqual(viewerSourceOf({ feed: 'reels' }), { kind: 'feed', tab: 'reels', key: ['feed', 'reels'], seekPages: 1 });
+  });
+
+  it('a profile pages through that person\'s reels, looking a few pages ahead for the tapped one', () => {
+    assert.deepEqual(viewerSourceOf({ profile: USER }), {
+      kind: 'profile',
+      userId: USER,
+      key: ['feed', 'profile', USER, 'reels'],
+      seekPages: VIEWER_SEEK_PAGES,
+    });
+    assert.equal(VIEWER_SEEK_PAGES, 6, 'the first page and five more');
+    assert.deepEqual(viewerSourceOf({ profile: [USER] })?.key, ['feed', 'profile', USER, 'reels']);
+  });
+
+  it('anything else is the one post', () => {
+    assert.equal(viewerSourceOf({}), null);
+    assert.equal(viewerSourceOf({ feed: 'hashtag' }), null);
+    assert.equal(viewerSourceOf({ profile: 'not-a-uuid' }), null);
+    assert.equal(viewerSourceOf({ profile: '../x' }), null);
+  });
+});
+
+describe('seekMore', () => {
+  // The tapped reel may sit further down a profile than the first page.
+  it('loads another page while the post is not found, there is one, and the limit is not reached', () => {
+    assert.equal(seekMore({ found: false, pages: 1, hasNext: true }, 6), true);
+    assert.equal(seekMore({ found: false, pages: 5, hasNext: true }, 6), true);
+  });
+  it('stops once found, at the end, or at the limit', () => {
+    assert.equal(seekMore({ found: true, pages: 1, hasNext: true }, 6), false);
+    assert.equal(seekMore({ found: false, pages: 2, hasNext: false }, 6), false);
+    assert.equal(seekMore({ found: false, pages: 6, hasNext: true }, 6), false);
+    assert.equal(seekMore({ found: false, pages: 1, hasNext: true }, 1), false, 'a feed never looks further');
   });
 });

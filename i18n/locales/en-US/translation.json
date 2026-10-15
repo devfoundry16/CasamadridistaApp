@@ -1830,6 +1830,7 @@
       "tabs": {
         "posts": "Posts",
         "videos": "Videos",
+        "reels": "Reels",
         "tagged": "Tagged",
         "saved": "Saved",
         "media": "Media"
@@ -1846,6 +1847,8 @@
         "postsSelf": "Your posts in Community will appear here.",
         "videos": "{{name}} hasn't posted a video yet.",
         "videosSelf": "Your video posts will appear here.",
+        "reels": "{{name}} hasn't posted a reel yet.",
+        "reelsSelf": "Your reels will appear here.",
         "tagged": "No posts tag {{name}} yet.",
         "taggedSelf": "Posts you're tagged in will appear here.",
         "saved": "Tap the bookmark on a post to save it here. Only you can see what you save.",

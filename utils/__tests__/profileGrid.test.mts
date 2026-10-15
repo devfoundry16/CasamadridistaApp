@@ -4,6 +4,7 @@
  * Run with:  node --test utils/__tests__/profileGrid.test.mts
  */
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 
 import {
@@ -16,18 +17,31 @@ import {
 } from '../profileGrid.core.ts';
 
 describe('profileTabs', () => {
-  it('anyone: Posts, Videos, Tagged', () => {
-    assert.deepEqual(profileTabs(false), ['posts', 'videos', 'tagged']);
+  it('anyone: Posts, Videos, Reels, Tagged', () => {
+    assert.deepEqual(profileTabs(false), ['posts', 'videos', 'reels', 'tagged']);
   });
 
   it('your own profile adds Saved, last', () => {
-    assert.deepEqual(profileTabs(true), ['posts', 'videos', 'tagged', 'saved']);
+    assert.deepEqual(profileTabs(true), ['posts', 'videos', 'reels', 'tagged', 'saved']);
   });
 
   it('a Casa Media contributor gets a Media tab, before Saved', () => {
-    assert.deepEqual(profileTabs(false, true), ['posts', 'videos', 'tagged', 'media']);
-    assert.deepEqual(profileTabs(true, true), ['posts', 'videos', 'tagged', 'media', 'saved']);
+    assert.deepEqual(profileTabs(false, true), ['posts', 'videos', 'reels', 'tagged', 'media']);
+    assert.deepEqual(profileTabs(true, true), ['posts', 'videos', 'reels', 'tagged', 'media', 'saved']);
   });
+});
+
+describe('profile tab strings exist in both languages', () => {
+  const load = (locale: string) =>
+    JSON.parse(readFileSync(new URL(`../../i18n/locales/${locale}/translation.json`, import.meta.url), 'utf8'));
+  for (const locale of ['en-US', 'ar-SA']) {
+    it(locale, () => {
+      const profile = load(locale).social.profile;
+      for (const tab of profileTabs(true, true)) assert.equal(typeof profile.tabs[tab], 'string', `${locale} tabs.${tab}`);
+      for (const key of ['reels', 'reelsSelf']) assert.equal(typeof profile.empty[key], 'string', `${locale} empty.${key}`);
+      assert.match(profile.empty.reels, /\{\{name\}\}/);
+    });
+  }
 });
 
 describe('mediaGridCell', () => {

@@ -122,10 +122,13 @@ export default function UserProfileScreen() {
   });
   const cells = grid.data?.pages.flatMap((p) => p?.items ?? []) ?? [];
 
+  // A reel opens full screen and swipes on through this person's reels.
   const openPost = useCallback(
-    (item: ProfileGridItem) =>
-      router.push(shownTab === 'media' ? `/media/item/${item.id}` : `/community/post/${item.id}`),
-    [router, shownTab],
+    (item: ProfileGridItem) => {
+      if (shownTab === 'reels' && id) router.push({ pathname: '/community/videos/[postId]', params: { postId: item.id, profile: id } });
+      else router.push(shownTab === 'media' ? `/media/item/${item.id}` : `/community/post/${item.id}`);
+    },
+    [router, shownTab, id],
   );
 
   const openChat = useCallback(async () => {

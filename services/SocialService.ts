@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 import { API_BASE_URL } from '@/config/supabase';
+import type { FeedPage } from '@/services/FeedService';
 import { UPLOAD_METHODS } from '@/utils/uploadTarget.core';
 import {
   normaliseBlocked,
@@ -150,11 +151,25 @@ class SocialServiceClass {
    * A profile tab as grid cells (`layout=grid`). Saved is not here: it is your
    * own list, `PostService.savedGrid`. Null when the profile is not visible.
    */
-  async userGrid(userId: string, tab: 'posts' | 'videos' | 'tagged', cursor?: string | null): Promise<ProfileGridPage | null> {
+  async userGrid(userId: string, tab: 'posts' | 'videos' | 'reels' | 'tagged', cursor?: string | null): Promise<ProfileGridPage | null> {
     try {
       return normaliseGridPage(await this.get(`/users/${encodeURIComponent(userId)}/posts`, { tab, layout: 'grid', cursor }));
     } catch (error) {
       if (error instanceof SocialApiError && error.status === 404) return null;
+      throw error;
+    }
+  }
+
+  /**
+   * A profile tab as full posts (`layout=list`), the feed's page shape, for
+   * the video viewer. A profile that is not visible is an empty page.
+   */
+  async userPosts(userId: string, tab: 'posts' | 'videos' | 'reels' | 'tagged', cursor?: string | null): Promise<FeedPage> {
+    try {
+      const data = await this.get<Partial<FeedPage>>(`/users/${encodeURIComponent(userId)}/posts`, { tab, layout: 'list', cursor });
+      return { posts: Array.isArray(data?.posts) ? data.posts : [], nextCursor: data?.nextCursor ?? null };
+    } catch (error) {
+      if (error instanceof SocialApiError && error.status === 404) return { posts: [], nextCursor: null };
       throw error;
     }
   }

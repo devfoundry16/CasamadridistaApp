@@ -15,7 +15,7 @@ interface Props {
   isContributor?: boolean;
 }
 
-/** Posts | Videos | Tagged, plus Media for a contributor and Saved on your own. */
+/** Posts | Videos | Reels | Tagged, plus Media for a contributor and Saved on your own. */
 export default function ProfileTabs({ active, onSelect, isSelf, isContributor = false }: Props) {
   const { t } = useTranslation();
   return (
