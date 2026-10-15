@@ -103,7 +103,7 @@ export interface Post {
   /** 'reel': a vertical short video, shown in the Reels tab. Absent reads as standard. */
   format?: 'standard' | 'reel';
   /** A poll post's options and closing time; the counts come from GET /posts/:id/poll. */
-  poll?: { closes_at: string; options: { id: string; position: number; label: string }[] } | null;
+  poll?: { closes_at: string; multiple?: boolean; options: { id: string; position: number; label: string }[] } | null;
 }
 
 export interface FeedPage {

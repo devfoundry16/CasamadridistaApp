@@ -96,7 +96,9 @@ describe('unreferencedFiles', () => {
 describe('a poll in a draft', () => {
   it('round-trips its options and length', () => {
     const back = parseDraft(serializeDraft(draft({ poll: { options: ['Vini', ''], days: 3 } })));
-    assert.deepEqual(back?.poll, { options: ['Vini', ''], days: 3 });
+    assert.deepEqual(back?.poll, { options: ['Vini', ''], days: 3, multiple: false });
+    const several = parseDraft(serializeDraft(draft({ poll: { options: ['a', 'b'], days: 1, multiple: true } })));
+    assert.equal(several?.poll?.multiple, true, 'several answers are kept');
   });
   it('a malformed poll is dropped, the rest of the draft kept', () => {
     const back = parseDraft(JSON.stringify({ ...draft(), poll: { options: 'Vini', days: 3 } }));

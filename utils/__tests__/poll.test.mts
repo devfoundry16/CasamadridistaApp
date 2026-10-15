@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { POLL_DURATIONS, POLL_OPTIONS_MAX, closesIn, pollState, validatePollDraft } from '../poll.core.ts';
+import { POLL_DURATIONS, POLL_OPTIONS_MAX, closesIn, mineOf, pollState, toggleChoice, validatePollDraft } from '../poll.core.ts';
 
 /**
  * Poll posts (spec 2.1.0 §03). The composer checks a poll the same way the
@@ -65,15 +65,39 @@ describe('poll strings exist in both languages', () => {
       for (const key of [
         'add', 'remove', 'optionPlaceholder', 'addOption', 'duration', 'yourVote',
         'final', 'closed', 'failed', 'signIn', 'locked', 'label', 'voteA11y', 'noMedia', 'removeOption', 'durationNote',
+        'multiple', 'multipleHint', 'end', 'endConfirmTitle', 'endConfirmBody', 'endFailed', 'pickA11y',
       ]) {
         assert.equal(typeof p[key], 'string', `${locale} community.poll.${key}`);
       }
       // Counts read "1 vote", "2 votes": plural forms, all of Arabic's six.
       const forms = locale === 'ar-SA' ? ['zero', 'one', 'two', 'few', 'many', 'other'] : ['one', 'other'];
-      for (const base of ['votes', 'days', 'closesInDays', 'closesInHours', 'closesInMinutes']) {
+      for (const base of ['votes', 'voters', 'days', 'closesInDays', 'closesInHours', 'closesInMinutes']) {
         assert.equal(typeof p[base], 'undefined', `${locale} community.poll.${base} is plural`);
         for (const f of forms) assert.equal(typeof p[`${base}_${f}`], 'string', `${locale} community.poll.${base}_${f}`);
       }
     });
   }
+});
+
+describe('toggleChoice', () => {
+  it('single choice: the tapped option replaces the vote; tapping it again changes nothing', () => {
+    assert.deepEqual(toggleChoice([], 'a', false), ['a']);
+    assert.deepEqual(toggleChoice(['a'], 'b', false), ['b']);
+    assert.equal(toggleChoice(['a'], 'a', false), null);
+  });
+  it('several answers: a tap adds or removes it; removing the last withdraws the vote', () => {
+    assert.deepEqual(toggleChoice([], 'a', true), ['a']);
+    assert.deepEqual(toggleChoice(['a'], 'b', true), ['a', 'b']);
+    assert.deepEqual(toggleChoice(['a', 'b'], 'a', true), ['b']);
+    assert.deepEqual(toggleChoice(['b'], 'b', true), []);
+  });
+});
+
+describe('mineOf', () => {
+  it('every choice from the tally; an older single answer counts as one', () => {
+    assert.deepEqual(mineOf({ mine: 'a', mine_ids: ['a', 'c'] }), ['a', 'c']);
+    assert.deepEqual(mineOf({ mine: 'a' }), ['a']);
+    assert.deepEqual(mineOf({ mine: null }), []);
+    assert.deepEqual(mineOf(undefined), []);
+  });
 });

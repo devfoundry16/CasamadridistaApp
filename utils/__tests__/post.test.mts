@@ -179,6 +179,11 @@ describe('feedMenuActions', () => {
     assert.deepEqual(feedMenuActions({ isOwn: true }), ['insights', 'edit', 'delete']);
     assert.deepEqual(feedMenuActions({ isOwn: true, status: 'removed', pinned: true }), ['unpin', 'insights', 'edit', 'delete']);
   });
+  it('an open poll of your own can be ended; a closed one, or anyone else\'s, cannot', () => {
+    assert.deepEqual(feedMenuActions({ isOwn: true, kind: 'poll', status: 'approved', pollOpen: true }), ['pin', 'end_poll', 'insights', 'edit', 'delete']);
+    assert.deepEqual(feedMenuActions({ isOwn: true, kind: 'poll', status: 'approved', pollOpen: false }), ['pin', 'insights', 'edit', 'delete']);
+    assert.deepEqual(feedMenuActions({ isOwn: false, kind: 'poll', pollOpen: true }), ['report']);
+  });
   it('a shared Casa Media teaser has nothing of its own to edit, pin or measure, only delete', () => {
     assert.deepEqual(feedMenuActions({ isOwn: true, kind: 'media_teaser', status: 'approved' }), ['delete']);
     assert.deepEqual(feedMenuActions({ isOwn: false, kind: 'media_teaser' }), ['report']);

@@ -25,9 +25,13 @@ function PostCard({ post }: Props) {
   const isPoll = post.kind === 'poll' && !!post.poll;
   // The card is one accessible element, which hides the poll's option buttons
   // from VoiceOver/TalkBack: each open option comes back as an action.
-  const { tally: poll, open: pollOpen, choose } = usePollVote(post, isPoll);
+  const { tally: poll, open: pollOpen, choose, multiple: pollMultiple } = usePollVote(post, isPoll);
+  // Several answers: each action ticks or unticks its option.
   const pollActions = isPoll && pollOpen && poll
-    ? poll.options.map((o) => ({ name: `vote:${o.id}`, label: t('community.poll.voteA11y', { option: o.label }) }))
+    ? poll.options.map((o) => ({
+        name: `vote:${o.id}`,
+        label: t(pollMultiple ? 'community.poll.pickA11y' : 'community.poll.voteA11y', { option: o.label }),
+      }))
     : [];
 
   const goToPost = useCallback(() => {

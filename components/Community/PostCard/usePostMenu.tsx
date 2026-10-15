@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { BarChart3, Flag, Pencil, Pin, PinOff, Trash2 } from 'lucide-react-native';
+import { BarChart3, Flag, Pencil, Pin, PinOff, TimerOff, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,7 @@ import ReportSheet from '@/components/Community/Moderation/ReportSheet';
 import ActionSheet, { type SheetAction } from '@/components/Social/ActionSheet';
 import Colors from '@/constants/colors';
 import { useDeletePost } from '@/hooks/useDeletePost';
+import { useEndPoll } from '@/hooks/usePostPoll';
 import { usePinPost } from '@/hooks/usePinPost';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useUser } from '@/hooks/useUser';
@@ -29,6 +30,7 @@ export function usePostMenu(post: Post | undefined, { onDeleted }: { onDeleted?:
   const requireAuth = useRequireAuth();
   const { confirmAndDelete } = useDeletePost();
   const { setPinned } = usePinPost();
+  const { confirmAndEnd } = useEndPoll();
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
 
@@ -36,7 +38,13 @@ export function usePostMenu(post: Post | undefined, { onDeleted }: { onDeleted?:
   // While the post screen is still loading the post, there is nothing to offer.
   const menuKeys = !post
     ? []
-    : feedMenuActions({ isOwn, kind: post.kind, status: post.status, pinned: !!post.profile_pinned_at });
+    : feedMenuActions({
+        isOwn,
+        kind: post.kind,
+        status: post.status,
+        pinned: !!post.profile_pinned_at,
+        pollOpen: !!post.poll && Date.parse(post.poll.closes_at) > Date.now(),
+      });
   const actions: SheetAction[] = !post ? [] : menuKeys.map((key) =>
     key === 'pin' || key === 'unpin'
       ? {
@@ -44,6 +52,13 @@ export function usePostMenu(post: Post | undefined, { onDeleted }: { onDeleted?:
           label: t(key === 'pin' ? 'community.pin.pin' : 'community.pin.unpin'),
           icon: key === 'pin' ? <Pin size={20} color={Colors.text.primary} /> : <PinOff size={20} color={Colors.text.primary} />,
           onPress: () => setPinned(post.id, key === 'pin'),
+        }
+      : key === 'end_poll'
+      ? {
+          key,
+          label: t('community.poll.end'),
+          icon: <TimerOff size={20} color={Colors.text.primary} />,
+          onPress: () => confirmAndEnd(post),
         }
       : key === 'insights'
       ? {

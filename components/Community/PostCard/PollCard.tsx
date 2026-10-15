@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react-native';
+import { Check, Square, SquareCheck } from 'lucide-react-native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
@@ -23,19 +23,20 @@ function optionsOf(post: Post, tally: PollTally | undefined) {
 
 /**
  * A poll post's options: tap one to vote, tap another to change the vote
- * while the poll is open. Results (bars and percentages) show once you have
+ * while the poll is open. Where the author allowed several answers, each
+ * option is a checkbox: tap to add or remove it. Results (bars and percentages) show once you have
  * voted, once it has closed, and always to its author: the server sends no
  * counts before that, so a vote is not steered by the standings.
  */
 export default function PollCard({ post }: Props) {
   const { t } = useTranslation();
-  const { tally, state, choose } = usePollVote(post);
+  const { tally, state, choose, multiple, mine: mineIds } = usePollVote(post);
   const options = optionsOf(post, tally);
   const left = closesIn(tally?.closes_at ?? post.poll?.closes_at ?? '');
 
   const footer = [
     state.showResults && tally?.total !== null && tally?.total !== undefined
-      ? t('community.poll.votes', { count: tally.total })
+      ? t(multiple ? 'community.poll.voters' : 'community.poll.votes', { count: tally.total })
       : null,
     left
       ? t(left.unit === 'days' ? 'community.poll.closesInDays' : left.unit === 'hours' ? 'community.poll.closesInHours' : 'community.poll.closesInMinutes', { count: left.count })
@@ -47,24 +48,31 @@ export default function PollCard({ post }: Props) {
   return (
     <View style={styles.container}>
       {options.map((o) => {
-        const mine = tally?.mine === o.id;
+        const mine = mineIds.includes(o.id);
         const percent = state.showResults ? o.percent ?? 0 : null;
         return (
           <Touchable
             key={o.id}
             onPress={() => choose(o.id)}
             disabled={!state.canVote && !state.askSignIn}
-            accessibilityRole="button"
-            accessibilityState={{ selected: mine, disabled: !state.canVote && !state.askSignIn }}
+            accessibilityRole={multiple ? 'checkbox' : 'button'}
+            accessibilityState={multiple ? { checked: mine, disabled: !state.canVote && !state.askSignIn } : { selected: mine, disabled: !state.canVote && !state.askSignIn }}
             accessibilityLabel={[o.label, percent !== null ? `${percent}%` : null, mine ? t('community.poll.yourVote') : null].filter(Boolean).join(', ')}
             style={({ pressed }) => [styles.option, mine && styles.optionMine, { opacity: pressed ? 0.85 : 1 }]}
           >
             {percent !== null ? <View style={[styles.fill, mine && styles.fillMine, { width: `${percent}%` }]} /> : null}
             <View style={styles.row}>
+              {multiple ? (
+                mine ? (
+                  <SquareCheck size={18} color={Colors.darkGold} style={styles.box} />
+                ) : (
+                  <Square size={18} color={Colors.text.tertiary} style={styles.box} />
+                )
+              ) : null}
               <Text style={[styles.label, mine && styles.labelMine]} numberOfLines={2}>
                 {o.label}
               </Text>
-              {mine ? <Check size={14} color={Colors.darkGold} style={styles.check} /> : null}
+              {mine && !multiple ? <Check size={14} color={Colors.darkGold} style={styles.check} /> : null}
               {percent !== null ? <Text style={[styles.percent, mine && styles.labelMine]}>{percent}%</Text> : null}
             </View>
           </Touchable>
@@ -128,6 +136,9 @@ const styles = StyleSheet.create({
   },
   check: {
     marginHorizontal: 6,
+  },
+  box: {
+    marginEnd: 8,
   },
   percent: {
     marginStart: 8,

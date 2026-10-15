@@ -1080,7 +1080,16 @@
       "closesInMinutes_one": "Closes in {{count}} minute",
       "closesInMinutes_other": "Closes in {{count}} minutes",
       "removeOption": "Remove option",
-      "durationNote": "Counted from when you post it."
+      "durationNote": "Counted from when you post it.",
+      "multiple": "Allow several answers",
+      "multipleHint": "Voters can pick more than one option.",
+      "end": "End poll now",
+      "endConfirmTitle": "End this poll?",
+      "endConfirmBody": "Voting closes now and everyone sees the results.",
+      "endFailed": "Could not end the poll. Try again.",
+      "pickA11y": "Choose: {{option}}",
+      "voters_one": "{{count}} voter",
+      "voters_other": "{{count}} voters"
     },
     "tabReels": "Reels",
     "pin": {

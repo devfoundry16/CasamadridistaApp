@@ -28,7 +28,7 @@ export interface CreatePostPayload {
   /** 'reel' for a vertical short video post (kind 'video' only). */
   format?: 'standard' | 'reel';
   /** kind 'poll' only: 2–4 options, open for 1, 3 or 7 days (utils/poll.core). */
-  poll?: { options: string[]; duration_days: number };
+  poll?: { options: string[]; duration_days: number; multiple?: boolean };
 }
 
 export interface SaveState {
@@ -59,14 +59,25 @@ class PostServiceClass {
     return data;
   }
 
-  /** Vote (or change the vote). Rejects with the axios error: 409 when the poll has closed. */
-  async votePoll(postId: string, optionId: string): Promise<PollTally> {
+  /**
+   * Set the viewer's choices: one option, or several where the author allowed
+   * it (none withdraws the vote). Rejects with the axios error: 409 when the
+   * poll has closed.
+   */
+  async votePoll(postId: string, optionIds: string[]): Promise<PollTally> {
     const headers = await this.getAuthHeader();
     const { data } = await axios.post<PollTally>(
       `${API_BASE_URL}posts/${encodeURIComponent(postId)}/poll/vote`,
-      { option_id: optionId },
+      { option_ids: optionIds },
       { headers },
     );
+    return data;
+  }
+
+  /** The author ends the poll now. Rejects with the axios error (403, 409 already closed). */
+  async closePoll(postId: string): Promise<PollTally> {
+    const headers = await this.getAuthHeader();
+    const { data } = await axios.post<PollTally>(`${API_BASE_URL}posts/${encodeURIComponent(postId)}/poll/close`, {}, { headers });
     return data;
   }
 

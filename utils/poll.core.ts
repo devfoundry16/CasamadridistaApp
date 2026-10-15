@@ -22,10 +22,32 @@ export interface PollOptionTally {
 
 export interface PollTally {
   options: PollOptionTally[];
+  /** People who voted, once the viewer may see results. */
   total: number | null;
+  voters?: number | null;
+  /** The first choice (a single-choice poll's answer). */
   mine: string | null;
+  /** Every choice: several where the author allowed several answers. */
+  mine_ids?: string[];
+  multiple?: boolean;
   open: boolean;
   closes_at: string;
+}
+
+/** The viewer's choices from a tally, an older single answer included. */
+export function mineOf(tally: Pick<PollTally, 'mine' | 'mine_ids'> | null | undefined): string[] {
+  if (Array.isArray(tally?.mine_ids)) return tally.mine_ids;
+  return tally?.mine ? [tally.mine] : [];
+}
+
+/**
+ * The choices after tapping `optionId`, or null when the tap changes nothing.
+ * A single-choice poll: the tapped option replaces the vote. Several answers:
+ * the tap adds or removes it, and removing the last withdraws the vote.
+ */
+export function toggleChoice(mine: readonly string[], optionId: string, multiple: boolean): string[] | null {
+  if (!multiple) return mine.length === 1 && mine[0] === optionId ? null : [optionId];
+  return mine.includes(optionId) ? mine.filter((id) => id !== optionId) : [...mine, optionId];
 }
 
 /** The options as the server will store them, or not ok. */
@@ -43,7 +65,7 @@ export function validatePollDraft(
 
 /** What the viewer can do with a poll, from the server's tally. */
 export function pollState(
-  tally: Pick<PollTally, 'mine' | 'open' | 'total'>,
+  tally: Pick<PollTally, 'open' | 'total'>,
   { signedIn }: { signedIn: boolean },
 ): { canVote: boolean; showResults: boolean; askSignIn: boolean } {
   return {

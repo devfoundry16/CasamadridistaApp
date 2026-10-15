@@ -125,7 +125,7 @@ export function patchPostInPages<T extends HasId, D extends { pages: { posts: T[
   return changed ? { ...data, pages } : data;
 }
 
-export type FeedMenuAction = 'report' | 'pin' | 'unpin' | 'insights' | 'edit' | 'delete';
+export type FeedMenuAction = 'report' | 'pin' | 'unpin' | 'end_poll' | 'insights' | 'edit' | 'delete';
 
 /**
  * What a post's "..." menu offers. Someone else's post can be reported
@@ -139,16 +139,20 @@ export function feedMenuActions({
   kind,
   status,
   pinned,
+  pollOpen,
 }: {
   isOwn: boolean;
   kind?: string;
   status?: string;
   pinned?: boolean;
+  /** An open poll can be ended early by its author. */
+  pollOpen?: boolean;
 }): FeedMenuAction[] {
   if (!isOwn) return ['report'];
   if (kind === 'media_teaser') return ['delete'];
   const pin: FeedMenuAction[] = pinned ? ['unpin'] : status === 'approved' ? ['pin'] : [];
-  return [...pin, 'insights', 'edit', 'delete'];
+  const poll: FeedMenuAction[] = kind === 'poll' && pollOpen ? ['end_poll'] : [];
+  return [...pin, ...poll, 'insights', 'edit', 'delete'];
 }
 
 /**

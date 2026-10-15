@@ -41,8 +41,8 @@ export interface PostDraft {
   fanClub: Record<string, unknown> | null;
   postAsFanClub: boolean;
   media: DraftMedia[];
-  /** A poll being written: its option texts as typed, and its length in days. */
-  poll?: { options: string[]; days: number } | null;
+  /** A poll being written: its option texts as typed, its length in days, and whether it takes several answers. */
+  poll?: { options: string[]; days: number; multiple?: boolean } | null;
   /** Reel mode: one vertical video, posted as format 'reel'. */
   reel?: boolean;
 }
@@ -100,7 +100,7 @@ export function parseDraft(raw: string | null | undefined): PostDraft | null {
     media: mediaOf(d.media),
     poll:
       d.poll && Array.isArray(d.poll.options) && d.poll.options.every(isStr) && typeof d.poll.days === 'number'
-        ? { options: d.poll.options, days: d.poll.days }
+        ? { options: d.poll.options, days: d.poll.days, multiple: d.poll.multiple === true }
         : null,
     reel: d.reel === true,
   };

@@ -73,6 +73,8 @@ export default function Composer({ start = null, editing }: Props = {}) {
   // A poll being written (new posts only): its options as typed and its length.
   const [pollOptions, setPollOptions] = useState<string[] | null>(null);
   const [pollDays, setPollDays] = useState<number>(1);
+  // The author lets voters pick several options.
+  const [pollMultiple, setPollMultiple] = useState(false);
   // Edit mode: the tags are sent only once the author changes them, so a
   // picker still loading its country list never clears them.
   const [tagsTouched, setTagsTouched] = useState(false);
@@ -232,6 +234,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
             if (saved.poll) {
               setPollOptions(saved.poll.options);
               setPollDays(saved.poll.days);
+              setPollMultiple(saved.poll.multiple === true);
             }
             setDraftReadyFor(draftUserId);
           },
@@ -281,7 +284,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
           country,
           fanClub: fanClub as unknown as Record<string, unknown> | null,
           postAsFanClub,
-          poll: pollOptions ? { options: pollOptions, days: pollDays } : null,
+          poll: pollOptions ? { options: pollOptions, days: pollDays, multiple: pollMultiple } : null,
           reel: reelMode,
           media: kept.map((m) => ({
             uri: m.uri,
@@ -300,7 +303,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
       }
     }, 800);
     return () => clearTimeout(timer);
-  }, [draftUserId, draftReady, submitting, title, body, location, audience, feeling, tagged, country, fanClub, postAsFanClub, media, pollOptions, pollDays, reelMode]);
+  }, [draftUserId, draftReady, submitting, title, body, location, audience, feeling, tagged, country, fanClub, postAsFanClub, media, pollOptions, pollDays, pollMultiple, reelMode]);
 
   // In reel mode only one vertical video of at most 60 s is kept; anything
   // else is refused with the reason, rather than posted as a reel.
@@ -381,7 +384,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
         body: body.trim() || undefined,
         audience: sentAudience,
         ...(feeling ? { feeling } : {}),
-        ...(pollCheck?.ok ? { poll: { options: pollCheck.options, duration_days: pollDays } } : {}),
+        ...(pollCheck?.ok ? { poll: { options: pollCheck.options, duration_days: pollDays, multiple: pollMultiple } } : {}),
         ...(asReel ? { format: "reel" as const } : {}),
         country_code: country?.country_code ?? undefined,
         ...(locationName ? { location_name: locationName } : {}),
@@ -438,7 +441,7 @@ export default function Composer({ start = null, editing }: Props = {}) {
       setUploadProgress("");
       setUploadFraction(0);
     }
-  }, [canPost, title, body, media, location, tagged, country, fanClub, postAsFanClub, roles, sentAudience, feeling, pollCheck, pollDays, reelMode, user, queryClient, router, t]);
+  }, [canPost, title, body, media, location, tagged, country, fanClub, postAsFanClub, roles, sentAudience, feeling, pollCheck, pollDays, pollMultiple, reelMode, user, queryClient, router, t]);
 
   const submit = editing ? handleSave : handlePost;
 
@@ -475,11 +478,12 @@ export default function Composer({ start = null, editing }: Props = {}) {
         (pollOptions
           ? {
               closes_at: new Date(Date.now() + pollDays * 86_400_000).toISOString(),
+              multiple: pollMultiple,
               options: pollOptions.map((label, position) => ({ id: `preview-${position}`, position, label: label.trim() })),
             }
           : null),
     } as Post;
-  }, [editing, user, postAsFanClub, roles, media, title, body, location, sentAudience, feeling, tagged, pollOptions, pollDays, reelMode]);
+  }, [editing, user, postAsFanClub, roles, media, title, body, location, sentAudience, feeling, tagged, pollOptions, pollDays, pollMultiple, reelMode]);
 
   return (
     // The offset makes the lift include the header (useKeyboardOffsets explains
@@ -625,6 +629,20 @@ export default function Composer({ start = null, editing }: Props = {}) {
                       <Text style={styles.tagButtonText}>{t("community.poll.addOption")}</Text>
                     </TouchableOpacity>
                   ) : null}
+                  <View style={styles.switchRow}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.switchLabel}>{t("community.poll.multiple")}</Text>
+                      <Text style={styles.note}>{t("community.poll.multipleHint")}</Text>
+                    </View>
+                    <Switch
+                      value={pollMultiple}
+                      onValueChange={setPollMultiple}
+                      disabled={submitting}
+                      accessibilityLabel={t("community.poll.multiple")}
+                      trackColor={{ false: Colors.border.default, true: Colors.darkGold }}
+                      thumbColor={Colors.textWhite}
+                    />
+                  </View>
                   <Text style={styles.subLabel}>{t("community.poll.duration")}</Text>
                   <Text style={styles.note}>{t("community.poll.durationNote")}</Text>
                   <View style={styles.pollDays} accessibilityRole="radiogroup">
@@ -1001,6 +1019,17 @@ const styles = StyleSheet.create({
   tagButtonText: {
     color: Colors.darkGold,
     fontSize: 13,
+    fontWeight: '600',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 8,
+  },
+  switchLabel: {
+    color: Colors.text.primary,
+    fontSize: 14,
     fontWeight: '600',
   },
   toggleRow: {

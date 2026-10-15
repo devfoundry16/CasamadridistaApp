@@ -1105,7 +1105,20 @@
       "closesInMinutes_many": "ينتهي خلال {{count}} دقيقة",
       "closesInMinutes_other": "ينتهي خلال {{count}} دقيقة",
       "removeOption": "إزالة الخيار",
-      "durationNote": "تُحتسب المدة من وقت النشر."
+      "durationNote": "تُحتسب المدة من وقت النشر.",
+      "multiple": "السماح بأكثر من إجابة",
+      "multipleHint": "يمكن للمصوّتين اختيار أكثر من خيار.",
+      "end": "إنهاء الاستطلاع الآن",
+      "endConfirmTitle": "إنهاء هذا الاستطلاع؟",
+      "endConfirmBody": "يُغلق التصويت الآن ويرى الجميع النتائج.",
+      "endFailed": "تعذّر إنهاء الاستطلاع. حاول مرة أخرى.",
+      "pickA11y": "اختر: {{option}}",
+      "voters_zero": "لا مصوّتين",
+      "voters_one": "مصوّت واحد",
+      "voters_two": "مصوّتان",
+      "voters_few": "{{count}} مصوّتين",
+      "voters_many": "{{count}} مصوّتًا",
+      "voters_other": "{{count}} مصوّت"
     },
     "tabReels": "ريلز",
     "pin": {
