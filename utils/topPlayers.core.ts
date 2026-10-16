@@ -44,6 +44,9 @@ export const TEAM_STAT_KEYS = [
   'shots_per_game',
   'key_passes_per_game',
   'yellow_cards',
+  // Our minutes-weighted mean of the players' API-Football ratings; the
+  // provider has no team rating (backend playerLeaderRules TEAM_STATS).
+  'average_rating',
 ] as const;
 export type TeamStatKey = (typeof TEAM_STAT_KEYS)[number];
 

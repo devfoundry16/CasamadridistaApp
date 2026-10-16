@@ -153,3 +153,11 @@ describe('every label exists in both languages', () => {
     });
   }
 });
+
+describe('the average team rating', () => {
+  it('is a team stat, labelled as our average of API-Football player ratings', () => {
+    assert.equal(TEAM_STAT_KEYS.at(-1), 'average_rating');
+    const en = JSON.parse(readFileSync(new URL('../../i18n/locales/en-US/translation.json', import.meta.url), 'utf8'));
+    assert.match(en.team.leaders.teamStat.average_rating, /API-Football/);
+  });
+});

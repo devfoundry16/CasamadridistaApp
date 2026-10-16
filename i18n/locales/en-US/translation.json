@@ -472,7 +472,8 @@
         "goals_against_per_game": "Goals conceded per game",
         "shots_per_game": "Shots",
         "key_passes_per_game": "Key passes",
-        "yellow_cards": "Yellow cards"
+        "yellow_cards": "Yellow cards",
+        "average_rating": "Average player rating (API-Football ratings)"
       },
       "unit": {
         "minutes": "min",

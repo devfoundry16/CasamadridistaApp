@@ -473,7 +473,8 @@
         "goals_against_per_game": "الأهداف المستقبلة لكل مباراة",
         "shots_per_game": "التسديدات",
         "key_passes_per_game": "التمريرات المفتاحية",
-        "yellow_cards": "البطاقات الصفراء"
+        "yellow_cards": "البطاقات الصفراء",
+        "average_rating": "متوسط تقييم اللاعبين (تقييمات API-Football)"
       },
       "unit": {
         "minutes": "د",
