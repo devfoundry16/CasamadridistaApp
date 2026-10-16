@@ -3,7 +3,7 @@
  */
 
 export type OwnerTool = 'pin' | 'unpin' | 'insights' | 'edit';
-export type ShareRow = 'friends' | 'copy_link' | 'share' | 'qr' | 'speed' | OwnerTool | 'save' | 'delete';
+export type ShareRow = 'friends' | 'copy_link' | 'share' | 'qr' | 'speed' | 'collection' | OwnerTool | 'save' | 'delete';
 
 const OWNER_TOOLS: readonly string[] = ['pin', 'unpin', 'insights', 'edit'];
 
@@ -22,24 +22,31 @@ const OWNER_TOOLS: readonly string[] = ['pin', 'unpin', 'insights', 'edit'];
  * Sending it to a friend in the app still works (the server checks each
  * reader).
  *
+ * "Save to collection" (row 3, Add to Playlist/Collection) is for anyone
+ * signed in: collections are private, so any post you can see can go in one.
+ *
  * @param saveable a photo or video post with something ready to save
  * @param isPublic false for a friends-only post
+ * @param signedIn a viewer with an account, who can keep collections
  */
 export function shareSheetRows({
   isOwn,
   saveable,
   isPublic = true,
   isVideo = false,
+  signedIn = false,
   ownerTools = [],
 }: {
   isOwn: boolean;
   saveable: boolean;
   isPublic?: boolean;
   isVideo?: boolean;
+  signedIn?: boolean;
   ownerTools?: readonly string[];
 }): ShareRow[] {
   const rows: ShareRow[] = isPublic ? ['friends', 'copy_link', 'share', 'qr'] : ['friends'];
   if (isVideo) rows.push('speed');
+  if (signedIn) rows.push('collection');
   if (isOwn) rows.push(...(ownerTools.filter((t) => OWNER_TOOLS.includes(t)) as OwnerTool[]));
   if (isOwn && saveable) rows.push('save');
   if (isOwn) rows.push('delete');

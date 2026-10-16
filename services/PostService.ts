@@ -8,6 +8,7 @@ import type { ProfileGridPage } from '@/types/social';
 import type { Audience, EditPayload } from '@/utils/postCompose.core';
 import type { PollTally } from '@/utils/poll.core';
 import { normaliseInsights, type PostInsights } from '@/utils/postInsights.core';
+import { normaliseCollections, type SavedCollection } from '@/utils/savedCollections.core';
 
 export interface CreatePostPayload {
   kind: 'text' | 'image' | 'video' | 'poll';
@@ -165,6 +166,74 @@ class PostServiceClass {
     }
   }
 
+  // ---- Saved collections (private folders of saved posts) ----
+  // A refusal is thrown with the server's code as its message
+  // (savedCollections.core collectionErrorKey).
+
+  async savedCollections(): Promise<SavedCollection[]> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.get(`${API_BASE_URL}posts/saved/collections`, { headers });
+      return normaliseCollections(data);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to load collections');
+    }
+  }
+
+  async createCollection(name: string): Promise<SavedCollection> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.post(`${API_BASE_URL}posts/saved/collections`, { name }, { headers });
+      return normaliseCollections({ collections: [data] })[0];
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to create collection');
+    }
+  }
+
+  async renameCollection(id: string, name: string): Promise<void> {
+    try {
+      const headers = await this.getAuthHeader();
+      await axios.patch(`${API_BASE_URL}posts/saved/collections/${encodeURIComponent(id)}`, { name }, { headers });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to rename collection');
+    }
+  }
+
+  async deleteCollection(id: string): Promise<void> {
+    try {
+      const headers = await this.getAuthHeader();
+      await axios.delete(`${API_BASE_URL}posts/saved/collections/${encodeURIComponent(id)}`, { headers });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to delete collection');
+    }
+  }
+
+  /** Which of your collections hold this post. */
+  async postCollections(postId: string): Promise<string[]> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.get(`${API_BASE_URL}posts/${encodeURIComponent(postId)}/collections`, { headers });
+      return Array.isArray(data?.collection_ids) ? data.collection_ids.filter((x: unknown) => typeof x === 'string') : [];
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to load collections');
+    }
+  }
+
+  /** Puts the post in exactly these of your collections, and saves it. */
+  async setPostCollections(postId: string, collectionIds: string[]): Promise<SaveState & { collection_ids: string[] }> {
+    try {
+      const headers = await this.getAuthHeader();
+      const { data } = await axios.put(
+        `${API_BASE_URL}posts/${encodeURIComponent(postId)}/collections`,
+        { collection_ids: collectionIds },
+        { headers },
+      );
+      return data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to update collections');
+    }
+  }
+
   async savePost(id: string): Promise<SaveState> {
     try {
       const headers = await this.getAuthHeader();
@@ -185,12 +254,16 @@ class PostServiceClass {
     }
   }
 
-  /** Your saved posts, newest save first, as grid cells for the profile's Saved tab. */
-  async savedGrid(cursor?: string | null): Promise<ProfileGridPage> {
+  /**
+   * Your saved posts as grid cells for the profile's Saved tab: all of them,
+   * newest save first, or one of your collections, newest addition first.
+   */
+  async savedGrid(cursor?: string | null, collectionId?: string | null): Promise<ProfileGridPage> {
     try {
       const headers = await this.getAuthHeader();
       const params: Record<string, string> = { layout: 'grid' };
       if (cursor) params.cursor = cursor;
+      if (collectionId) params.collection = collectionId;
       const response = await axios.get(`${API_BASE_URL}posts/saved`, { headers, params });
       return normaliseGridPage(response.data);
     } catch (error: any) {

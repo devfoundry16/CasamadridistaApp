@@ -1142,7 +1142,8 @@
       "legendWeb": "Web link"
     },
     "underReview": "Under review",
-    "underReviewA11y": "Under review: others will see this post once it has been checked."
+    "underReviewA11y": "Under review: others will see this post once it has been checked.",
+    "saveHint": "Long-press to save to a collection"
   },
   "membershipPackages": {
     "halaGold": {
@@ -2157,6 +2158,28 @@
       "failed": "The recording couldn't start. Try again.",
       "stopRecording": "Stop recording",
       "recordHintScreenReader": "Double-tap to start recording, double-tap again to stop and listen before sending"
+    },
+    "collections": {
+      "all": "All",
+      "new": "New",
+      "newTitle": "New collection",
+      "namePlaceholder": "Collection name",
+      "create": "Create",
+      "rename": "Rename",
+      "renameTitle": "Rename collection",
+      "save": "Save",
+      "delete": "Delete collection",
+      "deleteTitle": "Delete this collection?",
+      "deleteBody": "The posts in it stay in your saved posts.",
+      "saveTo": "Save to collection",
+      "empty": "You have no collections yet. Create one to sort your saved posts.",
+      "emptyCollection": "Nothing in this collection yet. Long-press the bookmark on a post to add it.",
+      "done": "Done",
+      "nameTaken": "You already have a collection with that name.",
+      "limit": "You can have up to 50 collections.",
+      "invalidName": "A name needs 1 to 40 characters.",
+      "failed": "Could not change your collections. Try again.",
+      "manage": "Collection options"
     }
   },
   "appeals": {
@@ -2269,6 +2292,7 @@
     "sendTo": "Send to",
     "qrCode": "QR code",
     "yourPost": "Your post",
-    "speed": "Playback speed"
+    "speed": "Playback speed",
+    "saveToCollection": "Save to collection"
   }
 }

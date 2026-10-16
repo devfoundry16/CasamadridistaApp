@@ -1,5 +1,5 @@
 import * as Clipboard from 'expo-clipboard';
-import { BarChart3, Check, Download, Gauge, Link2, MoreHorizontal, Pencil, Pin, PinOff, QrCode, Send, Share2, Trash2, X } from 'lucide-react-native';
+import { BarChart3, BookmarkPlus, Check, Download, Gauge, Link2, MoreHorizontal, Pencil, Pin, PinOff, QrCode, Send, Share2, Trash2, X } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,7 @@ import { feedMenuActions, isOwnPost } from '@/utils/post.core';
 import { speedLabel } from '@/utils/playbackSpeed.core';
 import { saveableFiles, sendToPeople, shareSheetRows } from '@/utils/shareSheet.core';
 import Avatar from './Avatar';
+import CollectionPickerSheet from './CollectionPickerSheet';
 import FriendPicker from './FriendPicker';
 import T from './T';
 
@@ -63,6 +64,7 @@ export default function PostShareSheet({ visible, post, onClose, onDeleted }: Pr
   const { confirmAndDelete } = useDeletePost();
   const [picker, setPicker] = useState<{ open: boolean; preselect?: string[] }>({ open: false });
   const [qr, setQr] = useState(false);
+  const [collections, setCollections] = useState(false);
   const [copied, setCopied] = useState(false);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -82,6 +84,7 @@ export default function PostShareSheet({ visible, post, onClose, onDeleted }: Pr
     saveable: files.length > 0,
     isPublic: post.audience !== 'friends',
     isVideo: post.kind === 'video',
+    signedIn: !!user?.id,
     ownerTools,
   });
   const hasOwnerGroup = rows.some((r) => ['pin', 'unpin', 'insights', 'edit', 'save', 'delete'].includes(r));
@@ -210,12 +213,20 @@ export default function PostShareSheet({ visible, post, onClose, onDeleted }: Pr
             />
           ) : null}
           {rows.includes('share') ? <Row icon={<Share2 size={20} color={Colors.darkGold} />} label={t('postShare.shareVia')} onPress={shareVia} /> : null}
-          {rows.includes('qr') ? <Row icon={<QrCode size={20} color={Colors.darkGold} />} label={t('postShare.qrCode')} onPress={showQr} last={!rows.includes('speed') && !hasOwnerGroup} /> : null}
+          {rows.includes('qr') ? <Row icon={<QrCode size={20} color={Colors.darkGold} />} label={t('postShare.qrCode')} onPress={showQr} last={!rows.includes('speed') && !rows.includes('collection') && !hasOwnerGroup} /> : null}
           {rows.includes('speed') ? (
             <Row
               icon={<Gauge size={20} color={Colors.darkGold} />}
               label={`${t('postShare.speed')} · ${speedLabel(speed)}`}
               onPress={cycleSpeed}
+              last={!rows.includes('collection') && !hasOwnerGroup}
+            />
+          ) : null}
+          {rows.includes('collection') ? (
+            <Row
+              icon={<BookmarkPlus size={20} color={Colors.darkGold} />}
+              label={t('postShare.saveToCollection')}
+              onPress={() => thenOpen(() => setCollections(true))}
               last={!hasOwnerGroup}
             />
           ) : null}
@@ -258,6 +269,7 @@ export default function PostShareSheet({ visible, post, onClose, onDeleted }: Pr
       </Modal>
 
       <QrSheet visible={qr} url={url} onClose={() => setQr(false)} />
+      <CollectionPickerSheet visible={collections} postId={post.id} onClose={() => setCollections(false)} />
 
       <FriendPicker
         visible={picker.open}

@@ -13,6 +13,7 @@ import ProfileGridCell from '@/components/Social/ProfileGridCell';
 import ProfileHeader from '@/components/Social/ProfileHeader';
 import ProfileStoryStrip from '@/components/Social/stories/ProfileStoryStrip';
 import ProfileTabs from '@/components/Social/ProfileTabs';
+import SavedCollectionsBar from '@/components/Social/SavedCollectionsBar';
 import SocialReportSheet from '@/components/Social/SocialReportSheet';
 import T from '@/components/Social/T';
 import Colors from '@/constants/colors';
@@ -56,6 +57,8 @@ export default function UserProfileScreen() {
   const [report, setReport] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [tab, setTab] = useState<ProfileTab>('posts');
+  // The Saved tab: every saved post, or one of your collections.
+  const [savedCollection, setSavedCollection] = useState<string | null>(null);
   const { width } = useWindowDimensions();
   const cell = gridCellSize(width);
 
@@ -106,9 +109,9 @@ export default function UserProfileScreen() {
   // One infinite query per tab: each keeps its own pages and cursor, so
   // switching back to a tab is instant.
   const grid = useInfiniteQuery({
-    queryKey: shownTab === 'saved' ? socialKeys.saved() : socialKeys.profileGrid(id ?? '', shownTab),
+    queryKey: shownTab === 'saved' ? socialKeys.saved(savedCollection) : socialKeys.profileGrid(id ?? '', shownTab),
     queryFn: async ({ pageParam }): Promise<ProfileGridPage | null> => {
-      if (shownTab === 'saved') return PostService.savedGrid(pageParam);
+      if (shownTab === 'saved') return PostService.savedGrid(pageParam, savedCollection);
       if (shownTab === 'media') {
         // What this contributor published in Casa Media, drawn in the same grid.
         const page = await CasaMediaService.list({ contributor_id: id!, cursor: pageParam });
@@ -181,7 +184,9 @@ export default function UserProfileScreen() {
 
   const emptyText =
     shownTab === 'saved'
-      ? t('social.profile.empty.saved')
+      ? savedCollection
+        ? t('social.collections.emptyCollection')
+        : t('social.profile.empty.saved')
       : isSelf
         ? t(`social.profile.empty.${shownTab}Self`)
         : t(`social.profile.empty.${shownTab}`, { name });
@@ -270,6 +275,9 @@ export default function UserProfileScreen() {
             ) : (
               <ProfileTabs active={shownTab} onSelect={setTab} isSelf={isSelf} isContributor={isContributor} />
             )}
+            {!blocking && shownTab === 'saved' ? (
+              <SavedCollectionsBar selected={savedCollection} onSelect={setSavedCollection} />
+            ) : null}
           </>
         }
         ListEmptyComponent={

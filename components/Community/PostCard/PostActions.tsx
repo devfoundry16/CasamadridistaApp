@@ -9,12 +9,12 @@ import {
   StyleSheet,
 } from "react-native";
 import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react-native";
-import type { FeedPage, Post } from "@/services/FeedService";
+import type { Post } from "@/services/FeedService";
 import PostService from "@/services/PostService";
 import Colors from "@/constants/colors";
 import PostShareSheet from "@/components/Social/PostShareSheet";
-import { socialKeys } from "@/hooks/social/keys";
-import { patchPost, patchPostInPages } from "@/utils/post.core";
+import CollectionPickerSheet from "@/components/Social/CollectionPickerSheet";
+import { afterSaveChange } from "@/hooks/social/useSavedCollections";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 interface Props {
@@ -35,6 +35,7 @@ export default function PostActions({ post, onCommentPress, onDeleted }: Props) 
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [saved, setSaved] = useState(post.saved_by_me ?? false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [collectionsOpen, setCollectionsOpen] = useState(false);
   const hasInteracted = useRef(false);
   const hasSaved = useRef(false);
   const saving = useRef(false);
@@ -96,21 +97,20 @@ export default function PostActions({ post, onCommentPress, onDeleted }: Props) 
       const nowSaved = typeof result?.saved === "boolean" ? result.saved : !wasSaved;
       setSaved(nowSaved);
       // Every cached copy of the post (detail, photo viewer, each feed tab), so
-      // a card remounted from the cache shows the new state rather than the old.
-      const patch: Partial<Post> = {
-        saved_by_me: nowSaved,
-        ...(typeof result?.save_count === "number" ? { save_count: result.save_count } : {}),
-      };
-      queryClient.setQueryData<Post>(["post", post.id], (old) => patchPost(old, post.id, patch));
-      queryClient.setQueriesData<{ pages: FeedPage[] }>({ queryKey: ["feed"] }, (old) =>
-        patchPostInPages(old, post.id, patch),
-      );
-      queryClient.invalidateQueries({ queryKey: socialKeys.saved() });
+      // a card remounted from the cache shows the new state rather than the
+      // old; and the Saved tab and collections (an unsave leaves them all).
+      afterSaveChange(queryClient, post.id, nowSaved, typeof result?.save_count === "number" ? result.save_count : undefined);
     } catch {
       setSaved(wasSaved);
     } finally {
       saving.current = false;
     }
+  };
+
+  // A long press on the bookmark: choose collections for the post (which saves it).
+  const openCollections = () => {
+    if (!signedIn()) return;
+    setCollectionsOpen(true);
   };
 
   // §16: a sheet with "Send to a friend" and "Share elsewhere", instead of
@@ -173,10 +173,16 @@ export default function PostActions({ post, onCommentPress, onDeleted }: Props) 
       {/* Bookmark */}
       <TouchableOpacity
         onPress={handleSave}
+        onLongPress={openCollections}
         activeOpacity={0.7}
         hitSlop={8}
         accessibilityRole="button"
         accessibilityLabel={saved ? t("community.unsavePost") : t("community.savePost")}
+        accessibilityHint={t("community.saveHint")}
+        accessibilityActions={[{ name: "longpress", label: t("social.collections.saveTo") }]}
+        onAccessibilityAction={(e) => {
+          if (e.nativeEvent.actionName === "longpress") openCollections();
+        }}
         accessibilityState={{ selected: saved }}
       >
         <Bookmark
@@ -186,6 +192,15 @@ export default function PostActions({ post, onCommentPress, onDeleted }: Props) 
         />
       </TouchableOpacity>
       <PostShareSheet visible={shareOpen} post={post} onClose={() => setShareOpen(false)} onDeleted={onDeleted} />
+      <CollectionPickerSheet
+        visible={collectionsOpen}
+        postId={post.id}
+        onClose={() => setCollectionsOpen(false)}
+        onSaved={() => {
+          hasSaved.current = true;
+          setSaved(true);
+        }}
+      />
     </View>
   );
 }
