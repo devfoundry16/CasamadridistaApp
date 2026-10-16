@@ -1135,8 +1135,14 @@
         "dm": "Sent in messages",
         "save": "Saved to photos"
       },
-      "ownViews": "Your own views are not counted."
-    }
+      "ownViews": "Your own views are not counted.",
+      "webViews": "Web link views",
+      "webNote": "Visits to this post's shared web link from people outside the app, counted once a day per visitor.",
+      "legendApp": "In the app",
+      "legendWeb": "Web link"
+    },
+    "underReview": "Under review",
+    "underReviewA11y": "Under review: others will see this post once it has been checked."
   },
   "membershipPackages": {
     "halaGold": {

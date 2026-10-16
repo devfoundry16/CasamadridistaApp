@@ -172,6 +172,18 @@ export function removePostFromPages<T extends HasId, D extends { pages: { posts:
 }
 
 /**
+ * Your own post while moderation checks it: after an edit that is checked
+ * again, or a new post still waiting. Shown as "Under review" in its header;
+ * nobody else can open a post in review.
+ */
+export function underReview(
+  post: { author_type?: string | null; author_id?: string | null; status?: string | null } | undefined,
+  userId: string | null | undefined,
+): boolean {
+  return isOwnPost(post, userId) && post?.status === 'pending';
+}
+
+/**
  * A person's own post: the gate for Save and Delete (share sheet, "..." menu).
  * A fan club or Casa post records its admin or manager as author_id, and is
  * never "theirs" here.

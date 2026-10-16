@@ -8,12 +8,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 
-import { SHARE_CHANNELS, barHeights, normaliseInsights, pinErrorKey } from '../postInsights.core.ts';
+import { SHARE_CHANNELS, barHeights, normaliseInsights, pinErrorKey, stackedBars } from '../postInsights.core.ts';
 
 const WIRE = {
-  totals: { views: 40, unique_viewers: 25, opens: 9, likes: 12, comments: 3, saves: 2, shares: 3 },
+  totals: { views: 40, unique_viewers: 25, opens: 9, likes: 12, comments: 3, saves: 2, shares: 3, web_views: 6 },
   shares_by_channel: { native_share: 0, copy_link: 1, qr: 0, dm: 2, save: 0 },
-  series: [{ day: '2026-10-12', views: 5 }, { day: '2026-10-13', views: 7 }],
+  series: [{ day: '2026-10-12', views: 5, web_views: 0 }, { day: '2026-10-13', views: 7, web_views: 6 }],
   tracked_since: '2026-10-13',
 };
 
@@ -34,6 +34,12 @@ describe('normaliseInsights', () => {
     assert.equal(out.channels.every((c) => c.count === 0), true);
     assert.equal(normaliseInsights(null).trackedSince, null);
   });
+
+  it('an answer from before web link views reads them as zero', () => {
+    const out = normaliseInsights({ totals: { views: 2 }, series: [{ day: '2026-10-13', views: 2 }] });
+    assert.equal(out.totals.web_views, 0);
+    assert.deepEqual(out.series, [{ day: '2026-10-13', views: 2, web_views: 0 }]);
+  });
 });
 
 describe('barHeights', () => {
@@ -43,6 +49,18 @@ describe('barHeights', () => {
   });
   it('no views at all is a flat row', () => {
     assert.deepEqual(barHeights([{ views: 0 }, { views: 0 }], 40), [0, 0]);
+  });
+});
+
+describe('stackedBars', () => {
+  it('app views at the bottom, web link views on top, scaled to the tallest day', () => {
+    assert.deepEqual(
+      stackedBars([{ views: 10, web_views: 10 }, { views: 5, web_views: 0 }, { views: 0, web_views: 1 }, { views: 0, web_views: 0 }], 40),
+      [{ app: 20, web: 20 }, { app: 10, web: 0 }, { app: 0, web: 2 }, { app: 0, web: 0 }],
+    );
+  });
+  it('a part with views is never invisible', () => {
+    assert.deepEqual(stackedBars([{ views: 100, web_views: 1 }], 40), [{ app: 40, web: 2 }]);
   });
 });
 
@@ -67,7 +85,7 @@ describe('pin and insights strings exist in both languages', () => {
         assert.equal(typeof pin[leaf], 'string', `${locale} ${pinErrorKey(code)}`);
       }
       const ins = all.community.insights;
-      for (const key of ['title', 'open', 'loadFailed', 'reach', 'views', 'people', 'opens', 'trackedSince', 'last30', 'engagement', 'likes', 'comments', 'saves', 'shares', 'sharesBy', 'ownViews']) {
+      for (const key of ['title', 'open', 'loadFailed', 'reach', 'views', 'people', 'opens', 'trackedSince', 'last30', 'engagement', 'likes', 'comments', 'saves', 'shares', 'sharesBy', 'ownViews', 'webViews', 'webNote', 'legendApp', 'legendWeb']) {
         assert.equal(typeof ins[key], 'string', `${locale} community.insights.${key}`);
       }
       for (const c of SHARE_CHANNELS) assert.equal(typeof ins.channel[c], 'string', `${locale} community.insights.channel.${c}`);

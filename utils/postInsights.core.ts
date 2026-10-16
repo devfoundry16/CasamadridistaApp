@@ -16,17 +16,19 @@ export interface InsightsTotals {
   comments: number;
   saves: number;
   shares: number;
+  /** Visits to the shared web link (/p/<id>), one per visitor per day; not app views. */
+  web_views: number;
 }
 
 export interface PostInsights {
   totals: InsightsTotals;
   channels: { channel: ShareChannel; count: number }[];
-  series: { day: string; views: number }[];
+  series: { day: string; views: number; web_views: number }[];
   /** The day views started being counted per viewer; null when unknown. */
   trackedSince: string | null;
 }
 
-const TOTAL_KEYS: (keyof InsightsTotals)[] = ['views', 'unique_viewers', 'opens', 'likes', 'comments', 'saves', 'shares'];
+const TOTAL_KEYS: (keyof InsightsTotals)[] = ['views', 'unique_viewers', 'opens', 'likes', 'comments', 'saves', 'shares', 'web_views'];
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function count(value: unknown): number {
@@ -39,7 +41,7 @@ export function normaliseInsights(raw: unknown): PostInsights {
   for (const key of TOTAL_KEYS) totals[key] = count(w.totals?.[key]);
   const series = (Array.isArray(w.series) ? w.series : [])
     .filter((d: any) => typeof d?.day === 'string' && DAY_RE.test(d.day))
-    .map((d: any) => ({ day: d.day as string, views: count(d.views) }));
+    .map((d: any) => ({ day: d.day as string, views: count(d.views), web_views: count(d.web_views) }));
   return {
     totals,
     channels: SHARE_CHANNELS.map((channel) => ({ channel, count: count(w.shares_by_channel?.[channel]) })),
@@ -53,6 +55,17 @@ export function barHeights(series: { views: number }[], maxHeight: number): numb
   const top = Math.max(0, ...series.map((d) => d.views));
   if (!top) return series.map(() => 0);
   return series.map((d) => (d.views ? Math.max(2, Math.round((d.views / top) * maxHeight)) : 0));
+}
+
+/**
+ * The 30-day chart as stacked bars: app views at the bottom, web link views on
+ * top, both scaled to the day with the most of the two together. A part with
+ * any views shows at least 2 px.
+ */
+export function stackedBars(series: { views: number; web_views: number }[], maxHeight: number): { app: number; web: number }[] {
+  const top = Math.max(0, ...series.map((d) => d.views + d.web_views));
+  const part = (n: number) => (top && n ? Math.max(2, Math.round((n / top) * maxHeight)) : 0);
+  return series.map((d) => ({ app: part(d.views), web: part(d.web_views) }));
 }
 
 /** The message key for a refused pin, from the server's error code. */

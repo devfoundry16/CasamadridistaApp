@@ -9,6 +9,8 @@ import VerifiedBadge from '../VerifiedBadge';
 import FanClubBadge from '../FanClubBadge';
 import Colors from '@/constants/colors';
 import { feelingOf } from '@/utils/postCompose.core';
+import { underReview } from '@/utils/post.core';
+import { useUser } from '@/hooks/useUser';
 
 interface Props {
   post: Post;
@@ -28,6 +30,9 @@ const CASA_LOGO = require('@/assets/icons/splash-icon-dark.png');
 
 export default function PostHeader({ post, onAuthorPress, onReportPress }: Props) {
   const { t } = useTranslation();
+  const { user } = useUser();
+  // Your own post while moderation checks it; nobody else can open it.
+  const reviewing = underReview(post, user?.id);
 
   // An official Casa teaser. `author_id` is the manager who clicked "Add to
   // Community", which is bookkeeping, not a byline: show the club's name and
@@ -93,6 +98,11 @@ export default function PostHeader({ post, onAuthorPress, onReportPress }: Props
             </View>
           ) : null}
         </View>
+        {reviewing ? (
+          <View accessible accessibilityLabel={t('community.underReviewA11y')} style={styles.review}>
+            <Text style={styles.reviewText}>{t('community.underReview')}</Text>
+          </View>
+        ) : null}
         {feelingText ? (
           <Text style={styles.feeling} numberOfLines={1}>{feelingText}</Text>
         ) : null}
@@ -173,6 +183,21 @@ const styles = StyleSheet.create({
   },
   audience: {
     marginStart: 4,
+  },
+  // "Under review": a gold outline, quieter than a button.
+  review: {
+    alignSelf: 'flex-start',
+    marginTop: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.darkGold,
+  },
+  reviewText: {
+    color: Colors.darkGold,
+    fontSize: 11,
+    fontWeight: '600',
   },
   feeling: {
     fontSize: 12,

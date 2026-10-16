@@ -5,6 +5,7 @@
  * Run with:  node --test utils/__tests__/post.test.mts
  */
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 
 import {
@@ -20,6 +21,7 @@ import {
   reportErrorKey,
   reportReady,
   isAuthRefusal,
+  underReview,
 } from '../post.core.ts';
 import { SOCIAL_REPORT_REASONS } from '../../types/social.ts';
 
@@ -217,5 +219,27 @@ describe('isOwnPost', () => {
   it('signed out, or no post', () => {
     assert.equal(isOwnPost(post(), null), false);
     assert.equal(isOwnPost(undefined, 'me'), false);
+  });
+});
+
+describe('underReview', () => {
+  // Your own post while moderation checks it (after an edit, or a new post
+  // still waiting). Nobody else can open a post in review.
+  const post = (over: Record<string, unknown> = {}) => ({ author_type: 'user', author_id: 'me', status: 'pending', ...over });
+  it('your own post waiting for review', () => {
+    assert.equal(underReview(post(), 'me'), true);
+  });
+  it('a live post, someone else\'s, a club post, or no one signed in', () => {
+    assert.equal(underReview(post({ status: 'approved' }), 'me'), false);
+    assert.equal(underReview(post({ author_id: 'other' }), 'me'), false);
+    assert.equal(underReview(post({ author_type: 'fan_club' }), 'me'), false);
+    assert.equal(underReview(post(), null), false);
+  });
+  it('the label exists in both languages', () => {
+    for (const locale of ['en-US', 'ar-SA']) {
+      const all = JSON.parse(readFileSync(new URL(`../../i18n/locales/${locale}/translation.json`, import.meta.url), 'utf8'));
+      assert.equal(typeof all.community.underReview, 'string', locale);
+      assert.equal(typeof all.community.underReviewA11y, 'string', locale);
+    }
   });
 });
