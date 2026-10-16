@@ -7,6 +7,8 @@ import { View } from 'react-native';
 import CustomWebView from '@/components/CustomWebView';
 import { Card, Crest, ResultDot, TabScroll, Updated } from '@/components/Match/Center/parts';
 import PreviewCard from '@/components/Match/Center/PreviewCard';
+import TrophiesCard from '@/components/Match/Center/TrophiesCard';
+import WatchCard from '@/components/Match/Center/WatchCard';
 import WatchExclusiveBanner from '@/components/Media/Match/WatchExclusiveBanner';
 import { isFinishedStatus } from '@/components/Media/Match/MatchIdentityStrip';
 import { Text } from '@/components/Text';
@@ -18,8 +20,9 @@ import type { MatchSummary, StandingRef, TeamForm } from '@/types/soccer/matchCe
 
 /**
  * Details: competition, kickoff and stadium, the AI preview before kickoff
- * (once switched on), both clubs' places in the table and their last five
- * results. Live and finished matches also keep the
+ * (once switched on), where to watch, both clubs' places in the table, their
+ * last five results and their trophies. Where to watch and trophies are
+ * entered by the Casa Media desk; each card hides when there is none. Live and finished matches also keep the
  * API-Sports match widget, which draws the events timeline.
  *
  * The id comes from the GLOBAL params: entered at `/match/123/media`, this
@@ -56,6 +59,8 @@ export default function MatchDetailsTab() {
 
           {match.state === 'upcoming' ? <PreviewCard matchId={match.id} /> : null}
 
+          {match.state !== 'finished' ? <WatchCard matchId={match.id} /> : null}
+
           {standings ? <StandingsCard match={match} home={standings.home} away={standings.away} /> : null}
 
           {form.data && (form.data.home.matches.length || form.data.away.matches.length) ? (
@@ -64,6 +69,8 @@ export default function MatchDetailsTab() {
               <FormLine name={match.away.name} logo={match.away.logo} form={form.data.away} />
             </Card>
           ) : null}
+
+          <TrophiesCard matchId={match.id} />
 
           {match.state === 'live' || match.state === 'finished' ? <EventsWidget fixtureId={match.id} /> : null}
 

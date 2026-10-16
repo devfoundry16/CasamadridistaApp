@@ -3,6 +3,7 @@ import axios, { AxiosInstance, isAxiosError } from 'axios';
 
 import { development } from '@/config/environment';
 import { API_BASE_URL } from '@/config/supabase';
+import { normaliseBroadcasts, normaliseTrophies, type Broadcasts, type Trophies } from '@/utils/matchWatch.core';
 import type {
   MatchFormResponse,
   MatchH2HResponse,
@@ -66,6 +67,36 @@ class MatchCenterApi {
         timeout: 15_000,
       });
       return data;
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 404) return null;
+      throw error;
+    }
+  }
+
+  /**
+   * Where to watch, by country (entered by the Casa Media desk), or null when
+   * nothing is entered. The server prefers the signed-in viewer's profile
+   * country; `region` (the phone's) is the fallback.
+   */
+  async broadcasts(id: number, region: string | null): Promise<Broadcasts | null> {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}match/fixture/${id}/broadcasts`, {
+        headers: await this.authHeader(),
+        params: region ? { country: region } : {},
+        timeout: 15_000,
+      });
+      return normaliseBroadcasts(data);
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 404) return null;
+      throw error;
+    }
+  }
+
+  /** The two clubs' trophies (entered by the desk), or null when not both are entered. */
+  async trophies(id: number): Promise<Trophies | null> {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}match/fixture/${id}/trophies`, { timeout: 15_000 });
+      return normaliseTrophies(data);
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 404) return null;
       throw error;

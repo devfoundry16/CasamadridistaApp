@@ -1583,7 +1583,24 @@
       "previewTitle": "Match preview",
       "previewBadge": "AI-generated",
       "previewSource": "Written by AI from API-Football data · {{time}}",
-      "previewHidden": "Hidden from fans until the preview setting is turned on."
+      "previewHidden": "Hidden from fans until the preview setting is turned on.",
+      "watchTitle": "Where to watch",
+      "watchHere": "In {{country}}",
+      "watchWorldwide": "Worldwide",
+      "watchOthers": "Other countries",
+      "watchOthersShow": "Show other countries ({{count}})",
+      "trophiesTitle": "Trophies",
+      "trophiesTotal": "Total",
+      "trophiesSource": "Source: Casa Madridista · Updated {{time}}",
+      "trophy": {
+        "league": "League titles",
+        "domestic_cup": "Domestic cups",
+        "super_cup": "Domestic super cups",
+        "champions_league": "European Cup / Champions League",
+        "europa_league": "UEFA Cup / Europa League",
+        "uefa_super_cup": "UEFA Super Cups",
+        "club_world_cup": "Club World Cups / Intercontinental"
+      }
     }
   },
   "contributor": {

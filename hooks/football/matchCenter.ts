@@ -117,6 +117,38 @@ export function useMatchPreview(id: number) {
   });
 }
 
+/** The phone's region (ISO alpha-2), or null; safe without the native module. */
+function deviceRegion(): string | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const code = require('expo-localization').getLocales?.()?.[0]?.regionCode;
+    return typeof code === 'string' && /^[A-Z]{2}$/.test(code) ? code : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Where to watch, keyed by account: the server uses the profile's country. */
+export function useMatchBroadcasts(id: number) {
+  const { user } = useUser();
+  return useQuery({
+    queryKey: [...matchCenterKeys.tab(id, 'broadcasts'), user?.id ?? null] as const,
+    queryFn: () => MatchCenterService.broadcasts(id, deviceRegion()),
+    enabled: valid(id),
+    staleTime: 30 * MIN,
+  });
+}
+
+/** The two clubs' trophies. */
+export function useMatchTrophies(id: number) {
+  return useQuery({
+    queryKey: matchCenterKeys.tab(id, 'trophies'),
+    queryFn: () => MatchCenterService.trophies(id),
+    enabled: valid(id),
+    staleTime: 60 * MIN,
+  });
+}
+
 /** Keyed by account, so a sign-in or sign-out never shows someone else's pick. */
 export function useMatchPredictions(id: number) {
   const { user } = useUser();

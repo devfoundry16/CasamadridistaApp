@@ -1640,7 +1640,24 @@
       "previewTitle": "تقديم المباراة",
       "previewBadge": "مكتوب بالذكاء الاصطناعي",
       "previewSource": "كتبه الذكاء الاصطناعي من بيانات API-Football · {{time}}",
-      "previewHidden": "مخفي عن المشجعين حتى يتم تفعيل إعداد التقديم."
+      "previewHidden": "مخفي عن المشجعين حتى يتم تفعيل إعداد التقديم.",
+      "watchTitle": "أين تشاهد المباراة",
+      "watchHere": "في {{country}}",
+      "watchWorldwide": "حول العالم",
+      "watchOthers": "دول أخرى",
+      "watchOthersShow": "عرض الدول الأخرى ({{count}})",
+      "trophiesTitle": "الألقاب",
+      "trophiesTotal": "المجموع",
+      "trophiesSource": "المصدر: كاسا مادريديستا · آخر تحديث {{time}}",
+      "trophy": {
+        "league": "ألقاب الدوري",
+        "domestic_cup": "الكؤوس المحلية",
+        "super_cup": "كؤوس السوبر المحلية",
+        "champions_league": "كأس أوروبا / دوري أبطال أوروبا",
+        "europa_league": "كأس الاتحاد الأوروبي / الدوري الأوروبي",
+        "uefa_super_cup": "كؤوس السوبر الأوروبي",
+        "club_world_cup": "كؤوس العالم للأندية / الكأس القارية"
+      }
     }
   },
   "contributor": {
